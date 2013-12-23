@@ -13,6 +13,7 @@
 #define BOOST_INTRUSIVE_HASHTABLE_HPP
 
 #include <boost/intrusive/detail/config_begin.hpp>
+#include <boost/intrusive/intrusive_fwd.hpp>
 //std C++
 #include <functional>   //std::equal_to
 #include <utility>      //std::pair
@@ -24,7 +25,6 @@
 #include <boost/functional/hash.hpp>
 #include <boost/pointer_cast.hpp>
 //General intrusive utilities
-#include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/detail/hashtable_node.hpp>
 #include <boost/intrusive/detail/transform_iterator.hpp>
 #include <boost/intrusive/link_mode.hpp>

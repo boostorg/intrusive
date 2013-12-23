@@ -13,6 +13,7 @@
 #define BOOST_INTRUSIVE_AVLTREE_HPP
 
 #include <boost/intrusive/detail/config_begin.hpp>
+#include <boost/intrusive/intrusive_fwd.hpp>
 #include <algorithm>
 #include <cstddef>
 #include <functional>
@@ -21,7 +22,6 @@
 
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/static_assert.hpp>
-#include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/avl_set_hook.hpp>
 #include <boost/intrusive/detail/avltree_node.hpp>
 #include <boost/intrusive/bstree.hpp>

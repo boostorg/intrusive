@@ -19,6 +19,7 @@
 #define BOOST_INTRUSIVE_SGTREE_HPP
 
 #include <boost/intrusive/detail/config_begin.hpp>
+#include <boost/intrusive/intrusive_fwd.hpp>
 #include <algorithm>
 #include <cstddef>
 #include <functional>
@@ -28,7 +29,6 @@
 #include <cstddef>
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/static_assert.hpp>
-#include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/bs_set_hook.hpp>
 #include <boost/intrusive/bstree.hpp>
 #include <boost/intrusive/detail/tree_node.hpp>

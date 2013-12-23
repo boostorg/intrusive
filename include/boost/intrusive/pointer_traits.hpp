@@ -22,6 +22,7 @@
 #endif
 
 #include <boost/intrusive/detail/config_begin.hpp>
+#include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/detail/workaround.hpp>
 #include <boost/intrusive/detail/memory_util.hpp>
 #include <boost/type_traits/integral_constant.hpp>

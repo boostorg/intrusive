@@ -13,6 +13,7 @@
 #define BOOST_INTRUSIVE_SPLAYTREE_HPP
 
 #include <boost/intrusive/detail/config_begin.hpp>
+#include <boost/intrusive/intrusive_fwd.hpp>
 #include <cstddef>
 #include <functional>
 #include <iterator>
@@ -20,8 +21,6 @@
 
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/static_assert.hpp>
-#include <boost/intrusive/intrusive_fwd.hpp>
-#include <boost/intrusive/splay_set_hook.hpp>
 #include <boost/intrusive/bstree.hpp>
 #include <boost/intrusive/detail/tree_node.hpp>
 #include <boost/intrusive/detail/ebo_functor_holder.hpp>

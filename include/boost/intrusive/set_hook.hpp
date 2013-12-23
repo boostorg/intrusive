@@ -16,6 +16,7 @@
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
+
 #include <boost/intrusive/detail/utilities.hpp>
 #include <boost/intrusive/detail/rbtree_node.hpp>
 #include <boost/intrusive/rbtree_algorithms.hpp>

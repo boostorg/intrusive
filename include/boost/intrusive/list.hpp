@@ -15,8 +15,8 @@
 #define BOOST_INTRUSIVE_LIST_HPP
 
 #include <boost/intrusive/detail/config_begin.hpp>
-#include <boost/intrusive/detail/assert.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
+#include <boost/intrusive/detail/assert.hpp>
 #include <boost/intrusive/list_hook.hpp>
 #include <boost/intrusive/circular_list_algorithms.hpp>
 #include <boost/intrusive/pointer_traits.hpp>

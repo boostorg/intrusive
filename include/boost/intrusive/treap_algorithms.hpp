@@ -14,9 +14,9 @@
 #define BOOST_INTRUSIVE_TREAP_ALGORITHMS_HPP
 
 #include <boost/intrusive/detail/config_begin.hpp>
+#include <boost/intrusive/intrusive_fwd.hpp>
 
 #include <cstddef>
-#include <boost/intrusive/intrusive_fwd.hpp>
 
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/intrusive/pointer_traits.hpp>

@@ -33,10 +33,12 @@ doxygen autodoc
                   \"BOOST_RV_REF_END=&&\" \\
                   \"list_impl=list\" \\
                   \"slist_impl=slist\" \\
+                  \"bstree_impl=bstree\" \\
+                  \"bs_set_impl=bs_set\" \\
+                  \"bs_multiset_impl=bs_multiset\" \\
+                  \"rbtree_impl=rbtree\" \\
                   \"set_impl=set\" \\
                   \"multiset_impl=multiset\" \\
-                  \"bstree_impl=bstree\" \\
-                  \"rbtree_impl=rbtree\" \\
                   \"unordered_set_impl=unordered_set\" \\
                   \"unordered_multiset_impl=unordered_multiset\" \\
                   \"hashtable_impl=hashtable\" \\
