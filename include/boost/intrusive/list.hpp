@@ -887,7 +887,7 @@ class list_impl
    //!   new_ele must point to an element contained in list x.
    //!
    //! <b>Effects</b>: Transfers the value pointed by new_ele, from list x to this list,
-   //!   before the the element pointed by p. No destructors or copy constructors are called.
+   //!   before the element pointed by p. No destructors or copy constructors are called.
    //!   If p == new_ele or p == ++new_ele, this function is a null operation.
    //!
    //! <b>Throws</b>: Nothing.
@@ -907,7 +907,7 @@ class list_impl
    //!   f and e must point to elements contained in list x.
    //!
    //! <b>Effects</b>: Transfers the range pointed by f and e from list x to this list,
-   //!   before the the element pointed by p. No destructors or copy constructors are called.
+   //!   before the element pointed by p. No destructors or copy constructors are called.
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -929,7 +929,7 @@ class list_impl
    //!   n == std::distance(f, e)
    //!
    //! <b>Effects</b>: Transfers the range pointed by f and e from list x to this list,
-   //!   before the the element pointed by p. No destructors or copy constructors are called.
+   //!   before the element pointed by p. No destructors or copy constructors are called.
    //!
    //! <b>Throws</b>: Nothing.
    //!

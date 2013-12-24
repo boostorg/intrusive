@@ -875,7 +875,7 @@ the section [link intrusive.usage How to use Boost.Intrusive]:
    last element of the singly linked list. This allows `O(1)` swap,
    `splice_after(iterator, slist &)` and makes the list offer new functions
    like `push_back(reference)` and `back()`. Logically, the size an empty list is
-   increased in `sizeof(void_pointer)` and the the cached last node pointer must
+   increased in `sizeof(void_pointer)` and the cached last node pointer must
    be updated in every operation, and that might incur in a slight performance impact.
 
 `auto_unlink` hooks are not usable if `linear<true>` and/or `cache_last<true>` options are
@@ -3582,7 +3582,7 @@ and also derives from `test_class`.
 `func_ptr_adaptor` is just a functor adaptor to convert function objects taking
 `test_list` objects to function objects taking pointers to them.
 
-You can find the full test code code in the
+You can find the full test code in the
 [@../../libs/intrusive/perf/perf_list.cpp perf_list.cpp] source file.
 
 [section:performance_results_push_back Back insertion and destruction]
