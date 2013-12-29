@@ -158,6 +158,9 @@
 				RelativePath="..\..\..\..\..\boost\intrusive\options.hpp">
 			</File>
 			<File
+				RelativePath="..\..\..\..\..\boost\intrusive\pack_options.hpp">
+			</File>
+			<File
 				RelativePath="..\..\..\..\..\boost\intrusive\parent_from_member.hpp">
 			</File>
 			<File

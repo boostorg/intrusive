@@ -2,8 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="set"
-	ProjectGUID="{960E01F6-92C1-F74A-BCA5-2A9F3B994979}"
+	Name="pack_options"
+	ProjectGUID="{77F4139B-281B-F694-7CB1-3495467B4D35}"
+	RootNamespace="pack_options"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -20,8 +21,9 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../../../../../"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				PreprocessorDefinitions="BOOST_DATE_TIME_NO_LIB"
 				GeneratePreprocessedFile="0"
+				KeepComments="FALSE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
@@ -36,10 +38,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/set.exe"
+				OutputFile="$(OutDir)/pack_options.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/set.pdb"
+				ProgramDatabaseFile="$(OutDir)/pack_options.pdb"
+				GenerateMapFile="TRUE"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
@@ -72,8 +75,10 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="../../../../../"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				PreprocessorDefinitions="BOOST_DATE_TIME_NO_LIB"
 				RuntimeLibrary="4"
+				DisableLanguageExtensions="FALSE"
+				ForceConformanceInForLoopScope="TRUE"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
@@ -82,7 +87,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/set.exe"
+				OutputFile="$(OutDir)/pack_options.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
@@ -117,9 +122,9 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4F73C7F1-C745-4726-06A6-2D752AA322FF}">
+			UniqueIdentifier="{47FFA531-6474-B5A5-A661-272FA537F35F}">
 			<File
-				RelativePath="..\..\..\test\set_test.cpp">
+				RelativePath="..\..\..\test\pack_options_test.cpp">
 			</File>
 		</Filter>
 	</Files>
