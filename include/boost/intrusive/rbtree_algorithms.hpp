@@ -10,31 +10,6 @@
 // See http://www.boost.org/libs/intrusive for documentation.
 //
 /////////////////////////////////////////////////////////////////////////////
-// The internal implementation of red-black trees is based on that of SGI STL
-// stl_tree.h file:
-//
-// Copyright (c) 1996,1997
-// Silicon Graphics Computer Systems, Inc.
-//
-// Permission to use, copy, modify, distribute and sell this software
-// and its documentation for any purpose is hereby granted without fee,
-// provided that the above copyright notice appear in all copies and
-// that both that copyright notice and this permission notice appear
-// in supporting documentation.  Silicon Graphics makes no
-// representations about the suitability of this software for any
-// purpose.  It is provided "as is" without express or implied warranty.
-//
-//
-// Copyright (c) 1994
-// Hewlett-Packard Company
-//
-// Permission to use, copy, modify, distribute and sell this software
-// and its documentation for any purpose is hereby granted without fee,
-// provided that the above copyright notice appear in all copies and
-// that both that copyright notice and this permission notice appear
-// in supporting documentation.  Hewlett-Packard Company makes no
-// representations about the suitability of this software for any
-// purpose.  It is provided "as is" without express or implied warranty.
 //
 // The tree destruction algorithm is based on Julienne Walker and The EC Team code:
 //
@@ -421,14 +396,16 @@ class rbtree_algorithms
                bstree_algo::rotate_left(x_parent, header);
                w = NodeTraits::get_right(x_parent);
             }
-            if((!NodeTraits::get_left(w) || NodeTraits::get_color(NodeTraits::get_left(w))  == NodeTraits::black()) &&
-               (!NodeTraits::get_right(w) || NodeTraits::get_color(NodeTraits::get_right(w)) == NodeTraits::black())){
+            node_ptr const w_left (NodeTraits::get_left(w));
+            node_ptr const w_right(NodeTraits::get_right(w));
+            if((!w_left  || NodeTraits::get_color(w_left)  == NodeTraits::black()) &&
+               (!w_right || NodeTraits::get_color(w_right) == NodeTraits::black())){
                NodeTraits::set_color(w, NodeTraits::red());
                x = x_parent;
                x_parent = NodeTraits::get_parent(x_parent);
             }
             else {
-               if(!NodeTraits::get_right(w) || NodeTraits::get_color(NodeTraits::get_right(w)) == NodeTraits::black()){
+               if(!w_right || NodeTraits::get_color(w_right) == NodeTraits::black()){
                   NodeTraits::set_color(NodeTraits::get_left(w), NodeTraits::black());
                   NodeTraits::set_color(w, NodeTraits::red());
                   bstree_algo::rotate_right(w, header);
@@ -451,14 +428,16 @@ class rbtree_algorithms
                bstree_algo::rotate_right(x_parent, header);
                w = NodeTraits::get_left(x_parent);
             }
-            if((!NodeTraits::get_right(w) || NodeTraits::get_color(NodeTraits::get_right(w)) == NodeTraits::black()) &&
-               (!NodeTraits::get_left(w) || NodeTraits::get_color(NodeTraits::get_left(w)) == NodeTraits::black())){
+            node_ptr const w_left (NodeTraits::get_left(w));
+            node_ptr const w_right(NodeTraits::get_right(w));
+            if((!w_right || NodeTraits::get_color(w_right) == NodeTraits::black()) &&
+               (!w_left  || NodeTraits::get_color(w_left)  == NodeTraits::black())){
                NodeTraits::set_color(w, NodeTraits::red());
                x = x_parent;
                x_parent = NodeTraits::get_parent(x_parent);
             }
             else {
-               if(!NodeTraits::get_left(w) || NodeTraits::get_color(NodeTraits::get_left(w)) == NodeTraits::black()){
+               if(!w_left || NodeTraits::get_color(w_left) == NodeTraits::black()){
                   NodeTraits::set_color(NodeTraits::get_right(w), NodeTraits::black());
                   NodeTraits::set_color(w, NodeTraits::red());
                   bstree_algo::rotate_left(w, header);
