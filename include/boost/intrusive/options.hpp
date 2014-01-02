@@ -316,12 +316,13 @@ BOOST_INTRUSIVE_OPTION_CONSTANT(link_mode, link_mode_type, LinkType, link_mode)
 //!should be optimized for size instead of for speed.
 BOOST_INTRUSIVE_OPTION_CONSTANT(optimize_size, bool, Enabled, optimize_size)
 
-//!This option setter specifies if the list container should
+//!This option setter specifies if the slist container should
 //!use a linear implementation instead of a circular one.
 BOOST_INTRUSIVE_OPTION_CONSTANT(linear, bool, Enabled, linear)
 
-//!This option setter specifies if the list container should
-//!use a linear implementation instead of a circular one.
+//!If true, slist also stores a pointer to the last element of the singly linked list.
+//!This allows O(1) swap and splice_after(iterator, slist &) for circular slists and makes
+//!possible new functions like push_back(reference) and back().
 BOOST_INTRUSIVE_OPTION_CONSTANT(cache_last, bool, Enabled, cache_last)
 
 //!This option setter specifies the bucket traits

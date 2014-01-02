@@ -871,7 +871,7 @@ the section [link intrusive.usage How to use Boost.Intrusive]:
 *  [*`linear<bool Enable>`]: the singly linked list is implemented as a
    null-terminated list instead of a circular list. This allows `O(1)` swap,
    but losses some operations like `container_from_end_iterator`.
-*  [*`cache_last<bool Enable>`]: the singly linked also stores a pointer to the
+*  [*`cache_last<bool Enable>`]: `slist` also stores a pointer to the
    last element of the singly linked list. This allows `O(1)` swap,
    `splice_after(iterator, slist &)` and makes the list offer new functions
    like `push_back(reference)` and `back()`. Logically, the size an empty list is
