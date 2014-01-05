@@ -825,7 +825,6 @@ class bstree_algorithms
          //If the upper_key is less than x, the target
          //range is on the left part
          else if(comp(upper_key, x)){
-            //y > upper_key
             y = x;
             x = NodeTraits::get_left(x);
          }

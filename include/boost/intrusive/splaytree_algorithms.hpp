@@ -510,19 +510,20 @@ class splaytree_algorithms
 
          for( ;; ){
             if(comp(key, t)){
-               if(NodeTraits::get_left(t) == node_ptr() )
+               node_ptr const t_left = NodeTraits::get_left(t);
+               if(!t_left)
                   break;
-               if(comp(key, NodeTraits::get_left(t))){
+               if(comp(key, t_left)){
                   t = bstree_algo::rotate_right(t);
 
-                  if(NodeTraits::get_left(t) == node_ptr())
+                  if( !NodeTraits::get_left(t) )
                      break;
                   link_right(t, r);
                }
-               else if(comp(NodeTraits::get_left(t), key)){
+               else if(comp(t_left, key)){
                   link_right(t, r);
 
-                  if(NodeTraits::get_right(t) == node_ptr() )
+                  if( !NodeTraits::get_right(t) )
                      break;
                   link_left(t, l);
                }
@@ -531,20 +532,21 @@ class splaytree_algorithms
                }
             }
             else if(comp(t, key)){
-               if(NodeTraits::get_right(t) == node_ptr() )
+               node_ptr const t_right = NodeTraits::get_right(t);
+               if(!t_right)
                   break;
 
-               if(comp(NodeTraits::get_right(t), key)){
+               if(comp(t_right, key)){
                      t = bstree_algo::rotate_left( t );
 
-                     if(NodeTraits::get_right(t) == node_ptr() )
+                     if( !NodeTraits::get_right(t) )
                         break;
                      link_left(t, l);
                }
-               else if(comp(key, NodeTraits::get_right(t))){
+               else if(comp(key, t_right)){
                   link_left(t, l);
 
-                  if(NodeTraits::get_left(t) == node_ptr())
+                  if( !NodeTraits::get_left(t) )
                      break;
 
                   link_right(t, r);
@@ -580,26 +582,29 @@ class splaytree_algorithms
    // assemble the three sub-trees into new tree pointed to by t    | complexity : constant        | exception : nothrow
    static void assemble(const node_ptr &t, const node_ptr & l, const node_ptr & r, const const_node_ptr & null_node )
    {
-      NodeTraits::set_right(l, NodeTraits::get_left(t));
-      NodeTraits::set_left(r, NodeTraits::get_right(t));
+      node_ptr const new_l_right = NodeTraits::get_left(t);
+      node_ptr const new_r_left  = NodeTraits::get_right(t);
+      NodeTraits::set_right(l, new_l_right);
+      NodeTraits::set_left (r, new_r_left);
 
-      if(NodeTraits::get_right(l) != node_ptr()){
-         NodeTraits::set_parent(NodeTraits::get_right(l), l);
+      if(new_l_right){
+         NodeTraits::set_parent(new_l_right, l);
+      }
+      if(new_r_left){
+         NodeTraits::set_parent(new_r_left, r);
       }
 
-      if(NodeTraits::get_left(r) != node_ptr()){
-         NodeTraits::set_parent(NodeTraits::get_left(r), r);
+      node_ptr const t_new_left  = NodeTraits::get_right(null_node);
+      node_ptr const t_new_right = NodeTraits::get_left(null_node);
+      NodeTraits::set_left (t, t_new_left);
+      NodeTraits::set_right(t, t_new_right);
+
+      if(t_new_left){
+         NodeTraits::set_parent(t_new_left, t);
       }
 
-      NodeTraits::set_left (t, NodeTraits::get_right(null_node));
-      NodeTraits::set_right(t, NodeTraits::get_left(null_node));
-
-      if( NodeTraits::get_left(t) != node_ptr() ){
-         NodeTraits::set_parent(NodeTraits::get_left(t), t);
-      }
-
-      if( NodeTraits::get_right(t) ){
-         NodeTraits::set_parent(NodeTraits::get_right(t), t);
+      if(t_new_right){
+         NodeTraits::set_parent(t_new_right, t);
       }
    }
 
@@ -632,13 +637,13 @@ class splaytree_algorithms
 
       if(NodeTraits::get_left(p) == n){
          NodeTraits::set_left(p, NodeTraits::get_right(n));
-         if(NodeTraits::get_left(p) != node_ptr())
+         if(NodeTraits::get_left(p))
             NodeTraits::set_parent(NodeTraits::get_left(p), p);
          NodeTraits::set_right(n, p);
       }
       else{ // must be ( p->right == n )
          NodeTraits::set_right(p, NodeTraits::get_left(n));
-         if(NodeTraits::get_right(p) != node_ptr())
+         if(NodeTraits::get_right(p))
             NodeTraits::set_parent(NodeTraits::get_right(p), p);
          NodeTraits::set_left(n, p);
       }
