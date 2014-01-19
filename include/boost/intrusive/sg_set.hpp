@@ -247,13 +247,19 @@ class sg_set_impl
    template<class Disposer>
    void clear_and_dispose(Disposer disposer);
 
+   #endif   //   #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
+
    //! @copydoc ::boost::intrusive::sgtree::count(const_reference)const
-   size_type count(const_reference value) const;
+   size_type count(const_reference value) const
+   {  return static_cast<size_type>(this->tree_type::find(value) != this->tree_type::cend()); }
 
    //! @copydoc ::boost::intrusive::sgtree::count(const KeyType&,KeyValueCompare)const
    template<class KeyType, class KeyValueCompare>
-   size_type count(const KeyType& key, KeyValueCompare comp) const;
-   
+   size_type count(const KeyType& key, KeyValueCompare comp) const
+   {  return static_cast<size_type>(this->tree_type::find(key, comp) != this->tree_type::cend()); }
+
+   #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
+
    //! @copydoc ::boost::intrusive::sgtree::lower_bound(const_reference)
    iterator lower_bound(const_reference value);
    

@@ -173,7 +173,7 @@ class bstree_algorithms
    static node_ptr end_node(const const_node_ptr & header)
    {  return detail::uncast(header);   }
 
-   //! <b>Requires</b>: 'node' is a node of the tree or an node initialized
+   //! <b>Requires</b>: 'node' is a node of the tree or a node initialized
    //!   by init(...) or init_node.
    //!
    //! <b>Effects</b>: Returns true if the node is initialized by init() or init_node().
@@ -766,7 +766,7 @@ class bstree_algorithms
    //!   ordering compatible with the strict weak ordering used to create the
    //!   the tree. KeyNodePtrCompare can compare KeyType with tree's node_ptrs.
    //!
-   //! <b>Effects</b>: Returns an node_ptr to the element that is equivalent to
+   //! <b>Effects</b>: Returns a node_ptr to the first element that is equivalent to
    //!   "key" according to "comp" or "header" if that element does not exist.
    //!
    //! <b>Complexity</b>: Logarithmic.
@@ -863,7 +863,7 @@ class bstree_algorithms
    //!   ordering compatible with the strict weak ordering used to create the
    //!   the tree. KeyNodePtrCompare can compare KeyType with tree's node_ptrs.
    //!
-   //! <b>Effects</b>: Returns the number of elements with a key equivalent to "key"pair of node_ptr delimiting a range containing
+   //! <b>Effects</b>: Returns the number of elements with a key equivalent to "key"
    //!   according to "comp".
    //!
    //! <b>Complexity</b>: Logarithmic.
@@ -907,7 +907,7 @@ class bstree_algorithms
    //!   ordering compatible with the strict weak ordering used to create the
    //!   the tree. KeyNodePtrCompare can compare KeyType with tree's node_ptrs.
    //!
-   //! <b>Effects</b>: Returns an node_ptr to the first element that is
+   //! <b>Effects</b>: Returns a node_ptr to the first element that is
    //!   not less than "key" according to "comp" or "header" if that element does
    //!   not exist.
    //!
@@ -926,7 +926,7 @@ class bstree_algorithms
    //!   ordering compatible with the strict weak ordering used to create the
    //!   the tree. KeyNodePtrCompare can compare KeyType with tree's node_ptrs.
    //!
-   //! <b>Effects</b>: Returns an node_ptr to the first element that is greater
+   //! <b>Effects</b>: Returns a node_ptr to the first element that is greater
    //!   than "key" according to "comp" or "header" if that element does not exist.
    //!
    //! <b>Complexity</b>: Logarithmic.

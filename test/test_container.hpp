@@ -219,7 +219,7 @@ void test_common_unordered_and_associative_container(Container & c, Data & d, bo
 
    c.erase(*da, c.key_comp());
    BOOST_TEST( c.size() == old_size-1 );
-   //This should not eras anyone
+   //This should not erase any
    size_type second_erase = c.erase_and_dispose( *da, c.key_comp(), detail::null_disposer() );
    BOOST_TEST( second_erase == 0 );
 

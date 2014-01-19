@@ -431,6 +431,16 @@ struct bstbase
    const size_traits &sz_traits() const
    {  return *this;  }
 
+   bool empty() const
+   {
+      if(ConstantTimeSize){
+         return !this->sz_traits().get_size();
+      }
+      else{
+         return algo_type::unique(this->header_ptr());
+      }
+   }
+
    size_type count(const_reference value) const
    {  return size_type(this->count(value, this->comp()));   }
 
@@ -441,14 +451,16 @@ struct bstbase
       return size_type(std::distance(ret.first, ret.second));
    }
 
-   bool empty() const
+   //Add non-const overloads to theoretically const members
+   //as some algorithms have different behavior when non-const versions are used (like splay trees).
+   size_type count(const_reference value)
+   {  return size_type(this->count(value, this->comp()));   }
+
+   template<class KeyType, class KeyValueCompare>
+   size_type count(const KeyType &key, KeyValueCompare comp)
    {
-      if(ConstantTimeSize){
-         return !this->sz_traits().get_size();
-      }
-      else{
-         return algo_type::unique(this->header_ptr());
-      }
+      std::pair<const_iterator, const_iterator> ret = this->equal_range(key, comp);
+      return size_type(std::distance(ret.first, ret.second));
    }
 };
 
@@ -1364,7 +1376,7 @@ class bstree_impl
    //! <b>Complexity</b>: Logarithmic to the number of elements contained plus lineal
    //!   to number of objects with the given value.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If `value_compare` throws.
    size_type count(const_reference value) const;
 
    //! <b>Effects</b>: Returns the number of contained elements with the given key
@@ -1372,7 +1384,7 @@ class bstree_impl
    //! <b>Complexity</b>: Logarithmic to the number of elements contained plus lineal
    //!   to number of objects with the given key.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If `comp` throws.
    template<class KeyType, class KeyValueCompare>
    size_type count(const KeyType &key, KeyValueCompare comp) const;
 
@@ -1381,7 +1393,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If `value_compare` throws.
    iterator lower_bound(const_reference value);
 
    //! <b>Effects</b>: Returns an iterator to the first element whose
@@ -1389,7 +1401,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If `value_compare` throws.
    const_iterator lower_bound(const_reference value) const;
 
    //! <b>Effects</b>: Returns an iterator to the first element whose
@@ -1397,7 +1409,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If `comp` throws.
    template<class KeyType, class KeyValueCompare>
    iterator lower_bound(const KeyType &key, KeyValueCompare comp);
    
@@ -1406,7 +1418,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If `comp` throws.
    template<class KeyType, class KeyValueCompare>
    const_iterator lower_bound(const KeyType &key, KeyValueCompare comp) const;
 
@@ -1415,7 +1427,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If `value_compare` throws.
    iterator upper_bound(const_reference value);
 
    //! <b>Effects</b>: Returns an iterator to the first element whose
@@ -1424,7 +1436,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If `comp` throws.
    template<class KeyType, class KeyValueCompare>
    iterator upper_bound(const KeyType &key, KeyValueCompare comp);
 
@@ -1433,7 +1445,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If `value_compare` throws.
    const_iterator upper_bound(const_reference value) const;
 
    //! <b>Effects</b>: Returns an iterator to the first element whose
@@ -1442,7 +1454,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If `comp` throws.
    template<class KeyType, class KeyValueCompare>
    const_iterator upper_bound(const KeyType &key, KeyValueCompare comp) const;
 
@@ -1451,7 +1463,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If `value_compare` throws.
    iterator find(const_reference value);
 
    //! <b>Effects</b>: Finds an iterator to the first element whose key is
@@ -1459,7 +1471,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If `comp` throws.
    template<class KeyType, class KeyValueCompare>
    iterator find(const KeyType &key, KeyValueCompare comp);
 
@@ -1468,7 +1480,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If `value_compare` throws.
    const_iterator find(const_reference value) const;
 
    //! <b>Effects</b>: Finds a const_iterator to the first element whose key is
@@ -1476,7 +1488,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If `comp` throws.
    template<class KeyType, class KeyValueCompare>
    const_iterator find(const KeyType &key, KeyValueCompare comp) const;
 
@@ -1486,7 +1498,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If `value_compare` throws.
    std::pair<iterator,iterator> equal_range(const_reference value);
 
    //! <b>Effects</b>: Finds a range containing all elements whose key is k or
@@ -1495,7 +1507,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If `comp` throws.
    template<class KeyType, class KeyValueCompare>
    std::pair<iterator,iterator> equal_range(const KeyType &key, KeyValueCompare comp);
 
@@ -1505,7 +1517,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If `value_compare` throws.
    std::pair<const_iterator, const_iterator>
       equal_range(const_reference value) const;
 
@@ -1515,7 +1527,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If `comp` throws.
    template<class KeyType, class KeyValueCompare>
    std::pair<const_iterator, const_iterator>
       equal_range(const KeyType &key, KeyValueCompare comp) const;
@@ -1531,7 +1543,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
-   //! <b>Throws</b>: If the predicate throws.
+   //! <b>Throws</b>: If `value_compare` throws.
    //!
    //! <b>Note</b>: This function can be more efficient than calling upper_bound
    //!   and lower_bound for lower_value and upper_value.
@@ -1554,7 +1566,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
-   //! <b>Throws</b>: If "comp" throws.
+   //! <b>Throws</b>: If `comp` throws.
    //!
    //! <b>Note</b>: This function can be more efficient than calling upper_bound
    //!   and lower_bound for lower_key and upper_key.
@@ -1575,7 +1587,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
-   //! <b>Throws</b>: If the predicate throws.
+   //! <b>Throws</b>: If `value_compare` throws.
    //!
    //! <b>Note</b>: This function can be more efficient than calling upper_bound
    //!   and lower_bound for lower_value and upper_value.
@@ -1598,7 +1610,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
-   //! <b>Throws</b>: If "comp" throws.
+   //! <b>Throws</b>: If `comp` throws.
    //!
    //! <b>Note</b>: This function can be more efficient than calling upper_bound
    //!   and lower_bound for lower_key and upper_key.

@@ -3788,8 +3788,9 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 *  Improved Doxygen generated reference and updated and fixed forward-declaration header.
 
-*  [*Source breaking]: Removed previously deprecated `xxx_dont_splay` functions from splay containers and
-   removed `splay_set_base_hook` and `splay_set_member_hook`from splay containers.
+*  [*Source breaking]: Removed previously deprecated `xxx_dont_splay` functions from splay containers,
+   `splay_set_base_hook` and `splay_set_member_hook`from splay containers and `bool splay = true`
+   extra parameter is `splaytree_algorithms` functions.
 
 *  Fixed bugs:
    *  [@https://svn.boost.org/trac/boost/ticket/9332 #9332: ['"has_member_function_callable_with.hpp compile error on msvc-12.0"]].

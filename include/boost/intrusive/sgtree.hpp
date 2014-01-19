@@ -48,6 +48,12 @@ namespace intrusive {
 
 namespace detail{
 
+/////////////////////////////////////////////////////////////
+//
+//       Halpha for fixed floating_point<false> option
+//
+/////////////////////////////////////////////////////////////
+
 //! Returns floor(log2(n)/log2(sqrt(2))) -> floor(2*log2(n))
 //! Undefined if N is 0.
 //!
@@ -55,7 +61,7 @@ namespace detail{
 inline std::size_t calculate_h_sqrt2 (std::size_t n)
 {
    std::size_t f_log2 = detail::floor_log2(n);
-   return (2*f_log2) + (n >= detail::sqrt2_pow_2xplus1 (f_log2));
+   return (2*f_log2) + static_cast<std::size_t>(n >= detail::sqrt2_pow_2xplus1(f_log2));
 }
 
 struct h_alpha_sqrt2_t
@@ -76,6 +82,12 @@ struct alpha_0_75_by_max_size_t
    }
 };
 
+/////////////////////////////////////////////////////////////
+//
+//       Halpha for fixed floating_point<true> option
+//
+/////////////////////////////////////////////////////////////
+
 struct h_alpha_t
 {
    explicit h_alpha_t(float inv_minus_logalpha)
@@ -84,9 +96,12 @@ struct h_alpha_t
 
    std::size_t operator()(std::size_t n) const
    {
-      //Returns floor(log2(1/alpha(n))) ->
-      // floor(log2(n)/log(1/alpha)) ->
-      // floor(log2(n)/(-log2(alpha)))
+      ////////////////////////////////////////////////////////////
+      // This function must return "floor(log2(1/alpha(n)))" ->
+      //    floor(log2(n)/log(1/alpha)) ->
+      //    floor(log2(n)/-log2(alpha))
+      //    floor(log2(n)*(1/-log2(alpha)))
+      ////////////////////////////////////////////////////////////
       //return static_cast<std::size_t>(std::log(float(n))*inv_minus_logalpha_);
       return static_cast<std::size_t>(detail::fast_log2(float(n))*inv_minus_logalpha_);
    }
@@ -119,7 +134,7 @@ struct alpha_holder
    typedef boost::intrusive::detail::alpha_by_max_size_t multiply_by_alpha_t;
 
    alpha_holder() : max_tree_size_(0)
-   {  set_alpha(0.7f);   }
+   {  set_alpha(0.70711f);   } // ~1/sqrt(2)
 
    float get_alpha() const
    {  return alpha_;  }
@@ -666,7 +681,7 @@ class sgtree_impl
    //! @copydoc ::boost::intrusive::bstree::count(const KeyType&,KeyValueCompare)const
    template<class KeyType, class KeyValueCompare>
    size_type count(const KeyType& key, KeyValueCompare comp) const;
-   
+
    //! @copydoc ::boost::intrusive::bstree::lower_bound(const_reference)
    iterator lower_bound(const_reference value);
    

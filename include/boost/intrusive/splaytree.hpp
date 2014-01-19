@@ -266,7 +266,6 @@ class splaytree_impl
 
    //! @copydoc ::boost::intrusive::bstree::erase(const KeyType&,KeyValueCompare)
    template<class KeyType, class KeyValueCompare>
-
    size_type erase(const KeyType& key, KeyValueCompare comp);
 
    //! @copydoc ::boost::intrusive::bstree::erase_and_dispose(const_iterator,Disposer)
@@ -292,59 +291,31 @@ class splaytree_impl
    template<class Disposer>
    void clear_and_dispose(Disposer disposer);
 
-   #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-
    //! @copydoc ::boost::intrusive::bstree::count(const_reference)const
-   //! Additional note: non-const function, splaying is performed for the first
-   //! element of the equal range of "value"
-   size_type count(const_reference value)
-   {  return this->count(value, this->value_comp());  }
+   //! Additional note: non-const function, splaying is performed.
+   size_type count(const_reference value);
 
    //! @copydoc ::boost::intrusive::bstree::count(const KeyType&,KeyValueCompare)const
-   //! Additional note: non-const function, splaying is performed for the first
-   //! element of the equal range of "key"
+   //! Additional note: non-const function, splaying is performed.
    template<class KeyType, class KeyValueCompare>
-   size_type count(const KeyType &key, KeyValueCompare comp)
-   {
-      std::pair<const_iterator, const_iterator> ret = this->equal_range(key, comp);
-      return std::distance(ret.first, ret.second);
-   }
+   size_type count(const KeyType &key, KeyValueCompare comp);
 
    //! @copydoc ::boost::intrusive::bstree::count(const_reference)const
-   //! Additional note: Deprecated function, use count const overload instead.
-   size_type count(const_reference value) const
-   {  return tree_type::count(value);  }
+   //! Additional note: const function, no splaying is performed
+   size_type count(const_reference value) const;
 
    //! @copydoc ::boost::intrusive::bstree::count(const KeyType&,KeyValueCompare)const
-   //! Additional note: Deprecated function, use count const overload instead.
+   //! Additional note: const function, no splaying is performed
    template<class KeyType, class KeyValueCompare>
-   size_type count(const KeyType &key, KeyValueCompare comp) const
-   {  return tree_type::count(key, comp);  }
+   size_type count(const KeyType &key, KeyValueCompare comp) const;
 
-   //! @copydoc ::boost::intrusive::bstree::count(const_reference)const
-   //! Additional note: Deprecated function, use count const overload instead.
-   size_type count_dont_splay(const_reference value) const
-   {  return tree_type::count(value);  }
-
-   //! @copydoc ::boost::intrusive::bstree::count(const KeyType&,KeyValueCompare)const
-   //! Additional note: Deprecated function, use count const overload instead.
-   template<class KeyType, class KeyValueCompare>
-   size_type count_dont_splay(const KeyType &key, KeyValueCompare comp) const
-   {  return tree_type::count(key, comp);  }
-
-   #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::bstree::lower_bound(const_reference)
-   //! Additional note: non-const function, splaying is performed for the first
-   //! element of the equal range of "value"
+   //! Additional note: non-const function, splaying is performed.
    iterator lower_bound(const_reference value);
 
    //! @copydoc ::boost::intrusive::bstree::lower_bound(const_reference)const
    //! Additional note: const function, no splaying is performed
    const_iterator lower_bound(const_reference value) const;
-
-   //! @copydoc ::boost::intrusive::bstree::lower_bound(const_reference)const
-   //! Additional note: Deprecated function, use lower_bound const overload instead.
-   const_iterator lower_bound_dont_splay(const_reference value) const;
 
    //! @copydoc ::boost::intrusive::bstree::lower_bound(const KeyType&,KeyValueCompare)
    //! Additional note: non-const function, splaying is performed for the first
@@ -357,11 +328,6 @@ class splaytree_impl
    template<class KeyType, class KeyValueCompare>
    const_iterator lower_bound(const KeyType &key, KeyValueCompare comp) const;
 
-   //! @copydoc ::boost::intrusive::bstree::lower_bound(const KeyType&,KeyValueCompare)
-   //! Additional note: Deprecated function, use lower_bound const overload instead.
-   template<class KeyType, class KeyValueCompare>
-   iterator lower_bound_dont_splay(const KeyType &key, KeyValueCompare comp) const;
-
    //! @copydoc ::boost::intrusive::bstree::upper_bound(const_reference)
    //! Additional note: non-const function, splaying is performed for the first
    //! element of the equal range of "value"
@@ -370,10 +336,6 @@ class splaytree_impl
    //! @copydoc ::boost::intrusive::bstree::upper_bound(const_reference)const
    //! Additional note: const function, no splaying is performed
    const_iterator upper_bound(const_reference value) const;
-
-   //! @copydoc ::boost::intrusive::bstree::upper_bound(const_reference)const
-   //! Additional note: Deprecated function, use upper_bound const overload instead.
-   const_iterator upper_bound_dont_splay(const_reference value) const;
 
    //! @copydoc ::boost::intrusive::bstree::upper_bound(const KeyType&,KeyValueCompare)
    //! Additional note: non-const function, splaying is performed for the first
@@ -386,11 +348,6 @@ class splaytree_impl
    template<class KeyType, class KeyValueCompare>
    const_iterator upper_bound(const KeyType &key, KeyValueCompare comp) const;
 
-   //! @copydoc ::boost::intrusive::bstree::upper_bound(const KeyType&,KeyValueCompare)
-   //! Additional note: Deprecated function, use upper_bound const overload instead.
-   template<class KeyType, class KeyValueCompare>
-   const_iterator upper_bound_dont_splay(const KeyType &key, KeyValueCompare comp) const;
-
    //! @copydoc ::boost::intrusive::bstree::find(const_reference)
    //! Additional note: non-const function, splaying is performed for the first
    //! element of the equal range of "value"
@@ -399,10 +356,6 @@ class splaytree_impl
    //! @copydoc ::boost::intrusive::bstree::find(const_reference)const
    //! Additional note: const function, no splaying is performed
    const_iterator find(const_reference value) const;
-
-   //! @copydoc ::boost::intrusive::bstree::find(const_reference)const
-   //! Additional note: Deprecated function, use find const overload instead.
-   const_iterator find_dont_splay(const_reference value) const;
 
    //! @copydoc ::boost::intrusive::bstree::find(const KeyType&,KeyValueCompare)
    //! Additional note: non-const function, splaying is performed for the first
@@ -415,11 +368,6 @@ class splaytree_impl
    template<class KeyType, class KeyValueCompare>
    const_iterator find(const KeyType &key, KeyValueCompare comp) const;
 
-   //! @copydoc ::boost::intrusive::bstree::find(const KeyType&,KeyValueCompare)const
-   //! Additional note: Deprecated function, use find const overload instead.
-   template<class KeyType, class KeyValueCompare>
-   const_iterator find_dont_splay(const KeyType &key, KeyValueCompare comp) const;
-
    //! @copydoc ::boost::intrusive::bstree::equal_range(const_reference)
    //! Additional note: non-const function, splaying is performed for the first
    //! element of the equal range of "value"
@@ -428,10 +376,6 @@ class splaytree_impl
    //! @copydoc ::boost::intrusive::bstree::equal_range(const_reference)const
    //! Additional note: const function, no splaying is performed
    std::pair<const_iterator, const_iterator> equal_range(const_reference value) const;
-
-   //! @copydoc ::boost::intrusive::bstree::equal_range(const_reference)const
-   //! Additional note: Deprecated function, use equal_range const overload instead.
-   std::pair<const_iterator, const_iterator> equal_range_dont_splay(const_reference value) const;
 
    //! @copydoc ::boost::intrusive::bstree::equal_range(const KeyType&,KeyValueCompare)
    //! Additional note: non-const function, splaying is performed for the first
@@ -443,11 +387,6 @@ class splaytree_impl
    //! Additional note: const function, no splaying is performed
    template<class KeyType, class KeyValueCompare>
    std::pair<const_iterator, const_iterator> equal_range(const KeyType &key, KeyValueCompare comp) const;
-
-   //! @copydoc ::boost::intrusive::bstree::equal_range(const KeyType&,KeyValueCompare)
-   //! Additional note: Deprecated function, use equal_range const overload instead.
-   template<class KeyType, class KeyValueCompare>
-   std::pair<const_iterator, const_iterator> equal_range_dont_splay(const KeyType &key, KeyValueCompare comp) const;
 
    //! @copydoc ::boost::intrusive::bstree::bounded_range(const_reference,const_reference,bool,bool)
    std::pair<iterator,iterator> bounded_range
@@ -466,17 +405,6 @@ class splaytree_impl
    template<class KeyType, class KeyValueCompare>
    std::pair<const_iterator, const_iterator> bounded_range
          (const KeyType& lower_key, const KeyType& upper_key, KeyValueCompare comp, bool left_closed, bool right_closed) const;
-
-   //! @copydoc ::boost::intrusive::bstree::bounded_range(const_reference,const_reference,bool,bool)const
-   //! Additional note: Deprecated function, use bounded_range const overload instead.
-   std::pair<const_iterator, const_iterator> bounded_range_dont_splay
-      (const_reference lower_value, const_reference upper_value, bool left_closed, bool right_closed) const;
-
-   //! @copydoc ::boost::intrusive::bstree::bounded_range(const KeyType&,const KeyType&,KeyValueCompare,bool,bool)const
-   //! Additional note: Deprecated function, use bounded_range const overload instead.
-   template<class KeyType, class KeyValueCompare>
-   std::pair<const_iterator, const_iterator> bounded_range_dont_splay
-      (const KeyType& lower_key, const KeyType& upper_key, KeyValueCompare comp, bool left_closed, bool right_closed) const;
 
    //! @copydoc ::boost::intrusive::bstree::s_iterator_to(reference)
    static iterator s_iterator_to(reference value);
