@@ -364,25 +364,153 @@ template<class Hook>
 void destructor_impl(Hook &, detail::link_dispatch<normal_link>)
 {}
 
-//This function uses binary search to discover the
-//highest set bit of the integer
-inline std::size_t floor_log2 (std::size_t x)
-{
-   const std::size_t Bits = sizeof(std::size_t)*CHAR_BIT;
-   const bool Size_t_Bits_Power_2= !(Bits & (Bits-1));
-   BOOST_STATIC_ASSERT(Size_t_Bits_Power_2);
+///////////////////////////
+// floor_log2  Dispatcher
+////////////////////////////
 
-   std::size_t n = x;
-   std::size_t log2 = 0;
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
 
-   for(std::size_t shift = Bits >> 1; shift; shift >>= 1){
-      std::size_t tmp = n >> shift;
-      if (tmp)
-         log2 += shift, n = tmp;
+   }}} //namespace boost::intrusive::detail
+
+   #include <intrin.h>
+
+   namespace boost {
+   namespace intrusive {
+   namespace detail {
+
+   #if defined(_M_X64) || defined(_M_AMD64) || defined(_M_IA64)   //64 bit target
+      #define BOOST_INTRUSIVE_BSR_INTRINSIC _BitScanReverse64
+   #else //32 bit target
+      #define BOOST_INTRUSIVE_BSR_INTRINSIC _BitScanReverse
+   #endif
+
+   inline std::size_t floor_log2 (std::size_t x)
+   {
+      unsigned long log2;
+      BOOST_INTRUSIVE_BSR_INTRINSIC( &log2, (unsigned long)x );
+      return log2;
    }
 
-   return log2;
-}
+   #undef BOOST_INTRUSIVE_BSR_INTRINSIC
+
+#elif defined(_MSC_VER) //visual 2003
+
+   inline std::size_t floor_log2 (std::size_t x)
+   {
+      unsigned long log2;
+      __asm
+      {
+         bsr eax, x
+         mov log2, eax
+      }
+      return static_cast<std::size_t>(log2);
+   }
+
+#elif defined(__GNUC__) && ((__GNUC__ >= 4) || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)) //GCC >=3.4
+
+   #if SIZE_MAX > UINT_MAX
+      #define BOOST_INTRUSIVE_CLZ_INTRINSIC __builtin_clzll
+   #elif SIZE_MAX > UINT_MAX
+      #define BOOST_INTRUSIVE_CLZ_INTRINSIC __builtin_clzl
+   #else
+      #define BOOST_INTRUSIVE_CLZ_INTRINSIC __builtin_clz
+   #endif
+
+   inline std::size_t floor_log2(std::size_t n)
+   {
+      return sizeof(std::size_t)*CHAR_BIT - 1 - BOOST_INTRUSIVE_CLZ_INTRINSIC(n);
+   }
+
+   #undef BOOST_INTRUSIVE_CLZ_INTRINSIC
+
+#else //Portable methods
+
+////////////////////////////
+// Generic method
+////////////////////////////
+
+   inline std::size_t floor_log2_get_shift(std::size_t n, true_ )//power of two size_t
+   {  return n >> 1;  }
+
+   inline std::size_t floor_log2_get_shift(std::size_t n, false_ )//non-power of two size_t
+   {  return (n >> 1) + ((n & 1u) & (n != 1)); }
+
+   template<std::size_t N>
+   inline std::size_t floor_log2 (std::size_t x, integer<std::size_t, N>)
+   {
+      const std::size_t Bits = N;
+      const bool Size_t_Bits_Power_2= !(Bits & (Bits-1));
+
+      std::size_t n = x;
+      std::size_t log2 = 0;
+
+      std::size_t remaining_bits = Bits;
+      std::size_t shift = floor_log2_get_shift(remaining_bits, bool_<Size_t_Bits_Power_2>());
+      while(shift){
+         std::size_t tmp = n >> shift;
+         if (tmp){
+            log2 += shift, n = tmp;
+         }
+         shift = floor_log2_get_shift(shift, bool_<Size_t_Bits_Power_2>());
+      }
+
+      return log2;
+   }
+
+   ////////////////////////////
+   // DeBruijn method
+   ////////////////////////////
+
+   //Taken from:
+   //http://stackoverflow.com/questions/11376288/fast-computing-of-log2-for-64-bit-integers
+   //Thanks to Desmond Hume
+
+   inline std::size_t floor_log2 (std::size_t v, integer<std::size_t, 32>)
+   {
+      static const int MultiplyDeBruijnBitPosition[32] = 
+      {
+         0, 9, 1, 10, 13, 21, 2, 29, 11, 14, 16, 18, 22, 25, 3, 30,
+         8, 12, 20, 28, 15, 17, 24, 7, 19, 27, 23, 6, 26, 5, 4, 31
+      };
+
+      v |= v >> 1;
+      v |= v >> 2;
+      v |= v >> 4;
+      v |= v >> 8;
+      v |= v >> 16;
+
+      return MultiplyDeBruijnBitPosition[(std::size_t)(v * 0x07C4ACDDU) >> 27];
+   }
+
+   inline std::size_t floor_log2 (std::size_t v, integer<std::size_t, 64>)
+   {
+      static const std::size_t MultiplyDeBruijnBitPosition[64] = {
+      63,  0, 58,  1, 59, 47, 53,  2,
+      60, 39, 48, 27, 54, 33, 42,  3,
+      61, 51, 37, 40, 49, 18, 28, 20,
+      55, 30, 34, 11, 43, 14, 22,  4,
+      62, 57, 46, 52, 38, 26, 32, 41,
+      50, 36, 17, 19, 29, 10, 13, 21,
+      56, 45, 25, 31, 35, 16,  9, 12,
+      44, 24, 15,  8, 23,  7,  6,  5};
+
+      v |= v >> 1;
+      v |= v >> 2;
+      v |= v >> 4;
+      v |= v >> 8;
+      v |= v >> 16;
+      v |= v >> 32;
+      return MultiplyDeBruijnBitPosition[((std::size_t)((v - (v >> 1))*0x07EDD5E59A4E28C2ULL)) >> 58];
+   }
+
+
+   inline std::size_t floor_log2 (std::size_t x)
+   {
+      const std::size_t Bits = sizeof(std::size_t)*CHAR_BIT;
+      return floor_log2(x, integer<std::size_t, Bits>());
+   }
+
+#endif
 
 //Thanks to Laurent de Soras in
 //http://www.flipcode.com/archives/Fast_log_Function.shtml
@@ -404,13 +532,13 @@ inline float fast_log2 (float val)
    //1+log2(m), m ranging from 1 to 2
    //3rd degree polynomial keeping first derivate continuity.
    //For less precision the line can be commented out
-   val = ((-1.0f/3.f) * val + 2.f) * val - (2.0f/3.f);
+   val = ((-1.f/3.f) * val + 2.f) * val - (2.f/3.f);
    return (val + log_2);
 }
 
 inline std::size_t ceil_log2 (std::size_t x)
 {
-   return ((x & (x-1))!= 0) + floor_log2(x);
+   return static_cast<std::size_t>((x & (x-1)) != 0) + floor_log2(x);
 }
 
 template<class SizeType, std::size_t N>
