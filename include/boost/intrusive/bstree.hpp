@@ -238,6 +238,7 @@ struct bstbase2
    key_compare key_comp() const
    {  return this->comp();   }
 
+   //lower_bound
    iterator lower_bound(const_reference value)
    {  return this->lower_bound(value, this->comp());   }
 
@@ -262,6 +263,7 @@ struct bstbase2
          (this->header_ptr(), key, key_node_comp), this->real_value_traits_ptr());
    }
 
+   //upper_bound
    iterator upper_bound(const_reference value)
    {  return this->upper_bound(value, this->comp());   }
 
@@ -286,6 +288,7 @@ struct bstbase2
          (this->header_ptr(), key, key_node_comp), this->real_value_traits_ptr());
    }
 
+   //find
    iterator find(const_reference value)
    {  return this->find(value, this->comp()); }
 
@@ -310,6 +313,7 @@ struct bstbase2
          (node_algorithms::find(this->header_ptr(), key, key_node_comp), this->real_value_traits_ptr());
    }
 
+   //equal_range
    std::pair<iterator,iterator> equal_range(const_reference value)
    {  return this->equal_range(value, this->comp());   }
 
@@ -340,6 +344,38 @@ struct bstbase2
                                                       , const_iterator(ret.second, this->real_value_traits_ptr()));
    }
 
+   //lower_bound_range
+   std::pair<iterator,iterator> lower_bound_range(const_reference value)
+   {  return this->lower_bound_range(value, this->comp());   }
+
+   template<class KeyType, class KeyValueCompare>
+   std::pair<iterator,iterator> lower_bound_range(const KeyType &key, KeyValueCompare comp)
+   {
+      detail::key_nodeptr_comp<KeyValueCompare, real_value_traits>
+         key_node_comp(comp, &this->get_real_value_traits());
+      std::pair<node_ptr, node_ptr> ret
+         (node_algorithms::lower_bound_range(this->header_ptr(), key, key_node_comp));
+      return std::pair<iterator, iterator>( iterator(ret.first, this->real_value_traits_ptr())
+                                          , iterator(ret.second, this->real_value_traits_ptr()));
+   }
+
+   std::pair<const_iterator, const_iterator>
+      lower_bound_range(const_reference value) const
+   {  return this->lower_bound_range(value, this->comp());   }
+
+   template<class KeyType, class KeyValueCompare>
+   std::pair<const_iterator, const_iterator>
+      lower_bound_range(const KeyType &key, KeyValueCompare comp) const
+   {
+      detail::key_nodeptr_comp<KeyValueCompare, real_value_traits>
+         key_node_comp(comp, &this->get_real_value_traits());
+      std::pair<node_ptr, node_ptr> ret
+         (node_algorithms::lower_bound_range(this->header_ptr(), key, key_node_comp));
+      return std::pair<const_iterator, const_iterator>( const_iterator(ret.first, this->real_value_traits_ptr())
+                                                      , const_iterator(ret.second, this->real_value_traits_ptr()));
+   }
+
+   //bounded_range
    std::pair<iterator,iterator> bounded_range
       (const_reference lower_value, const_reference upper_value, bool left_closed, bool right_closed)
    {  return this->bounded_range(lower_value, upper_value, this->comp(), left_closed, right_closed);   }
@@ -374,6 +410,7 @@ struct bstbase2
                                                       , const_iterator(ret.second, this->real_value_traits_ptr()));
    }
 
+   //insert_unique_check
    template<class KeyType, class KeyValueCompare>
    std::pair<iterator, bool> insert_unique_check
       (const KeyType &key, KeyValueCompare key_value_comp, insert_commit_data &commit_data)

@@ -487,18 +487,18 @@ class bstree_algorithms
    //! <b>Throws</b>: Nothing.
    static node_ptr next_node(const node_ptr & node)
    {
-      node_ptr p_right(NodeTraits::get_right(node));
-      if(p_right){
-         return minimum(p_right);
+      node_ptr const n_right(NodeTraits::get_right(node));
+      if(n_right){
+         return minimum(n_right);
       }
       else {
-         node_ptr p(node);
-         node_ptr x = NodeTraits::get_parent(p);
-         while(p == NodeTraits::get_right(x)){
-            p = x;
-            x = NodeTraits::get_parent(x);
+         node_ptr n(node);
+         node_ptr p(NodeTraits::get_parent(n));
+         while(n == NodeTraits::get_right(p)){
+            n = p;
+            p = NodeTraits::get_parent(p);
          }
-         return NodeTraits::get_right(p) != x ? x : detail::uncast(p);
+         return NodeTraits::get_right(n) != p ? p : n;
       }
    }
 
@@ -900,6 +900,31 @@ class bstree_algorithms
       (const const_node_ptr & header, const KeyType &key, KeyNodePtrCompare comp)
    {
       return bounded_range(header, key, key, comp, true, true);
+   }
+
+   //! <b>Requires</b>: "header" must be the header node of a tree.
+   //!   KeyNodePtrCompare is a function object that induces a strict weak
+   //!   ordering compatible with the strict weak ordering used to create the
+   //!   the tree. KeyNodePtrCompare can compare KeyType with tree's node_ptrs.
+   //!
+   //! <b>Effects</b>: Returns an a pair of node_ptr delimiting a range containing
+   //!   the first element that is equivalent to "key" according to "comp" or an
+   //!   empty range that indicates the position where that element would be
+   //!   if there are no equivalent elements.
+   //!
+   //! <b>Complexity</b>: Logarithmic.
+   //!
+   //! <b>Throws</b>: If "comp" throws.
+   template<class KeyType, class KeyNodePtrCompare>
+   static std::pair<node_ptr, node_ptr> lower_bound_range
+      (const const_node_ptr & header, const KeyType &key, KeyNodePtrCompare comp)
+   {
+      node_ptr const lb(lower_bound(header, key, comp));
+      std::pair<node_ptr, node_ptr> ret_ii(lb, lb);
+      if(lb != header && !comp(key, lb)){
+         ret_ii.second = next_node(ret_ii.second);
+      }
+      return ret_ii;
    }
 
    //! <b>Requires</b>: "header" must be the header node of a tree.

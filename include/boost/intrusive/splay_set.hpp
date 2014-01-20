@@ -309,21 +309,29 @@ class splay_set_impl
    template<class KeyType, class KeyValueCompare>
    const_iterator find(const KeyType& key, KeyValueCompare comp) const;
 
-   //! @copydoc ::boost::intrusive::splaytree::equal_range(const_reference)
-   std::pair<iterator,iterator> equal_range(const_reference value);
+   #endif   //   #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
-   //! @copydoc ::boost::intrusive::splaytree::equal_range(const KeyType&,KeyValueCompare)
+   //! @copydoc ::boost::intrusive::rbtree::equal_range(const_reference)
+   std::pair<iterator,iterator> equal_range(const_reference value)
+   {  return this->tree_type::lower_bound_range(value); }
+
+   //! @copydoc ::boost::intrusive::rbtree::equal_range(const KeyType&,KeyValueCompare)
    template<class KeyType, class KeyValueCompare>
-   std::pair<iterator,iterator> equal_range(const KeyType& key, KeyValueCompare comp);
+   std::pair<iterator,iterator> equal_range(const KeyType& key, KeyValueCompare comp)
+   {  return this->tree_type::lower_bound_range(key, comp); }
 
-   //! @copydoc ::boost::intrusive::splaytree::equal_range(const_reference)const
+   //! @copydoc ::boost::intrusive::rbtree::equal_range(const_reference)const
    std::pair<const_iterator, const_iterator>
-      equal_range(const_reference value) const;
+      equal_range(const_reference value) const
+   {  return this->tree_type::lower_bound_range(value); }
 
-   //! @copydoc ::boost::intrusive::splaytree::equal_range(const KeyType&,KeyValueCompare)const
+   //! @copydoc ::boost::intrusive::rbtree::equal_range(const KeyType&,KeyValueCompare)const
    template<class KeyType, class KeyValueCompare>
    std::pair<const_iterator, const_iterator>
-      equal_range(const KeyType& key, KeyValueCompare comp) const;
+      equal_range(const KeyType& key, KeyValueCompare comp) const
+   {  return this->tree_type::lower_bound_range(key, comp); }
+
+   #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::splaytree::bounded_range(const_reference,const_reference,bool,bool)
    std::pair<iterator,iterator> bounded_range

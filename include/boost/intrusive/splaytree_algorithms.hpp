@@ -353,6 +353,25 @@ class splaytree_algorithms
       (const const_node_ptr & header, const KeyType &key, KeyNodePtrCompare comp)
    {  return bstree_algo::equal_range(header, key, comp);  }
 
+   //! @copydoc ::boost::intrusive::bstree_algorithms::lower_bound_range(const const_node_ptr&,const KeyType&,KeyNodePtrCompare)
+   //! Additional notes: the first node of the range is splayed.
+   template<class KeyType, class KeyNodePtrCompare>
+   static std::pair<node_ptr, node_ptr> lower_bound_range
+      (const node_ptr & header, const KeyType &key, KeyNodePtrCompare comp)
+   {
+      splay_down(detail::uncast(header), key, comp);
+      std::pair<node_ptr, node_ptr> ret = bstree_algo::lower_bound_range(header, key, comp);
+      //splay_up(ret.first, detail::uncast(header));
+      return ret;
+   }
+
+   //! @copydoc ::boost::intrusive::bstree_algorithms::lower_bound_range(const const_node_ptr&,const KeyType&,KeyNodePtrCompare)
+   //! Additional note: no splaying is performed
+   template<class KeyType, class KeyNodePtrCompare>
+   static std::pair<node_ptr, node_ptr> lower_bound_range
+      (const const_node_ptr & header, const KeyType &key, KeyNodePtrCompare comp)
+   {  return bstree_algo::lower_bound_range(header, key, comp);  }
+
    //! @copydoc ::boost::intrusive::bstree_algorithms::bounded_range(const const_node_ptr&,const KeyType&,const KeyType&,KeyNodePtrCompare,bool,bool)
    //! Additional notes: the first node of the range is splayed.
    template<class KeyType, class KeyNodePtrCompare>
