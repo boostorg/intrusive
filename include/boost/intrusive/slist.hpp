@@ -101,34 +101,29 @@ template<class ValueTraits, class SizeType, std::size_t BoolFlags>
 class slist_impl
    :  private detail::clear_on_destructor_base
          < slist_impl<ValueTraits, SizeType, BoolFlags>
-         , is_safe_autounlink<detail::get_real_value_traits<ValueTraits>::type::link_mode>::value
+         , is_safe_autounlink<ValueTraits::link_mode>::value
          >
 {
    template<class C, bool> friend class detail::clear_on_destructor_base;
    //Public typedefs
    public:
    typedef ValueTraits                                               value_traits;
-   /// @cond
-   static const bool external_value_traits =
-      detail::external_value_traits_bool_is_true<value_traits>::value;
-   typedef typename detail::get_real_value_traits<ValueTraits>::type real_value_traits;
-   /// @endcond
-   typedef typename real_value_traits::pointer                       pointer;
-   typedef typename real_value_traits::const_pointer                 const_pointer;
+   typedef typename value_traits::pointer                            pointer;
+   typedef typename value_traits::const_pointer                      const_pointer;
    typedef typename pointer_traits<pointer>::element_type            value_type;
    typedef typename pointer_traits<pointer>::reference               reference;
    typedef typename pointer_traits<const_pointer>::reference         const_reference;
    typedef typename pointer_traits<pointer>::difference_type         difference_type;
    typedef SizeType                                                  size_type;
-   typedef slist_iterator<real_value_traits, false>                  iterator;
-   typedef slist_iterator<real_value_traits, true>                   const_iterator;
-   typedef typename real_value_traits::node_traits                   node_traits;
+   typedef slist_iterator<value_traits, false>                       iterator;
+   typedef slist_iterator<value_traits, true>                        const_iterator;
+   typedef typename value_traits::node_traits                        node_traits;
    typedef typename node_traits::node                                node;
    typedef typename node_traits::node_ptr                            node_ptr;
    typedef typename node_traits::const_node_ptr                      const_node_ptr;
 
    static const bool constant_time_size = 0 != (BoolFlags & slist_bool_flags::constant_time_size_pos);
-   static const bool stateful_value_traits = detail::is_stateful_value_traits<real_value_traits>::value;
+   static const bool stateful_value_traits = detail::is_stateful_value_traits<value_traits>::value;
    static const bool linear = 0 != (BoolFlags & slist_bool_flags::linear_pos);
    static const bool cache_last = 0 != (BoolFlags & slist_bool_flags::cache_last_pos);
 
@@ -145,14 +140,14 @@ class slist_impl
    //noncopyable
    BOOST_MOVABLE_BUT_NOT_COPYABLE(slist_impl)
 
-   static const bool safemode_or_autounlink = is_safe_autounlink<real_value_traits::link_mode>::value;
+   static const bool safemode_or_autounlink = is_safe_autounlink<value_traits::link_mode>::value;
 
    //Constant-time size is incompatible with auto-unlink hooks!
-   BOOST_STATIC_ASSERT(!(constant_time_size && ((int)real_value_traits::link_mode == (int)auto_unlink)));
+   BOOST_STATIC_ASSERT(!(constant_time_size && ((int)value_traits::link_mode == (int)auto_unlink)));
    //Linear singly linked lists are incompatible with auto-unlink hooks!
-   BOOST_STATIC_ASSERT(!(linear && ((int)real_value_traits::link_mode == (int)auto_unlink)));
+   BOOST_STATIC_ASSERT(!(linear && ((int)value_traits::link_mode == (int)auto_unlink)));
    //A list with cached last node is incompatible with auto-unlink hooks!
-   BOOST_STATIC_ASSERT(!(cache_last && ((int)real_value_traits::link_mode == (int)auto_unlink)));
+   BOOST_STATIC_ASSERT(!(cache_last && ((int)value_traits::link_mode == (int)auto_unlink)));
 
    node_ptr get_end_node()
    {  return node_ptr(linear ? node_ptr() : this->get_root_node());  }
@@ -230,18 +225,6 @@ class slist_impl
    const size_traits &priv_size_traits() const
    {  return data_.root_plus_size_;  }
 
-   const real_value_traits &get_real_value_traits(detail::bool_<false>) const
-   {  return data_;  }
-
-   const real_value_traits &get_real_value_traits(detail::bool_<true>) const
-   {  return data_.get_value_traits(*this);  }
-
-   real_value_traits &get_real_value_traits(detail::bool_<false>)
-   {  return data_;  }
-
-   real_value_traits &get_real_value_traits(detail::bool_<true>)
-   {  return data_.get_value_traits(*this);  }
-
    const value_traits &priv_value_traits() const
    {  return data_;  }
 
@@ -258,20 +241,15 @@ class slist_impl
    void prot_set_size(size_type s)
    {  data_.root_plus_size_.set_size(s);  }
 
-   /// @endcond
-
    public:
 
-   const real_value_traits &get_real_value_traits() const
-   {  return this->get_real_value_traits(detail::bool_<external_value_traits>());  }
+   typedef typename pointer_traits<node_ptr>::template
+      rebind_pointer<const value_traits>::type const_value_traits_ptr;
 
-   real_value_traits &get_real_value_traits()
-   {  return this->get_real_value_traits(detail::bool_<external_value_traits>());  }
+   const_value_traits_ptr value_traits_ptr() const
+   {  return pointer_traits<const_value_traits_ptr>::pointer_to(this->priv_value_traits());  }
 
-   typedef typename pointer_traits<node_ptr>::template rebind_pointer<const real_value_traits>::type const_real_value_traits_ptr;
-
-   const_real_value_traits_ptr real_value_traits_ptr() const
-   {  return pointer_traits<const_real_value_traits_ptr>::pointer_to(this->get_real_value_traits());  }
+   /// @endcond
 
    public:
 
@@ -403,7 +381,7 @@ class slist_impl
          ++it;
          if(safemode_or_autounlink)
             node_algorithms::init(to_erase);
-         disposer(get_real_value_traits().to_value_ptr(to_erase));
+         disposer(priv_value_traits().to_value_ptr(to_erase));
       }
       this->set_default_constructed_state();
    }
@@ -420,7 +398,7 @@ class slist_impl
    //! <b>Note</b>: Does not affect the validity of iterators and references.
    void push_front(reference value)
    {
-      node_ptr to_insert = get_real_value_traits().to_node_ptr(value);
+      node_ptr to_insert = priv_value_traits().to_node_ptr(value);
       if(safemode_or_autounlink)
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::inited(to_insert));
       if(cache_last){
@@ -446,7 +424,7 @@ class slist_impl
    void push_back(reference value)
    {
       BOOST_STATIC_ASSERT((cache_last));
-      node_ptr n = get_real_value_traits().to_node_ptr(value);
+      node_ptr n = priv_value_traits().to_node_ptr(value);
       if(safemode_or_autounlink)
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::inited(n));
       node_algorithms::link_after(this->get_last_node(), n);
@@ -485,7 +463,7 @@ class slist_impl
       this->priv_size_traits().decrement();
       if(safemode_or_autounlink)
          node_algorithms::init(to_erase);
-      disposer(get_real_value_traits().to_value_ptr(to_erase));
+      disposer(priv_value_traits().to_value_ptr(to_erase));
       if(cache_last){
          if(this->empty()){
             this->set_last_node(this->get_root_node());
@@ -499,7 +477,7 @@ class slist_impl
    //!
    //! <b>Complexity</b>: Constant.
    reference front()
-   { return *this->get_real_value_traits().to_value_ptr(node_traits::get_next(this->get_root_node())); }
+   { return *this->priv_value_traits().to_value_ptr(node_traits::get_next(this->get_root_node())); }
 
    //! <b>Effects</b>: Returns a const_reference to the first element of the list.
    //!
@@ -507,7 +485,7 @@ class slist_impl
    //!
    //! <b>Complexity</b>: Constant.
    const_reference front() const
-   { return *this->get_real_value_traits().to_value_ptr(detail::uncast(node_traits::get_next(this->get_root_node()))); }
+   { return *this->priv_value_traits().to_value_ptr(detail::uncast(node_traits::get_next(this->get_root_node()))); }
 
    //! <b>Effects</b>: Returns a reference to the last element of the list.
    //!
@@ -520,7 +498,7 @@ class slist_impl
    reference back()
    {
       BOOST_STATIC_ASSERT((cache_last));
-      return *this->get_real_value_traits().to_value_ptr(this->get_last_node());
+      return *this->priv_value_traits().to_value_ptr(this->get_last_node());
    }
 
    //! <b>Effects</b>: Returns a const_reference to the last element of the list.
@@ -534,7 +512,7 @@ class slist_impl
    const_reference back() const
    {
       BOOST_STATIC_ASSERT((cache_last));
-      return *this->get_real_value_traits().to_value_ptr(this->get_last_node());
+      return *this->priv_value_traits().to_value_ptr(this->get_last_node());
    }
 
    //! <b>Effects</b>: Returns an iterator to the first element contained in the list.
@@ -543,7 +521,7 @@ class slist_impl
    //!
    //! <b>Complexity</b>: Constant.
    iterator begin()
-   { return iterator (node_traits::get_next(this->get_root_node()), this->real_value_traits_ptr()); }
+   { return iterator (node_traits::get_next(this->get_root_node()), this->value_traits_ptr()); }
 
    //! <b>Effects</b>: Returns a const_iterator to the first element contained in the list.
    //!
@@ -551,7 +529,7 @@ class slist_impl
    //!
    //! <b>Complexity</b>: Constant.
    const_iterator begin() const
-   { return const_iterator (node_traits::get_next(this->get_root_node()), this->real_value_traits_ptr()); }
+   { return const_iterator (node_traits::get_next(this->get_root_node()), this->value_traits_ptr()); }
 
    //! <b>Effects</b>: Returns a const_iterator to the first element contained in the list.
    //!
@@ -559,7 +537,7 @@ class slist_impl
    //!
    //! <b>Complexity</b>: Constant.
    const_iterator cbegin() const
-   { return const_iterator(node_traits::get_next(this->get_root_node()), this->real_value_traits_ptr()); }
+   { return const_iterator(node_traits::get_next(this->get_root_node()), this->value_traits_ptr()); }
 
    //! <b>Effects</b>: Returns an iterator to the end of the list.
    //!
@@ -567,7 +545,7 @@ class slist_impl
    //!
    //! <b>Complexity</b>: Constant.
    iterator end()
-   { return iterator(this->get_end_node(), this->real_value_traits_ptr()); }
+   { return iterator(this->get_end_node(), this->value_traits_ptr()); }
 
    //! <b>Effects</b>: Returns a const_iterator to the end of the list.
    //!
@@ -575,7 +553,7 @@ class slist_impl
    //!
    //! <b>Complexity</b>: Constant.
    const_iterator end() const
-   { return const_iterator(detail::uncast(this->get_end_node()), this->real_value_traits_ptr()); }
+   { return const_iterator(detail::uncast(this->get_end_node()), this->value_traits_ptr()); }
 
    //! <b>Effects</b>: Returns a const_iterator to the end of the list.
    //!
@@ -592,7 +570,7 @@ class slist_impl
    //!
    //! <b>Complexity</b>: Constant.
    iterator before_begin()
-   { return iterator(this->get_root_node(), this->real_value_traits_ptr()); }
+   { return iterator(this->get_root_node(), this->value_traits_ptr()); }
 
    //! <b>Effects</b>: Returns an iterator that points to a position
    //!   before the first element. Equivalent to "end()"
@@ -601,7 +579,7 @@ class slist_impl
    //!
    //! <b>Complexity</b>: Constant.
    const_iterator before_begin() const
-   { return const_iterator(detail::uncast(this->get_root_node()), this->real_value_traits_ptr()); }
+   { return const_iterator(detail::uncast(this->get_root_node()), this->value_traits_ptr()); }
 
    //! <b>Effects</b>: Returns an iterator that points to a position
    //!   before the first element. Equivalent to "end()"
@@ -623,7 +601,7 @@ class slist_impl
    {
       //This function shall not be used if cache_last is not true
       BOOST_INTRUSIVE_INVARIANT_ASSERT(cache_last);
-      return iterator (this->get_last_node(), this->real_value_traits_ptr());
+      return iterator (this->get_last_node(), this->value_traits_ptr());
    }
 
    //! <b>Effects</b>: Returns a const_iterator to the last element contained in the list.
@@ -637,7 +615,7 @@ class slist_impl
    {
       //This function shall not be used if cache_last is not true
       BOOST_INTRUSIVE_INVARIANT_ASSERT(cache_last);
-      return const_iterator (this->get_last_node(), this->real_value_traits_ptr());
+      return const_iterator (this->get_last_node(), this->value_traits_ptr());
    }
 
    //! <b>Effects</b>: Returns a const_iterator to the last element contained in the list.
@@ -648,7 +626,7 @@ class slist_impl
    //!
    //! <b>Note</b>: This function is present only if cached_last<> option is true.
    const_iterator clast() const
-   { return const_iterator(this->get_last_node(), this->real_value_traits_ptr()); }
+   { return const_iterator(this->get_last_node(), this->value_traits_ptr()); }
 
    //! <b>Precondition</b>: end_iterator must be a valid end iterator
    //!   of slist.
@@ -788,7 +766,7 @@ class slist_impl
    //! <b>Note</b>: Does not affect the validity of iterators and references.
    iterator insert_after(const_iterator prev_p, reference value)
    {
-      node_ptr n = get_real_value_traits().to_node_ptr(value);
+      node_ptr n = priv_value_traits().to_node_ptr(value);
       if(safemode_or_autounlink)
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::inited(n));
       node_ptr prev_n(prev_p.pointed_node());
@@ -797,7 +775,7 @@ class slist_impl
          this->set_last_node(n);
       }
       this->priv_size_traits().increment();
-      return iterator (n, this->real_value_traits_ptr());
+      return iterator (n, this->value_traits_ptr());
    }
 
    //! <b>Requires</b>: Dereferencing iterator must yield
@@ -819,7 +797,7 @@ class slist_impl
       size_type count = 0;
       node_ptr prev_n(prev_p.pointed_node());
       for (; f != l; ++f, ++count){
-         const node_ptr n = get_real_value_traits().to_node_ptr(*f);
+         const node_ptr n = priv_value_traits().to_node_ptr(*f);
          if(safemode_or_autounlink)
             BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::inited(n));
          node_algorithms::link_after(prev_n, n);
@@ -1026,7 +1004,7 @@ class slist_impl
       }
       if(safemode_or_autounlink)
          node_algorithms::init(to_erase);
-      disposer(get_real_value_traits().to_value_ptr(to_erase));
+      disposer(priv_value_traits().to_value_ptr(to_erase));
       this->priv_size_traits().decrement();
       return it.unconst();
    }
@@ -1045,7 +1023,7 @@ class slist_impl
       node_algorithms::unlink_after(prev_n);
       if(safemode_or_autounlink)
          node_algorithms::init(to_erase);
-      disposer(real_value_traits::to_value_ptr(to_erase));
+      disposer(value_traits::to_value_ptr(to_erase));
       return it.unconst();
    }
 
@@ -1079,7 +1057,7 @@ class slist_impl
          fp = node_traits::get_next(fp);
          if(safemode_or_autounlink)
             node_algorithms::init(to_erase);
-         disposer(get_real_value_traits().to_value_ptr(to_erase));
+         disposer(priv_value_traits().to_value_ptr(to_erase));
          this->priv_size_traits().decrement();
       }
       if(cache_last && (node_traits::get_next(bfp) == this->get_end_node())){
@@ -1692,7 +1670,7 @@ class slist_impl
    {
       BOOST_STATIC_ASSERT((!stateful_value_traits));
       //BOOST_INTRUSIVE_INVARIANT_ASSERT (!node_algorithms::inited(value_traits::to_node_ptr(value)));
-      return iterator (value_traits::to_node_ptr(value), const_real_value_traits_ptr());
+      return iterator (value_traits::to_node_ptr(value), const_value_traits_ptr());
    }
 
    //! <b>Requires</b>: value must be a const reference to a value inserted in a list.
@@ -1710,7 +1688,7 @@ class slist_impl
    {
       BOOST_STATIC_ASSERT((!stateful_value_traits));
       //BOOST_INTRUSIVE_INVARIANT_ASSERT (!node_algorithms::inited(value_traits::to_node_ptr(const_cast<reference> (value))));
-      return const_iterator (value_traits::to_node_ptr(const_cast<reference> (value)), const_real_value_traits_ptr());
+      return const_iterator (value_traits::to_node_ptr(const_cast<reference> (value)), const_value_traits_ptr());
    }
 
    //! <b>Requires</b>: value must be a reference to a value inserted in a list.
@@ -1725,7 +1703,7 @@ class slist_impl
    iterator iterator_to(reference value)
    {
       //BOOST_INTRUSIVE_INVARIANT_ASSERT (!node_algorithms::inited(value_traits::to_node_ptr(value)));
-      return iterator (value_traits::to_node_ptr(value), this->real_value_traits_ptr());
+      return iterator (value_traits::to_node_ptr(value), this->value_traits_ptr());
    }
 
    //! <b>Requires</b>: value must be a const reference to a value inserted in a list.
@@ -1740,7 +1718,7 @@ class slist_impl
    const_iterator iterator_to(const_reference value) const
    {
       //BOOST_INTRUSIVE_INVARIANT_ASSERT (!node_algorithms::inited(value_traits::to_node_ptr(const_cast<reference> (value))));
-      return const_iterator (value_traits::to_node_ptr(const_cast<reference> (value)), this->real_value_traits_ptr());
+      return const_iterator (value_traits::to_node_ptr(const_cast<reference> (value)), this->value_traits_ptr());
    }
 
    //! <b>Returns</b>: The iterator to the element before i in the list.
@@ -1789,11 +1767,11 @@ class slist_impl
    const_iterator previous(const_iterator prev_from, const_iterator i) const
    {
       if(cache_last && (i.pointed_node() == this->get_end_node())){
-         return const_iterator(detail::uncast(this->get_last_node()), this->real_value_traits_ptr());
+         return const_iterator(detail::uncast(this->get_last_node()), this->value_traits_ptr());
       }
       return const_iterator
          (node_algorithms::get_previous_node
-            (prev_from.pointed_node(), i.pointed_node()), this->real_value_traits_ptr());
+            (prev_from.pointed_node(), i.pointed_node()), this->value_traits_ptr());
    }
 
    ///@cond
@@ -1844,8 +1822,8 @@ class slist_impl
          BOOST_INTRUSIVE_INVARIANT_ASSERT(n > 0);
          BOOST_INTRUSIVE_INVARIANT_ASSERT
             (size_type(std::distance
-               ( iterator(f, this->real_value_traits_ptr())
-               , iterator(before_l, this->real_value_traits_ptr())))
+               ( iterator(f, this->value_traits_ptr())
+               , iterator(before_l, this->value_traits_ptr())))
             +1 == n);
          this->priv_incorporate_after(prev_pos.pointed_node(), f, before_l);
          if(constant_time_size){
@@ -2171,9 +2149,8 @@ class slist
       Options...
       #endif
       >::type   Base;
-   typedef typename Base::real_value_traits  real_value_traits;
    //Assert if passed value traits are compatible with the type
-   BOOST_STATIC_ASSERT((detail::is_same<typename real_value_traits::value_type, T>::value));
+   BOOST_STATIC_ASSERT((detail::is_same<typename Base::value_traits::value_type, T>::value));
    BOOST_MOVABLE_BUT_NOT_COPYABLE(slist)
 
    public:

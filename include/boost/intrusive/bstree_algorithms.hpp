@@ -173,6 +173,19 @@ class bstree_algorithms
    static node_ptr end_node(const const_node_ptr & header)
    {  return detail::uncast(header);   }
 
+   //! <b>Requires</b>: 'header' is the header node of a tree.
+   //!
+   //! <b>Effects</b>: Returns the root of the tree if any, header otherwise
+   //!
+   //! <b>Complexity</b>: Constant time.
+   //!
+   //! <b>Throws</b>: Nothing.
+   static node_ptr root_node(const const_node_ptr & header)
+   {
+      node_ptr p = node_traits::get_parent(header);
+      return p ? p : detail::uncast(header);
+   }
+
    //! <b>Requires</b>: 'node' is a node of the tree or a node initialized
    //!   by init(...) or init_node.
    //!

@@ -89,8 +89,6 @@ struct TRAITS_PREFIX##_bool_is_true\
 
 BOOST_INTRUSIVE_INTERNAL_STATIC_BOOL_IS_TRUE(internal_base_hook, hooktags::is_base_hook)
 BOOST_INTRUSIVE_INTERNAL_STATIC_BOOL_IS_TRUE(internal_any_hook, is_any_hook)
-BOOST_INTRUSIVE_INTERNAL_STATIC_BOOL_IS_TRUE(external_value_traits, external_value_traits)
-BOOST_INTRUSIVE_INTERNAL_STATIC_BOOL_IS_TRUE(external_bucket_traits, external_bucket_traits)
 BOOST_INTRUSIVE_INTERNAL_STATIC_BOOL_IS_TRUE(resizable, resizable)
 
 template <class T>
@@ -163,8 +161,8 @@ struct size_holder
    SizeType size_;
 };
 
-template<class SizeType>
-struct size_holder<false, SizeType>
+template<class SizeType, class Tag>
+struct size_holder<false, SizeType, Tag>
 {
    static const bool constant_time_size = false;
    typedef SizeType  size_type;

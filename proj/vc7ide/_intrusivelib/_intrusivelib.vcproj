@@ -365,9 +365,6 @@
 				RelativePath="..\..\..\example\doc_erasing_and_disposing.cpp">
 			</File>
 			<File
-				RelativePath="..\..\..\example\doc_external_value_traits.cpp">
-			</File>
-			<File
 				RelativePath="..\..\..\example\doc_function_hooks.cpp">
 			</File>
 			<File

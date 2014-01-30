@@ -51,27 +51,6 @@ BOOST_INTRUSIVE_DEFAULT_HOOK_MARKER_DEFINITION(default_bstree_hook);
 
 #undef BOOST_INTRUSIVE_DEFAULT_HOOK_MARKER_DEFINITION
 
-template <class ValueTraits>
-struct eval_value_traits
-{
-   typedef typename ValueTraits::value_traits type;
-};
-
-template<class ValueTraits>
-struct get_real_value_traits
-   : public eval_if_c
-      < external_value_traits_bool_is_true<ValueTraits>::value
-      , eval_value_traits<ValueTraits>
-      , identity<ValueTraits>
-      >
-{};
-
-template <class BucketTraits>
-struct eval_bucket_traits
-{
-   typedef typename BucketTraits::bucket_traits type;
-};
-
 template <class T, class BaseHook>
 struct concrete_hook_base_value_traits
 {

@@ -2,9 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="external_value_traits"
-	ProjectGUID="{97B69A72-B9D3-7389-17FB-74612F4A9543}"
-	RootNamespace="external_value_traits"
+	Name="container_size_test"
+	ProjectGUID="{9E721E26-45AF-192C-AD67-A4CC7D096497}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -22,8 +21,6 @@
 				Optimization="0"
 				AdditionalIncludeDirectories="../../../../../"
 				PreprocessorDefinitions="BOOST_DATE_TIME_NO_LIB"
-				GeneratePreprocessedFile="0"
-				KeepComments="FALSE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
@@ -38,11 +35,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/external_value_traits.exe"
+				OutputFile="$(OutDir)/container_size_test.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/external_value_traits.pdb"
-				GenerateMapFile="TRUE"
+				ProgramDatabaseFile="$(OutDir)/container_size_test.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
@@ -75,10 +71,9 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="../../../../../"
-				PreprocessorDefinitions="BOOST_DATE_TIME_NO_LIB"
+				PreprocessorDefinitions="BOOST_DATE_TIME_NO_LIB,NDEBUG"
 				RuntimeLibrary="4"
 				DisableLanguageExtensions="FALSE"
-				ForceConformanceInForLoopScope="TRUE"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
@@ -87,7 +82,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/external_value_traits.exe"
+				OutputFile="$(OutDir)/container_size_test.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
@@ -122,9 +117,9 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{7FAFEA31-6364-FB35-16A6-77AF315C236A}">
+			UniqueIdentifier="{4F0C713E-750E-B78A-4373-52D2204C1ACA}">
 			<File
-				RelativePath="..\..\..\test\external_value_traits_test.cpp">
+				RelativePath="..\..\..\test\container_size_test.cpp">
 			</File>
 		</Filter>
 	</Files>

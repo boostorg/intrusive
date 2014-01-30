@@ -44,6 +44,7 @@ class treap_set_impl
 #endif
 {
    /// @cond
+   public:
    typedef treap_impl<ValueTraits, VoidOrKeyComp, VoidOrPrioComp, SizeType, ConstantTimeSize> tree_type;
    BOOST_MOVABLE_BUT_NOT_COPYABLE(treap_set_impl)
 

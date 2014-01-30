@@ -76,7 +76,6 @@ class splaytree_impl
    /// @cond
    typedef bstree_impl< ValueTraits, VoidOrKeyComp, SizeType
                       , ConstantTimeSize, SplayTreeAlgorithms>       tree_type;
-   typedef typename tree_type::real_value_traits                     real_value_traits;
    typedef tree_type                                                 implementation_defined;
    /// @endcond
 
@@ -456,10 +455,10 @@ class splaytree_impl
    template<class KeyType, class KeyValueCompare>
    iterator splay_down(const KeyType &key, KeyValueCompare comp)
    {
-      detail::key_nodeptr_comp<value_compare, real_value_traits>
-         key_node_comp(comp, &this->get_real_value_traits());
+      detail::key_nodeptr_comp<value_compare, value_traits>
+         key_node_comp(comp, &this->get_value_traits());
       node_ptr r = node_algorithms::splay_down(tree_type::header_ptr(), key, key_node_comp);
-      return iterator(r, this->real_value_traits_ptr());
+      return iterator(r, this->value_traits_ptr());
    }
 
    //! <b>Effects</b>: Rearranges the container so that if *this stores an element
@@ -571,14 +570,13 @@ class splaytree
    public:
    typedef typename Base::value_compare      value_compare;
    typedef typename Base::value_traits       value_traits;
-   typedef typename Base::real_value_traits  real_value_traits;
    typedef typename Base::iterator           iterator;
    typedef typename Base::const_iterator     const_iterator;
    typedef typename Base::reverse_iterator           reverse_iterator;
    typedef typename Base::const_reverse_iterator     const_reverse_iterator;
 
    //Assert if passed value traits are compatible with the type
-   BOOST_STATIC_ASSERT((detail::is_same<typename real_value_traits::value_type, T>::value));
+   BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
    explicit splaytree( const value_compare &cmp = value_compare()
                      , const value_traits &v_traits = value_traits())
