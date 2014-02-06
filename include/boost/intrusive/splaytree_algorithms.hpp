@@ -576,8 +576,8 @@ class splaytree_algorithms
                if(!t_left)
                   break;
                if(comp(key, t_left)){
-                  commit.t_ = bstree_algo::rotate_right(commit.t_);
-
+                  bstree_algo::rotate_right_no_parent_fix(commit.t_, t_left);
+                  commit.t_ = t_left;
                   if( !NodeTraits::get_left(commit.t_) )
                      break;
                   link_right(commit.t_, commit.r_);
@@ -597,8 +597,8 @@ class splaytree_algorithms
                   break;
 
                if(comp(t_right, key)){
-                     commit.t_ = bstree_algo::rotate_left( commit.t_ );
-
+                     bstree_algo::rotate_left_no_parent_fix(commit.t_, t_right);
+                     commit.t_ = t_right;
                      if( !NodeTraits::get_right(commit.t_) )
                         break;
                      link_left(commit.t_, commit.l_);
