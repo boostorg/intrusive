@@ -56,7 +56,6 @@ struct slist_node_traits
 // node oriented bidirectional iterator:
 template<class RealValueTraits, bool IsConst>
 class slist_iterator
-   :  public iiterator<RealValueTraits, IsConst, std::forward_iterator_tag>::iterator_base
 {
    protected:
    typedef iiterator
@@ -72,9 +71,11 @@ class slist_iterator
    typedef typename types_t::void_pointer                   void_pointer;
 
    public:
-   typedef typename types_t::value_type      value_type;
-   typedef typename types_t::pointer         pointer;
-   typedef typename types_t::reference       reference;
+   typedef typename types_t::iterator_traits::difference_type    difference_type;
+   typedef typename types_t::iterator_traits::value_type         value_type;
+   typedef typename types_t::iterator_traits::pointer            pointer;
+   typedef typename types_t::iterator_traits::reference          reference;
+   typedef typename types_t::iterator_traits::iterator_category  iterator_category;
 
    typedef typename pointer_traits
       <void_pointer>::template rebind_pointer

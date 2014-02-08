@@ -1106,7 +1106,7 @@ struct iiterator
          , difference_type
          , pointer
          , reference
-         > iterator_base;
+         > iterator_traits;
    static const bool stateful_value_traits =
       detail::is_stateful_value_traits<real_value_traits>::value;
 };

@@ -173,7 +173,8 @@ struct get_slist_impl
 
 template<class BucketValueTraits, bool IsConst>
 class hashtable_iterator
-   :  public std::iterator
+{
+   typedef std::iterator
          < std::forward_iterator_tag
          , typename BucketValueTraits::value_traits::value_type
          , typename pointer_traits<typename BucketValueTraits::value_traits::value_type*>::difference_type
@@ -181,8 +182,8 @@ class hashtable_iterator
                      <typename BucketValueTraits::value_traits::value_type, IsConst>::type *
          , typename detail::add_const_if_c
                      <typename BucketValueTraits::value_traits::value_type, IsConst>::type &
-         >
-{
+         >  iterator_traits;
+
    typedef typename BucketValueTraits::value_traits          value_traits;
    typedef typename BucketValueTraits::bucket_traits         bucket_traits;
    typedef typename value_traits::node_traits                node_traits;
@@ -207,9 +208,11 @@ class hashtable_iterator
    }
 
    public:
-   typedef typename value_traits::value_type    value_type;
-   typedef typename detail::add_const_if_c<value_type, IsConst>::type *pointer;
-   typedef typename detail::add_const_if_c<value_type, IsConst>::type &reference;
+   typedef typename iterator_traits::difference_type    difference_type;
+   typedef typename iterator_traits::value_type         value_type;
+   typedef typename iterator_traits::pointer            pointer;
+   typedef typename iterator_traits::reference          reference;
+   typedef typename iterator_traits::iterator_category  iterator_category;
 
    hashtable_iterator ()
    {}
