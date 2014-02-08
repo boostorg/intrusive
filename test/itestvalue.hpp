@@ -52,8 +52,8 @@ struct testvalue
    // have to be handled appropriately when copied:
    testvalue & operator= (const testvalue& src)
    {
-      Hooks::base_hook_type::operator=(src);
-      Hooks::auto_base_hook_type::operator=(src);
+      Hooks::base_hook_type::operator=(static_cast<const Hooks::base_hook_type&>(src));
+      Hooks::auto_base_hook_type::operator=(static_cast<const Hooks::auto_base_hook_type&>(src));
       this->node_       = src.node_;
       this->auto_node_  = src.auto_node_;
       value_ = src.value_;
@@ -62,8 +62,8 @@ struct testvalue
 
    void swap_nodes(testvalue &other)
    {
-      Hooks::base_hook_type::swap_nodes(other);
-      Hooks::auto_base_hook_type::swap_nodes(other);
+      Hooks::base_hook_type::swap_nodes(static_cast<Hooks::base_hook_type&>(other));
+      Hooks::auto_base_hook_type::swap_nodes(static_cast<Hooks::auto_base_hook_type&>(other));
       node_.swap_nodes(other.node_);
       auto_node_.swap_nodes(other.auto_node_);
    }

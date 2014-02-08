@@ -159,10 +159,10 @@ struct pointer_traits
 
    //priv_pointer_to
    static pointer priv_pointer_to(boost::true_type, typename boost::intrusive::detail::unvoid<element_type>::type& r)
-      { return Ptr::pointer_to(r); }
+   { return Ptr::pointer_to(r); }
 
    static pointer priv_pointer_to(boost::false_type, typename boost::intrusive::detail::unvoid<element_type>::type& r)
-      { return pointer(boost::intrusive::detail::addressof(r)); }
+   { return pointer(boost::intrusive::detail::addressof(r)); }
 
    //priv_static_cast_from
    template<class UPtr>
@@ -189,7 +189,15 @@ struct pointer_traits
 
    template<class UPtr>
    static pointer priv_dynamic_cast_from(boost::false_type, const UPtr &uptr)
-   {  return pointer_to(*dynamic_cast<element_type*>(&*uptr));  }
+   {
+      element_type *p = dynamic_cast<element_type*>(&*uptr);
+	  if(!p){
+		  return pointer();
+	  }
+	  else{
+		  return pointer_to(*p);
+	  }
+   }
    ///@endcond
 };
 
