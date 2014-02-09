@@ -1831,7 +1831,8 @@ class bstree_algorithms
 
    static void vine_to_subtree(const node_ptr & super_root, std::size_t count)
    {
-      std::size_t leaf_nodes = count + 1 - ((std::size_t) 1 << detail::floor_log2(count + 1));
+      const std::size_t one_szt = 1u;
+      std::size_t leaf_nodes = count + one_szt - std::size_t(one_szt << detail::floor_log2(count + one_szt));
       compress_subtree(super_root, leaf_nodes);  //create deepest leaves
       std::size_t vine_nodes = count - leaf_nodes;
       while(vine_nodes > 1){

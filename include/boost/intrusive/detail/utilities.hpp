@@ -416,20 +416,37 @@ void destructor_impl(Hook &, detail::link_dispatch<normal_link>)
 
 #elif defined(__GNUC__) && ((__GNUC__ >= 4) || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)) //GCC >=3.4
 
-   #if SIZE_MAX > UINT_MAX
-      #define BOOST_INTRUSIVE_CLZ_INTRINSIC __builtin_clzll
-   #elif SIZE_MAX > UINT_MAX
-      #define BOOST_INTRUSIVE_CLZ_INTRINSIC __builtin_clzl
-   #else
-      #define BOOST_INTRUSIVE_CLZ_INTRINSIC __builtin_clz
+   //Compile-time error in case of missing specialization
+   template<class Uint>
+   struct builtin_clz_dispatch;
+
+   #if defined(BOOST_HAS_LONG_LONG)
+   template<>
+   struct builtin_clz_dispatch<unsigned long long>
+   {
+      static const unsigned long long call(unsigned long long n)
+      {  return __builtin_clzll(n); }
+   };
    #endif
+
+   template<>
+   struct builtin_clz_dispatch<unsigned long>
+   {
+      static const unsigned long call(unsigned long n)
+      {  return __builtin_clzl(n); }
+   };
+
+   template<>
+   struct builtin_clz_dispatch<unsigned int>
+   {
+      static const unsigned int call(unsigned int n)
+      {  return __builtin_clz(n); }
+   };
 
    inline std::size_t floor_log2(std::size_t n)
    {
-      return sizeof(std::size_t)*CHAR_BIT - 1 - BOOST_INTRUSIVE_CLZ_INTRINSIC(n);
+      return sizeof(std::size_t)*CHAR_BIT - std::size_t(1) - builtin_clz_dispatch<std::size_t>::call(n);
    }
-
-   #undef BOOST_INTRUSIVE_CLZ_INTRINSIC
 
 #else //Portable methods
 
