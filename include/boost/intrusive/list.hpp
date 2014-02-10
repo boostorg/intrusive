@@ -1260,8 +1260,8 @@ class list_impl
    //! <b>Note</b>: Iterators and references are not invalidated.
    iterator iterator_to(reference value)
    {
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(!node_algorithms::inited(real_value_traits::to_node_ptr(value)));
-      return iterator(real_value_traits::to_node_ptr(value), real_value_traits_ptr());
+       BOOST_INTRUSIVE_INVARIANT_ASSERT(!node_algorithms::inited(this->get_real_value_traits().to_node_ptr(value)));
+       return iterator(this->get_real_value_traits().to_node_ptr(value), real_value_traits_ptr());
    }
 
    //! <b>Requires</b>: value must be a const reference to a value inserted in a list.
