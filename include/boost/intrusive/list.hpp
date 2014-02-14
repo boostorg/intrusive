@@ -1228,8 +1228,8 @@ class list_impl
    //! <b>Note</b>: Iterators and references are not invalidated.
    iterator iterator_to(reference value)
    {
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(!node_algorithms::inited(value_traits::to_node_ptr(value)));
-      return iterator(value_traits::to_node_ptr(value), value_traits_ptr());
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(!node_algorithms::inited(this->priv_value_traits().to_node_ptr(value)));
+      return iterator(this->priv_value_traits().to_node_ptr(value), value_traits_ptr());
    }
 
    //! <b>Requires</b>: value must be a const reference to a value inserted in a list.
@@ -1243,8 +1243,8 @@ class list_impl
    //! <b>Note</b>: Iterators and references are not invalidated.
    const_iterator iterator_to(const_reference value) const
    {
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(!node_algorithms::inited(value_traits::to_node_ptr(const_cast<reference> (value))));
-      return const_iterator(value_traits::to_node_ptr(const_cast<reference> (value)), value_traits_ptr());
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(!node_algorithms::inited(this->priv_value_traits().to_node_ptr(const_cast<reference> (value))));
+      return const_iterator(this->priv_value_traits().to_node_ptr(const_cast<reference> (value)), value_traits_ptr());
    }
 
    /// @cond

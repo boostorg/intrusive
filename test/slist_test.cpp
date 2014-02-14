@@ -275,6 +275,13 @@ void test_slist<ValueTraits, Linear, CacheLast>
    BOOST_TEST (&*i == &values[4]);
    i = list_type::s_iterator_to (values[4]);
    BOOST_TEST (&*i == &values[4]);
+
+   typename list_type::const_iterator ic;
+   ic = testlist.iterator_to (const_cast<const value_type &>(values[4]));
+   BOOST_TEST (&*ic == &values[4]);
+   ic = list_type::s_iterator_to (const_cast<const value_type &>(values[4]));
+   BOOST_TEST (&*ic == &values[4]);
+
    i = testlist.previous (i);
    BOOST_TEST (&*i == &values[0]);
 
