@@ -261,38 +261,6 @@ inline void swap (smart_ptr<T> &pt,
    pt2 = ptr;
 }
 
-//!Simulation of static_cast between pointers. Never throws.
-template<class T, class U>
-inline smart_ptr<T>
-   static_pointer_cast(const smart_ptr<U> & r)
-{
-   return smart_ptr<T>(r, detail::static_cast_tag());
-}
-
-//!Simulation of const_cast between pointers. Never throws.
-template<class T, class U>
-inline smart_ptr<T>const_pointer_cast(smart_ptr<U> const & r)
-{
-   return smart_ptr<T>(r, detail::const_cast_tag());
-}
-
-//!Simulation of dynamic_cast between pointers. Never throws.
-template<class T, class U>
-inline smart_ptr<T>
-   dynamic_pointer_cast(smart_ptr<U> const & r)
-{
-   return smart_ptr<T>
-            (r, detail::dynamic_cast_tag());
-}
-
-//!Simulation of reinterpret_cast between pointers. Never throws.
-template<class T, class U>
-inline smart_ptr<T>
-   reinterpret_pointer_cast(smart_ptr<U> const & r)
-{
-   return smart_ptr<T>(r, detail::reinterpret_cast_tag());
-}
-
 }  //namespace intrusive {
 }  //namespace boost {
 
