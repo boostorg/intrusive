@@ -13,13 +13,13 @@
 #define BOOST_INTRUSIVE_RBTREE_HPP
 
 #include <boost/intrusive/detail/config_begin.hpp>
+#include <boost/intrusive/intrusive_fwd.hpp>
 #include <cstddef>
 #include <functional>
 #include <utility>
 
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/static_assert.hpp>
-#include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/set_hook.hpp>
 #include <boost/intrusive/detail/rbtree_node.hpp>
 #include <boost/intrusive/bstree.hpp>
@@ -292,7 +292,7 @@ class rbtree_impl
    //! @copydoc ::boost::intrusive::bstree::count(const KeyType&,KeyValueCompare)const
    template<class KeyType, class KeyValueCompare>
    size_type count(const KeyType& key, KeyValueCompare comp) const;
-   
+
    //! @copydoc ::boost::intrusive::bstree::lower_bound(const_reference)
    iterator lower_bound(const_reference value);
    
@@ -483,14 +483,13 @@ class rbtree
    public:
    typedef typename Base::value_compare      value_compare;
    typedef typename Base::value_traits       value_traits;
-   typedef typename Base::real_value_traits  real_value_traits;
    typedef typename Base::iterator           iterator;
    typedef typename Base::const_iterator     const_iterator;
    typedef typename Base::reverse_iterator           reverse_iterator;
    typedef typename Base::const_reverse_iterator     const_reverse_iterator;
 
    //Assert if passed value traits are compatible with the type
-   BOOST_STATIC_ASSERT((detail::is_same<typename real_value_traits::value_type, T>::value));
+   BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
    explicit rbtree( const value_compare &cmp = value_compare()
                   , const value_traits &v_traits = value_traits())

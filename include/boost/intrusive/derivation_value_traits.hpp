@@ -13,6 +13,9 @@
 #ifndef BOOST_INTRUSIVE_DERIVATION_VALUE_TRAITS_HPP
 #define BOOST_INTRUSIVE_DERIVATION_VALUE_TRAITS_HPP
 
+#include <boost/intrusive/detail/config_begin.hpp>
+#include <boost/intrusive/intrusive_fwd.hpp>
+
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/pointer_cast.hpp>
 #include <boost/pointer_to_other.hpp>
@@ -24,7 +27,12 @@ namespace intrusive {
 //!This value traits template is used to create value traits
 //!from user defined node traits where value_traits::value_type will
 //!derive from node_traits::node
-template<class T, class NodeTraits, link_mode_type LinkMode = safe_link>
+
+template<class T, class NodeTraits, link_mode_type LinkMode 
+   #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
+   = safe_link
+   #endif
+>
 struct derivation_value_traits
 {
    public:
@@ -66,5 +74,7 @@ struct derivation_value_traits
 
 } //namespace intrusive
 } //namespace boost
+
+#include <boost/intrusive/detail/config_end.hpp>
 
 #endif //BOOST_INTRUSIVE_DERIVATION_VALUE_TRAITS_HPP

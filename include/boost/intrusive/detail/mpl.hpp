@@ -29,6 +29,12 @@ struct bool_
    static const bool value = C_;
 };
 
+template< class Integer, Integer Value >
+struct integer
+{
+   static const Integer value = Value;
+};
+
 typedef bool_<true>        true_;
 typedef bool_<false>       false_;
 
