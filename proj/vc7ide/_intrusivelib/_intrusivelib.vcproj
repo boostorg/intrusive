@@ -158,6 +158,9 @@
 				RelativePath="..\..\..\..\..\boost\intrusive\options.hpp">
 			</File>
 			<File
+				RelativePath="..\..\..\..\..\boost\intrusive\pack_options.hpp">
+			</File>
+			<File
 				RelativePath="..\..\..\..\..\boost\intrusive\parent_from_member.hpp">
 			</File>
 			<File
@@ -360,9 +363,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\example\doc_erasing_and_disposing.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\example\doc_external_value_traits.cpp">
 			</File>
 			<File
 				RelativePath="..\..\..\example\doc_function_hooks.cpp">

@@ -77,15 +77,15 @@ struct my_tag;
 template<class VoidPointer>
 struct hooks
 {
-   typedef splay_set_base_hook<void_pointer<VoidPointer> >     base_hook_type;
-   typedef splay_set_base_hook
+   typedef bs_set_base_hook<void_pointer<VoidPointer> >     base_hook_type;
+   typedef bs_set_base_hook
       < link_mode<auto_unlink>
       , void_pointer<VoidPointer>
-      , tag<my_tag> >                                          auto_base_hook_type;
-   typedef splay_set_member_hook<void_pointer<VoidPointer> >   member_hook_type;
-   typedef splay_set_member_hook
+      , tag<my_tag> >                                       auto_base_hook_type;
+   typedef bs_set_member_hook<void_pointer<VoidPointer> >   member_hook_type;
+   typedef bs_set_member_hook
       < link_mode<auto_unlink>
-      , void_pointer<VoidPointer> >                            auto_member_hook_type;
+      , void_pointer<VoidPointer> >                         auto_member_hook_type;
 };
 
 template< class ValueType

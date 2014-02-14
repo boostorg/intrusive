@@ -17,11 +17,12 @@
 #ifndef BOOST_INTRUSIVE_POINTER_TRAITS_HPP
 #define BOOST_INTRUSIVE_POINTER_TRAITS_HPP
 
-#if (defined _MSC_VER) && (_MSC_VER >= 1200)
+#if defined(_MSC_VER)
 #  pragma once
 #endif
 
 #include <boost/intrusive/detail/config_begin.hpp>
+#include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/detail/workaround.hpp>
 #include <boost/intrusive/detail/memory_util.hpp>
 #include <boost/type_traits/integral_constant.hpp>

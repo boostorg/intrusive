@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="external_value_traits"
-	ProjectGUID="{97B69A72-B9D3-7389-17FB-74612F4A9543}"
-	RootNamespace="external_value_traits"
+	Name="pack_options"
+	ProjectGUID="{77F4139B-281B-F694-7CB1-3495467B4D35}"
+	RootNamespace="pack_options"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -38,10 +38,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/external_value_traits.exe"
+				OutputFile="$(OutDir)/pack_options.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/external_value_traits.pdb"
+				ProgramDatabaseFile="$(OutDir)/pack_options.pdb"
 				GenerateMapFile="TRUE"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -87,7 +87,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/external_value_traits.exe"
+				OutputFile="$(OutDir)/pack_options.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
@@ -122,9 +122,9 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{7FAFEA31-6364-FB35-16A6-77AF315C236A}">
+			UniqueIdentifier="{47FFA531-6474-B5A5-A661-272FA537F35F}">
 			<File
-				RelativePath="..\..\..\test\external_value_traits_test.cpp">
+				RelativePath="..\..\..\test\pack_options_test.cpp">
 			</File>
 		</Filter>
 	</Files>
