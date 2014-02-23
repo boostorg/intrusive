@@ -1700,7 +1700,7 @@ class slist_impl
    //! <b>Note</b>: Iterators and references are not invalidated.
    iterator iterator_to(reference value)
    {
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(!node_algorithms::inited(this->priv_value_traits().to_node_ptr(value)));
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(linear || !node_algorithms::inited(this->priv_value_traits().to_node_ptr(value)));
       return iterator (this->priv_value_traits().to_node_ptr(value), this->value_traits_ptr());
    }
 
@@ -1715,7 +1715,7 @@ class slist_impl
    //! <b>Note</b>: Iterators and references are not invalidated.
    const_iterator iterator_to(const_reference value) const
    {
-      BOOST_INTRUSIVE_INVARIANT_ASSERT (!node_algorithms::inited(this->priv_value_traits().to_node_ptr(const_cast<reference> (value))));
+      BOOST_INTRUSIVE_INVARIANT_ASSERT (linear || !node_algorithms::inited(this->priv_value_traits().to_node_ptr(const_cast<reference> (value))));
       return const_iterator(this->priv_value_traits().to_node_ptr(const_cast<reference> (value)), this->value_traits_ptr());
    }
 
