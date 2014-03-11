@@ -538,7 +538,7 @@ class bstree_algorithms
             p = x;
             x = NodeTraits::get_parent(x);
          }
-         return x;
+         return NodeTraits::get_left(p) != x ? x : detail::uncast(p);
       }
    }
 
