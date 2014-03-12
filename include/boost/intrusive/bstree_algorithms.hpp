@@ -33,6 +33,7 @@ struct extra_data_manager_generator
 {
     typedef typename NodeTraits::node_ptr node_ptr;
     typedef typename NodeTraits::const_node_ptr const_node_ptr;
+    static const bool enabled = false;
     static void clone_extra_data(node_ptr, const_node_ptr) {}
     static void recompute_extra_data(node_ptr) {}
     static void recompute_extra_data(node_ptr, node_ptr) {}
@@ -43,8 +44,15 @@ struct extra_data_manager_generator< NodeTraits, true >
 {
     typedef typename NodeTraits::node_ptr node_ptr;
     typedef typename NodeTraits::const_node_ptr const_node_ptr;
-    static void clone_extra_data(node_ptr dest, const_node_ptr src) { NodeTraits::clone_extra_data(dest, src); }
-    static void recompute_extra_data(node_ptr node) { NodeTraits::recompute_extra_data(node); }
+    static const bool enabled = true;
+    static void clone_extra_data(node_ptr dest, const_node_ptr src)
+    {
+        NodeTraits::clone_extra_data(dest, src);
+    }
+    static void recompute_extra_data(node_ptr node)
+    {
+        NodeTraits::recompute_extra_data(node);
+    }
     static void recompute_extra_data(node_ptr start_node, node_ptr end_node)
     {
         for (node_ptr node = start_node;
@@ -61,10 +69,16 @@ BOOST_TTI_HAS_STATIC_MEMBER_FUNCTION(recompute_extra_data)
 
 template <typename NodeTraits>
 struct extra_data_manager
-  : extra_data_manager_generator<
-      NodeTraits,
-      has_static_member_function_clone_extra_data<NodeTraits, void (typename NodeTraits::node_ptr, typename NodeTraits::const_node_ptr)>::value
-      and has_static_member_function_recompute_extra_data<NodeTraits, void (typename NodeTraits::node_ptr)>::value
+    : extra_data_manager_generator<
+        NodeTraits,
+        has_static_member_function_clone_extra_data<
+            NodeTraits,
+            void (typename NodeTraits::node_ptr, typename NodeTraits::const_node_ptr)
+        >::value
+        and has_static_member_function_recompute_extra_data<
+            NodeTraits,
+            void (typename NodeTraits::node_ptr)
+        >::value
       > {};
 
 } // namespace detail
@@ -170,6 +184,7 @@ class bstree_algorithms
    typedef typename NodeTraits::const_node_ptr  const_node_ptr;
    typedef insert_commit_data_t<node_ptr>       insert_commit_data;
    typedef data_for_rebalance_t<node_ptr>       data_for_rebalance;
+   typedef detail::extra_data_manager<NodeTraits> extra_data_manager;
 
    /// @cond
 
@@ -193,8 +208,6 @@ class bstree_algorithms
       Disposer *disposer_;
       const node_ptr subtree_;
    };
-
-   typedef detail::extra_data_manager<NodeTraits> extra_data_manager;
 
    /// @endcond
 
