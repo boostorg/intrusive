@@ -97,8 +97,8 @@ namespace tt {
             typedef boost::intrusive::rbtree_algorithms< rbtree_node_traits< T > > algo;
 
             for ( typename algo::node_ptr it = algo::begin_node( header )
-                    , last = algo::end_node( header );
-                    it != last;
+                    , end = algo::end_node( header );
+                    it != end;
                     it = algo::next_node( it ) )
             {
                 func( it );
@@ -111,9 +111,7 @@ namespace tt {
             typedef boost::intrusive::rbtree_algorithms< rbtree_node_traits< T > > algo;
 
             typename algo::node_ptr it( rbtree_node_traits< T >::get_right( header ) );
-            typename algo::node_ptr end(
-                    boost::intrusive::pointer_traits< typename algo::node_ptr >
-                    ::const_cast_from( header ) );
+            typename algo::node_ptr end( algo::end_node( header ) );
 
             for ( ; it != end; it = algo::prev_node( it ) ) {
                 func( it );
@@ -181,43 +179,42 @@ bool rbtree_test_ascending() {
     // iterate
 
     algo::node_ptr it = algo::begin_node( & header );
-    algo::node_ptr last = algo::end_node( & header );
+    algo::node_ptr end = algo::end_node( & header );
 
-    BOOST_TEST( ! compEqual( it, last ) );
+    BOOST_TEST( ! compEqual( it, end ) );
     BOOST_TEST( compEqual( it, 1, 'a' ) );
     it = algo::next_node( it ); 
 
-    BOOST_TEST( ! compEqual( it, last ) );
+    BOOST_TEST( ! compEqual( it, end ) );
     BOOST_TEST( compEqual( it, 2, 'b' ) );
     it = algo::next_node( it );
 
-    BOOST_TEST( ! compEqual( it, last ) );
+    BOOST_TEST( ! compEqual( it, end ) );
     BOOST_TEST( compEqual( it, 3, 'c' ) );
     it = algo::next_node( it );
 
-    BOOST_TEST( compEqual( it, last ) );
+    BOOST_TEST( compEqual( it, end ) );
 
 
     // reverse
 
     it = tt::rbtree_node_traits< tt::data >::get_right( & header );
-    last = boost::intrusive::pointer_traits< algo::node_ptr >
-                    ::const_cast_from( & header );
+    end = algo::end_node( & header );
 
-    BOOST_TEST( ! compEqual( it, last ) );
+    BOOST_TEST( ! compEqual( it, end ) );
     BOOST_TEST( compEqual( it, 3, 'c' ) );
     it = algo::prev_node( it );
 
-    BOOST_TEST( ! compEqual( it, last ) );
+    BOOST_TEST( ! compEqual( it, end ) );
     BOOST_TEST( compEqual( it, 2, 'b' ) );
     it = algo::prev_node( it );
 
-    BOOST_TEST( ! compEqual( it, last ) );
+    BOOST_TEST( ! compEqual( it, end ) );
     BOOST_TEST( compEqual( it, 1, 'a' ) );
     it = algo::prev_node( it );
 
 
-    BOOST_TEST( compEqual( it, last ) );
+    BOOST_TEST( compEqual( it, end ) );
 
     algo::clear_and_dispose( & header, disposer );
 
@@ -245,44 +242,43 @@ bool rbtree_test_descending() {
     // iterate
 
     algo::node_ptr it = algo::begin_node( & header );
-    algo::node_ptr last = algo::end_node( & header );
+    algo::node_ptr end = algo::end_node( & header );
 
-    BOOST_TEST( ! compEqual( it, last ) );
+    BOOST_TEST( ! compEqual( it, end ) );
     BOOST_TEST( compEqual( it, 3, 'c' ) );
     it = algo::next_node( it );
 
-    BOOST_TEST( ! compEqual( it, last ) );
+    BOOST_TEST( ! compEqual( it, end ) );
     BOOST_TEST( compEqual( it, 2, 'b' ) );
     it = algo::next_node( it );
 
-    BOOST_TEST( ! compEqual( it, last ) );
+    BOOST_TEST( ! compEqual( it, end ) );
     BOOST_TEST( compEqual( it, 1, 'a' ) );
     it = algo::next_node( it ); 
 
 
-    BOOST_TEST( compEqual( it, last ) );
+    BOOST_TEST( compEqual( it, end ) );
 
 
     // reverse
 
     it = tt::rbtree_node_traits< tt::data >::get_right( & header );
-    last = boost::intrusive::pointer_traits< algo::node_ptr >
-                    ::const_cast_from( & header );
+    end = algo::end_node( & header );
 
-    BOOST_TEST( ! compEqual( it, last ) );
+    BOOST_TEST( ! compEqual( it, end ) );
     BOOST_TEST( compEqual( it, 1, 'a' ) );
     it = algo::prev_node( it );
 
-    BOOST_TEST( ! compEqual( it, last ) );
+    BOOST_TEST( ! compEqual( it, end ) );
     BOOST_TEST( compEqual( it, 2, 'b' ) );
     it = algo::prev_node( it );
 
-    BOOST_TEST( ! compEqual( it, last ) );
+    BOOST_TEST( ! compEqual( it, end ) );
     BOOST_TEST( compEqual( it, 3, 'c' ) );
     it = algo::prev_node( it );
 
 
-    BOOST_TEST( compEqual( it, last ) );
+    BOOST_TEST( compEqual( it, end ) );
 
     algo::clear_and_dispose( & header, disposer );
 
@@ -307,26 +303,25 @@ bool rbtree_test_one() {
     // iterate
 
     algo::node_ptr it = algo::begin_node( & header );
-    algo::node_ptr last = algo::end_node( & header );
+    algo::node_ptr end = algo::end_node( & header );
 
-    BOOST_TEST( ! compEqual( it, last ) );
+    BOOST_TEST( ! compEqual( it, end ) );
     BOOST_TEST( compEqual( it, 1, 'a' ) );
     it = algo::next_node( it ); 
 
-    BOOST_TEST( compEqual( it, last ) );
+    BOOST_TEST( compEqual( it, end ) );
 
 
     // reverse
 
     it = tt::rbtree_node_traits< tt::data >::get_right( & header );
-    last = boost::intrusive::pointer_traits< algo::node_ptr >
-                    ::const_cast_from( & header );
+    end = algo::end_node( & header );
 
-    BOOST_TEST( ! compEqual( it, last ) );
+    BOOST_TEST( ! compEqual( it, end ) );
     BOOST_TEST( compEqual( it, 1, 'a' ) );
     it = algo::prev_node( it );
 
-    BOOST_TEST( compEqual( it, last ) );
+    BOOST_TEST( compEqual( it, end ) );
 
     algo::clear_and_dispose( & header, disposer );
 
@@ -348,17 +343,16 @@ bool rbtree_test_empty() {
     // iterate
 
     algo::node_ptr it = algo::begin_node( & header );
-    algo::node_ptr last = algo::end_node( & header );
+    algo::node_ptr end = algo::end_node( & header );
 
-    BOOST_TEST( compEqual( it, last ) );
+    BOOST_TEST( compEqual( it, end ) );
 
     // reverse
 
     it = tt::rbtree_node_traits< tt::data >::get_right( & header );
-    last = boost::intrusive::pointer_traits< algo::node_ptr >
-                    ::const_cast_from( & header );
+    end = algo::end_node( & header );
 
-    BOOST_TEST( compEqual( it, last ) );
+    BOOST_TEST( compEqual( it, end ) );
 
     algo::clear_and_dispose( & header, disposer );
 
