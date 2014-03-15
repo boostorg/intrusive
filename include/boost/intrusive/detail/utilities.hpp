@@ -366,21 +366,44 @@ void destructor_impl(Hook &, detail::link_dispatch<normal_link>)
 // floor_log2  Dispatcher
 ////////////////////////////
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
 
    }}} //namespace boost::intrusive::detail
 
-   #include <intrin.h>
+   //Use _BitScanReverseXX intrinsics
+
+   #if defined(_M_X64) || defined(_M_AMD64) || defined(_M_IA64)   //64 bit target
+      #define BOOST_INTRUSIVE_BSR_INTRINSIC_64_BIT
+   #endif
+
+   #ifndef __INTRIN_H_	// Avoid including any windows system header
+      #ifdef __cplusplus
+      extern "C" {
+      #endif // __cplusplus
+
+      #if defined(BOOST_INTRUSIVE_BSR_INTRINSIC_64_BIT)   //64 bit target
+         unsigned char _BitScanReverse64(unsigned long *index, unsigned __int64 mask);
+         #pragma intrinsic(_BitScanReverse64)
+      #else //32 bit target
+         unsigned char _BitScanReverse(unsigned long *index, unsigned long mask);
+         #pragma intrinsic(_BitScanReverse)
+      #endif
+
+      #ifdef __cplusplus
+      }
+      #endif // __cplusplus
+   #endif // __INTRIN_H_
+
+   #ifdef BOOST_INTRUSIVE_BSR_INTRINSIC_64_BIT
+      #define BOOST_INTRUSIVE_BSR_INTRINSIC _BitScanReverse64
+      #undef BOOST_INTRUSIVE_BSR_INTRINSIC_64_BIT
+   #else
+      #define BOOST_INTRUSIVE_BSR_INTRINSIC _BitScanReverse
+   #endif
 
    namespace boost {
    namespace intrusive {
    namespace detail {
-
-   #if defined(_M_X64) || defined(_M_AMD64) || defined(_M_IA64)   //64 bit target
-      #define BOOST_INTRUSIVE_BSR_INTRINSIC _BitScanReverse64
-   #else //32 bit target
-      #define BOOST_INTRUSIVE_BSR_INTRINSIC _BitScanReverse
-   #endif
 
    inline std::size_t floor_log2 (std::size_t x)
    {
@@ -391,35 +414,39 @@ void destructor_impl(Hook &, detail::link_dispatch<normal_link>)
 
    #undef BOOST_INTRUSIVE_BSR_INTRINSIC
 
-#elif defined(_MSC_VER) //visual 2003
-
-   inline std::size_t floor_log2 (std::size_t x)
-   {
-      unsigned long log2;
-      __asm
-      {
-         bsr eax, x
-         mov log2, eax
-      }
-      return static_cast<std::size_t>(log2);
-   }
-
 #elif defined(__GNUC__) && ((__GNUC__ >= 4) || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)) //GCC >=3.4
 
-   #if SIZE_MAX > UINT_MAX
-      #define BOOST_INTRUSIVE_CLZ_INTRINSIC __builtin_clzll
-   #elif SIZE_MAX > UINT_MAX
-      #define BOOST_INTRUSIVE_CLZ_INTRINSIC __builtin_clzl
-   #else
-      #define BOOST_INTRUSIVE_CLZ_INTRINSIC __builtin_clz
+   //Compile-time error in case of missing specialization
+   template<class Uint>
+   struct builtin_clz_dispatch;
+
+   #if defined(BOOST_HAS_LONG_LONG)
+   template<>
+   struct builtin_clz_dispatch<unsigned long long>
+   {
+      static const unsigned long long call(unsigned long long n)
+      {  return __builtin_clzll(n); }
+   };
    #endif
+
+   template<>
+   struct builtin_clz_dispatch<unsigned long>
+   {
+      static const unsigned long call(unsigned long n)
+      {  return __builtin_clzl(n); }
+   };
+
+   template<>
+   struct builtin_clz_dispatch<unsigned int>
+   {
+      static const unsigned int call(unsigned int n)
+      {  return __builtin_clz(n); }
+   };
 
    inline std::size_t floor_log2(std::size_t n)
    {
-      return sizeof(std::size_t)*CHAR_BIT - 1 - BOOST_INTRUSIVE_CLZ_INTRINSIC(n);
+      return sizeof(std::size_t)*CHAR_BIT - std::size_t(1) - builtin_clz_dispatch<std::size_t>::call(n);
    }
-
-   #undef BOOST_INTRUSIVE_CLZ_INTRINSIC
 
 #else //Portable methods
 
@@ -1106,7 +1133,7 @@ struct iiterator
          , difference_type
          , pointer
          , reference
-         > iterator_base;
+         > iterator_traits;
    static const bool stateful_value_traits =
       detail::is_stateful_value_traits<real_value_traits>::value;
 };

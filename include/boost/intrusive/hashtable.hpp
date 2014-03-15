@@ -2711,15 +2711,16 @@ class hashtable_impl
    static std::size_t priv_stored_hash(slist_node_ptr n, detail::false_ false_value)
    {  return bucket_plus_vtraits<ValueTraits, BucketTraits>::priv_stored_hash(n, false_value); }
 
-   void priv_clear_buckets(bucket_ptr buckets_ptr, size_type bucket_cnt)
+   void priv_clear_buckets(const bucket_ptr buckets_ptr, const size_type bucket_cnt)
    {
-      for(; bucket_cnt--; ++buckets_ptr){
+      bucket_ptr buckets_it = buckets_ptr;
+      for(size_type bucket_i = 0; bucket_i != bucket_cnt; ++buckets_it, ++bucket_i){
          if(safemode_or_autounlink){
-            bucket_plus_vtraits_t::priv_clear_group_nodes(*buckets_ptr, optimize_multikey_t());
-            buckets_ptr->clear_and_dispose(detail::init_disposer<node_algorithms>());
+            bucket_plus_vtraits_t::priv_clear_group_nodes(*buckets_it, optimize_multikey_t());
+            buckets_it->clear_and_dispose(detail::init_disposer<node_algorithms>());
          }
          else{
-            buckets_ptr->clear();
+            buckets_it->clear();
          }
       }
       this->priv_initialize_cache();

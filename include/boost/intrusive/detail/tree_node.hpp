@@ -82,7 +82,6 @@ struct tree_node_traits
 // node oriented bidirectional iterator:
 template<class RealValueTraits, bool IsConst>
 class tree_iterator
-   :  public iiterator<RealValueTraits, IsConst, std::bidirectional_iterator_tag>::iterator_base
 {
    protected:
    typedef iiterator< RealValueTraits, IsConst
@@ -99,13 +98,14 @@ class tree_iterator
    typedef typename pointer_traits
       <void_pointer>::template rebind_pointer
          <const real_value_traits>::type   const_real_value_traits_ptr;
+   typedef bstree_algorithms<node_traits> node_algorithms;
 
    public:
-   typedef typename types_t::value_type      value_type;
-   typedef typename types_t::pointer         pointer;
-   typedef typename types_t::reference       reference;
-
-   typedef bstree_algorithms<node_traits> node_algorithms;
+   typedef typename types_t::iterator_traits::difference_type    difference_type;
+   typedef typename types_t::iterator_traits::value_type         value_type;
+   typedef typename types_t::iterator_traits::pointer            pointer;
+   typedef typename types_t::iterator_traits::reference          reference;
+   typedef typename types_t::iterator_traits::iterator_category  iterator_category;
 
    tree_iterator()
    {}

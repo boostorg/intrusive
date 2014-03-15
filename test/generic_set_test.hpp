@@ -172,6 +172,12 @@ void test_generic_set<ValueTraits, ContainerDefiner>::test_insert(std::vector<ty
       i = set_type::s_iterator_to(values[2]);
       BOOST_TEST (&*i == &values[2]);
 
+      typename set_type::const_iterator ic;
+      ic = testset.iterator_to (const_cast<const value_type &>(values[2]));
+      BOOST_TEST (&*ic == &values[2]);
+      ic = set_type::s_iterator_to (const_cast<const value_type &>(values[2]));
+      BOOST_TEST (&*ic == &values[2]);
+
       testset.erase (i);
       {  int init_values [] = { 1, 3, 5 };
          TEST_INTRUSIVE_SEQUENCE( init_values, testset.begin() );  }

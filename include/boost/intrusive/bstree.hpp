@@ -188,10 +188,10 @@ struct bstbase3
    }
 
    iterator iterator_to(reference value)
-   {  return iterator (value_traits::to_node_ptr(value), this->value_traits_ptr()); }
+   {  return iterator (this->get_value_traits().to_node_ptr(value), this->value_traits_ptr()); }
 
    const_iterator iterator_to(const_reference value) const
-   {  return const_iterator (value_traits::to_node_ptr(const_cast<reference> (value)), this->value_traits_ptr()); }
+   {  return const_iterator (this->get_value_traits().to_node_ptr(const_cast<reference> (value)), this->value_traits_ptr()); }
 
    static void init_node(reference value)
    { node_algorithms::init(value_traits::to_node_ptr(value)); }
