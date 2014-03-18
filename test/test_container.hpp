@@ -193,6 +193,33 @@ void test_common_unordered_and_associative_container(Container & c, Data & d, bo
    c.clear();
 
    BOOST_TEST( c.equal_range(*da, c.hash_function(), c.key_eq()).first == c.end() );
+
+   //
+   //suggested_upper_bucket_count
+   //
+   //Maximum fallbacks to the highest possible value
+   typename Container::size_type sz = Container::suggested_upper_bucket_count(size_type(-1));
+   BOOST_TEST( sz > size_type(-1)/2 );
+   //In the rest of cases the upper bound is returned
+   sz = Container::suggested_upper_bucket_count(size_type(-1)/2);
+   BOOST_TEST( sz >= size_type(-1)/2 );
+   sz = Container::suggested_upper_bucket_count(size_type(-1)/4);
+   BOOST_TEST( sz >= size_type(-1)/4 );
+   sz = Container::suggested_upper_bucket_count(0);
+   BOOST_TEST( sz > 0 );
+   //
+   //suggested_lower_bucket_count
+   //
+   sz = Container::suggested_lower_bucket_count(size_type(-1));
+   BOOST_TEST( sz <= size_type(-1) );
+   //In the rest of cases the lower bound is returned
+   sz = Container::suggested_lower_bucket_count(size_type(-1)/2);
+   BOOST_TEST( sz <= size_type(-1)/2 );
+   sz = Container::suggested_lower_bucket_count(size_type(-1)/4);
+   BOOST_TEST( sz <= size_type(-1)/4 );
+   //Minimum fallbacks to the lowest possible value
+   sz = Container::suggested_upper_bucket_count(0);
+   BOOST_TEST( sz > 0 );
 }
 
 template< class Container, class Data >
