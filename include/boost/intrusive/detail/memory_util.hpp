@@ -186,11 +186,7 @@ template <typename Ptr, typename T>
 struct type_has_rebind
 {
    template <typename X>
-   #if !defined (__SUNPRO_CC)
    static char test(int, typename X::template rebind<T>*);
-   #else
-   static char test(int, typename X::rebind<T>*);
-   #endif
 
    template <typename X>
    static int test(boost::intrusive::detail::LowPriorityConversion<int>, void*);
@@ -202,11 +198,7 @@ template <typename Ptr, typename T>
 struct type_has_rebind_other
 {
    template <typename X>
-   #if !defined (__SUNPRO_CC)
    static char test(int, typename X::template rebind<T>::other*);
-   #else
-   static char test(int, typename X::rebind<T>::other*);
-   #endif
 
    template <typename X>
    static int test(boost::intrusive::detail::LowPriorityConversion<int>, void*);

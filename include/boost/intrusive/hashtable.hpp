@@ -2585,8 +2585,7 @@ class hashtable_impl
       const std::size_t *primes     = &detail::prime_list_holder<0>::prime_list[0];
       const std::size_t *primes_end = primes + detail::prime_list_holder<0>::prime_list_size;
       std::size_t const* bound = std::lower_bound(primes, primes_end, n);
-      if(bound == primes_end)
-         --bound;
+      bound -= (bound == primes_end);
       return size_type(*bound);
    }
 
@@ -2604,8 +2603,7 @@ class hashtable_impl
       const std::size_t *primes     = &detail::prime_list_holder<0>::prime_list[0];
       const std::size_t *primes_end = primes + detail::prime_list_holder<0>::prime_list_size;
       size_type const* bound = std::upper_bound(primes, primes_end, n);
-      if(bound != primes)
-         --bound;
+      bound -= (bound != primes);
       return size_type(*bound);
    }
 
