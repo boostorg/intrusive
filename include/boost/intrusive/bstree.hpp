@@ -526,6 +526,7 @@ struct bstbase
             ( this->header_ptr()
             , detail::node_disposer<detail::null_disposer, value_traits, AlgoType>
                (detail::null_disposer(), &this->get_value_traits()));
+         node_algorithms::init(this->header_ptr());
       }
    }
 };
