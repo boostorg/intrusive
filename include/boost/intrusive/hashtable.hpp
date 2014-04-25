@@ -29,7 +29,6 @@
 #include <boost/intrusive/detail/transform_iterator.hpp>
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/intrusive/detail/ebo_functor_holder.hpp>
-#include <boost/intrusive/detail/clear_on_destructor_base.hpp>
 #include <boost/intrusive/detail/utilities.hpp>
 //Implementation utilities
 #include <boost/intrusive/unordered_set_hook.hpp>
@@ -510,7 +509,7 @@ struct bucket_plus_vtraits : public ValueTraits
    typedef typename
       detail::get_slist_impl_from_supposed_value_traits
          <value_traits>::type                            slist_impl;
-   typedef typename value_traits::node_traits       node_traits;
+   typedef typename value_traits::node_traits            node_traits;
    typedef unordered_group_adapter<node_traits>          group_traits;
    typedef typename slist_impl::iterator                 siterator;
    typedef typename slist_impl::size_type                size_type;
@@ -532,6 +531,8 @@ struct bucket_plus_vtraits : public ValueTraits
             <const bucket_plus_vtraits>::type            const_bucket_value_traits_ptr;
    typedef typename detail::unordered_bucket_ptr_impl
       <value_traits>::type                               bucket_ptr;
+   typedef detail::bool_<detail::optimize_multikey_is_true
+      <node_traits>::value>                              optimize_multikey_t;
 
    template<class BucketTraitsType>
    bucket_plus_vtraits(const ValueTraits &val_traits, BOOST_FWD_REF(BucketTraitsType) b_traits)
@@ -683,6 +684,20 @@ struct bucket_plus_vtraits : public ValueTraits
 
    const value_type &priv_value_from_slist_node(slist_node_ptr n) const
    {  return *this->priv_value_traits().to_value_ptr(detail::dcast_bucket_ptr<node>(n)); }
+
+   void priv_clear_buckets(const bucket_ptr buckets_ptr, const size_type bucket_cnt)
+   {
+      bucket_ptr buckets_it = buckets_ptr;
+      for(size_type bucket_i = 0; bucket_i != bucket_cnt; ++buckets_it, ++bucket_i){
+         if(safemode_or_autounlink){
+            bucket_plus_vtraits::priv_clear_group_nodes(*buckets_it, optimize_multikey_t());
+            buckets_it->clear_and_dispose(detail::init_disposer<node_algorithms>());
+         }
+         else{
+            buckets_it->clear();
+         }
+      }
+   }
 
    bucket_traits bucket_traits_;
 };
@@ -943,6 +958,32 @@ struct hashdata_internal
    const split_traits &priv_split_traits() const
    {  return *this;  }
 
+   ~hashdata_internal()
+   {  this->priv_clear_buckets();  }
+
+   void priv_clear_buckets()
+   {
+      this->internal.internal.internal.priv_clear_buckets
+         ( this->internal.priv_get_cache()
+         , this->internal.internal.internal.priv_bucket_count()
+            - (this->internal.priv_get_cache()
+               - this->internal.internal.internal.priv_bucket_pointer()));
+   }
+
+   void priv_clear_buckets_and_cache()
+   {
+      this->priv_clear_buckets();
+      this->internal.priv_initialize_cache();
+   }
+
+   void priv_initialize_buckets_and_cache()
+   {
+      this->internal.internal.internal.priv_clear_buckets
+         ( this->internal.internal.internal.priv_bucket_pointer()
+         , this->internal.internal.internal.priv_bucket_count());
+      this->internal.priv_initialize_cache();
+   }
+
    internal_type internal; //2
 };
 
@@ -1021,18 +1062,15 @@ template<class T, class ...Options>
 template<class ValueTraits, class VoidOrKeyHash, class VoidOrKeyEqual, class SizeType, class BucketTraits, std::size_t BoolFlags>
 #endif
 class hashtable_impl
-   :  private detail::clear_on_destructor_base
-         < hashtable_impl<ValueTraits, VoidOrKeyHash, VoidOrKeyEqual, SizeType, BucketTraits, BoolFlags>
-         , true   //To always clear the bucket array
-         //is_safe_autounlink<detail::get_value_traits<ValueTraits>::type::link_mode>::value
-         >
+   :  private hashtable_data_t
+      < SizeType
+      , BoolFlags & hashtable_data_bool_flags_mask
+      , VoidOrKeyHash, VoidOrKeyEqual, ValueTraits, BucketTraits>
 {
-   template<class C, bool> friend class detail::clear_on_destructor_base;
    typedef hashtable_data_t
       < SizeType
       , BoolFlags & hashtable_data_bool_flags_mask
-      , VoidOrKeyHash, VoidOrKeyEqual, ValueTraits, BucketTraits>  data_type;
-   data_type data;
+      , VoidOrKeyHash, VoidOrKeyEqual, ValueTraits, BucketTraits> data_type;
 
    public:
    typedef ValueTraits  value_traits;
@@ -1174,9 +1212,9 @@ class hashtable_impl
                            , const hasher & hash_func = hasher()
                            , const key_equal &equal_func = key_equal()
                            , const value_traits &v_traits = value_traits())
-      :  data(b_traits, hash_func, equal_func, v_traits)
+      :  data_type(b_traits, hash_func, equal_func, v_traits)
    {
-      this->priv_initialize_buckets();
+      this->data_type::internal.priv_initialize_buckets_and_cache();
       this->priv_size_traits().set_size(size_type(0));
       size_type bucket_sz = this->priv_bucket_count();
       BOOST_INTRUSIVE_INVARIANT_ASSERT(bucket_sz != 0);
@@ -1189,7 +1227,7 @@ class hashtable_impl
    //! <b>Effects</b>: to-do
    //!
    hashtable_impl(BOOST_RV_REF(hashtable_impl) x)
-      : data( ::boost::move(x.priv_bucket_traits())
+      : data_type( ::boost::move(x.priv_bucket_traits())
              , ::boost::move(x.priv_hasher())
              , ::boost::move(x.priv_equal())
              , ::boost::move(x.priv_value_traits())
@@ -1221,8 +1259,7 @@ class hashtable_impl
    //!   it's a safe-mode or auto-unlink value. Otherwise constant.
    //!
    //! <b>Throws</b>: Nothing.
-   ~hashtable_impl()
-   {}
+   ~hashtable_impl();
    #endif
 
    //! <b>Effects</b>: Returns an iterator pointing to the beginning of the unordered_set.
@@ -1863,7 +1900,7 @@ class hashtable_impl
    //!    to the erased elements. No destructors are called.
    void clear()
    {
-      this->priv_clear_buckets();
+      this->data_type::internal.priv_clear_buckets_and_cache();
       this->priv_size_traits().set_size(size_type(0));
    }
 
@@ -2606,133 +2643,107 @@ class hashtable_impl
       bound -= (bound != primes);
       return size_type(*bound);
    }
-
    /// @cond
    private:
    size_traits &priv_size_traits()
-   {  return this->data;  }
+   {  return static_cast<size_traits&>(static_cast<data_type&>(*this));  }
 
    const size_traits &priv_size_traits() const
-   {  return this->data;  }
+   {  return static_cast<const size_traits&>(static_cast<const data_type&>(*this));  }
 
    bucket_ptr priv_bucket_pointer() const
-   {  return this->data.internal.internal.internal.internal.priv_bucket_pointer();  }
+   {  return this->data_type::internal.internal.internal.internal.priv_bucket_pointer();  }
 
    SizeType priv_bucket_count() const
-   {  return this->data.internal.internal.internal.internal.priv_bucket_count();  }
+   {  return this->data_type::internal.internal.internal.internal.priv_bucket_count();  }
 
    const bucket_plus_vtraits<ValueTraits, BucketTraits> &get_bucket_value_traits() const
-   {  return this->data.internal.internal.internal.internal.get_bucket_value_traits(); }
+   {  return this->data_type::internal.internal.internal.internal.get_bucket_value_traits(); }
 
    bucket_plus_vtraits<ValueTraits, BucketTraits> &get_bucket_value_traits()
-   {  return this->data.internal.internal.internal.internal.get_bucket_value_traits(); }
+   {  return this->data_type::internal.internal.internal.internal.get_bucket_value_traits(); }
 
    bucket_traits &priv_bucket_traits()
-   {  return this->data.internal.internal.internal.internal.priv_bucket_traits(); }
+   {  return this->data_type::internal.internal.internal.internal.priv_bucket_traits(); }
 
    const bucket_traits &priv_bucket_traits() const
-   {  return this->data.internal.internal.internal.internal.priv_bucket_traits(); }
+   {  return this->data_type::internal.internal.internal.internal.priv_bucket_traits(); }
 
    value_traits &priv_value_traits()
-   {  return this->data.internal.internal.internal.internal.priv_value_traits(); }
+   {  return this->data_type::internal.internal.internal.internal.priv_value_traits(); }
 
    const value_traits &priv_value_traits() const
-   {  return this->data.internal.internal.internal.internal.priv_value_traits(); }
+   {  return this->data_type::internal.internal.internal.internal.priv_value_traits(); }
 
    const_value_traits_ptr value_traits_ptr() const
-   {  return this->data.internal.internal.internal.internal.value_traits_ptr(); }
+   {  return this->data_type::internal.internal.internal.internal.value_traits_ptr(); }
 
    siterator priv_invalid_local_it() const
-   {  return this->data.internal.internal.internal.internal.priv_invalid_local_it(); }
+   {  return this->data_type::internal.internal.internal.internal.priv_invalid_local_it(); }
    
    split_traits &priv_split_traits()
-   {  return this->data.internal.priv_split_traits();  }
+   {  return this->data_type::internal.priv_split_traits();  }
 
    const split_traits &priv_split_traits() const
-   {  return this->data.internal.priv_split_traits();  }
+   {  return this->data_type::internal.priv_split_traits();  }
 
    bucket_ptr priv_get_cache()
-   {  return this->data.internal.internal.priv_get_cache();  }
+   {  return this->data_type::internal.internal.priv_get_cache();  }
 
    void priv_initialize_cache()
-   {  return this->data.internal.internal.priv_initialize_cache();  }
+   {  return this->data_type::internal.internal.priv_initialize_cache();  }
 
    siterator priv_begin() const
-   {  return this->data.internal.internal.priv_begin(); }
+   {  return this->data_type::internal.internal.priv_begin(); }
 
    const value_equal &priv_equal() const
-   {  return this->data.internal.internal.priv_equal(); }
+   {  return this->data_type::internal.internal.priv_equal(); }
 
    value_equal &priv_equal()
-   {  return this->data.internal.internal.priv_equal(); }
+   {  return this->data_type::internal.internal.priv_equal(); }
 
    const hasher &priv_hasher() const
-   {  return this->data.internal.internal.internal.priv_hasher(); }
+   {  return this->data_type::internal.internal.internal.priv_hasher(); }
 
    hasher &priv_hasher()
-   {  return this->data.internal.internal.internal.priv_hasher(); }
+   {  return this->data_type::internal.internal.internal.priv_hasher(); }
 
    void priv_swap_cache(hashtable_impl &h)
-   {  this->data.internal.internal.priv_swap_cache(h.data.internal.internal);   }
+   {  this->data_type::internal.internal.priv_swap_cache(h.data_type::internal.internal);   }
 
    node &priv_value_to_node(value_type &v)
-   {  return this->data.internal.internal.internal.internal.priv_value_to_node(v); }
+   {  return this->data_type::internal.internal.internal.internal.priv_value_to_node(v); }
 
    const node &priv_value_to_node(const value_type &v) const
-   {  return this->data.internal.internal.internal.internal.priv_value_to_node(v); }
+   {  return this->data_type::internal.internal.internal.internal.priv_value_to_node(v); }
 
    SizeType priv_get_cache_bucket_num()
-   {  return this->data.internal.internal.priv_get_cache_bucket_num(); }
+   {  return this->data_type::internal.internal.priv_get_cache_bucket_num(); }
 
    void priv_insertion_update_cache(SizeType n)
-   {  return this->data.internal.internal.priv_insertion_update_cache(n); }
+   {  return this->data_type::internal.internal.priv_insertion_update_cache(n); }
 
    template<bool Boolean>
    std::size_t priv_stored_or_compute_hash(const value_type &v, detail::bool_<Boolean> b) const
-   {  return this->data.internal.internal.internal.priv_stored_or_compute_hash(v, b); }
+   {  return this->data_type::internal.internal.internal.priv_stored_or_compute_hash(v, b); }
 
    value_type &priv_value_from_slist_node(slist_node_ptr n)
-   {  return this->data.internal.internal.internal.internal.priv_value_from_slist_node(n); }
+   {  return this->data_type::internal.internal.internal.internal.priv_value_from_slist_node(n); }
 
    const value_type &priv_value_from_slist_node(slist_node_ptr n) const
-   {  return this->data.internal.internal.internal.internal.priv_value_from_slist_node(n); }
+   {  return this->data_type::internal.internal.internal.internal.priv_value_from_slist_node(n); }
 
    void priv_erasure_update_cache_range(SizeType first_bucket_num, SizeType last_bucket_num)
-   {  return this->data.internal.internal.priv_erasure_update_cache_range(first_bucket_num, last_bucket_num); }
+   {  return this->data_type::internal.internal.priv_erasure_update_cache_range(first_bucket_num, last_bucket_num); }
 
    void priv_erasure_update_cache()
-   {  return this->data.internal.internal.priv_erasure_update_cache(); }
+   {  return this->data_type::internal.internal.priv_erasure_update_cache(); }
 
    static std::size_t priv_stored_hash(slist_node_ptr n, detail::true_ true_value)
    {  return bucket_plus_vtraits<ValueTraits, BucketTraits>::priv_stored_hash(n, true_value); }
 
    static std::size_t priv_stored_hash(slist_node_ptr n, detail::false_ false_value)
    {  return bucket_plus_vtraits<ValueTraits, BucketTraits>::priv_stored_hash(n, false_value); }
-
-   void priv_clear_buckets(const bucket_ptr buckets_ptr, const size_type bucket_cnt)
-   {
-      bucket_ptr buckets_it = buckets_ptr;
-      for(size_type bucket_i = 0; bucket_i != bucket_cnt; ++buckets_it, ++bucket_i){
-         if(safemode_or_autounlink){
-            bucket_plus_vtraits_t::priv_clear_group_nodes(*buckets_it, optimize_multikey_t());
-            buckets_it->clear_and_dispose(detail::init_disposer<node_algorithms>());
-         }
-         else{
-            buckets_it->clear();
-         }
-      }
-      this->priv_initialize_cache();
-   }
-
-   void priv_initialize_buckets()
-   {  this->priv_clear_buckets(this->priv_bucket_pointer(), this->priv_bucket_count());  }
-
-   void priv_clear_buckets()
-   {
-      this->priv_clear_buckets
-         ( this->priv_get_cache()
-         , this->priv_bucket_count() - (this->priv_get_cache() - this->priv_bucket_pointer()));
-   }
 
    std::size_t priv_hash_to_bucket(std::size_t hash_value) const
    {
@@ -2815,7 +2826,7 @@ class hashtable_impl
    }
 
    std::size_t priv_get_bucket_num_hash_dispatch(siterator it, detail::false_)   //NO store_hash
-   {  return this->data.internal.internal.internal.internal.priv_get_bucket_num_no_hash_store(it, optimize_multikey_t());  }
+   {  return this->data_type::internal.internal.internal.internal.priv_get_bucket_num_no_hash_store(it, optimize_multikey_t());  }
 
    static siterator priv_get_previous(bucket_type &b, siterator i)
    {  return bucket_plus_vtraits_t::priv_get_previous(b, i, optimize_multikey_t());   }

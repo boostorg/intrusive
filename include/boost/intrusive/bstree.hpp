@@ -28,7 +28,6 @@
 #include <boost/intrusive/detail/ebo_functor_holder.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
-#include <boost/intrusive/detail/clear_on_destructor_base.hpp>
 #include <boost/intrusive/detail/function_detector.hpp>
 #include <boost/intrusive/detail/utilities.hpp>
 #include <boost/intrusive/options.hpp>
@@ -527,6 +526,7 @@ struct bstbase
             ( this->header_ptr()
             , detail::node_disposer<detail::null_disposer, value_traits, AlgoType>
                (detail::null_disposer(), &this->get_value_traits()));
+         node_algorithms::init(this->header_ptr());
       }
    }
 };
@@ -557,7 +557,6 @@ template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTime
 class bstree_impl
    :  public bstbase<ValueTraits, VoidKeyComp, ConstantTimeSize, SizeType, AlgoType>
 {
-   template<class C, bool> friend class detail::clear_on_destructor_base;
    public:
    /// @cond
    typedef bstbase<ValueTraits, VoidKeyComp, ConstantTimeSize, SizeType, AlgoType> data_type;
@@ -618,7 +617,7 @@ class bstree_impl
    //!
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks)
-   //!   or the copy constructorof the value_compare object throws. Basic guarantee.
+   //!   or the copy constructor of the value_compare object throws. Basic guarantee.
    explicit bstree_impl( const value_compare &cmp = value_compare()
                        , const value_traits &v_traits = value_traits())
       :  data_type(cmp, v_traits)
@@ -642,6 +641,7 @@ class bstree_impl
               , const value_traits &v_traits = value_traits())
       : data_type(cmp, v_traits)
    {
+      //bstbase releases elements in case of exceptions
       if(unique)
          this->insert_unique(b, e);
       else

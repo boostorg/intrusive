@@ -20,7 +20,6 @@
 #include <boost/intrusive/list_hook.hpp>
 #include <boost/intrusive/circular_list_algorithms.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
-#include <boost/intrusive/detail/clear_on_destructor_base.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/static_assert.hpp>
@@ -63,12 +62,7 @@ template<class T, class ...Options>
 template <class ValueTraits, class SizeType, bool ConstantTimeSize>
 #endif
 class list_impl
-   :  private detail::clear_on_destructor_base
-         < list_impl<ValueTraits, SizeType, ConstantTimeSize>
-         , is_safe_autounlink<ValueTraits::link_mode>::value
-         >
 {
-   template<class C, bool> friend class detail::clear_on_destructor_base;
    //Public typedefs
    public:
    typedef ValueTraits                                               value_traits;
@@ -175,8 +169,10 @@ class list_impl
    list_impl(Iterator b, Iterator e, const value_traits &v_traits = value_traits())
       :  data_(v_traits)
    {
+      //nothrow, no need to rollback to release elements on exception
       this->priv_size_traits().set_size(size_type(0));
       node_algorithms::init_header(this->get_root_node());
+      //nothrow, no need to rollback to release elements on exception
       this->insert(this->cend(), b, e);
    }
 
@@ -187,6 +183,7 @@ class list_impl
    {
       this->priv_size_traits().set_size(size_type(0));
       node_algorithms::init_header(this->get_root_node());
+      //nothrow, no need to rollback to release elements on exception
       this->swap(x);
    }
 
@@ -195,7 +192,6 @@ class list_impl
    list_impl& operator=(BOOST_RV_REF(list_impl) x)
    {  this->swap(x); return *this;  }
 
-   #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! <b>Effects</b>: If it's not a safe-mode or an auto-unlink value_type
    //!   the destructor does nothing
    //!   (ie. no code is generated). Otherwise it detaches all elements from this.
@@ -206,8 +202,12 @@ class list_impl
    //! <b>Complexity</b>: Linear to the number of elements in the list, if
    //!   it's a safe-mode or auto-unlink value . Otherwise constant.
    ~list_impl()
-   {}
-   #endif
+   {
+      if(is_safe_autounlink<ValueTraits::link_mode>::value){
+         this->clear();
+         node_algorithms::init(this->get_root_node());
+      }
+   }
 
    //! <b>Requires</b>: value must be an lvalue.
    //!

@@ -22,7 +22,6 @@
 #include <boost/intrusive/circular_slist_algorithms.hpp>
 #include <boost/intrusive/linear_slist_algorithms.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
-#include <boost/intrusive/detail/clear_on_destructor_base.hpp>
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/intrusive/options.hpp>
 #include <boost/intrusive/detail/utilities.hpp>
@@ -99,12 +98,7 @@ template<class T, class ...Options>
 template<class ValueTraits, class SizeType, std::size_t BoolFlags>
 #endif
 class slist_impl
-   :  private detail::clear_on_destructor_base
-         < slist_impl<ValueTraits, SizeType, BoolFlags>
-         , is_safe_autounlink<ValueTraits::link_mode>::value
-         >
 {
-   template<class C, bool> friend class detail::clear_on_destructor_base;
    //Public typedefs
    public:
    typedef ValueTraits                                               value_traits;
@@ -312,6 +306,7 @@ class slist_impl
       :  data_(v_traits)
    {
       this->set_default_constructed_state();
+      //nothrow, no need to rollback to release elements on exception
       this->insert_after(this->cbefore_begin(), b, e);
    }
 
@@ -322,6 +317,7 @@ class slist_impl
    {
       this->priv_size_traits().set_size(size_type(0));
       node_algorithms::init_header(this->get_root_node());
+      //nothrow, no need to rollback to release elements on exception
       this->swap(x);
    }
 
@@ -330,7 +326,6 @@ class slist_impl
    slist_impl& operator=(BOOST_RV_REF(slist_impl) x)
    {  this->swap(x); return *this;  }
 
-   #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! <b>Effects</b>: If it's a safe-mode
    //!   or auto-unlink value, the destructor does nothing
    //!   (ie. no code is generated). Otherwise it detaches all elements from this.
@@ -341,8 +336,12 @@ class slist_impl
    //! <b>Complexity</b>: Linear to the number of elements in the list, if
    //!   it's a safe-mode or auto-unlink value. Otherwise constant.
    ~slist_impl()
-   {}
-   #endif
+   {
+      if(is_safe_autounlink<ValueTraits::link_mode>::value){
+         this->clear();
+         node_algorithms::init(this->get_root_node());
+      }
+   }
 
    //! <b>Effects</b>: Erases all the elements of the container.
    //!
