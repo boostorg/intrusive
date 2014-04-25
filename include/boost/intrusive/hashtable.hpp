@@ -29,7 +29,6 @@
 #include <boost/intrusive/detail/transform_iterator.hpp>
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/intrusive/detail/ebo_functor_holder.hpp>
-#include <boost/intrusive/detail/clear_on_destructor_base.hpp>
 #include <boost/intrusive/detail/utilities.hpp>
 //Implementation utilities
 #include <boost/intrusive/unordered_set_hook.hpp>
