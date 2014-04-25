@@ -339,7 +339,6 @@ class slist_impl
    {
       if(is_safe_autounlink<ValueTraits::link_mode>::value){
          this->clear();
-         node_algorithms::init(this->get_root_node());
       }
    }
 
