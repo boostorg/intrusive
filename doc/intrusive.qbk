@@ -3798,6 +3798,8 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
    *  [@https://svn.boost.org/trac/boost/ticket/8468 #8468: Compile error on visual studio 2010/2012 using vector with custom allocator and aligned types]
    *  [@https://svn.boost.org/trac/boost/ticket/9332 #9332: ['"has_member_function_callable_with.hpp compile error on msvc-12.0"]].
    *  [@https://svn.boost.org/trac/boost/ticket/9746 #9746: Modern Sun CC compiler detects error in intrusive library header]
+   *  [@https://svn.boost.org/trac/boost/ticket/9940 #9940: bad bug in intrusive list with safe_link (or auto_unlink) hooks]
+   *  [@https://svn.boost.org/trac/boost/ticket/9949 #9949: clear header node hooks upon intrusive container destruction]
 
 *  Optimized tree rebalancing code to avoid redundant assignments.
 
