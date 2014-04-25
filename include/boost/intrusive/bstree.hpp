@@ -183,14 +183,14 @@ struct bstbase3
    static const_iterator s_iterator_to(const_reference value)
    {
       BOOST_STATIC_ASSERT((!stateful_value_traits));
-      return const_iterator (value_traits::to_node_ptr(const_cast<reference> (value)), const_value_traits_ptr());
+      return const_iterator (value_traits::to_node_ptr(*pointer_traits<pointer>::const_cast_from(pointer_traits<const_pointer>::pointer_to(value))), const_value_traits_ptr());
    }
 
    iterator iterator_to(reference value)
    {  return iterator (this->get_value_traits().to_node_ptr(value), this->value_traits_ptr()); }
 
    const_iterator iterator_to(const_reference value) const
-   {  return const_iterator (this->get_value_traits().to_node_ptr(const_cast<reference> (value)), this->value_traits_ptr()); }
+   {  return const_iterator (this->get_value_traits().to_node_ptr(*pointer_traits<pointer>::const_cast_from(pointer_traits<const_pointer>::pointer_to(value))), this->value_traits_ptr()); }
 
    static void init_node(reference value)
    { node_algorithms::init(value_traits::to_node_ptr(value)); }
@@ -222,7 +222,7 @@ struct bstbase2
 
    const value_compare &comp() const
    {  return this->get();  }
-   
+
    value_compare &comp()
    {  return this->get();  }
 
@@ -488,7 +488,7 @@ struct bstbase_hack<ValueTraits, VoidOrKeyComp, false, SizeType, AlgoType>
 
    const size_traits &sz_traits() const
    {  return s_size_traits;  }
-   
+
    static size_traits s_size_traits;
 };
 
@@ -822,7 +822,7 @@ class bstree_impl
    //!
    //! <b>Throws</b>: If value_compare copy-constructor throws.
    key_compare key_comp() const;
-   
+
    //! <b>Effects</b>: Returns the value_compare object used by the container.
    //!
    //! <b>Complexity</b>: Constant.
@@ -1492,7 +1492,7 @@ class bstree_impl
    //! <b>Throws</b>: If `comp` throws.
    template<class KeyType, class KeyValueCompare>
    iterator lower_bound(const KeyType &key, KeyValueCompare comp);
-   
+
    //! <b>Effects</b>: Returns a const iterator to the first element whose
    //!   key is not less than k or end() if that element does not exist.
    //!
@@ -1634,7 +1634,7 @@ class bstree_impl
 
    //! <b>Requires</b>: KeyValueCompare is a function object that induces a strict weak
    //!   ordering compatible with the strict weak ordering used to create the
-   //!   the container. 
+   //!   the container.
    //!   'lower_key' must not be greater than 'upper_key' according to 'comp'. If
    //!   'lower_key' == 'upper_key', ('left_closed' || 'right_closed') must be false.
    //!
@@ -1678,7 +1678,7 @@ class bstree_impl
 
    //! <b>Requires</b>: KeyValueCompare is a function object that induces a strict weak
    //!   ordering compatible with the strict weak ordering used to create the
-   //!   the container. 
+   //!   the container.
    //!   'lower_key' must not be greater than 'upper_key' according to 'comp'. If
    //!   'lower_key' == 'upper_key', ('left_closed' || 'right_closed') must be false.
    //!
