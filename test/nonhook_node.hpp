@@ -41,6 +41,14 @@ struct nonhook_node_member : public Node_Traits::node
         static_cast< node& >(*this) = rhs;
         return *this;
     }
+    ~nonhook_node_member()
+    {
+        if (is_linked())
+        {
+            std::cerr << "nonhook_node_member dtor of linked: &=" << (void*)this << std::endl;
+        }
+        node_algorithms::init(pointer_traits<node_ptr>::pointer_to(static_cast< node& >(*this)));
+    }
 
     void swap_nodes(nonhook_node_member& other)
     {
