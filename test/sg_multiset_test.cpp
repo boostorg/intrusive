@@ -66,6 +66,9 @@ struct hooks
    struct auto_base_hook_type
       :  bs_set_base_hook<void_pointer<VoidPointer>, tag<my_tag> >
    {};
+   typedef nonhook_node_member< tree_node_traits < VoidPointer >,
+                                sgtree_algorithms
+                              > nonhook_node_member_type;
 };
 
 
@@ -139,6 +142,13 @@ class test_main_template
                   >::type
                , GetContainerFixedAlpha
                >::test_all();
+      test::test_generic_multiset < nonhook_node_member_value_traits< value_type,
+                                                                      typename hooks<VoidPointer>::nonhook_node_member_type,
+                                                                      &value_type::nhn_member_,
+                                                                      safe_link
+                                                                    >,
+                                    GetContainerFixedAlpha
+                                  >::test_all();
       return 0;
    }
 };
