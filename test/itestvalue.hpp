@@ -16,6 +16,7 @@
 #include <iostream>
 #include <boost/intrusive/options.hpp>
 #include <boost/functional/hash.hpp>
+#include "nonhook_node.hpp"
 
 namespace boost{
 namespace intrusive{
@@ -33,6 +34,7 @@ struct testvalue
 {
    typename Hooks::member_hook_type        node_;
    typename Hooks::auto_member_hook_type   auto_node_;
+   typename Hooks::nonhook_node_member_type nhn_member_;
    int value_;
 
    static const bool constant_time_size = ConstantTimeSize;
@@ -56,6 +58,7 @@ struct testvalue
       Hooks::auto_base_hook_type::operator=(static_cast<const typename Hooks::auto_base_hook_type&>(src));
       this->node_       = src.node_;
       this->auto_node_  = src.auto_node_;
+      this->nhn_member_ = src.nhn_member_;
       value_ = src.value_;
       return *this;
    }
@@ -66,6 +69,7 @@ struct testvalue
       Hooks::auto_base_hook_type::swap_nodes(static_cast<typename Hooks::auto_base_hook_type&>(other));
       node_.swap_nodes(other.node_);
       auto_node_.swap_nodes(other.auto_node_);
+      nhn_member_.swap_nodes(other.nhn_member_);
    }
 
    bool is_linked() const
@@ -73,7 +77,8 @@ struct testvalue
       return Hooks::base_hook_type::is_linked() ||
       Hooks::auto_base_hook_type::is_linked() ||
       node_.is_linked() ||
-      auto_node_.is_linked();
+      auto_node_.is_linked() ||
+      nhn_member_.is_linked();
    }
 
    ~testvalue()
