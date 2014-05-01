@@ -35,6 +35,9 @@ struct hooks
    typedef slist_member_hook<void_pointer<VoidPointer>, tag<my_tag> > member_hook_type;
    typedef slist_member_hook< link_mode<auto_unlink>
                            , void_pointer<VoidPointer> >             auto_member_hook_type;
+   typedef nonhook_node_member< slist_node_traits< VoidPointer >,
+                                circular_slist_algorithms
+                              > nonhook_node_member_type;
 };
 
 template<class ValueTraits, bool Linear, bool CacheLast>
@@ -563,6 +566,14 @@ class test_main_template
                   >::type
                  , false
                  , false
+                >::test_all(data);
+      test_slist < nonhook_node_member_value_traits< value_type,
+                                                     typename hooks<VoidPointer>::nonhook_node_member_type,
+                                                     &value_type::nhn_member_,
+                                                     safe_link
+                                                   >,
+                   false,
+                   false
                 >::test_all(data);
 
       //Now linear slists

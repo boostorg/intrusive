@@ -233,9 +233,6 @@
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\assert.hpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\boost\intrusive\detail\clear_on_destructor_base.hpp">
-				</File>
-				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\common_slist_algorithms.hpp">
 				</File>
 				<File
@@ -317,6 +314,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\test\Jamfile.v2">
+			</File>
+			<File
+				RelativePath="..\..\..\test\nonhook_node.hpp">
 			</File>
 			<File
 				RelativePath="..\..\..\test\smart_ptr.hpp">

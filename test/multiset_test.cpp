@@ -54,6 +54,9 @@ struct hooks
       <VoidPointer>, optimize_size<true> >                  member_hook_type;
    typedef set_member_hook
       <link_mode<auto_unlink>, void_pointer<VoidPointer> >  auto_member_hook_type;
+   typedef nonhook_node_member< rbtree_node_traits <VoidPointer, false >,
+                                rbtree_algorithms
+                              > nonhook_node_member_type;
 };
 
 template< class ValueType
@@ -95,6 +98,13 @@ class test_main_template
                   >::type
                 , GetContainer
                 >::test_all();
+      test::test_generic_multiset < nonhook_node_member_value_traits< value_type,
+                                                                      typename hooks<VoidPointer>::nonhook_node_member_type,
+                                                                      &value_type::nhn_member_,
+                                                                      safe_link
+                                                                    >,
+                                    GetContainer
+                                  >::test_all();
       return 0;
    }
 };

@@ -3792,14 +3792,17 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 *  [*Source breaking]: Removed previously deprecated `xxx_dont_splay` functions from splay containers,
    `splay_set_base_hook` and `splay_set_member_hook`from splay containers and `bool splay = true`
-   extra parameter is `splaytree_algorithms` functions.
+   extra parameter in `splaytree_algorithms` functions.
 
 *  Fixed bugs:
    *  [@https://svn.boost.org/trac/boost/ticket/8468 #8468: Compile error on visual studio 2010/2012 using vector with custom allocator and aligned types]
    *  [@https://svn.boost.org/trac/boost/ticket/9332 #9332: ['"has_member_function_callable_with.hpp compile error on msvc-12.0"]].
+   *  [@https://svn.boost.org/trac/boost/ticket/9650 #9650: ['"intrusive list with stateful value traits"]].
    *  [@https://svn.boost.org/trac/boost/ticket/9746 #9746: Modern Sun CC compiler detects error in intrusive library header]
    *  [@https://svn.boost.org/trac/boost/ticket/9940 #9940: bad bug in intrusive list with safe_link (or auto_unlink) hooks]
+   *  [@https://svn.boost.org/trac/boost/ticket/9948 #9948: remove use of const_cast in intrusive containers]
    *  [@https://svn.boost.org/trac/boost/ticket/9949 #9949: clear header node hooks upon intrusive container destruction]
+   *  [@https://svn.boost.org/trac/boost/ticket/9961 #9961: tests for hooks not derived frorm generic_hook]
 
 *  Optimized tree rebalancing code to avoid redundant assignments.
 

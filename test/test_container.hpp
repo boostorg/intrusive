@@ -90,6 +90,10 @@ void test_sequence_container(Container & c, Data & d)
       {
       typename Data::iterator i = d.begin();
       c.insert( c.begin(), *i );
+      BOOST_TEST( &*c.iterator_to(*c.begin())  == &*i );
+      BOOST_TEST( &*c.iterator_to(*c.cbegin()) == &*i );
+      BOOST_TEST( &*Container::s_iterator_to(*c.begin())  == &*i );
+      BOOST_TEST( &*Container::s_iterator_to(*c.cbegin()) == &*i );
       c.insert( c.end(), *(++i) );
       }
       BOOST_TEST( c.size() == 2 );
@@ -231,6 +235,12 @@ void test_common_unordered_and_associative_container(Container & c, Data & d, bo
    assert( d.size() > 2 );
 
    c.clear();
+   typename Container::reference r = *d.begin();
+   c.insert(d.begin(), ++d.begin());
+   BOOST_TEST( &*Container::s_iterator_to(*c.begin())  == &r );
+   BOOST_TEST( &*Container::s_iterator_to(*c.cbegin()) == &r );
+
+   c.clear();
    c.insert(d.begin(), d.end());
 
    for( typename Data::const_iterator di = d.begin(), de = d.end();
@@ -259,13 +269,18 @@ void test_common_unordered_and_associative_container(Container & c, Data & d, bo
    BOOST_TEST( c.equal_range(*da, c.key_comp()).first == c.end() );
 }
 
-
 template< class Container, class Data >
 void test_common_unordered_and_associative_container(Container & c, Data & d)
 {
    typedef typename Container::size_type  size_type;
    {
       assert( d.size() > 2 );
+
+      c.clear();
+      typename Container::reference r = *d.begin();
+      c.insert(d.begin(), ++d.begin());
+      BOOST_TEST( &*c.iterator_to(*c.begin())  == &r );
+      BOOST_TEST( &*c.iterator_to(*c.cbegin()) == &r );
 
       c.clear();
       c.insert(d.begin(), d.end());
@@ -372,6 +387,9 @@ void test_unordered_associative_container_invariants(Container & c, Data & d)
       size_type bucket_elem = std::distance(c.begin(nb), c.end(nb));
       BOOST_TEST( bucket_elem ==  c.bucket_size(nb) );
       BOOST_TEST( &*c.local_iterator_to(*c.find(*di)) == &*i );
+      BOOST_TEST( &*c.local_iterator_to(*const_cast<const Container &>(c).find(*di)) == &*i );
+      BOOST_TEST( &*Container::s_local_iterator_to(*c.find(*di)) == &*i );
+      BOOST_TEST( &*Container::s_local_iterator_to(*const_cast<const Container &>(c).find(*di)) == &*i );
       std::pair<const_iterator, const_iterator> er = c.equal_range(*di);
       size_type cnt = std::distance(er.first, er.second);
       BOOST_TEST( cnt == c.count(*di));
