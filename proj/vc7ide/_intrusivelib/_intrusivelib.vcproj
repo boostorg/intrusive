@@ -233,9 +233,6 @@
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\assert.hpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\boost\intrusive\detail\clear_on_destructor_base.hpp">
-				</File>
-				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\common_slist_algorithms.hpp">
 				</File>
 				<File

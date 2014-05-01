@@ -1103,6 +1103,13 @@ class hashtable_impl
    typedef typename pointer_traits
       <pointer>::template rebind_pointer
          < bucket_type >::type                                       bucket_ptr;
+   typedef typename pointer_traits
+      <pointer>::template rebind_pointer
+         < const bucket_type >::type                                 const_bucket_ptr;
+   typedef typename pointer_traits
+      <bucket_ptr>::reference                                        bucket_reference;
+   typedef typename pointer_traits
+      <bucket_ptr>::reference                                        const_bucket_reference;
    typedef typename slist_impl::iterator                             siterator;
    typedef typename slist_impl::const_iterator                       const_siterator;
    typedef hashtable_iterator<bucket_plus_vtraits_t, false>          iterator;
@@ -1115,6 +1122,10 @@ class hashtable_impl
    typedef typename pointer_traits
       <pointer>::template rebind_pointer
          < const node >::type                                        const_node_ptr;
+   typedef typename pointer_traits
+      <node_ptr>::reference                                          node_reference;
+   typedef typename pointer_traits
+      <const_node_ptr>::reference                                    const_node_reference;
    typedef typename slist_impl::node_algorithms                      node_algorithms;
 
    static const bool stateful_value_traits = detail::is_stateful_value_traits<value_traits>::value;
@@ -2145,7 +2156,9 @@ class hashtable_impl
    //! <b>Throws</b>: If the internal hash function throws.
    const_iterator iterator_to(const_reference value) const
    {
-      siterator sit = bucket_type::s_iterator_to(const_cast<node &>(this->priv_value_to_node(value)));
+      node_reference r = *pointer_traits<node_ptr>::const_cast_from
+         (pointer_traits<const_node_ptr>::pointer_to(this->priv_value_to_node(value)));
+      siterator sit = bucket_type::s_iterator_to(r);
       return const_iterator(sit, &this->get_bucket_value_traits());
    }
 
@@ -2183,7 +2196,9 @@ class hashtable_impl
    static const_local_iterator s_local_iterator_to(const_reference value)
    {
       BOOST_STATIC_ASSERT((!stateful_value_traits));
-      siterator sit = bucket_type::s_iterator_to(((hashtable_impl*)0)->priv_value_to_node(const_cast<value_type&>(value)));
+      node_reference r = *pointer_traits<node_ptr>::const_cast_from
+         (pointer_traits<const_node_ptr>::pointer_to(((hashtable_impl*)0)->priv_value_to_node(value)));
+      siterator sit = bucket_type::s_iterator_to(r);
       return const_local_iterator(sit, const_value_traits_ptr());
    }
 
@@ -2213,8 +2228,9 @@ class hashtable_impl
    //! <b>Throws</b>: Nothing.
    const_local_iterator local_iterator_to(const_reference value) const
    {
-      siterator sit = bucket_type::s_iterator_to
-         (const_cast<node &>(this->priv_value_to_node(value)));
+      node_reference r = *pointer_traits<node_ptr>::const_cast_from
+         (pointer_traits<const_node_ptr>::pointer_to(this->priv_value_to_node(value)));
+      siterator sit = bucket_type::s_iterator_to(r);
       return const_local_iterator(sit, this->value_traits_ptr());
    }
 
@@ -2314,8 +2330,8 @@ class hashtable_impl
    //!   containing all of the elements in the nth bucket.
    const_local_iterator cbegin(size_type n) const
    {
-      siterator sit = const_cast<bucket_type&>(this->priv_bucket_pointer()[n]).begin();
-      return const_local_iterator(sit, this->value_traits_ptr());
+      bucket_reference br = pointer_traits<bucket_ptr>::const_cast_from(this->priv_bucket_pointer())[n];
+      return const_local_iterator(br.begin(), this->value_traits_ptr());
    }
 
    //! <b>Requires</b>: n is in the range [0, this->bucket_count()).
@@ -2359,8 +2375,8 @@ class hashtable_impl
    //!   containing all of the elements in the nth bucket.
    const_local_iterator cend(size_type n) const
    {
-      return const_local_iterator ( const_cast<bucket_type&>(this->priv_bucket_pointer()[n]).end()
-                                  , this->value_traits_ptr());
+      bucket_reference br = pointer_traits<bucket_ptr>::const_cast_from(this->priv_bucket_pointer())[n];
+      return const_local_iterator ( br.end(), this->value_traits_ptr());
    }
 
    //! <b>Requires</b>: new_bucket_traits can hold a pointer to a new bucket array
