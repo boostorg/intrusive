@@ -319,6 +319,9 @@
 				RelativePath="..\..\..\test\Jamfile.v2">
 			</File>
 			<File
+				RelativePath="..\..\..\test\nonhook_node.hpp">
+			</File>
+			<File
 				RelativePath="..\..\..\test\smart_ptr.hpp">
 			</File>
 			<File
