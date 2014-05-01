@@ -67,6 +67,9 @@ struct hooks
       , store_hash<true>
       , optimize_multikey<true>
       >                                                           auto_member_hook_type;
+   typedef nonhook_node_member< unordered_node_traits< VoidPointer, true, true >,
+                                unordered_algorithms
+                              > nonhook_node_member_type;
 };
 
 static const std::size_t BucketSize = 8;
@@ -805,6 +808,15 @@ class test_main_template
                 , false
                 , Incremental
                 >::test_all(data);
+      test_unordered_multiset < nonhook_node_member_value_traits< value_type,
+                                                                  typename hooks<VoidPointer>::nonhook_node_member_type,
+                                                                  &value_type::nhn_member_,
+                                                                  safe_link
+                                                                >,
+                                false,
+                                false,
+                                Incremental
+                              >::test_all(data);
       return 0;
    }
 };
