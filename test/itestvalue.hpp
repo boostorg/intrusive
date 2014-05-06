@@ -112,6 +112,12 @@ struct testvalue
    {  return other1.value_ != other2;  }
 };
 
+template < class Hooks, bool ConstantTimeSize >
+void swap_nodes(testvalue< Hooks, ConstantTimeSize >& lhs, testvalue< Hooks, ConstantTimeSize >& rhs)
+{
+    lhs.swap_nodes(rhs);
+}
+
 template<class Hooks, bool ConstantTimeSize>
 std::size_t hash_value(const testvalue<Hooks, ConstantTimeSize> &t)
 {
@@ -137,24 +143,24 @@ std::ostream& operator<<
 
 struct even_odd
 {
-   template<class Hooks, bool constant_time_size>
+   template <typename value_type>
    bool operator()
-      (const testvalue<Hooks, constant_time_size>& v1
-      ,const testvalue<Hooks, constant_time_size>& v2) const
+      (const value_type& v1
+      ,const value_type& v2) const
    {
-      if ((v1.value_ & 1) == (v2.value_ & 1))
-         return v1.value_ < v2.value_;
+      if (((&v1)->value_ & 1) == ((&v2)->value_ & 1))
+         return (&v1)->value_ < (&v2)->value_;
       else
-         return v2.value_ & 1;
+         return (&v2)->value_ & 1;
    }
 };
 
 struct is_even
 {
-   template<class Hooks, bool constant_time_size>
+   template <typename value_type>
    bool operator()
-      (const testvalue<Hooks, constant_time_size>& v1) const
-   {  return (v1.value_ & 1) == 0;  }
+      (const value_type& v1) const
+   {  return ((&v1)->value_ & 1) == 0;  }
 };
 /*
 struct int_testvalue_comp
