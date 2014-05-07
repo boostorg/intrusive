@@ -112,7 +112,7 @@ struct testvalue
    {  return other1.value_ != other2;  }
 };
 
-template < class Hooks, bool ConstantTimeSize >
+template < typename Node_Algorithms, class Hooks, bool ConstantTimeSize >
 void swap_nodes(testvalue< Hooks, ConstantTimeSize >& lhs, testvalue< Hooks, ConstantTimeSize >& rhs)
 {
     lhs.swap_nodes(rhs);

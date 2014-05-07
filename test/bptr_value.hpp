@@ -18,23 +18,6 @@
 #include "bounded_pointer.hpp"
 
 
-template < typename Node_Traits >
-struct BPtr_Value;
-
-struct List_BPtr_Node_Traits
-{
-    typedef BPtr_Value< boost::intrusive::circular_list_algorithms< List_BPtr_Node_Traits > > val_t;
-    typedef val_t                          node;
-    typedef Bounded_Pointer< val_t >       node_ptr;
-    typedef Bounded_Pointer< const val_t > const_node_ptr;
-
-    static node_ptr get_previous(const_node_ptr);
-    static void set_previous(node_ptr, node_ptr);
-    static node_ptr get_next(const_node_ptr);
-    static void set_next(node_ptr, node_ptr);
-};
-
-template <typename Node_Algorithms>
 struct BPtr_Value
 {
     static const bool constant_time_size = true;
@@ -74,56 +57,63 @@ struct BPtr_Value
     Bounded_Pointer< BPtr_Value > _previous;
     Bounded_Pointer< BPtr_Value > _next;
 
-    //bool is_linked() const { return Node_Algorithms::unique(Bounded_Pointer< BPtr_Value >(this)); }
     bool is_linked() const { return _previous or _next; }
 
-    friend bool operator< (const BPtr_Value<Node_Algorithms> &other1, const BPtr_Value<Node_Algorithms> &other2)
+    friend bool operator< (const BPtr_Value &other1, const BPtr_Value &other2)
     {  return other1.value_ < other2.value_;  }
 
-    friend bool operator< (int other1, const BPtr_Value<Node_Algorithms> &other2)
+    friend bool operator< (int other1, const BPtr_Value &other2)
     {  return other1 < other2.value_;  }
 
-    friend bool operator< (const BPtr_Value<Node_Algorithms> &other1, int other2)
+    friend bool operator< (const BPtr_Value &other1, int other2)
     {  return other1.value_ < other2;  }
 
-    friend bool operator== (const BPtr_Value<Node_Algorithms> &other1, const BPtr_Value<Node_Algorithms> &other2)
+    friend bool operator== (const BPtr_Value &other1, const BPtr_Value &other2)
     {  return other1.value_ == other2.value_;  }
 
-    friend bool operator== (int other1, const BPtr_Value<Node_Algorithms> &other2)
+    friend bool operator== (int other1, const BPtr_Value &other2)
     {  return other1 == other2.value_;  }
 
-    friend bool operator== (const BPtr_Value<Node_Algorithms> &other1, int other2)
+    friend bool operator== (const BPtr_Value &other1, int other2)
     {  return other1.value_ == other2;  }
 
-    friend bool operator!= (const BPtr_Value<Node_Algorithms> &other1, const BPtr_Value<Node_Algorithms> &other2)
+    friend bool operator!= (const BPtr_Value &other1, const BPtr_Value &other2)
     {  return !(other1 == other2);  }
 
-    friend bool operator!= (int other1, const BPtr_Value<Node_Algorithms> &other2)
+    friend bool operator!= (int other1, const BPtr_Value &other2)
     {  return !(other1 == other2.value_);  }
 
-    friend bool operator!= (const BPtr_Value<Node_Algorithms> &other1, int other2)
+    friend bool operator!= (const BPtr_Value &other1, int other2)
     {  return !(other1.value_ == other2);  }
 
-    friend std::ostream& operator << (std::ostream& os, const BPtr_Value<Node_Algorithms>& v)
+    friend std::ostream& operator << (std::ostream& os, const BPtr_Value& v)
     {
         os << v.value_;
         return os;
     }
 }; // class BPtr_Value
 
-template <typename Node_Algorithms>
-void swap_nodes(Bounded_Reference< BPtr_Value< Node_Algorithms > > lhs,
-                Bounded_Reference< BPtr_Value< Node_Algorithms > > rhs)
+template < typename Node_Algorithms >
+void swap_nodes(Bounded_Reference< BPtr_Value > lhs,
+                Bounded_Reference< BPtr_Value > rhs)
 {
     Node_Algorithms::swap_nodes(
-        boost::intrusive::pointer_traits< Bounded_Pointer< BPtr_Value< Node_Algorithms > > >::pointer_to(lhs),
-        boost::intrusive::pointer_traits< Bounded_Pointer< BPtr_Value< Node_Algorithms > > >::pointer_to(rhs));
+        boost::intrusive::pointer_traits< Bounded_Pointer< BPtr_Value > >::pointer_to(lhs),
+        boost::intrusive::pointer_traits< Bounded_Pointer< BPtr_Value > >::pointer_to(rhs));
 }
 
-List_BPtr_Node_Traits::node_ptr List_BPtr_Node_Traits::get_previous(const_node_ptr p) { return p->_previous; }
-void List_BPtr_Node_Traits::set_previous(node_ptr p, node_ptr prev) { p->_previous = prev; }
-List_BPtr_Node_Traits::node_ptr List_BPtr_Node_Traits::get_next(const_node_ptr p) { return p->_next; }
-void List_BPtr_Node_Traits::set_next(node_ptr p, node_ptr next) { p->_next = next; }
+struct List_BPtr_Node_Traits
+{
+    typedef BPtr_Value                     val_t;
+    typedef val_t                          node;
+    typedef Bounded_Pointer< val_t >       node_ptr;
+    typedef Bounded_Pointer< const val_t > const_node_ptr;
+
+    static node_ptr get_previous(const_node_ptr p) { return p->_previous; }
+    static void set_previous(node_ptr p, node_ptr prev) { p->_previous = prev; }
+    static node_ptr get_next(const_node_ptr p) { return p->_next; }
+    static void set_next(node_ptr p, node_ptr next) { p->_next = next; }
+};
 
 struct List_BPtr_Value_Traits
 {

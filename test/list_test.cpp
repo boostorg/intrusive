@@ -50,6 +50,7 @@ struct test_list
    typedef typename list_type::value_traits value_traits;
    typedef typename list_type::node_allocator_type node_allocator_type;
    typedef typename value_traits::value_type value_type;
+   typedef typename list_type::node_algorithms node_algorithms;
 
    static void test_all(Value_Container& values);
    static void test_front_back(Value_Container& values);
@@ -308,13 +309,11 @@ void test_list< List_Type, Value_Container >
       list_type testlist1 (values.begin(), values.begin() + 2);
       list_type testlist2 (values.begin() + 3, values.begin() + 5);
 
-      //values[0].swap_nodes(values[2]);
-      swap_nodes(values[0], values[2]);
+      swap_nodes< node_algorithms >(values[0], values[2]);
       {  int init_values [] = { 3, 2 };
          TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
 
-      //values[2].swap_nodes(values[4]);
-      swap_nodes(values[2], values[4]);
+      swap_nodes< node_algorithms >(values[2], values[4]);
       {  int init_values [] = { 5, 2 };
          TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
       {  int init_values [] = { 4, 3 };
@@ -326,20 +325,17 @@ void test_list< List_Type, Value_Container >
       {  int init_values [] = { 1 };
          TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
 
-      //values[1].swap_nodes(values[2]);
-      swap_nodes(values[1], values[2]);
+      swap_nodes< node_algorithms >(values[1], values[2]);
 
       {  int init_values [] = { 1 };
          TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
 
-      //values[0].swap_nodes(values[2]);
-      swap_nodes(values[0], values[2]);
+      swap_nodes< node_algorithms >(values[0], values[2]);
 
       {  int init_values [] = { 3 };
          TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
 
-      //values[0].swap_nodes(values[2]);
-      swap_nodes(values[0], values[2]);
+      swap_nodes< node_algorithms >(values[0], values[2]);
 
       {  int init_values [] = { 1 };
          TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
@@ -552,7 +548,7 @@ struct test_main_template_bptr
 {
    int operator()()
    {
-      typedef BPtr_Value< circular_list_algorithms< List_BPtr_Node_Traits > > value_type;
+      typedef BPtr_Value value_type;
       typedef List_BPtr_Value_Traits::node_ptr node_ptr;
       typedef Bounded_Allocator< value_type > allocator_type;
 
