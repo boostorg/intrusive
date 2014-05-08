@@ -18,6 +18,11 @@
 #include "bounded_pointer.hpp"
 
 
+namespace boost
+{
+namespace intrusive
+{
+
 struct BPtr_Value
 {
     static const bool constant_time_size = true;
@@ -56,8 +61,13 @@ struct BPtr_Value
     // list node hooks
     Bounded_Pointer< BPtr_Value > _previous;
     Bounded_Pointer< BPtr_Value > _next;
+    // tree node hooks
+    Bounded_Pointer< BPtr_Value > _parent;
+    Bounded_Pointer< BPtr_Value > _l_child;
+    Bounded_Pointer< BPtr_Value > _r_child;
+    char _extra;
 
-    bool is_linked() const { return _previous or _next; }
+    bool is_linked() const { return _previous or _next or _parent or _l_child or _r_child; }
 
     friend bool operator< (const BPtr_Value &other1, const BPtr_Value &other2)
     {  return other1.value_ < other2.value_;  }
@@ -109,18 +119,60 @@ struct List_BPtr_Node_Traits
     typedef Bounded_Pointer< val_t >       node_ptr;
     typedef Bounded_Pointer< const val_t > const_node_ptr;
 
-    static node_ptr get_previous(const_node_ptr p) { return p->_previous; }
+    static node_ptr get_previous(const_node_ptr p)      { return p->_previous; }
     static void set_previous(node_ptr p, node_ptr prev) { p->_previous = prev; }
-    static node_ptr get_next(const_node_ptr p) { return p->_next; }
-    static void set_next(node_ptr p, node_ptr next) { p->_next = next; }
+    static node_ptr get_next(const_node_ptr p)          { return p->_next; }
+    static void set_next(node_ptr p, node_ptr next)     { p->_next = next; }
 };
 
-struct List_BPtr_Value_Traits
+struct RBTree_BPtr_Node_Traits
 {
-    typedef List_BPtr_Node_Traits                 node_traits;
-    typedef node_traits::val_t                    value_type;
-    typedef node_traits::node_ptr                 node_ptr;
-    typedef node_traits::const_node_ptr           const_node_ptr;
+    typedef BPtr_Value                     val_t;
+    typedef val_t                          node;
+    typedef Bounded_Pointer< val_t >       node_ptr;
+    typedef Bounded_Pointer< const val_t > const_node_ptr;
+    typedef char                           color;
+
+    static node_ptr get_parent(const_node_ptr p)        { return p->_parent; }
+    static void set_parent(node_ptr p, node_ptr parent) { p->_parent = parent; }
+    static node_ptr get_left(const_node_ptr p)          { return p->_l_child; }
+    static void set_left(node_ptr p, node_ptr l_child)  { p->_l_child = l_child; }
+    static node_ptr get_right(const_node_ptr p)         { return p->_r_child; }
+    static void set_right(node_ptr p, node_ptr r_child) { p->_r_child = r_child; }
+    static color get_color(const_node_ptr p)            { return p->_extra; }
+    static void set_color(node_ptr p, color c)          { p->_extra = c; }
+    static color black()                                { return 0; }
+    static color red()                                  { return 1; }
+};
+
+struct AVLTree_BPtr_Node_Traits
+{
+    typedef BPtr_Value                     val_t;
+    typedef val_t                          node;
+    typedef Bounded_Pointer< val_t >       node_ptr;
+    typedef Bounded_Pointer< const val_t > const_node_ptr;
+    typedef char                           balance;
+
+    static node_ptr get_parent(const_node_ptr p)        { return p->_parent; }
+    static void set_parent(node_ptr p, node_ptr parent) { p->_parent = parent; }
+    static node_ptr get_left(const_node_ptr p)          { return p->_l_child; }
+    static void set_left(node_ptr p, node_ptr l_child)  { p->_l_child = l_child; }
+    static node_ptr get_right(const_node_ptr p)         { return p->_r_child; }
+    static void set_right(node_ptr p, node_ptr r_child) { p->_r_child = r_child; }
+    static balance get_balance(const_node_ptr p)        { return p->_extra; }
+    static void set_balance(node_ptr p, balance b)      { p->_extra = b; }
+    static balance negative()                           { return -1; }
+    static balance zero()                               { return 0; }
+    static balance positive()                           { return 1; }
+};
+
+template < typename Node_Traits >
+struct BPtr_Value_Traits
+{
+    typedef Node_Traits                           node_traits;
+    typedef typename node_traits::val_t           value_type;
+    typedef typename node_traits::node_ptr        node_ptr;
+    typedef typename node_traits::const_node_ptr  const_node_ptr;
     typedef node_ptr                              pointer;
     typedef const_node_ptr                        const_pointer;
     typedef Bounded_Reference< value_type >       reference;
@@ -133,6 +185,18 @@ struct List_BPtr_Value_Traits
     static const_pointer to_value_ptr(const_node_ptr p)  { return p; }
     static pointer to_value_ptr(node_ptr p)              { return p; }
 };
+
+template < typename >
+struct Value_Container;
+
+template <>
+struct Value_Container< BPtr_Value >
+{
+    typedef Bounded_Reference_Cont< BPtr_Value > type;
+};
+
+} // namespace intrusive
+} // namespace boost
 
 
 #endif

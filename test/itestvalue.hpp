@@ -143,10 +143,10 @@ std::ostream& operator<<
 
 struct even_odd
 {
-   template <typename value_type>
+   template < typename value_type_1, typename value_type_2 >
    bool operator()
-      (const value_type& v1
-      ,const value_type& v2) const
+      (const value_type_1& v1
+      ,const value_type_2& v2) const
    {
       if (((&v1)->value_ & 1) == ((&v2)->value_ & 1))
          return (&v1)->value_ < (&v2)->value_;
@@ -161,6 +161,15 @@ struct is_even
    bool operator()
       (const value_type& v1) const
    {  return ((&v1)->value_ & 1) == 0;  }
+};
+
+template <typename>
+struct Value_Container;
+
+template < class Hooks, bool ConstantTimeSize >
+struct Value_Container< testvalue< Hooks, ConstantTimeSize > >
+{
+    typedef std::vector< testvalue< Hooks, ConstantTimeSize > > type;
 };
 /*
 struct int_testvalue_comp

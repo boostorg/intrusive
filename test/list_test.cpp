@@ -549,7 +549,8 @@ struct test_main_template_bptr
    int operator()()
    {
       typedef BPtr_Value value_type;
-      typedef List_BPtr_Value_Traits::node_ptr node_ptr;
+      typedef BPtr_Value_Traits< List_BPtr_Node_Traits > list_value_traits;
+      typedef typename list_value_traits::node_ptr node_ptr;
       typedef Bounded_Allocator< value_type > allocator_type;
 
       allocator_type::init();
@@ -565,7 +566,7 @@ struct test_main_template_bptr
           }
 
           test_list < list < value_type,
-                             value_traits< List_BPtr_Value_Traits >,
+                             value_traits< list_value_traits >,
                              size_type< std::size_t >,
                              constant_time_size< Constant_Time_Size >,
                              node_allocator_type< Bounded_Allocator< value_type > >

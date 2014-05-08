@@ -133,6 +133,12 @@ public:
         return os;
     }
 
+    // the copy asop is shallow; we need swap overload to shuffle a vector of references
+    friend void swap(Bounded_Reference& lhs, Bounded_Reference& rhs)
+    {
+        std::swap(lhs._offset, rhs._offset);
+    }
+
 private:
     friend class Bounded_Pointer< T >;
     Bounded_Reference(Bounded_Pointer< T > bptr) : _offset(bptr._offset) { assert(_offset != 255); }
@@ -149,6 +155,7 @@ public:
 
     pointer allocate(size_t n)
     {
+        assert(inited());
         assert(n == 1);
         pointer p;
         uint8_t i;
@@ -161,6 +168,7 @@ public:
     }
     void deallocate(pointer p, size_t n)
     {
+        assert(inited());
         assert(n == 1);
         assert(_in_use[p._offset]);
         std::clog << "deallocating node " << static_cast< int >(p._offset) << "\n";
@@ -223,7 +231,15 @@ private:
     typedef Bounded_Pointer< T > pointer;
 
 public:
-    Bounded_Reference_Cont() : Base() {}
+    Bounded_Reference_Cont(size_t n = 0) : Base(), _allocator()
+    {
+        for (size_t i = 0; i < n; ++i)
+        {
+            pointer p = _allocator.allocate(1);
+            new (p.raw()) value_type();
+            Base::push_back(*p);
+        }
+    }
     Bounded_Reference_Cont(const Bounded_Reference_Cont& other) : Base(), _allocator(other._allocator)
     {
         //std::clog << "copying values container\n";
