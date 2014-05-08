@@ -47,11 +47,12 @@ struct bstree_defaults
    static const bool constant_time_size = true;
    typedef std::size_t size_type;
    typedef void compare;
+   typedef std::allocator< void > node_allocator_type;
    static const bool floating_point = true;  //For sgtree
    typedef void priority;  //For treap
 };
 
-template<class ValueTraits, algo_types AlgoType>
+template<class ValueTraits, algo_types AlgoType, typename Node_Allocator>
 struct bstbase3
 {
    typedef ValueTraits                                               value_traits;
@@ -60,45 +61,6 @@ struct bstbase3
    typedef typename get_algo<AlgoType, node_traits>::type            node_algorithms;
    typedef typename node_traits::node_ptr                            node_ptr;
    typedef typename node_traits::const_node_ptr                      const_node_ptr;
-
-   struct holder_t : public ValueTraits
-   {
-      explicit holder_t(const ValueTraits &vtraits)
-         : ValueTraits(vtraits)
-      {}
-      node_type root;
-   } holder;
-
-   static bstbase3 &get_tree_base_from_root(node_type &root)
-   {
-      holder_t *holder = get_parent_from_member<holder_t, node_type>(&root, &holder_t::root);
-      bstbase3 *base   = get_parent_from_member<bstbase3, holder_t> (holder, &bstbase3::holder);
-      return *base;
-   }
-
-   bstbase3(const ValueTraits &vtraits)
-      : holder(vtraits)
-   {
-      node_algorithms::init_header(this->header_ptr());
-   }
-
-   node_ptr header_ptr()
-   {  return pointer_traits<node_ptr>::pointer_to(this->holder.root);  }
-
-   const_node_ptr header_ptr() const
-   {  return pointer_traits<const_node_ptr>::pointer_to(this->holder.root);  }
-
-   const value_traits &get_value_traits() const
-   {  return this->holder;  }
-
-   value_traits &get_value_traits()
-   {  return this->holder;  }
-
-   typedef typename pointer_traits<node_ptr>::template
-      rebind_pointer<const value_traits>::type const_value_traits_ptr;
-
-   const_value_traits_ptr value_traits_ptr() const
-   {  return pointer_traits<const_value_traits_ptr>::pointer_to(this->get_value_traits());  }
 
    typedef tree_iterator<value_traits, false> iterator;
    typedef tree_iterator<value_traits, true>  const_iterator;
@@ -113,6 +75,91 @@ struct bstbase3
    typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<const_pointer>::difference_type)      difference_type;
    static const bool safemode_or_autounlink = is_safe_autounlink<value_traits::link_mode>::value;
    static const bool stateful_value_traits = detail::is_stateful_value_traits<value_traits>::value;
+
+   typedef Node_Allocator                                            node_allocator_type;
+
+   // node_allocator must always have value_type&pointer typedefs
+   BOOST_STATIC_ASSERT((detail::has_type_value_type< node_allocator_type >::value));
+   BOOST_STATIC_ASSERT((detail::has_type_pointer< node_allocator_type >::value));
+   // node_allocator value_type can be either void (disabled) or node (enabled)
+   BOOST_STATIC_ASSERT((boost::is_same< typename node_allocator_type::value_type, void >::value
+                        or boost::is_same< typename node_allocator_type::value_type, node_type >::value));
+
+   static const bool has_node_allocator = boost::is_same< typename node_allocator_type::value_type, node_type >::value;
+   static const bool has_value_allocator = has_node_allocator and boost::is_same< node_type, value_type >::value;
+   static const bool external_header = has_node_allocator;
+   static const bool has_container_from_iterator = not external_header and
+       boost::is_same< node_type, typename pointer_traits< node_ptr >::element_type >::value;
+   typedef typename boost::mpl::if_c< has_value_allocator,
+                                      node_allocator_type,
+                                      std::allocator< void >
+                                    >::type value_allocator_type;
+
+   typedef detail::header_holder< external_header, node_allocator_type, node_type, node_ptr > header_traits;
+   typedef detail::header_from_node_ptr< has_container_from_iterator, header_traits > header_from_node_ptr_functor;
+
+   // when external header is used node must be the element pointed at by node_ptr
+   BOOST_STATIC_ASSERT((not external_header
+                        or boost::is_same< node_type, typename pointer_traits< node_ptr >::element_type >::value));
+   // if a node allocator is given, it must produce node_ptr elements
+   BOOST_STATIC_ASSERT((not has_node_allocator
+                        or boost::is_same< node_ptr, typename node_allocator_type::pointer >::value));
+
+   struct holder_t : public ValueTraits, public node_allocator_type
+   {
+      explicit holder_t(const ValueTraits &vtraits, const node_allocator_type& alloc)
+         : ValueTraits(vtraits), node_allocator_type(alloc)
+      {
+         root.allocate_header(node_allocator());
+      }
+      ~holder_t()
+      {
+          root.deallocate_header(node_allocator());
+      }
+
+      const node_allocator_type& node_allocator() const
+      { return static_cast< const node_allocator_type& >(*this); }
+      node_allocator_type& node_allocator()
+      { return static_cast< node_allocator_type& >(*this); }
+
+      header_traits root;
+   } holder;
+
+   static bstbase3 &get_tree_base_from_header_node_ptr(node_ptr p)
+   {
+      BOOST_STATIC_ASSERT(has_container_from_iterator);
+      header_traits* ht_ptr = header_from_node_ptr_functor()(p);
+      holder_t *holder = get_parent_from_member<holder_t, header_traits>(ht_ptr, &holder_t::root);
+      bstbase3 *base   = get_parent_from_member<bstbase3, holder_t> (holder, &bstbase3::holder);
+      return *base;
+   }
+
+   bstbase3(const ValueTraits &vtraits, const node_allocator_type &alloc)
+      : holder(vtraits, alloc)
+   {
+      node_algorithms::init_header(this->header_ptr());
+   }
+
+   node_ptr header_ptr() { return holder.root.get_header_ptr(); }
+   //{  return pointer_traits<node_ptr>::pointer_to(this->holder.root);  } TODO: remove old
+
+   const_node_ptr header_ptr() const { return holder.root.get_header_ptr(); }
+   //{  return pointer_traits<const_node_ptr>::pointer_to(this->holder.root);  }
+
+   const value_traits &get_value_traits() const
+   {  return this->holder;  }
+
+   value_traits &get_value_traits()
+   {  return this->holder;  }
+
+   const node_allocator_type& priv_node_allocator() const { return holder; }
+   node_allocator_type& priv_node_allocator() { return holder; }
+
+   typedef typename pointer_traits<node_ptr>::template
+      rebind_pointer<const value_traits>::type const_value_traits_ptr;
+
+   const_value_traits_ptr value_traits_ptr() const
+   {  return pointer_traits<const_value_traits_ptr>::pointer_to(this->get_value_traits());  }
 
    iterator begin()
    {  return iterator(node_algorithms::begin_node(this->header_ptr()), this->value_traits_ptr());   }
@@ -197,15 +244,15 @@ struct bstbase3
 
 };
 
-template<class ValueTraits, class VoidOrKeyComp, algo_types AlgoType>
+template<class ValueTraits, class VoidOrKeyComp, algo_types AlgoType, typename Node_Allocator>
 struct bstbase2
    //Put the (possibly empty) functor in the first position to get EBO in MSVC
    : public detail::ebo_functor_holder<typename get_less< VoidOrKeyComp
                             , typename ValueTraits::value_type
                             >::type>
-   , public bstbase3<ValueTraits, AlgoType>
+   , public bstbase3<ValueTraits, AlgoType, Node_Allocator>
 {
-   typedef bstbase3<ValueTraits, AlgoType>                           treeheader_t;
+   typedef bstbase3<ValueTraits, AlgoType, Node_Allocator>           treeheader_t;
    typedef typename treeheader_t::value_traits                       value_traits;
    typedef typename treeheader_t::node_algorithms                    node_algorithms;
    typedef typename get_less
@@ -215,9 +262,10 @@ struct bstbase2
    typedef typename treeheader_t::const_iterator                     const_iterator;
    typedef typename treeheader_t::node_ptr                           node_ptr;
    typedef typename treeheader_t::const_node_ptr                     const_node_ptr;
+   typedef typename treeheader_t::node_allocator_type                node_allocator_type;
 
-   bstbase2(const value_compare &comp, const ValueTraits &vtraits)
-      : detail::ebo_functor_holder<value_compare>(comp), treeheader_t(vtraits)
+   bstbase2(const value_compare &comp, const ValueTraits &vtraits, const node_allocator_type &alloc)
+      : detail::ebo_functor_holder<value_compare>(comp), treeheader_t(vtraits, alloc)
    {}
 
    const value_compare &comp() const
@@ -443,20 +491,21 @@ struct bstbase2
 //Due to MSVC's EBO implementation, to save space and maintain the ABI, we must put the non-empty size member
 //in the first position, but if size is not going to be stored then we'll use an specialization
 //that doesn't inherit from size_holder
-template<class ValueTraits, class VoidOrKeyComp, bool ConstantTimeSize, class SizeType, algo_types AlgoType>
+template<class ValueTraits, class VoidOrKeyComp, bool ConstantTimeSize, class SizeType, algo_types AlgoType, typename Node_Allocator>
 struct bstbase_hack
    : public detail::size_holder<ConstantTimeSize, SizeType>
-   , public bstbase2 < ValueTraits, VoidOrKeyComp, AlgoType>
+   , public bstbase2 < ValueTraits, VoidOrKeyComp, AlgoType, Node_Allocator>
 {
-   typedef bstbase2< ValueTraits, VoidOrKeyComp, AlgoType> base_type;
+   typedef bstbase2< ValueTraits, VoidOrKeyComp, AlgoType, Node_Allocator> base_type;
    typedef typename base_type::value_compare       value_compare;
    typedef SizeType                                size_type;
    typedef typename base_type::node_traits         node_traits;
    typedef typename get_algo
       <AlgoType, node_traits>::type                algo_type;
+   typedef typename base_type::node_allocator_type node_allocator_type;
 
-   bstbase_hack(const value_compare & comp, const ValueTraits &vtraits)
-      : base_type(comp, vtraits)
+   bstbase_hack(const value_compare & comp, const ValueTraits &vtraits, const node_allocator_type &alloc)
+      : base_type(comp, vtraits, alloc)
    {
       this->sz_traits().set_size(size_type(0));
    }
@@ -471,14 +520,15 @@ struct bstbase_hack
 };
 
 //Specialization for ConstantTimeSize == false
-template<class ValueTraits, class VoidOrKeyComp, class SizeType, algo_types AlgoType>
-struct bstbase_hack<ValueTraits, VoidOrKeyComp, false, SizeType, AlgoType>
-   : public bstbase2 < ValueTraits, VoidOrKeyComp, AlgoType>
+template<class ValueTraits, class VoidOrKeyComp, class SizeType, algo_types AlgoType, typename Node_Allocator>
+struct bstbase_hack<ValueTraits, VoidOrKeyComp, false, SizeType, AlgoType, Node_Allocator>
+   : public bstbase2 < ValueTraits, VoidOrKeyComp, AlgoType, Node_Allocator>
 {
-   typedef bstbase2< ValueTraits, VoidOrKeyComp, AlgoType> base_type;
+   typedef bstbase2< ValueTraits, VoidOrKeyComp, AlgoType, Node_Allocator> base_type;
    typedef typename base_type::value_compare       value_compare;
-   bstbase_hack(const value_compare & comp, const ValueTraits &vtraits)
-      : base_type(comp, vtraits)
+   typedef typename base_type::node_allocator_type node_allocator_type;
+   bstbase_hack(const value_compare & comp, const ValueTraits &vtraits, const node_allocator_type &alloc)
+      : base_type(comp, vtraits, alloc)
    {}
 
    typedef detail::size_holder<true, SizeType>     size_traits;
@@ -492,15 +542,15 @@ struct bstbase_hack<ValueTraits, VoidOrKeyComp, false, SizeType, AlgoType>
    static size_traits s_size_traits;
 };
 
-template<class ValueTraits, class VoidOrKeyComp, class SizeType, algo_types AlgoType>
-detail::size_holder<true, SizeType> bstbase_hack<ValueTraits, VoidOrKeyComp, false, SizeType, AlgoType>::s_size_traits;
+template<class ValueTraits, class VoidOrKeyComp, class SizeType, algo_types AlgoType, typename Node_Allocator>
+detail::size_holder<true, SizeType> bstbase_hack<ValueTraits, VoidOrKeyComp, false, SizeType, AlgoType, Node_Allocator>::s_size_traits;
 
 //This class will
-template<class ValueTraits, class VoidOrKeyComp, bool ConstantTimeSize, class SizeType, algo_types AlgoType>
+template<class ValueTraits, class VoidOrKeyComp, bool ConstantTimeSize, class SizeType, algo_types AlgoType, typename Node_Allocator>
 struct bstbase
-   : public bstbase_hack< ValueTraits, VoidOrKeyComp, ConstantTimeSize, SizeType, AlgoType>
+   : public bstbase_hack< ValueTraits, VoidOrKeyComp, ConstantTimeSize, SizeType, AlgoType, Node_Allocator>
 {
-   typedef bstbase_hack< ValueTraits, VoidOrKeyComp, ConstantTimeSize, SizeType, AlgoType> base_type;
+   typedef bstbase_hack< ValueTraits, VoidOrKeyComp, ConstantTimeSize, SizeType, AlgoType, Node_Allocator> base_type;
    typedef ValueTraits                             value_traits;
    typedef typename base_type::value_compare       value_compare;
    typedef value_compare                           key_compare;
@@ -512,9 +562,10 @@ struct bstbase
    typedef typename get_algo
       <AlgoType, node_traits>::type                node_algorithms;
    typedef SizeType                                size_type;
+   typedef typename base_type::node_allocator_type node_allocator_type;
 
-   bstbase(const value_compare & comp, const ValueTraits &vtraits)
-      : base_type(comp, vtraits)
+   bstbase(const value_compare & comp, const ValueTraits &vtraits, const node_allocator_type &alloc)
+      : base_type(comp, vtraits, alloc)
    {}
 
    //Detach all inserted nodes. This will add exception safety to bstree_impl
@@ -552,14 +603,15 @@ struct bstbase
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType>
+template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType,
+         typename Node_Allocator = std::allocator< void > >
 #endif
 class bstree_impl
-   :  public bstbase<ValueTraits, VoidKeyComp, ConstantTimeSize, SizeType, AlgoType>
+   :  public bstbase<ValueTraits, VoidKeyComp, ConstantTimeSize, SizeType, AlgoType, Node_Allocator>
 {
    public:
    /// @cond
-   typedef bstbase<ValueTraits, VoidKeyComp, ConstantTimeSize, SizeType, AlgoType> data_type;
+   typedef bstbase<ValueTraits, VoidKeyComp, ConstantTimeSize, SizeType, AlgoType, Node_Allocator> data_type;
    typedef tree_iterator<ValueTraits, false> iterator_type;
    typedef tree_iterator<ValueTraits, true>  const_iterator_type;
    /// @endcond
@@ -587,9 +639,15 @@ class bstree_impl
    typedef typename get_algo<AlgoType, node_traits>::type                                       algo_type;
    /// @endcond
    typedef BOOST_INTRUSIVE_IMPDEF(algo_type)                                                    node_algorithms;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename data_type::node_allocator_type)                      node_allocator_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename data_type::value_allocator_type)                     value_allocator_type;
 
    static const bool constant_time_size = ConstantTimeSize;
    static const bool stateful_value_traits = detail::is_stateful_value_traits<value_traits>::value;
+   static const bool has_node_allocator = data_type::has_node_allocator;
+   static const bool has_value_allocator = data_type::has_value_allocator;
+   static const bool external_header = data_type::external_header;
+   static const bool has_container_from_iterator = data_type::has_container_from_iterator;
    /// @cond
    private:
 
@@ -619,8 +677,9 @@ class bstree_impl
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks)
    //!   or the copy constructor of the value_compare object throws. Basic guarantee.
    explicit bstree_impl( const value_compare &cmp = value_compare()
-                       , const value_traits &v_traits = value_traits())
-      :  data_type(cmp, v_traits)
+                       , const value_traits &v_traits = value_traits()
+                       , const node_allocator_type &alloc = node_allocator_type())
+      :  data_type(cmp, v_traits, alloc)
    {}
 
    //! <b>Requires</b>: Dereferencing iterator must yield an lvalue of type value_type.
@@ -638,8 +697,9 @@ class bstree_impl
    template<class Iterator>
    bstree_impl( bool unique, Iterator b, Iterator e
               , const value_compare &cmp     = value_compare()
-              , const value_traits &v_traits = value_traits())
-      : data_type(cmp, v_traits)
+              , const value_traits &v_traits = value_traits()
+              , const node_allocator_type &alloc = node_allocator_type())
+      : data_type(cmp, v_traits, alloc)
    {
       //bstbase releases elements in case of exceptions
       if(unique)
@@ -651,7 +711,7 @@ class bstree_impl
    //! <b>Effects</b>: to-do
    //!
    bstree_impl(BOOST_RV_REF(bstree_impl) x)
-      : data_type(::boost::move(x.comp()), ::boost::move(x.get_value_traits()))
+      : data_type(::boost::move(x.comp()), ::boost::move(x.get_value_traits()), ::boost::move(x.priv_node_allocator()))
    {
       this->swap(x);
    }
@@ -775,7 +835,7 @@ class bstree_impl
    static bstree_impl &container_from_end_iterator(iterator end_iterator)
    {
       return static_cast<bstree_impl&>
-               (data_type::get_tree_base_from_root(*boost::intrusive::detail::to_raw_pointer(end_iterator.pointed_node())));
+               (data_type::get_tree_base_from_header_node_ptr(end_iterator.pointed_node()));
    }
 
    //! <b>Precondition</b>: end_iterator must be a valid end const_iterator
@@ -789,7 +849,7 @@ class bstree_impl
    static const bstree_impl &container_from_end_iterator(const_iterator end_iterator)
    {
       return static_cast<bstree_impl&>
-               (data_type::get_tree_base_from_root(*boost::intrusive::detail::to_raw_pointer(end_iterator.pointed_node())));
+               (data_type::get_tree_base_from_header_node_ptr(end_iterator.pointed_node()));
    }
 
    //! <b>Precondition</b>: it must be a valid iterator
@@ -911,6 +971,12 @@ class bstree_impl
          this->comp() = src.comp();
          rollback.release();
       }
+   }
+   void clone_from(const bstree_impl &src)
+   {
+       BOOST_STATIC_ASSERT(has_value_allocator);
+       clone_from(src, detail::cloner_from_allocator< value_allocator_type >(this->priv_node_allocator()),
+                  detail::disposer_from_allocator< value_allocator_type >(this->priv_node_allocator()));
    }
 
    //! <b>Requires</b>: value must be an lvalue
@@ -1429,6 +1495,11 @@ class bstree_impl
       node_algorithms::init_header(this->header_ptr());
       this->sz_traits().set_size(0);
    }
+   void clear_and_dispose()
+   {
+       BOOST_STATIC_ASSERT(has_value_allocator);
+       clear_and_dispose(detail::disposer_from_allocator< value_allocator_type >(this->priv_node_allocator()));
+   }
 
    //! <b>Effects</b>: Returns the number of contained elements with the given value
    //!
@@ -1864,42 +1935,36 @@ class bstree_impl
    }
    /// @endcond
 
-   private:
-   static bstree_impl &priv_container_from_end_iterator(const const_iterator &end_iterator)
-   {
-      return *static_cast<bstree_impl*>
-         (boost::intrusive::detail::to_raw_pointer(end_iterator.pointed_node()));
-   }
 };
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType>
+template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename Node_Allocator>
 #endif
 inline bool operator<
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const bstree_impl<T, Options...> &x, const bstree_impl<T, Options...> &y)
 #else
-( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &x
-, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &y)
+( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Node_Allocator> &x
+, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Node_Allocator> &y)
 #endif
 {  return std::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType>
+template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename Node_Allocator>
 #endif
 bool operator==
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const bstree_impl<T, Options...> &x, const bstree_impl<T, Options...> &y)
 #else
-( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &x
-, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &y)
+( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Node_Allocator> &x
+, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Node_Allocator> &y)
 #endif
 {
-   typedef bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> tree_type;
+   typedef bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Node_Allocator> tree_type;
    typedef typename tree_type::const_iterator const_iterator;
 
    if(tree_type::constant_time_size && x.size() != y.size()){
@@ -1928,70 +1993,70 @@ bool operator==
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType>
+template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename Node_Allocator>
 #endif
 inline bool operator!=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const bstree_impl<T, Options...> &x, const bstree_impl<T, Options...> &y)
 #else
-( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &x
-, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &y)
+( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Node_Allocator> &x
+, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Node_Allocator> &y)
 #endif
 {  return !(x == y); }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType>
+template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename Node_Allocator>
 #endif
 inline bool operator>
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const bstree_impl<T, Options...> &x, const bstree_impl<T, Options...> &y)
 #else
-( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &x
-, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &y)
+( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Node_Allocator> &x
+, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Node_Allocator> &y)
 #endif
 {  return y < x;  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType>
+template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename Node_Allocator>
 #endif
 inline bool operator<=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const bstree_impl<T, Options...> &x, const bstree_impl<T, Options...> &y)
 #else
-( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &x
-, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &y)
+( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Node_Allocator> &x
+, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Node_Allocator> &y)
 #endif
 {  return !(y < x);  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType>
+template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename Node_Allocator>
 #endif
 inline bool operator>=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const bstree_impl<T, Options...> &x, const bstree_impl<T, Options...> &y)
 #else
-( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &x
-, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &y)
+( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Node_Allocator> &x
+, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Node_Allocator> &y)
 #endif
 {  return !(x < y);  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType>
+template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename Node_Allocator>
 #endif
 inline void swap
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (bstree_impl<T, Options...> &x, bstree_impl<T, Options...> &y)
 #else
-( bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &x
-, bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &y)
+( bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Node_Allocator> &x
+, bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Node_Allocator> &y)
 #endif
 {  x.swap(y);  }
 
@@ -2001,7 +2066,8 @@ inline void swap
 template<class T, class ...Options>
 #else
 template<class T, class O1 = void, class O2 = void
-                , class O3 = void, class O4 = void>
+                , class O3 = void, class O4 = void
+                , class O5 = void>
 #endif
 struct make_bstree
 {
@@ -2009,7 +2075,7 @@ struct make_bstree
    typedef typename pack_options
       < bstree_defaults,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
+      O1, O2, O3, O4, O5
       #else
       Options...
       #endif
@@ -2024,6 +2090,7 @@ struct make_bstree
          , typename packed_options::size_type
          , packed_options::constant_time_size
          , BsTreeAlgorithms
+         , typename packed_options::node_allocator_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -2033,14 +2100,14 @@ struct make_bstree
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
 #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-template<class T, class O1, class O2, class O3, class O4>
+template<class T, class O1, class O2, class O3, class O4, class O5>
 #else
 template<class T, class ...Options>
 #endif
 class bstree
    :  public make_bstree<T,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
+      O1, O2, O3, O4, O5
       #else
       Options...
       #endif
@@ -2049,7 +2116,7 @@ class bstree
    typedef typename make_bstree
       <T,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
+      O1, O2, O3, O4, O5
       #else
       Options...
       #endif
@@ -2061,20 +2128,23 @@ class bstree
    typedef typename Base::value_traits       value_traits;
    typedef typename Base::iterator           iterator;
    typedef typename Base::const_iterator     const_iterator;
+   typedef typename Base::node_allocator_type node_allocator_type;
 
    //Assert if passed value traits are compatible with the type
    BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
    bstree( const value_compare &cmp = value_compare()
-         , const value_traits &v_traits = value_traits())
-      :  Base(cmp, v_traits)
+         , const value_traits &v_traits = value_traits()
+         , const node_allocator_type &alloc = node_allocator_type())
+      :  Base(cmp, v_traits, alloc)
    {}
 
    template<class Iterator>
    bstree( bool unique, Iterator b, Iterator e
          , const value_compare &cmp = value_compare()
-         , const value_traits &v_traits = value_traits())
-      :  Base(unique, b, e, cmp, v_traits)
+         , const value_traits &v_traits = value_traits()
+         , const node_allocator_type &alloc = node_allocator_type())
+      :  Base(unique, b, e, cmp, v_traits, alloc)
    {}
 
    bstree(BOOST_RV_REF(bstree) x)

@@ -46,13 +46,6 @@ struct list_defaults
    typedef std::allocator< void > node_allocator_type;
 };
 
-namespace detail {
-
-BOOST_TTI_HAS_TYPE(value_type)
-BOOST_TTI_HAS_TYPE(pointer)
-
-}
-
 /// @endcond
 
 //! The class template list is an intrusive container that mimics most of the
