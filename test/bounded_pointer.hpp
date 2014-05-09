@@ -163,7 +163,7 @@ public:
         assert(i < 255);
         p._offset = i;
         _in_use[p._offset] = true;
-        std::clog << "allocating node " << static_cast< int >(p._offset) << "\n";
+        //std::clog << "allocating node " << static_cast< int >(p._offset) << "\n";
         return p;
     }
     void deallocate(pointer p, size_t n)
@@ -171,7 +171,7 @@ public:
         assert(inited());
         assert(n == 1);
         assert(_in_use[p._offset]);
-        std::clog << "deallocating node " << static_cast< int >(p._offset) << "\n";
+        //std::clog << "deallocating node " << static_cast< int >(p._offset) << "\n";
         _in_use[p._offset] = false;
     }
 
