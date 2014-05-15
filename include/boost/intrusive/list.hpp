@@ -83,9 +83,12 @@ class list_impl
    typedef typename node_traits::node_ptr                            node_ptr;
    typedef typename node_traits::const_node_ptr                      const_node_ptr;
    typedef circular_list_algorithms<node_traits>                     node_algorithms;
+   typedef Header_Holder                                             header_holder_type;
 
    static const bool constant_time_size = ConstantTimeSize;
    static const bool stateful_value_traits = detail::is_stateful_value_traits<value_traits>::value;
+   static const bool has_container_from_iterator =
+        boost::is_same< header_holder_type, detail::default_header_holder< node_traits > >::value;
 
    /// @cond
 
@@ -103,15 +106,13 @@ class list_impl
                       ));
 
    node_ptr get_root_node()
-   {  return pointer_traits<node_ptr>::pointer_to(data_.root_plus_size_.root_);  }
+   { return data_.root_plus_size_.get_node(); }
 
    const_node_ptr get_root_node() const
-   {  return pointer_traits<const_node_ptr>::pointer_to(data_.root_plus_size_.root_);  }
+   { return data_.root_plus_size_.get_node(); }
 
-   struct root_plus_size : public size_traits
-   {
-      node root_;
-   };
+   struct root_plus_size : public header_holder_type, public size_traits
+   { };
 
    struct data_t : public value_traits
    {
@@ -1255,8 +1256,10 @@ class list_impl
    private:
    static list_impl &priv_container_from_end_iterator(const const_iterator &end_iterator)
    {
-      root_plus_size *r = detail::parent_from_member<root_plus_size, node>
-         ( boost::intrusive::detail::to_raw_pointer(end_iterator.pointed_node()), &root_plus_size::root_);
+      BOOST_STATIC_ASSERT((has_container_from_iterator));
+      node_ptr p = end_iterator.pointed_node();
+      header_holder_type* h = header_holder_type::get_holder(p);
+      root_plus_size* r = static_cast< root_plus_size* >(h);
       data_t *d = detail::parent_from_member<data_t, root_plus_size>
          ( r, &data_t::root_plus_size_);
       list_impl *s  = detail::parent_from_member<list_impl, data_t>(d, &list_impl::data_);
