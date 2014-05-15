@@ -60,7 +60,7 @@ struct list_defaults
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 class list_impl
 {
@@ -1268,29 +1268,29 @@ class list_impl
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 inline bool operator<
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
 #else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &y)
 #endif
 {  return std::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 bool operator==
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
 #else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &y)
 #endif
 {
-   typedef list_impl<ValueTraits, SizeType, ConstantTimeSize> list_type;
+   typedef list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> list_type;
    typedef typename list_type::const_iterator const_iterator;
    const bool C = list_type::constant_time_size;
    if(C && x.size() != y.size()){
@@ -1320,65 +1320,65 @@ bool operator==
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 inline bool operator!=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
 #else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &y)
 #endif
 {  return !(x == y); }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 inline bool operator>
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
 #else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &y)
 #endif
 {  return y < x;  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 inline bool operator<=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
 #else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &y)
 #endif
 {  return !(y < x);  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 inline bool operator>=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
 #else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &y)
 #endif
 {  return !(x < y);  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 inline void swap
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (list_impl<T, Options...> &x, list_impl<T, Options...> &y)
 #else
-(list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &x, list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &y)
 #endif
 {  x.swap(y);  }
 
@@ -1403,12 +1403,15 @@ struct make_list
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
+   typedef typename detail::get_header_holder_type
+      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
 
    typedef list_impl
       <
          value_traits,
          typename packed_options::size_type,
-         packed_options::constant_time_size
+         packed_options::constant_time_size,
+         header_holder_type
       > implementation_defined;
    /// @endcond
    typedef implementation_defined type;

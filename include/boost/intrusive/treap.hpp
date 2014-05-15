@@ -69,16 +69,16 @@ struct treap_defaults
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidOrKeyComp, class VoidOrPrioComp, class SizeType, bool ConstantTimeSize>
+template<class ValueTraits, class VoidOrKeyComp, class VoidOrPrioComp, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 class treap_impl
    /// @cond
-   : public bstree_impl<ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, BsTreeAlgorithms>
+   : public bstree_impl<ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, BsTreeAlgorithms, Header_Holder>
    , public detail::ebo_functor_holder
          < typename get_prio
             < VoidOrPrioComp
             , typename bstree_impl
-               <ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, BsTreeAlgorithms>::value_type>::type 
+               <ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, BsTreeAlgorithms, Header_Holder>::value_type>::type
          >
    /// @endcond
 {
@@ -86,7 +86,8 @@ class treap_impl
    typedef ValueTraits                                               value_traits;
    /// @cond
    typedef bstree_impl< ValueTraits, VoidOrKeyComp, SizeType
-                      , ConstantTimeSize, BsTreeAlgorithms>          tree_type;
+                      , ConstantTimeSize, BsTreeAlgorithms
+                      , Header_Holder>                               tree_type;
    typedef tree_type                                                 implementation_defined;
    typedef get_prio
                < VoidOrPrioComp
@@ -1079,6 +1080,8 @@ struct make_treap
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
+   typedef typename detail::get_header_holder_type
+      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
 
    typedef treap_impl
          < value_traits
@@ -1086,6 +1089,7 @@ struct make_treap
          , typename packed_options::priority
          , typename packed_options::size_type
          , packed_options::constant_time_size
+         , header_holder_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;

@@ -36,15 +36,15 @@ namespace intrusive {
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class Compare, class SizeType, bool FloatingPoint>
+template<class ValueTraits, class Compare, class SizeType, bool FloatingPoint, typename Header_Holder>
 #endif
 class sg_set_impl
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-   : public sgtree_impl<ValueTraits, Compare, SizeType, FloatingPoint>
+   : public sgtree_impl<ValueTraits, Compare, SizeType, FloatingPoint, Header_Holder>
 #endif
 {
    /// @cond
-   typedef sgtree_impl<ValueTraits, Compare, SizeType, FloatingPoint> tree_type;
+   typedef sgtree_impl<ValueTraits, Compare, SizeType, FloatingPoint, Header_Holder> tree_type;
    BOOST_MOVABLE_BUT_NOT_COPYABLE(sg_set_impl)
 
    typedef tree_type implementation_defined;
@@ -425,12 +425,15 @@ struct make_sg_set
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
+   typedef typename detail::get_header_holder_type
+      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
 
    typedef sg_set_impl
          < value_traits
          , typename packed_options::compare
          , typename packed_options::size_type
          , packed_options::floating_point
+         , header_holder_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -518,15 +521,15 @@ class sg_set
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class Compare, class SizeType, bool FloatingPoint>
+template<class ValueTraits, class Compare, class SizeType, bool FloatingPoint, typename Header_Holder>
 #endif
 class sg_multiset_impl
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-   : public sgtree_impl<ValueTraits, Compare, SizeType, FloatingPoint>
+   : public sgtree_impl<ValueTraits, Compare, SizeType, FloatingPoint, Header_Holder>
 #endif
 {
    /// @cond
-   typedef sgtree_impl<ValueTraits, Compare, SizeType, FloatingPoint> tree_type;
+   typedef sgtree_impl<ValueTraits, Compare, SizeType, FloatingPoint, Header_Holder> tree_type;
 
    BOOST_MOVABLE_BUT_NOT_COPYABLE(sg_multiset_impl)
    typedef tree_type implementation_defined;
@@ -876,12 +879,15 @@ struct make_sg_multiset
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
+   typedef typename detail::get_header_holder_type
+      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
 
    typedef sg_multiset_impl
          < value_traits
          , typename packed_options::compare
          , typename packed_options::size_type
          , packed_options::floating_point
+         , header_holder_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;

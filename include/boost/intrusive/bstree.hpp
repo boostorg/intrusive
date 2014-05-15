@@ -52,7 +52,7 @@ struct bstree_defaults
    typedef void header_holder_type;
 };
 
-template<class ValueTraits, algo_types AlgoType>
+template<class ValueTraits, algo_types AlgoType, typename Header_Holder>
 struct bstbase3
 {
    typedef ValueTraits                                               value_traits;
@@ -198,15 +198,15 @@ struct bstbase3
 
 };
 
-template<class ValueTraits, class VoidOrKeyComp, algo_types AlgoType>
+template<class ValueTraits, class VoidOrKeyComp, algo_types AlgoType, typename Header_Holder>
 struct bstbase2
    //Put the (possibly empty) functor in the first position to get EBO in MSVC
    : public detail::ebo_functor_holder<typename get_less< VoidOrKeyComp
                             , typename ValueTraits::value_type
                             >::type>
-   , public bstbase3<ValueTraits, AlgoType>
+   , public bstbase3<ValueTraits, AlgoType, Header_Holder>
 {
-   typedef bstbase3<ValueTraits, AlgoType>                           treeheader_t;
+   typedef bstbase3<ValueTraits, AlgoType, Header_Holder>            treeheader_t;
    typedef typename treeheader_t::value_traits                       value_traits;
    typedef typename treeheader_t::node_algorithms                    node_algorithms;
    typedef typename get_less
@@ -444,12 +444,12 @@ struct bstbase2
 //Due to MSVC's EBO implementation, to save space and maintain the ABI, we must put the non-empty size member
 //in the first position, but if size is not going to be stored then we'll use an specialization
 //that doesn't inherit from size_holder
-template<class ValueTraits, class VoidOrKeyComp, bool ConstantTimeSize, class SizeType, algo_types AlgoType>
+template<class ValueTraits, class VoidOrKeyComp, bool ConstantTimeSize, class SizeType, algo_types AlgoType, typename Header_Holder>
 struct bstbase_hack
    : public detail::size_holder<ConstantTimeSize, SizeType>
-   , public bstbase2 < ValueTraits, VoidOrKeyComp, AlgoType>
+   , public bstbase2 < ValueTraits, VoidOrKeyComp, AlgoType, Header_Holder>
 {
-   typedef bstbase2< ValueTraits, VoidOrKeyComp, AlgoType> base_type;
+   typedef bstbase2< ValueTraits, VoidOrKeyComp, AlgoType, Header_Holder> base_type;
    typedef typename base_type::value_compare       value_compare;
    typedef SizeType                                size_type;
    typedef typename base_type::node_traits         node_traits;
@@ -472,11 +472,11 @@ struct bstbase_hack
 };
 
 //Specialization for ConstantTimeSize == false
-template<class ValueTraits, class VoidOrKeyComp, class SizeType, algo_types AlgoType>
-struct bstbase_hack<ValueTraits, VoidOrKeyComp, false, SizeType, AlgoType>
-   : public bstbase2 < ValueTraits, VoidOrKeyComp, AlgoType>
+template<class ValueTraits, class VoidOrKeyComp, class SizeType, algo_types AlgoType, typename Header_Holder>
+struct bstbase_hack<ValueTraits, VoidOrKeyComp, false, SizeType, AlgoType, Header_Holder>
+   : public bstbase2 < ValueTraits, VoidOrKeyComp, AlgoType, Header_Holder>
 {
-   typedef bstbase2< ValueTraits, VoidOrKeyComp, AlgoType> base_type;
+   typedef bstbase2< ValueTraits, VoidOrKeyComp, AlgoType, Header_Holder> base_type;
    typedef typename base_type::value_compare       value_compare;
    bstbase_hack(const value_compare & comp, const ValueTraits &vtraits)
       : base_type(comp, vtraits)
@@ -493,15 +493,15 @@ struct bstbase_hack<ValueTraits, VoidOrKeyComp, false, SizeType, AlgoType>
    static size_traits s_size_traits;
 };
 
-template<class ValueTraits, class VoidOrKeyComp, class SizeType, algo_types AlgoType>
-detail::size_holder<true, SizeType> bstbase_hack<ValueTraits, VoidOrKeyComp, false, SizeType, AlgoType>::s_size_traits;
+template<class ValueTraits, class VoidOrKeyComp, class SizeType, algo_types AlgoType, typename Header_Holder>
+detail::size_holder<true, SizeType> bstbase_hack<ValueTraits, VoidOrKeyComp, false, SizeType, AlgoType, Header_Holder>::s_size_traits;
 
 //This class will
-template<class ValueTraits, class VoidOrKeyComp, bool ConstantTimeSize, class SizeType, algo_types AlgoType>
+template<class ValueTraits, class VoidOrKeyComp, bool ConstantTimeSize, class SizeType, algo_types AlgoType, typename Header_Holder>
 struct bstbase
-   : public bstbase_hack< ValueTraits, VoidOrKeyComp, ConstantTimeSize, SizeType, AlgoType>
+   : public bstbase_hack< ValueTraits, VoidOrKeyComp, ConstantTimeSize, SizeType, AlgoType, Header_Holder>
 {
-   typedef bstbase_hack< ValueTraits, VoidOrKeyComp, ConstantTimeSize, SizeType, AlgoType> base_type;
+   typedef bstbase_hack< ValueTraits, VoidOrKeyComp, ConstantTimeSize, SizeType, AlgoType, Header_Holder> base_type;
    typedef ValueTraits                             value_traits;
    typedef typename base_type::value_compare       value_compare;
    typedef value_compare                           key_compare;
@@ -553,14 +553,14 @@ struct bstbase
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType>
+template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename Header_Holder>
 #endif
 class bstree_impl
-   :  public bstbase<ValueTraits, VoidKeyComp, ConstantTimeSize, SizeType, AlgoType>
+   :  public bstbase<ValueTraits, VoidKeyComp, ConstantTimeSize, SizeType, AlgoType, Header_Holder>
 {
    public:
    /// @cond
-   typedef bstbase<ValueTraits, VoidKeyComp, ConstantTimeSize, SizeType, AlgoType> data_type;
+   typedef bstbase<ValueTraits, VoidKeyComp, ConstantTimeSize, SizeType, AlgoType, Header_Holder> data_type;
    typedef tree_iterator<ValueTraits, false> iterator_type;
    typedef tree_iterator<ValueTraits, true>  const_iterator_type;
    /// @endcond
@@ -1876,31 +1876,31 @@ class bstree_impl
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType>
+template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename Header_Holder>
 #endif
 inline bool operator<
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const bstree_impl<T, Options...> &x, const bstree_impl<T, Options...> &y)
 #else
-( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &x
-, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &y)
+( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Header_Holder> &x
+, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Header_Holder> &y)
 #endif
 {  return std::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType>
+template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename Header_Holder>
 #endif
 bool operator==
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const bstree_impl<T, Options...> &x, const bstree_impl<T, Options...> &y)
 #else
-( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &x
-, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &y)
+( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Header_Holder> &x
+, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Header_Holder> &y)
 #endif
 {
-   typedef bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> tree_type;
+   typedef bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Header_Holder> tree_type;
    typedef typename tree_type::const_iterator const_iterator;
 
    if(tree_type::constant_time_size && x.size() != y.size()){
@@ -1929,70 +1929,70 @@ bool operator==
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType>
+template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename Header_Holder>
 #endif
 inline bool operator!=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const bstree_impl<T, Options...> &x, const bstree_impl<T, Options...> &y)
 #else
-( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &x
-, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &y)
+( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Header_Holder> &x
+, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Header_Holder> &y)
 #endif
 {  return !(x == y); }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType>
+template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename Header_Holder>
 #endif
 inline bool operator>
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const bstree_impl<T, Options...> &x, const bstree_impl<T, Options...> &y)
 #else
-( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &x
-, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &y)
+( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Header_Holder> &x
+, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Header_Holder> &y)
 #endif
 {  return y < x;  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType>
+template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename Header_Holder>
 #endif
 inline bool operator<=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const bstree_impl<T, Options...> &x, const bstree_impl<T, Options...> &y)
 #else
-( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &x
-, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &y)
+( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Header_Holder> &x
+, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Header_Holder> &y)
 #endif
 {  return !(y < x);  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType>
+template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename Header_Holder>
 #endif
 inline bool operator>=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const bstree_impl<T, Options...> &x, const bstree_impl<T, Options...> &y)
 #else
-( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &x
-, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &y)
+( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Header_Holder> &x
+, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Header_Holder> &y)
 #endif
 {  return !(x < y);  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType>
+template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename Header_Holder>
 #endif
 inline void swap
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (bstree_impl<T, Options...> &x, bstree_impl<T, Options...> &y)
 #else
-( bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &x
-, bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType> &y)
+( bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Header_Holder> &x
+, bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, Header_Holder> &y)
 #endif
 {  x.swap(y);  }
 
@@ -2019,6 +2019,8 @@ struct make_bstree
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
+   typedef typename detail::get_header_holder_type
+      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
 
    typedef bstree_impl
          < value_traits
@@ -2026,6 +2028,7 @@ struct make_bstree
          , typename packed_options::size_type
          , packed_options::constant_time_size
          , BsTreeAlgorithms
+         , header_holder_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;

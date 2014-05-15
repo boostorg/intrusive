@@ -66,18 +66,19 @@ struct rbtree_defaults
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidOrKeyComp, class SizeType, bool ConstantTimeSize>
+template<class ValueTraits, class VoidOrKeyComp, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 class rbtree_impl
    /// @cond
-   :  public bstree_impl<ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, RbTreeAlgorithms>
+   :  public bstree_impl<ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, RbTreeAlgorithms, Header_Holder>
    /// @endcond
 {
    public:
    typedef ValueTraits                                               value_traits;
    /// @cond
    typedef bstree_impl< ValueTraits, VoidOrKeyComp, SizeType
-                      , ConstantTimeSize, RbTreeAlgorithms>          tree_type;
+                      , ConstantTimeSize, RbTreeAlgorithms
+                      , Header_Holder>                               tree_type;
    typedef tree_type                                                 implementation_defined;
    /// @endcond
 
@@ -444,12 +445,15 @@ struct make_rbtree
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
+   typedef typename detail::get_header_holder_type
+      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
 
    typedef rbtree_impl
          < value_traits
          , typename packed_options::compare
          , typename packed_options::size_type
          , packed_options::constant_time_size
+         , header_holder_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;

@@ -36,15 +36,15 @@ namespace intrusive {
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class Compare, class SizeType, bool ConstantTimeSize>
+template<class ValueTraits, class Compare, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 class splay_set_impl
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-   : public splaytree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize>
+   : public splaytree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, Header_Holder>
 #endif
 {
    /// @cond
-   typedef splaytree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize> tree_type;
+   typedef splaytree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, Header_Holder> tree_type;
    BOOST_MOVABLE_BUT_NOT_COPYABLE(splay_set_impl)
 
    typedef tree_type implementation_defined;
@@ -435,12 +435,15 @@ struct make_splay_set
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
+   typedef typename detail::get_header_holder_type
+      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
 
    typedef splay_set_impl
          < value_traits
          , typename packed_options::compare
          , typename packed_options::size_type
          , packed_options::constant_time_size
+         , header_holder_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -528,15 +531,15 @@ class splay_set
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class Compare, class SizeType, bool ConstantTimeSize>
+template<class ValueTraits, class Compare, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 class splay_multiset_impl
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-   : public splaytree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize>
+   : public splaytree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, Header_Holder>
 #endif
 {
    /// @cond
-   typedef splaytree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize> tree_type;
+   typedef splaytree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, Header_Holder> tree_type;
 
    BOOST_MOVABLE_BUT_NOT_COPYABLE(splay_multiset_impl)
    typedef tree_type implementation_defined;
@@ -889,12 +892,15 @@ struct make_splay_multiset
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
+   typedef typename detail::get_header_holder_type
+      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
 
    typedef splay_multiset_impl
          < value_traits
          , typename packed_options::compare
          , typename packed_options::size_type
          , packed_options::constant_time_size
+         , header_holder_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;

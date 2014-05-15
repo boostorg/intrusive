@@ -96,7 +96,7 @@ struct slist_bool_flags
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags>
+template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename Header_Holder>
 #endif
 class slist_impl
 {
@@ -1972,31 +1972,31 @@ class slist_impl
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags>
+template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename Header_Holder>
 #endif
 inline bool operator<
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const slist_impl<T, Options...> &x, const slist_impl<T, Options...> &y)
 #else
-( const slist_impl<ValueTraits, SizeType, BoolFlags> &x
-, const slist_impl<ValueTraits, SizeType, BoolFlags> &y)
+( const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &x
+, const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &y)
 #endif
 {  return std::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags>
+template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename Header_Holder>
 #endif
 bool operator==
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const slist_impl<T, Options...> &x, const slist_impl<T, Options...> &y)
 #else
-( const slist_impl<ValueTraits, SizeType, BoolFlags> &x
-, const slist_impl<ValueTraits, SizeType, BoolFlags> &y)
+( const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &x
+, const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &y)
 #endif
 {
-   typedef slist_impl<ValueTraits, SizeType, BoolFlags> slist_type;
+   typedef slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> slist_type;
    typedef typename slist_type::const_iterator const_iterator;
    const bool C = slist_type::constant_time_size;
    if(C && x.size() != y.size()){
@@ -2026,70 +2026,70 @@ bool operator==
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags>
+template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename Header_Holder>
 #endif
 inline bool operator!=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const slist_impl<T, Options...> &x, const slist_impl<T, Options...> &y)
 #else
-( const slist_impl<ValueTraits, SizeType, BoolFlags> &x
-, const slist_impl<ValueTraits, SizeType, BoolFlags> &y)
+( const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &x
+, const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &y)
 #endif
 {  return !(x == y); }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags>
+template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename Header_Holder>
 #endif
 inline bool operator>
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const slist_impl<T, Options...> &x, const slist_impl<T, Options...> &y)
 #else
-( const slist_impl<ValueTraits, SizeType, BoolFlags> &x
-, const slist_impl<ValueTraits, SizeType, BoolFlags> &y)
+( const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &x
+, const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &y)
 #endif
 {  return y < x;  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags>
+template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename Header_Holder>
 #endif
 inline bool operator<=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const slist_impl<T, Options...> &x, const slist_impl<T, Options...> &y)
 #else
-( const slist_impl<ValueTraits, SizeType, BoolFlags> &x
-, const slist_impl<ValueTraits, SizeType, BoolFlags> &y)
+( const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &x
+, const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &y)
 #endif
 {  return !(y < x);  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags>
+template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename Header_Holder>
 #endif
 inline bool operator>=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const slist_impl<T, Options...> &x, const slist_impl<T, Options...> &y)
 #else
-( const slist_impl<ValueTraits, SizeType, BoolFlags> &x
-, const slist_impl<ValueTraits, SizeType, BoolFlags> &y)
+( const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &x
+, const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &y)
 #endif
 {  return !(x < y);  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags>
+template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename Header_Holder>
 #endif
 inline void swap
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (slist_impl<T, Options...> &x, slist_impl<T, Options...> &y)
 #else
-( slist_impl<ValueTraits, SizeType, BoolFlags> &x
-, slist_impl<ValueTraits, SizeType, BoolFlags> &y)
+( slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &x
+, slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &y)
 #endif
 {  x.swap(y);  }
 
@@ -2113,12 +2113,15 @@ struct make_slist
       >::type packed_options;
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
+   typedef typename detail::get_header_holder_type
+      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
    typedef slist_impl
       < value_traits
       , typename packed_options::size_type
       ,  (std::size_t(packed_options::linear)*slist_bool_flags::linear_pos)
         |(std::size_t(packed_options::constant_time_size)*slist_bool_flags::constant_time_size_pos)
         |(std::size_t(packed_options::cache_last)*slist_bool_flags::cache_last_pos)
+      , header_holder_type
       > implementation_defined;
    /// @endcond
    typedef implementation_defined type;

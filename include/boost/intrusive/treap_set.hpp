@@ -36,16 +36,16 @@ namespace intrusive {
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidOrKeyComp, class VoidOrPrioComp, class SizeType, bool ConstantTimeSize>
+template<class ValueTraits, class VoidOrKeyComp, class VoidOrPrioComp, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 class treap_set_impl
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-   : public treap_impl<ValueTraits, VoidOrKeyComp, VoidOrPrioComp, SizeType, ConstantTimeSize>
+   : public treap_impl<ValueTraits, VoidOrKeyComp, VoidOrPrioComp, SizeType, ConstantTimeSize, Header_Holder>
 #endif
 {
    /// @cond
    public:
-   typedef treap_impl<ValueTraits, VoidOrKeyComp, VoidOrPrioComp, SizeType, ConstantTimeSize> tree_type;
+   typedef treap_impl<ValueTraits, VoidOrKeyComp, VoidOrPrioComp, SizeType, ConstantTimeSize, Header_Holder> tree_type;
    BOOST_MOVABLE_BUT_NOT_COPYABLE(treap_set_impl)
 
    typedef tree_type implementation_defined;
@@ -439,6 +439,8 @@ struct make_treap_set
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
+   typedef typename detail::get_header_holder_type
+      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
 
    typedef treap_set_impl
          < value_traits
@@ -446,6 +448,7 @@ struct make_treap_set
          , typename packed_options::priority
          , typename packed_options::size_type
          , packed_options::constant_time_size
+         , header_holder_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -537,15 +540,15 @@ class treap_set
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidOrKeyComp, class VoidOrPrioComp, class SizeType, bool ConstantTimeSize>
+template<class ValueTraits, class VoidOrKeyComp, class VoidOrPrioComp, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 class treap_multiset_impl
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-   : public treap_impl<ValueTraits, VoidOrKeyComp, VoidOrPrioComp, SizeType, ConstantTimeSize>
+   : public treap_impl<ValueTraits, VoidOrKeyComp, VoidOrPrioComp, SizeType, ConstantTimeSize, Header_Holder>
 #endif
 {
    /// @cond
-   typedef treap_impl<ValueTraits, VoidOrKeyComp, VoidOrPrioComp, SizeType, ConstantTimeSize> tree_type;
+   typedef treap_impl<ValueTraits, VoidOrKeyComp, VoidOrPrioComp, SizeType, ConstantTimeSize, Header_Holder> tree_type;
    BOOST_MOVABLE_BUT_NOT_COPYABLE(treap_multiset_impl)
 
    typedef tree_type implementation_defined;
@@ -906,6 +909,8 @@ struct make_treap_multiset
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
+   typedef typename detail::get_header_holder_type
+      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
 
    typedef treap_multiset_impl
          < value_traits
@@ -913,6 +918,7 @@ struct make_treap_multiset
          , typename packed_options::priority
          , typename packed_options::size_type
          , packed_options::constant_time_size
+         , header_holder_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
