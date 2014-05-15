@@ -31,6 +31,7 @@
 #include <boost/detail/no_exceptions_support.hpp>
 #include <functional>
 #include <boost/functional/hash.hpp>
+#include <boost/tti/tti.hpp>
 
 namespace boost {
 namespace intrusive {
@@ -896,33 +897,42 @@ static typename uncast_types<ConstNodePtr>::non_const_pointer
 
 // trivial header node holder
 template < typename Node_Traits >
-struct default_holder : public Node_Traits::node
+struct default_header_holder : public Node_Traits::node
 {
     typedef Node_Traits node_traits;
     typedef typename node_traits::node node;
     typedef typename node_traits::node_ptr node_ptr;
     typedef typename node_traits::const_node_ptr const_node_ptr;
 
-    default_holder() : node() {}
+    default_header_holder() : node() {}
 
-    const_node_ptr get_header_node() const
+    const_node_ptr get_node() const
     { return pointer_traits< const_node_ptr >::pointer_to(*static_cast< const node* >(this)); }
-    node_ptr get_header_node()
+    node_ptr get_node()
     { return pointer_traits< node_ptr >::pointer_to(*static_cast< node* >(this)); }
+
+    // (unsafe) downcast used to implement container-from-iterator
+    static default_header_holder* get_holder(node_ptr p)
+    { return static_cast< default_header_holder* >(boost::intrusive::detail::to_raw_pointer(p)); }
 };
+
+//BOOST_TTI_HAS_MEMBER_FUNCTION(get_node)
 
 // type function producing the header node holder
 template < typename Value_Traits, typename Header_Holder >
 struct get_header_holder_type
 {
+    //typedef typename Value_Traits::node_ptr node_ptr;
+    //typedef typename Value_Traits::const_node_ptr const_node_ptr;
+    //BOOST_STATIC_ASSERT((has_member_function_get_node< Header_Holder, node_ptr () >::value));
+    //BOOST_STATIC_ASSERT((has_member_function_get_node< Header_Holder, const_node_ptr () const>::value));
     typedef Header_Holder type;
 };
 template < typename Value_Traits >
 struct get_header_holder_type< Value_Traits, void >
 {
-    typedef default_holder< typename Value_Traits::node_traits > type;
+    typedef default_header_holder< typename Value_Traits::node_traits > type;
 };
-
 
 } //namespace detail
 
