@@ -894,6 +894,36 @@ static typename uncast_types<ConstNodePtr>::non_const_pointer
    return uncast_types<ConstNodePtr>::non_const_traits::const_cast_from(ptr);
 }
 
+// trivial header node holder
+template < typename Node_Traits >
+struct default_holder : public Node_Traits::node
+{
+    typedef Node_Traits node_traits;
+    typedef typename node_traits::node node;
+    typedef typename node_traits::node_ptr node_ptr;
+    typedef typename node_traits::const_node_ptr const_node_ptr;
+
+    default_holder() : node() {}
+
+    const_node_ptr get_header_node() const
+    { return pointer_traits< const_node_ptr >::pointer_to(*static_cast< const node* >(this)); }
+    node_ptr get_header_node()
+    { return pointer_traits< node_ptr >::pointer_to(*static_cast< node* >(this)); }
+};
+
+// type function producing the header node holder
+template < typename Value_Traits, typename Header_Holder >
+struct get_header_holder_type
+{
+    typedef Header_Holder type;
+};
+template < typename Value_Traits >
+struct get_header_holder_type< Value_Traits, void >
+{
+    typedef default_holder< typename Value_Traits::node_traits > type;
+};
+
+
 } //namespace detail
 
 template<class Node, class Tag, unsigned int>
