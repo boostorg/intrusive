@@ -48,6 +48,7 @@ struct treap_defaults
    typedef std::size_t size_type;
    typedef void compare;
    typedef void priority;
+   typedef void header_holder_type;
 };
 
 /// @endcond

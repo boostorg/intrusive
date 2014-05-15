@@ -192,6 +192,7 @@ struct sgtree_defaults
    typedef std::size_t size_type;
    typedef void compare;
    static const bool floating_point = true;
+   typedef void header_holder_type;
 };
 
 /// @endcond

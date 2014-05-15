@@ -57,6 +57,7 @@ struct slist_defaults
    static const bool linear = false;
    typedef std::size_t size_type;
    static const bool cache_last = false;
+   typedef void header_holder_type;
 };
 
 struct slist_bool_flags

@@ -49,6 +49,7 @@ struct bstree_defaults
    typedef void compare;
    static const bool floating_point = true;  //For sgtree
    typedef void priority;  //For treap
+   typedef void header_holder_type;
 };
 
 template<class ValueTraits, algo_types AlgoType>

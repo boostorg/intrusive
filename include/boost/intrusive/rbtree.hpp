@@ -45,6 +45,7 @@ struct rbtree_defaults
    static const bool constant_time_size = true;
    typedef std::size_t size_type;
    typedef void compare;
+   typedef void header_holder_type;
 };
 
 /// @endcond

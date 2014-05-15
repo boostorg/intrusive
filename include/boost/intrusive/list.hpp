@@ -42,6 +42,7 @@ struct list_defaults
    typedef detail::default_list_hook proto_value_traits;
    static const bool constant_time_size = true;
    typedef std::size_t size_type;
+   typedef void header_holder_type;
 };
 
 /// @endcond
