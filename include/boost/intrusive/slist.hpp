@@ -2098,7 +2098,7 @@ inline void swap
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) || defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template<class T, class ...Options>
 #else
-template<class T, class O1 = void, class O2 = void, class O3 = void, class O4 = void, class O5 = void>
+template<class T, class O1 = void, class O2 = void, class O3 = void, class O4 = void, class O5 = void, class O6 = void>
 #endif
 struct make_slist
 {
@@ -2106,7 +2106,7 @@ struct make_slist
    typedef typename pack_options
       < slist_defaults,
          #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-         O1, O2, O3, O4, O5
+         O1, O2, O3, O4, O5, O6
          #else
          Options...
          #endif
@@ -2128,14 +2128,14 @@ struct make_slist
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
 #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-template<class T, class O1, class O2, class O3, class O4, class O5>
+template<class T, class O1, class O2, class O3, class O4, class O5, class O6>
 #else
 template<class T, class ...Options>
 #endif
 class slist
    :  public make_slist<T,
          #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-         O1, O2, O3, O4, O5
+         O1, O2, O3, O4, O5, O6
          #else
          Options...
          #endif
@@ -2144,7 +2144,7 @@ class slist
    typedef typename make_slist
       <T,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4, O5
+      O1, O2, O3, O4, O5, O6
       #else
       Options...
       #endif
