@@ -226,16 +226,6 @@ class slist_impl
    value_traits &priv_value_traits()
    {  return data_;  }
 
-   protected:
-   node &prot_root_node()
-   {  return data_.root_plus_size_.root_; }
-
-   node const &prot_root_node() const
-   {  return data_.root_plus_size_.root_; }
-
-   void prot_set_size(size_type s)
-   {  data_.root_plus_size_.set_size(s);  }
-
    public:
 
    typedef typename pointer_traits<node_ptr>::template
