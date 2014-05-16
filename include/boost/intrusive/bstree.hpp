@@ -1864,13 +1864,6 @@ class bstree_impl
       return b.unconst();
    }
    /// @endcond
-
-   private:
-   static bstree_impl &priv_container_from_end_iterator(const const_iterator &end_iterator)
-   {
-      return *static_cast<bstree_impl*>
-         (boost::intrusive::detail::to_raw_pointer(end_iterator.pointed_node()));
-   }
 };
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
