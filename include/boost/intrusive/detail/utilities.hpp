@@ -239,14 +239,25 @@ struct node_cloner
    typedef typename real_value_traits::pointer     pointer;
    typedef typename node_traits::node              node;
    typedef typename real_value_traits::const_node_ptr    const_node_ptr;
+   typedef typename real_value_traits::reference   reference;
+   typedef typename real_value_traits::const_reference const_reference;
 
    node_cloner(F f, const RealValueTraits *traits)
       :  base_t(f), traits_(traits)
    {}
 
+   // tree-based containers use this method, which is proxy-reference friendly
    node_ptr operator()(const node_ptr & p)
-   {  return this->operator()(*p); }
+   {
+      const_reference v = *traits_->to_value_ptr(p);
+      node_ptr n = traits_->to_node_ptr(*base_t::get()(v));
+      //Cloned node must be in default mode if the linking mode requires it
+      if(safemode_or_autounlink)
+         BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(n));
+      return n;
+   }
 
+   // hashtables use this method, which is proxy-reference unfriendly
    node_ptr operator()(const node &to_clone)
    {
       const value_type &v =
