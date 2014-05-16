@@ -37,17 +37,17 @@ namespace intrusive {
 
 /// @cond
 
-template<class Node, class NodePtr, bool>
-struct root_plus_last
+template<class Header_Holder, class NodePtr, bool>
+struct header_holder_plus_last
 {
-   Node     root_;
+   Header_Holder header_holder_;
    NodePtr  last_;
 };
 
-template<class Node, class NodePtr>
-struct root_plus_last<Node, NodePtr, false>
+template<class Header_Holder, class NodePtr>
+struct header_holder_plus_last<Header_Holder, NodePtr, false>
 {
-   Node root_;
+   Header_Holder header_holder_;
 };
 
 struct slist_defaults
@@ -116,11 +116,14 @@ class slist_impl
    typedef typename node_traits::node                                node;
    typedef typename node_traits::node_ptr                            node_ptr;
    typedef typename node_traits::const_node_ptr                      const_node_ptr;
+   typedef Header_Holder                                             header_holder_type;
 
    static const bool constant_time_size = 0 != (BoolFlags & slist_bool_flags::constant_time_size_pos);
    static const bool stateful_value_traits = detail::is_stateful_value_traits<value_traits>::value;
    static const bool linear = 0 != (BoolFlags & slist_bool_flags::linear_pos);
    static const bool cache_last = 0 != (BoolFlags & slist_bool_flags::cache_last_pos);
+   static const bool has_container_from_iterator =
+        boost::is_same< header_holder_type, detail::default_header_holder< node_traits > >::value;
 
    typedef typename detail::if_c
       < linear
@@ -153,10 +156,10 @@ class slist_impl
          (linear ? const_node_ptr() : this->get_root_node());  }
 
    node_ptr get_root_node()
-   {  return pointer_traits<node_ptr>::pointer_to(data_.root_plus_size_.root_);  }
+   { return data_.root_plus_size_.header_holder_.get_node(); }
 
    const_node_ptr get_root_node() const
-   {  return pointer_traits<const_node_ptr>::pointer_to(data_.root_plus_size_.root_);  }
+   { return data_.root_plus_size_.header_holder_.get_node(); }
 
    node_ptr get_last_node()
    {  return this->get_last_node(detail::bool_<cache_last>());  }
@@ -198,9 +201,10 @@ class slist_impl
       }
    }
 
+   typedef header_holder_plus_last<header_holder_type, node_ptr, cache_last> header_holder_plus_last_t;
    struct root_plus_size
       :  public size_traits
-      ,  public root_plus_last<node, node_ptr, cache_last>
+      ,  public header_holder_plus_last_t
    {};
 
    struct data_t
@@ -1950,8 +1954,12 @@ class slist_impl
       //Obtaining the container from the end iterator is not possible with linear
       //singly linked lists (because "end" is represented by the null pointer)
       BOOST_STATIC_ASSERT(!linear);
-      root_plus_size *r = detail::parent_from_member<root_plus_size, node>
-         ( boost::intrusive::detail::to_raw_pointer(end_iterator.pointed_node()), (&root_plus_size::root_));
+      BOOST_STATIC_ASSERT((has_container_from_iterator));
+      node_ptr p = end_iterator.pointed_node();
+      header_holder_type* h = header_holder_type::get_holder(p);
+      header_holder_plus_last_t* hpl = detail::parent_from_member< header_holder_plus_last_t, header_holder_type>
+                                         (h, &header_holder_plus_last_t::header_holder_);
+      root_plus_size* r = static_cast< root_plus_size* >(hpl);
       data_t *d = detail::parent_from_member<data_t, root_plus_size>
          ( r, &data_t::root_plus_size_);
       slist_impl *s  = detail::parent_from_member<slist_impl, data_t>(d, &slist_impl::data_);
