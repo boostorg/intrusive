@@ -212,27 +212,15 @@ void test_generic_assoc<ValueTraits, ContainerDefiner>::test_all(value_cont_type
    test_container_from_iterator(values);
 }
 
-template < bool Has_Value_Allocator, typename assoc_type, typename value_cont_type >
-struct test_clone_impl
+template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
+void test_generic_assoc<ValueTraits, ContainerDefiner>
+   ::test_clone(value_cont_type& values)
 {
-void operator () (value_cont_type& values)
-{
-   assoc_type testset1 (values.begin(), values.begin() + values.size());
-   assoc_type testset2;
-
-   testset2.clone_from(testset1);
-   BOOST_TEST (testset2 == testset1);
-   testset2.clear_and_dispose();
-   BOOST_TEST (testset2.empty());
-}
-};
-
-template < typename assoc_type, typename value_cont_type >
-struct test_clone_impl< false, assoc_type, value_cont_type >
-{
-void operator () (value_cont_type& values)
-{
-   typedef typename assoc_type::value_type value_type;
+   typedef typename ContainerDefiner
+      < value_type
+      , value_traits<ValueTraits>
+      , constant_time_size<value_type::constant_time_size>
+      >::type assoc_type;
    assoc_type testset1 (values.begin(), values.begin() + values.size());
    assoc_type testset2;
 
@@ -240,21 +228,6 @@ void operator () (value_cont_type& values)
    BOOST_TEST (testset2 == testset1);
    testset2.clear_and_dispose(test::delete_disposer<value_type>());
    BOOST_TEST (testset2.empty());
-}
-};
-
-template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
-void test_generic_assoc<ValueTraits, ContainerDefiner>
-   ::test_clone(value_cont_type& values)
-{
-   typedef typename ValueTraits::value_type value_type;
-   typedef typename ContainerDefiner
-      < value_type
-      , value_traits<ValueTraits>
-      , constant_time_size<value_type::constant_time_size>
-      >::type assoc_type;
-
-   test_clone_impl< assoc_type::has_value_allocator, assoc_type, value_cont_type >()(values);
 }
 
 template < bool Has_Container_From_Iterator, typename assoc_type, typename value_cont_type >

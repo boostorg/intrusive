@@ -61,8 +61,8 @@ struct hooks
 };
 
 // container generator with void node allocator
-template < bool Void_Allocator >
-struct GetContainer_With_Allocator
+template < bool Default_Holder >
+struct GetContainer_With_Holder
 {
 template< class ValueType
         , class Option1 =void
@@ -82,7 +82,7 @@ struct GetContainer
 
 // container generator with standard (non-void) node allocator
 template <>
-struct GetContainer_With_Allocator< false >
+struct GetContainer_With_Holder< false >
 {
 template< class ValueType
         , class Option1 =void
@@ -101,13 +101,13 @@ struct GetContainer
       , Option1
       , Option2
       , Option3
-      , node_allocator_type< std::allocator< node > >
+      , header_holder_type< pointer_holder< node > >
       > type;
 };
 };
 
 
-template<class VoidPointer, bool constant_time_size, bool Void_Allocator>
+template<class VoidPointer, bool constant_time_size, bool Default_Holder>
 class test_main_template
 {
    public:
@@ -120,7 +120,7 @@ class test_main_template
                   < value_type
                   , typename hooks<VoidPointer>::base_hook_type
                   >::type
-                , GetContainer_With_Allocator< Void_Allocator >::template GetContainer
+                , GetContainer_With_Holder< Default_Holder >::template GetContainer
                 >::test_all();
       test::test_generic_multiset < typename detail::get_member_value_traits
                   < value_type
@@ -129,21 +129,21 @@ class test_main_template
                                , &value_type::node_
                                >
                   >::type
-                , GetContainer_With_Allocator< Void_Allocator >::template GetContainer
+                , GetContainer_With_Holder< Default_Holder >::template GetContainer
                 >::test_all();
       test::test_generic_multiset < nonhook_node_member_value_traits< value_type,
                                                                       typename hooks<VoidPointer>::nonhook_node_member_type,
                                                                       &value_type::nhn_member_,
                                                                       safe_link
                                                                     >,
-                                    GetContainer_With_Allocator< Void_Allocator >::template GetContainer
+                                    GetContainer_With_Holder< Default_Holder >::template GetContainer
                                   >::test_all();
       return 0;
    }
 };
 
-template<class VoidPointer, bool Void_Allocator>
-class test_main_template<VoidPointer, false, Void_Allocator>
+template<class VoidPointer, bool Default_Holder>
+class test_main_template<VoidPointer, false, Default_Holder>
 {
    public:
    int operator()()
@@ -155,7 +155,7 @@ class test_main_template<VoidPointer, false, Void_Allocator>
                   < value_type
                   , typename hooks<VoidPointer>::base_hook_type
                   >::type
-                , GetContainer_With_Allocator< Void_Allocator >::template GetContainer
+                , GetContainer_With_Holder< Default_Holder >::template GetContainer
                 >::test_all();
 
       test::test_generic_multiset < typename detail::get_member_value_traits
@@ -165,14 +165,14 @@ class test_main_template<VoidPointer, false, Void_Allocator>
                                , &value_type::node_
                                >
                   >::type
-                , GetContainer_With_Allocator< Void_Allocator >::template GetContainer
+                , GetContainer_With_Holder< Default_Holder >::template GetContainer
                 >::test_all();
 
       test::test_generic_multiset < typename detail::get_base_value_traits
                   < value_type
                   , typename hooks<VoidPointer>::auto_base_hook_type
                   >::type
-                , GetContainer_With_Allocator< Void_Allocator >::template GetContainer
+                , GetContainer_With_Holder< Default_Holder >::template GetContainer
                 >::test_all();
 
       test::test_generic_multiset < typename detail::get_member_value_traits
@@ -182,14 +182,14 @@ class test_main_template<VoidPointer, false, Void_Allocator>
                                , &value_type::auto_node_
                                >
                   >::type
-                , GetContainer_With_Allocator< Void_Allocator >::template GetContainer
+                , GetContainer_With_Holder< Default_Holder >::template GetContainer
                 >::test_all();
       return 0;
    }
 };
 
 // container generator which ignores further parametrization, except for compare option
-template < typename Value_Traits, bool Constant_Time_Size, typename Allocator >
+template < typename Value_Traits, bool Constant_Time_Size, typename Header_Holder >
 struct Get_Preset_Container
 {
     template < class
@@ -208,7 +208,7 @@ struct Get_Preset_Container
                                             value_traits< Value_Traits >,
                                             constant_time_size< Constant_Time_Size >,
                                             compare< compare_option >,
-                                            node_allocator_type< Allocator >
+                                            header_holder_type< Header_Holder >
                                           > type;
     };
 };
@@ -224,7 +224,8 @@ struct test_main_template_bptr
 
         allocator_type::init();
         test::test_generic_multiset< value_traits,
-                                     Get_Preset_Container< value_traits, Constant_Time_Size, allocator_type >::template GetContainer
+                                     Get_Preset_Container< value_traits, Constant_Time_Size,
+                                                           Bounded_Pointer_Holder< value_type > >::template GetContainer
                                    >::test_all();
         assert(allocator_type::is_clear());
         allocator_type::destroy();
