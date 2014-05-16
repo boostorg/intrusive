@@ -61,18 +61,38 @@ struct bstbase3
    typedef typename get_algo<AlgoType, node_traits>::type            node_algorithms;
    typedef typename node_traits::node_ptr                            node_ptr;
    typedef typename node_traits::const_node_ptr                      const_node_ptr;
+   typedef tree_iterator<value_traits, false>                                                   iterator;
+   typedef tree_iterator<value_traits, true>                                                    const_iterator;
+   typedef boost::intrusive::detail::reverse_iterator<iterator>                                 reverse_iterator;
+   typedef boost::intrusive::detail::reverse_iterator<const_iterator>                           const_reverse_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename value_traits::pointer)                               pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename value_traits::const_pointer)                         const_pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<pointer>::element_type)               value_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(value_type)                                                   key_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<pointer>::reference)                  reference;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<const_pointer>::reference)            const_reference;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<const_pointer>::difference_type)      difference_type;
+   typedef Header_Holder                                                                        header_holder_type;
+
+   static const bool safemode_or_autounlink = is_safe_autounlink<value_traits::link_mode>::value;
+   static const bool stateful_value_traits = detail::is_stateful_value_traits<value_traits>::value;
+   static const bool has_container_from_iterator =
+        boost::is_same< header_holder_type, detail::default_header_holder< node_traits > >::value;
 
    struct holder_t : public ValueTraits
    {
       explicit holder_t(const ValueTraits &vtraits)
          : ValueTraits(vtraits)
       {}
-      node_type root;
+      header_holder_type root;
    } holder;
 
-   static bstbase3 &get_tree_base_from_root(node_type &root)
+   static bstbase3 &get_tree_base_from_end_iterator(const const_iterator &end_iterator)
    {
-      holder_t *holder = get_parent_from_member<holder_t, node_type>(&root, &holder_t::root);
+      BOOST_STATIC_ASSERT(has_container_from_iterator);
+      node_ptr p = end_iterator.pointed_node();
+      header_holder_type* h = header_holder_type::get_holder(p);
+      holder_t *holder = get_parent_from_member<holder_t, header_holder_type>(h, &holder_t::root);
       bstbase3 *base   = get_parent_from_member<bstbase3, holder_t> (holder, &bstbase3::holder);
       return *base;
    }
@@ -84,10 +104,10 @@ struct bstbase3
    }
 
    node_ptr header_ptr()
-   {  return pointer_traits<node_ptr>::pointer_to(this->holder.root);  }
+   { return holder.root.get_node(); }
 
    const_node_ptr header_ptr() const
-   {  return pointer_traits<const_node_ptr>::pointer_to(this->holder.root);  }
+   { return holder.root.get_node(); }
 
    const value_traits &get_value_traits() const
    {  return this->holder;  }
@@ -100,20 +120,6 @@ struct bstbase3
 
    const_value_traits_ptr value_traits_ptr() const
    {  return pointer_traits<const_value_traits_ptr>::pointer_to(this->get_value_traits());  }
-
-   typedef tree_iterator<value_traits, false> iterator;
-   typedef tree_iterator<value_traits, true>  const_iterator;
-   typedef boost::intrusive::detail::reverse_iterator<iterator>         reverse_iterator;
-   typedef boost::intrusive::detail::reverse_iterator<const_iterator>   const_reverse_iterator;
-   typedef BOOST_INTRUSIVE_IMPDEF(typename value_traits::pointer)                          pointer;
-   typedef BOOST_INTRUSIVE_IMPDEF(typename value_traits::const_pointer)                    const_pointer;
-   typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<pointer>::element_type)               value_type;
-   typedef BOOST_INTRUSIVE_IMPDEF(value_type)                                                   key_type;
-   typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<pointer>::reference)                  reference;
-   typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<const_pointer>::reference)            const_reference;
-   typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<const_pointer>::difference_type)      difference_type;
-   static const bool safemode_or_autounlink = is_safe_autounlink<value_traits::link_mode>::value;
-   static const bool stateful_value_traits = detail::is_stateful_value_traits<value_traits>::value;
 
    iterator begin()
    {  return iterator(node_algorithms::begin_node(this->header_ptr()), this->value_traits_ptr());   }
@@ -776,7 +782,7 @@ class bstree_impl
    static bstree_impl &container_from_end_iterator(iterator end_iterator)
    {
       return static_cast<bstree_impl&>
-               (data_type::get_tree_base_from_root(*boost::intrusive::detail::to_raw_pointer(end_iterator.pointed_node())));
+               (data_type::get_tree_base_from_end_iterator(end_iterator));
    }
 
    //! <b>Precondition</b>: end_iterator must be a valid end const_iterator
@@ -790,7 +796,7 @@ class bstree_impl
    static const bstree_impl &container_from_end_iterator(const_iterator end_iterator)
    {
       return static_cast<bstree_impl&>
-               (data_type::get_tree_base_from_root(*boost::intrusive::detail::to_raw_pointer(end_iterator.pointed_node())));
+               (data_type::get_tree_base_from_end_iterator(end_iterator));
    }
 
    //! <b>Precondition</b>: it must be a valid iterator
