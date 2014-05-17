@@ -424,7 +424,7 @@ void destructor_impl(Hook &, detail::link_dispatch<normal_link>)
    template<>
    struct builtin_clz_dispatch<unsigned long long>
    {
-      static const unsigned long long call(unsigned long long n)
+      static unsigned long long call(unsigned long long n)
       {  return __builtin_clzll(n); }
    };
    #endif
@@ -432,14 +432,14 @@ void destructor_impl(Hook &, detail::link_dispatch<normal_link>)
    template<>
    struct builtin_clz_dispatch<unsigned long>
    {
-      static const unsigned long call(unsigned long n)
+      static unsigned long call(unsigned long n)
       {  return __builtin_clzl(n); }
    };
 
    template<>
    struct builtin_clz_dispatch<unsigned int>
    {
-      static const unsigned int call(unsigned int n)
+      static unsigned int call(unsigned int n)
       {  return __builtin_clz(n); }
    };
 
