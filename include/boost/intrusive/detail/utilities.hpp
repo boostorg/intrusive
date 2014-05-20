@@ -31,6 +31,8 @@
 #include <boost/detail/no_exceptions_support.hpp>
 #include <functional>
 #include <boost/functional/hash.hpp>
+#include <boost/type_traits.hpp>
+#include <boost/tti/tti.hpp>
 
 namespace boost {
 namespace intrusive {
@@ -60,6 +62,11 @@ struct is_safe_autounlink
 };
 
 namespace detail {
+
+// macro definitions used to check that user-provided allocator
+// has expected types
+BOOST_TTI_HAS_TYPE(value_type)
+BOOST_TTI_HAS_TYPE(pointer)
 
 template <class T>
 struct internal_member_value_traits
@@ -186,6 +193,94 @@ struct size_holder<false, SizeType, Tag>
    {}
 };
 
+template < bool Has_Container_From_Iterator, typename Header_Holder >
+struct header_from_node_ptr
+{
+    typedef Header_Holder header_holder;
+    typedef typename header_holder::node_ptr node_ptr;
+    typedef typename header_holder::node node;
+    header_holder* operator () (node_ptr) { return NULL; }
+};
+
+template < typename Header_Holder >
+struct header_from_node_ptr< true, Header_Holder >
+{
+    typedef Header_Holder header_holder;
+    typedef typename header_holder::node_ptr node_ptr;
+    typedef typename header_holder::node node;
+    BOOST_STATIC_ASSERT((boost::is_same< typename header_holder::header, node >::value));
+    header_holder* operator () (node_ptr p)
+    {
+        return parent_from_member<header_holder, node>(to_raw_pointer(p), &header_holder::header_);
+    }
+};
+
+template < bool ExternalHeader, typename Allocator, typename Header, typename Node_Ptr >
+struct header_holder
+{
+    static const bool external_header = ExternalHeader;
+    typedef Allocator allocator_t;
+    typedef Header header;
+    typedef Node_Ptr node_ptr;
+    typedef typename pointer_traits< node_ptr >::element_type node;
+    typedef typename pointer_traits< node_ptr >::template rebind_pointer< const node >::type const_node_ptr;
+
+    void allocate_header(allocator_t&) {}
+    void deallocate_header(allocator_t&) {}
+    const_node_ptr get_header_ptr() const
+    {
+        return pointer_traits< const_node_ptr >::pointer_to(header_);
+    }
+    node_ptr get_header_ptr()
+    {
+        return pointer_traits< node_ptr >::pointer_to(header_);
+    }
+    void set_header_ptr(node_ptr)
+    {}
+
+    header header_;
+};
+
+template < typename Allocator, typename Header, typename Node_Ptr >
+struct header_holder< true, Allocator, Header, Node_Ptr >
+{
+    static const bool external_header = true;
+    typedef Allocator allocator_t;
+    typedef Header header;
+    typedef Node_Ptr node_ptr;
+    typedef typename pointer_traits< node_ptr >::element_type node;
+    typedef typename pointer_traits< node_ptr >::template rebind_pointer< const node >::type const_node_ptr;
+    BOOST_STATIC_ASSERT((boost::is_same< header, node >::value));
+
+    void allocate_header(allocator_t& header_allocator)
+    {
+        header_ptr_ = header_allocator.allocate(1);
+        new (to_raw_pointer(header_ptr_)) node();
+    }
+    void deallocate_header(allocator_t& header_allocator)
+    {
+        if (header_ptr_)
+        {
+            header_ptr_->~node();
+            header_allocator.deallocate(header_ptr_, 1);
+        }
+    }
+    const_node_ptr get_header_ptr() const
+    {
+        return header_ptr_;
+    }
+    node_ptr get_header_ptr()
+    {
+        return header_ptr_;
+    }
+    node_ptr set_header_ptr(node_ptr p)
+    {
+        header_ptr_ = p;
+    }
+
+    node_ptr header_ptr_;
+};
+
 template<class KeyValueCompare, class RealValueTraits>
 struct key_nodeptr_comp
    :  private detail::ebo_functor_holder<KeyValueCompare>
@@ -238,14 +333,25 @@ struct node_cloner
    typedef typename real_value_traits::pointer     pointer;
    typedef typename node_traits::node              node;
    typedef typename real_value_traits::const_node_ptr    const_node_ptr;
+   typedef typename real_value_traits::reference   reference;
+   typedef typename real_value_traits::const_reference const_reference;
 
    node_cloner(F f, const RealValueTraits *traits)
       :  base_t(f), traits_(traits)
    {}
 
+   // tree-based containers use this method, which is proxy-reference friendly
    node_ptr operator()(const node_ptr & p)
-   {  return this->operator()(*p); }
+   {
+      const_reference v = *traits_->to_value_ptr(p);
+      node_ptr n = traits_->to_node_ptr(*base_t::get()(v));
+      //Cloned node must be in default mode if the linking mode requires it
+      if(safemode_or_autounlink)
+         BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(n));
+      return n;
+   }
 
+   // hashtables use this method, which is proxy-reference unfriendly
    node_ptr operator()(const node &to_clone)
    {
       const value_type &v =
@@ -893,6 +999,65 @@ static typename uncast_types<ConstNodePtr>::non_const_pointer
 {
    return uncast_types<ConstNodePtr>::non_const_traits::const_cast_from(ptr);
 }
+
+template < typename Allocator >
+struct cloner_from_allocator
+{
+    typedef Allocator allocator_type;
+    typedef typename allocator_type::value_type value_type;
+    typedef typename allocator_type::pointer pointer;
+    typedef typename pointer_traits< pointer >::reference reference;
+    typedef typename pointer_traits< pointer >::template rebind_pointer< const value_type >::type const_pointer;
+    typedef typename pointer_traits< const_pointer >::reference const_reference;
+
+    cloner_from_allocator(allocator_type allocator) : _allocator(allocator) {}
+
+    pointer operator () (const_reference r)
+    {
+        pointer p = _allocator.allocate(1);
+        new (to_raw_pointer(p)) value_type(r);
+        return p;
+    }
+
+    allocator_type _allocator;
+};
+
+template <>
+struct cloner_from_allocator< std::allocator< void > >
+{
+    typedef std::allocator< void > allocator_type;
+    typedef typename allocator_type::value_type value_type;
+    typedef typename allocator_type::pointer pointer;
+};
+
+template < typename Allocator >
+struct disposer_from_allocator
+{
+    typedef Allocator allocator_type;
+    typedef typename allocator_type::value_type value_type;
+    typedef typename allocator_type::pointer pointer;
+    typedef typename pointer_traits< pointer >::reference reference;
+    typedef typename pointer_traits< pointer >::template rebind_pointer< const value_type >::type const_pointer;
+    typedef typename pointer_traits< const_pointer >::reference const_reference;
+
+    disposer_from_allocator(allocator_type allocator) : _allocator(allocator) {}
+
+    void operator () (pointer p)
+    {
+        to_raw_pointer(p)->~value_type();
+        _allocator.deallocate(p, 1);
+    }
+
+    allocator_type _allocator;
+};
+
+template <>
+struct disposer_from_allocator< std::allocator< void > >
+{
+    typedef std::allocator< void > allocator_type;
+    typedef typename allocator_type::value_type value_type;
+    typedef typename allocator_type::pointer pointer;
+};
 
 } //namespace detail
 

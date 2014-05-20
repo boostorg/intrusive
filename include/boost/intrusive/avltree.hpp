@@ -47,6 +47,7 @@ struct avltree_defaults
    static const bool constant_time_size = true;
    typedef std::size_t size_type;
    typedef void compare;
+   typedef std::allocator< void > node_allocator_type;
 };
 
 /// @endcond
@@ -67,18 +68,19 @@ struct avltree_defaults
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidOrKeyComp, class SizeType, bool ConstantTimeSize>
+template<class ValueTraits, class VoidOrKeyComp, class SizeType, bool ConstantTimeSize, typename Node_Allocator>
 #endif
 class avltree_impl
    /// @cond
-   :  public bstree_impl<ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, AvlTreeAlgorithms>
+   :  public bstree_impl<ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, AvlTreeAlgorithms, Node_Allocator>
    /// @endcond
 {
    public:
    typedef ValueTraits value_traits;
    /// @cond
    typedef bstree_impl< ValueTraits, VoidOrKeyComp, SizeType
-                      , ConstantTimeSize, AvlTreeAlgorithms>         tree_type;
+                      , ConstantTimeSize, AvlTreeAlgorithms
+                      , Node_Allocator >                             tree_type;
    typedef tree_type                                                 implementation_defined;
    /// @endcond
 
@@ -101,8 +103,15 @@ class avltree_impl
    typedef typename implementation_defined::node_ptr                 node_ptr;
    typedef typename implementation_defined::const_node_ptr           const_node_ptr;
    typedef typename implementation_defined::node_algorithms          node_algorithms;
+   typedef typename implementation_defined::node_allocator_type      node_allocator_type;
+   typedef typename implementation_defined::value_allocator_type     value_allocator_type;
 
-   static const bool constant_time_size = implementation_defined::constant_time_size;
+   static const bool constant_time_size = tree_type::constant_time_size;
+   static const bool has_node_allocator = tree_type::has_node_allocator;
+   static const bool has_value_allocator = tree_type::has_value_allocator;
+   static const bool external_header = tree_type::external_header;
+   static const bool has_container_from_iterator = tree_type::has_container_from_iterator;
+
    /// @cond
    private:
 
@@ -118,16 +127,18 @@ class avltree_impl
 
    //! @copydoc ::boost::intrusive::bstree::bstree(const value_compare &,const value_traits &)
    explicit avltree_impl( const value_compare &cmp = value_compare()
-                       , const value_traits &v_traits = value_traits())
-      :  tree_type(cmp, v_traits)
+                       , const value_traits &v_traits = value_traits()
+                       , const node_allocator_type &alloc = node_allocator_type())
+      :  tree_type(cmp, v_traits, alloc)
    {}
 
    //! @copydoc ::boost::intrusive::bstree::bstree(bool,Iterator,Iterator,const value_compare &,const value_traits &)
    template<class Iterator>
    avltree_impl( bool unique, Iterator b, Iterator e
               , const value_compare &cmp     = value_compare()
-              , const value_traits &v_traits = value_traits())
-      : tree_type(unique, b, e, cmp, v_traits)
+              , const value_traits &v_traits = value_traits()
+              , const node_allocator_type &alloc = node_allocator_type())
+      : tree_type(unique, b, e, cmp, v_traits, alloc)
    {}
 
    //! @copydoc ::boost::intrusive::bstree::bstree(bstree &&)
@@ -430,7 +441,8 @@ void swap(avltree_impl<T, Options...> &x, avltree_impl<T, Options...> &y);
 template<class T, class ...Options>
 #else
 template<class T, class O1 = void, class O2 = void
-                , class O3 = void, class O4 = void>
+                , class O3 = void, class O4 = void
+                , class O5 = void>
 #endif
 struct make_avltree
 {
@@ -438,7 +450,7 @@ struct make_avltree
    typedef typename pack_options
       < avltree_defaults,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
+      O1, O2, O3, O4, O5
       #else
       Options...
       #endif
@@ -452,6 +464,7 @@ struct make_avltree
          , typename packed_options::compare
          , typename packed_options::size_type
          , packed_options::constant_time_size
+         , typename packed_options::node_allocator_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -461,14 +474,14 @@ struct make_avltree
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
 #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-template<class T, class O1, class O2, class O3, class O4>
+template<class T, class O1, class O2, class O3, class O4, class O5>
 #else
 template<class T, class ...Options>
 #endif
 class avltree
    :  public make_avltree<T,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
+      O1, O2, O3, O4, O5
       #else
       Options...
       #endif
@@ -477,7 +490,7 @@ class avltree
    typedef typename make_avltree
       <T,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
+      O1, O2, O3, O4, O5
       #else
       Options...
       #endif
@@ -491,20 +504,23 @@ class avltree
    typedef typename Base::const_iterator     const_iterator;
    typedef typename Base::reverse_iterator           reverse_iterator;
    typedef typename Base::const_reverse_iterator     const_reverse_iterator;
+   typedef typename Base::node_allocator_type node_allocator_type;
 
    //Assert if passed value traits are compatible with the type
    BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
    explicit avltree( const value_compare &cmp = value_compare()
-                   , const value_traits &v_traits = value_traits())
-      :  Base(cmp, v_traits)
+                   , const value_traits &v_traits = value_traits()
+                   , const node_allocator_type &alloc = node_allocator_type())
+      :  Base(cmp, v_traits, alloc)
    {}
 
    template<class Iterator>
    avltree( bool unique, Iterator b, Iterator e
          , const value_compare &cmp = value_compare()
-         , const value_traits &v_traits = value_traits())
-      :  Base(unique, b, e, cmp, v_traits)
+         , const value_traits &v_traits = value_traits()
+         , const node_allocator_type &alloc = node_allocator_type())
+      :  Base(unique, b, e, cmp, v_traits, alloc)
    {}
 
    avltree(BOOST_RV_REF(avltree) x)

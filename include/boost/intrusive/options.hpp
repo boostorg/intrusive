@@ -182,6 +182,9 @@ struct get_node_traits
 //!obtain constant-time size() member.
 BOOST_INTRUSIVE_OPTION_CONSTANT(constant_time_size, bool, Enabled, constant_time_size)
 
+//!This option setter specifies a node allocator type
+BOOST_INTRUSIVE_OPTION_TYPE(node_allocator_type, Allocator, Allocator, node_allocator_type)
+
 //!This option setter specifies the type that
 //!the container will use to store its size.
 BOOST_INTRUSIVE_OPTION_TYPE(size_type, SizeType, SizeType, size_type)

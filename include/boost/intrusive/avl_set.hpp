@@ -36,15 +36,15 @@ namespace intrusive {
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class Compare, class SizeType, bool ConstantTimeSize>
+template<class ValueTraits, class Compare, class SizeType, bool ConstantTimeSize, typename Node_Allocator>
 #endif
 class avl_set_impl
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-   : public bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, AvlTreeAlgorithms>
+   : public bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, AvlTreeAlgorithms, Node_Allocator>
 #endif
 {
    /// @cond
-   typedef bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, AvlTreeAlgorithms> tree_type;
+   typedef bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, AvlTreeAlgorithms, Node_Allocator> tree_type;
    BOOST_MOVABLE_BUT_NOT_COPYABLE(avl_set_impl)
 
    typedef tree_type implementation_defined;
@@ -71,23 +71,31 @@ class avl_set_impl
    typedef typename implementation_defined::node_ptr                 node_ptr;
    typedef typename implementation_defined::const_node_ptr           const_node_ptr;
    typedef typename implementation_defined::node_algorithms          node_algorithms;
+   typedef typename implementation_defined::node_allocator_type      node_allocator_type;
+   typedef typename implementation_defined::value_allocator_type     value_allocator_type;
 
    static const bool constant_time_size = tree_type::constant_time_size;
+   static const bool has_node_allocator = tree_type::has_node_allocator;
+   static const bool has_value_allocator = tree_type::has_value_allocator;
+   static const bool external_header = tree_type::external_header;
+   static const bool has_container_from_iterator = tree_type::has_container_from_iterator;
 
    public:
 
    //! @copydoc ::boost::intrusive::avltree::avltree(const value_compare &,const value_traits &)
    explicit avl_set_impl( const value_compare &cmp = value_compare()
-                    , const value_traits &v_traits = value_traits())
-      :  tree_type(cmp, v_traits)
+                    , const value_traits &v_traits = value_traits()
+                    , const node_allocator_type &alloc = node_allocator_type())
+      :  tree_type(cmp, v_traits, alloc)
    {}
 
    //! @copydoc ::boost::intrusive::avltree::avltree(bool,Iterator,Iterator,const value_compare &,const value_traits &)
    template<class Iterator>
    avl_set_impl( Iterator b, Iterator e
            , const value_compare &cmp = value_compare()
-           , const value_traits &v_traits = value_traits())
-      : tree_type(true, b, e, cmp, v_traits)
+           , const value_traits &v_traits = value_traits()
+           , const node_allocator_type &alloc = node_allocator_type())
+      : tree_type(true, b, e, cmp, v_traits, alloc)
    {}
 
    //! @copydoc ::boost::intrusive::avltree::avltree(avltree &&)
@@ -397,7 +405,8 @@ void swap(avl_set_impl<T, Options...> &x, avl_set_impl<T, Options...> &y);
 template<class T, class ...Options>
 #else
 template<class T, class O1 = void, class O2 = void
-                , class O3 = void, class O4 = void>
+                , class O3 = void, class O4 = void
+                , class O5 = void>
 #endif
 struct make_avl_set
 {
@@ -405,7 +414,7 @@ struct make_avl_set
    typedef typename pack_options
       < avltree_defaults,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
+      O1, O2, O3, O4, O5
       #else
       Options...
       #endif
@@ -419,6 +428,7 @@ struct make_avl_set
          , typename packed_options::compare
          , typename packed_options::size_type
          , packed_options::constant_time_size
+         , typename packed_options::node_allocator_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -426,14 +436,14 @@ struct make_avl_set
 
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-template<class T, class O1, class O2, class O3, class O4>
+template<class T, class O1, class O2, class O3, class O4, class O5>
 #else
 template<class T, class ...Options>
 #endif
 class avl_set
    :  public make_avl_set<T,
    #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-   O1, O2, O3, O4
+   O1, O2, O3, O4, O5
    #else
    Options...
    #endif
@@ -442,7 +452,7 @@ class avl_set
    typedef typename make_avl_set
       <T,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
+      O1, O2, O3, O4, O5
       #else
       Options...
       #endif
@@ -454,20 +464,23 @@ class avl_set
    typedef typename Base::value_traits       value_traits;
    typedef typename Base::iterator           iterator;
    typedef typename Base::const_iterator     const_iterator;
+   typedef typename Base::node_allocator_type node_allocator_type;
 
    //Assert if passed value traits are compatible with the type
    BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
    explicit avl_set( const value_compare &cmp = value_compare()
-                   , const value_traits &v_traits = value_traits())
-      :  Base(cmp, v_traits)
+                   , const value_traits &v_traits = value_traits()
+                   , const node_allocator_type &alloc = node_allocator_type())
+      :  Base(cmp, v_traits, alloc)
    {}
 
    template<class Iterator>
    avl_set( Iterator b, Iterator e
       , const value_compare &cmp = value_compare()
-      , const value_traits &v_traits = value_traits())
-      :  Base(b, e, cmp, v_traits)
+      , const value_traits &v_traits = value_traits()
+      , const node_allocator_type &alloc = node_allocator_type())
+      :  Base(b, e, cmp, v_traits, alloc)
    {}
 
    avl_set(BOOST_RV_REF(avl_set) x)
@@ -506,15 +519,15 @@ class avl_set
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class Compare, class SizeType, bool ConstantTimeSize>
+template<class ValueTraits, class Compare, class SizeType, bool ConstantTimeSize, typename Node_Allocator>
 #endif
 class avl_multiset_impl
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-   : public bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, AvlTreeAlgorithms>
+   : public bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, AvlTreeAlgorithms, Node_Allocator>
 #endif
 {
    /// @cond
-   typedef bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, AvlTreeAlgorithms> tree_type;
+   typedef bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, AvlTreeAlgorithms, Node_Allocator> tree_type;
 
    BOOST_MOVABLE_BUT_NOT_COPYABLE(avl_multiset_impl)
    typedef tree_type implementation_defined;
@@ -541,22 +554,30 @@ class avl_multiset_impl
    typedef typename implementation_defined::node_ptr                 node_ptr;
    typedef typename implementation_defined::const_node_ptr           const_node_ptr;
    typedef typename implementation_defined::node_algorithms          node_algorithms;
+   typedef typename implementation_defined::node_allocator_type      node_allocator_type;
+   typedef typename implementation_defined::value_allocator_type     value_allocator_type;
 
    static const bool constant_time_size = tree_type::constant_time_size;
+   static const bool has_node_allocator = tree_type::has_node_allocator;
+   static const bool has_value_allocator = tree_type::has_value_allocator;
+   static const bool external_header = tree_type::external_header;
+   static const bool has_container_from_iterator = tree_type::has_container_from_iterator;
 
    public:
    //! @copydoc ::boost::intrusive::avltree::avltree(const value_compare &,const value_traits &)
    explicit avl_multiset_impl( const value_compare &cmp = value_compare()
-                         , const value_traits &v_traits = value_traits())
-      :  tree_type(cmp, v_traits)
+                         , const value_traits &v_traits = value_traits()
+                         , const node_allocator_type &alloc = node_allocator_type())
+      :  tree_type(cmp, v_traits, alloc)
    {}
 
    //! @copydoc ::boost::intrusive::avltree::avltree(bool,Iterator,Iterator,const value_compare &,const value_traits &)
    template<class Iterator>
    avl_multiset_impl( Iterator b, Iterator e
                 , const value_compare &cmp = value_compare()
-                , const value_traits &v_traits = value_traits())
-      : tree_type(false, b, e, cmp, v_traits)
+                , const value_traits &v_traits = value_traits()
+                , const node_allocator_type &alloc = node_allocator_type())
+      : tree_type(false, b, e, cmp, v_traits, alloc)
    {}
 
    //! @copydoc ::boost::intrusive::avltree::avltree(avltree &&)
@@ -834,7 +855,8 @@ void swap(avl_multiset_impl<T, Options...> &x, avl_multiset_impl<T, Options...> 
 template<class T, class ...Options>
 #else
 template<class T, class O1 = void, class O2 = void
-                , class O3 = void, class O4 = void>
+                , class O3 = void, class O4 = void
+                , class O5 = void>
 #endif
 struct make_avl_multiset
 {
@@ -842,7 +864,7 @@ struct make_avl_multiset
    typedef typename pack_options
       < avltree_defaults,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
+      O1, O2, O3, O4, O5
       #else
       Options...
       #endif
@@ -856,6 +878,7 @@ struct make_avl_multiset
          , typename packed_options::compare
          , typename packed_options::size_type
          , packed_options::constant_time_size
+         , typename packed_options::node_allocator_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -864,14 +887,14 @@ struct make_avl_multiset
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
 #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-template<class T, class O1, class O2, class O3, class O4>
+template<class T, class O1, class O2, class O3, class O4, class O5>
 #else
 template<class T, class ...Options>
 #endif
 class avl_multiset
    :  public make_avl_multiset<T,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
+      O1, O2, O3, O4, O5
       #else
       Options...
       #endif
@@ -879,7 +902,7 @@ class avl_multiset
 {
    typedef typename make_avl_multiset<T,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
+      O1, O2, O3, O4, O5
       #else
       Options...
       #endif
@@ -892,20 +915,23 @@ class avl_multiset
    typedef typename Base::value_traits       value_traits;
    typedef typename Base::iterator           iterator;
    typedef typename Base::const_iterator     const_iterator;
+   typedef typename Base::node_allocator_type node_allocator_type;
 
    //Assert if passed value traits are compatible with the type
    BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
    explicit avl_multiset( const value_compare &cmp = value_compare()
-                        , const value_traits &v_traits = value_traits())
-      :  Base(cmp, v_traits)
+                        , const value_traits &v_traits = value_traits()
+                        , const node_allocator_type &alloc = node_allocator_type())
+      :  Base(cmp, v_traits, alloc)
    {}
 
    template<class Iterator>
    avl_multiset( Iterator b, Iterator e
            , const value_compare &cmp = value_compare()
-           , const value_traits &v_traits = value_traits())
-      :  Base(b, e, cmp, v_traits)
+           , const value_traits &v_traits = value_traits()
+           , const node_allocator_type &alloc = node_allocator_type())
+      :  Base(b, e, cmp, v_traits, alloc)
    {}
 
    avl_multiset(BOOST_RV_REF(avl_multiset) x)

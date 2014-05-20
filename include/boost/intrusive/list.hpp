@@ -31,6 +31,7 @@
 #include <functional>
 #include <cstddef>
 #include <boost/move/move.hpp>
+#include <boost/tti/tti.hpp>
 
 namespace boost {
 namespace intrusive {
@@ -42,6 +43,7 @@ struct list_defaults
    typedef detail::default_list_hook proto_value_traits;
    static const bool constant_time_size = true;
    typedef std::size_t size_type;
+   typedef std::allocator< void > node_allocator_type;
 };
 
 /// @endcond
@@ -59,7 +61,7 @@ struct list_defaults
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Node_Allocator>
 #endif
 class list_impl
 {
@@ -82,14 +84,35 @@ class list_impl
    typedef typename node_traits::node_ptr                            node_ptr;
    typedef typename node_traits::const_node_ptr                      const_node_ptr;
    typedef circular_list_algorithms<node_traits>                     node_algorithms;
+   typedef Node_Allocator                                            node_allocator_type;
+
+   /// @cond
+   // node_allocator must always have value_type&pointer typedefs
+   BOOST_STATIC_ASSERT((detail::has_type_value_type< node_allocator_type >::value));
+   BOOST_STATIC_ASSERT((detail::has_type_pointer< node_allocator_type >::value));
+   // node_allocator value_type can be either void (disabled) or node (enabled)
+   BOOST_STATIC_ASSERT((boost::is_same< typename node_allocator_type::value_type, void >::value
+                        or boost::is_same< typename node_allocator_type::value_type, node >::value));
+   /// @endcond
 
    static const bool constant_time_size = ConstantTimeSize;
+   static const bool has_node_allocator = boost::is_same< typename node_allocator_type::value_type, node >::value;
+   static const bool has_value_allocator = has_node_allocator and boost::is_same< node, value_type >::value;
+   static const bool external_header = has_node_allocator;
    static const bool stateful_value_traits = detail::is_stateful_value_traits<value_traits>::value;
+   static const bool has_container_from_iterator = not external_header and
+       boost::is_same< node, typename pointer_traits< node_ptr >::element_type >::value;
+   typedef typename boost::mpl::if_c< has_value_allocator,
+                                      node_allocator_type,
+                                      std::allocator< void >
+                                    >::type value_allocator_type;
 
    /// @cond
 
    private:
    typedef detail::size_holder<constant_time_size, size_type>          size_traits;
+   typedef detail::header_holder< external_header, node_allocator_type, node, node_ptr > header_traits;
+   typedef detail::header_from_node_ptr< has_container_from_iterator, header_traits > header_from_node_ptr_functor;
 
    //noncopyable
    BOOST_MOVABLE_BUT_NOT_COPYABLE(list_impl)
@@ -101,26 +124,50 @@ class list_impl
                         ((int)value_traits::link_mode == (int)auto_unlink)
                       ));
 
+   // when external header is used node must be the element pointed at by node_ptr
+   BOOST_STATIC_ASSERT((not external_header
+                        or boost::is_same< node, typename pointer_traits< node_ptr >::element_type >::value));
+   // if a node allocator is given, it must produce node_ptr elements
+   BOOST_STATIC_ASSERT((not has_node_allocator
+                        or boost::is_same< node_ptr, typename node_allocator_type::pointer >::value));
+
    node_ptr get_root_node()
-   {  return pointer_traits<node_ptr>::pointer_to(data_.root_plus_size_.root_);  }
+   {  return data_.root_plus_size_.get_header_ptr();  }
 
    const_node_ptr get_root_node() const
-   {  return pointer_traits<const_node_ptr>::pointer_to(data_.root_plus_size_.root_);  }
+   {  return data_.root_plus_size_.get_header_ptr();  }
 
-   struct root_plus_size : public size_traits
-   {
-      node root_;
-   };
+   struct root_plus_size : public header_traits, public size_traits
+   {};
 
-   struct data_t : public value_traits
+   struct data_t : public value_traits, public node_allocator_type
    {
       typedef typename list_impl::value_traits value_traits;
-      explicit data_t(const value_traits &val_traits)
-         :  value_traits(val_traits)
-      {}
+      typedef typename list_impl::node_allocator_type node_allocator_type;
+
+      explicit data_t(const value_traits &val_traits, const node_allocator_type& alloc)
+         :  value_traits(val_traits), node_allocator_type(alloc)
+      {
+         root_plus_size_.allocate_header(node_allocator());
+      }
+      ~data_t()
+      {
+          root_plus_size_.deallocate_header(node_allocator());
+      }
+
+      const node_allocator_type& node_allocator() const
+      { return static_cast< const node_allocator_type& >(*this); }
+      node_allocator_type& node_allocator()
+      { return static_cast< node_allocator_type& >(*this); }
 
       root_plus_size root_plus_size_;
    } data_;
+
+   header_traits &priv_header_traits()
+   {  return data_.root_plus_size_;  }
+
+   const header_traits &priv_header_traits() const
+   {  return data_.root_plus_size_;  }
 
    size_traits &priv_size_traits()
    {  return data_.root_plus_size_;  }
@@ -133,6 +180,9 @@ class list_impl
 
    value_traits &priv_value_traits()
    {  return data_;  }
+
+   const node_allocator_type& priv_node_allocator() const { return data_; }
+   node_allocator_type& priv_node_allocator() { return data_; }
 
    typedef typename pointer_traits<node_ptr>::template
       rebind_pointer<value_traits const>::type const_value_traits_ptr;
@@ -150,8 +200,9 @@ class list_impl
    //!
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks).
-   explicit list_impl(const value_traits &v_traits = value_traits())
-      :  data_(v_traits)
+   explicit list_impl(const value_traits &v_traits = value_traits(),
+                      const node_allocator_type& node_allocator = node_allocator_type())
+      :  data_(v_traits, node_allocator)
    {
       this->priv_size_traits().set_size(size_type(0));
       node_algorithms::init_header(this->get_root_node());
@@ -166,8 +217,10 @@ class list_impl
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks).
    template<class Iterator>
-   list_impl(Iterator b, Iterator e, const value_traits &v_traits = value_traits())
-      :  data_(v_traits)
+   list_impl(Iterator b, Iterator e,
+             const value_traits &v_traits = value_traits(),
+             const node_allocator_type& node_allocator = node_allocator_type())
+      :  data_(v_traits, node_allocator)
    {
       //nothrow, no need to rollback to release elements on exception
       this->priv_size_traits().set_size(size_type(0));
@@ -179,7 +232,7 @@ class list_impl
    //! <b>Effects</b>: to-do
    //!
    list_impl(BOOST_RV_REF(list_impl) x)
-      : data_(::boost::move(x.priv_value_traits()))
+      : data_(::boost::move(x.priv_value_traits()), ::boost::move(x.priv_node_allocator()))
    {
       this->priv_size_traits().set_size(size_type(0));
       node_algorithms::init_header(this->get_root_node());
@@ -716,6 +769,11 @@ class list_impl
       node_algorithms::init_header(this->get_root_node());
       this->priv_size_traits().set_size(0);
    }
+   void clear_and_dispose()
+   {
+       BOOST_STATIC_ASSERT(has_value_allocator);
+       clear_and_dispose(detail::disposer_from_allocator< value_allocator_type >(priv_node_allocator()));
+   }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!   Cloner should yield to nodes equivalent to the original nodes.
@@ -742,6 +800,12 @@ class list_impl
          this->push_back(*cloner(*b));
       }
       rollback.release();
+   }
+   void clone_from(const list_impl &src)
+   {
+       BOOST_STATIC_ASSERT(has_value_allocator);
+       clone_from(src, detail::cloner_from_allocator< value_allocator_type >(priv_node_allocator()),
+                  detail::disposer_from_allocator< value_allocator_type >(priv_node_allocator()));
    }
 
    //! <b>Requires</b>: value must be an lvalue and p must be a valid iterator of *this.
@@ -1254,8 +1318,10 @@ class list_impl
    private:
    static list_impl &priv_container_from_end_iterator(const const_iterator &end_iterator)
    {
-      root_plus_size *r = detail::parent_from_member<root_plus_size, node>
-         ( boost::intrusive::detail::to_raw_pointer(end_iterator.pointed_node()), &root_plus_size::root_);
+      BOOST_STATIC_ASSERT(has_container_from_iterator);
+      header_traits* ht = header_from_node_ptr_functor()(end_iterator.pointed_node());
+      // unsafe downcast; could use dynamic_cast
+      root_plus_size *r = static_cast< root_plus_size* >(ht);
       data_t *d = detail::parent_from_member<data_t, root_plus_size>
          ( r, &data_t::root_plus_size_);
       list_impl *s  = detail::parent_from_member<list_impl, data_t>(d, &list_impl::data_);
@@ -1267,29 +1333,29 @@ class list_impl
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Node_Allocator>
 #endif
 inline bool operator<
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
 #else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(const list_impl<ValueTraits, SizeType, ConstantTimeSize, Node_Allocator> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, Node_Allocator> &y)
 #endif
 {  return std::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Node_Allocator>
 #endif
 bool operator==
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
 #else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(const list_impl<ValueTraits, SizeType, ConstantTimeSize, Node_Allocator> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, Node_Allocator> &y)
 #endif
 {
-   typedef list_impl<ValueTraits, SizeType, ConstantTimeSize> list_type;
+   typedef list_impl<ValueTraits, SizeType, ConstantTimeSize, Node_Allocator> list_type;
    typedef typename list_type::const_iterator const_iterator;
    const bool C = list_type::constant_time_size;
    if(C && x.size() != y.size()){
@@ -1319,65 +1385,65 @@ bool operator==
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Node_Allocator>
 #endif
 inline bool operator!=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
 #else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(const list_impl<ValueTraits, SizeType, ConstantTimeSize, Node_Allocator> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, Node_Allocator> &y)
 #endif
 {  return !(x == y); }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Node_Allocator>
 #endif
 inline bool operator>
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
 #else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(const list_impl<ValueTraits, SizeType, ConstantTimeSize, Node_Allocator> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, Node_Allocator> &y)
 #endif
 {  return y < x;  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Node_Allocator>
 #endif
 inline bool operator<=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
 #else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(const list_impl<ValueTraits, SizeType, ConstantTimeSize, Node_Allocator> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, Node_Allocator> &y)
 #endif
 {  return !(y < x);  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Node_Allocator>
 #endif
 inline bool operator>=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
 #else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(const list_impl<ValueTraits, SizeType, ConstantTimeSize, Node_Allocator> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, Node_Allocator> &y)
 #endif
 {  return !(x < y);  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Node_Allocator>
 #endif
 inline void swap
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (list_impl<T, Options...> &x, list_impl<T, Options...> &y)
 #else
-(list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(list_impl<ValueTraits, SizeType, ConstantTimeSize, Node_Allocator> &x, list_impl<ValueTraits, SizeType, ConstantTimeSize, Node_Allocator> &y)
 #endif
 {  x.swap(y);  }
 
@@ -1386,7 +1452,7 @@ inline void swap
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) || defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template<class T, class ...Options>
 #else
-template<class T, class O1 = void, class O2 = void, class O3 = void>
+template<class T, class O1 = void, class O2 = void, class O3 = void, class O4 = void>
 #endif
 struct make_list
 {
@@ -1394,7 +1460,7 @@ struct make_list
    typedef typename pack_options
       < list_defaults,
          #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-         O1, O2, O3
+         O1, O2, O3, O4
          #else
          Options...
          #endif
@@ -1407,7 +1473,8 @@ struct make_list
       <
          value_traits,
          typename packed_options::size_type,
-         packed_options::constant_time_size
+         packed_options::constant_time_size,
+         typename packed_options::node_allocator_type
       > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -1417,14 +1484,14 @@ struct make_list
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
 #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-template<class T, class O1, class O2, class O3>
+template<class T, class O1, class O2, class O3, class O4>
 #else
 template<class T, class ...Options>
 #endif
 class list
    :  public make_list<T,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3
+      O1, O2, O3, O4
       #else
       Options...
       #endif
@@ -1433,7 +1500,7 @@ class list
    typedef typename make_list
       <T,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3
+      O1, O2, O3, O4
       #else
       Options...
       #endif
@@ -1444,16 +1511,20 @@ class list
 
    public:
    typedef typename Base::value_traits          value_traits;
+   typedef typename Base::node_allocator_type   node_allocator_type;
    typedef typename Base::iterator              iterator;
    typedef typename Base::const_iterator        const_iterator;
 
-   explicit list(const value_traits &v_traits = value_traits())
-      :  Base(v_traits)
+   explicit list(const value_traits &v_traits = value_traits(),
+                 const node_allocator_type& allocator = node_allocator_type())
+      :  Base(v_traits, allocator)
    {}
 
    template<class Iterator>
-   list(Iterator b, Iterator e, const value_traits &v_traits = value_traits())
-      :  Base(b, e, v_traits)
+   list(Iterator b, Iterator e,
+        const value_traits &v_traits = value_traits(),
+        const node_allocator_type& allocator = node_allocator_type())
+      :  Base(b, e, v_traits, allocator)
    {}
 
    list(BOOST_RV_REF(list) x)
