@@ -167,6 +167,21 @@ struct AVLTree_BPtr_Node_Traits
     static balance positive()                           { return 1; }
 };
 
+struct Tree_BPtr_Node_Traits
+{
+    typedef BPtr_Value                     val_t;
+    typedef val_t                          node;
+    typedef Bounded_Pointer< val_t >       node_ptr;
+    typedef Bounded_Pointer< const val_t > const_node_ptr;
+
+    static node_ptr get_parent(const_node_ptr p)        { return p->_parent; }
+    static void set_parent(node_ptr p, node_ptr parent) { p->_parent = parent; }
+    static node_ptr get_left(const_node_ptr p)          { return p->_l_child; }
+    static void set_left(node_ptr p, node_ptr l_child)  { p->_l_child = l_child; }
+    static node_ptr get_right(const_node_ptr p)         { return p->_r_child; }
+    static void set_right(node_ptr p, node_ptr r_child) { p->_r_child = r_child; }
+};
+
 template < typename Node_Traits >
 struct BPtr_Value_Traits
 {

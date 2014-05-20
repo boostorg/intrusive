@@ -18,6 +18,7 @@
 #include "test_macros.hpp"
 #include "test_container.hpp"
 #include "generic_assoc_test.hpp"
+#include <typeinfo>
 
 namespace boost{
 namespace intrusive{
@@ -30,11 +31,11 @@ struct test_generic_multiset
    typedef typename Value_Container< value_type >::type value_cont_type;
    typedef typename ValueTraits::reference reference;
    typedef typename ValueTraits::const_reference const_reference;
-   static void test_all ();
-   static void test_sort(value_cont_type& values);
-   static void test_insert(value_cont_type& values);
-   static void test_swap(value_cont_type& values);
-   static void test_find(value_cont_type& values);
+   static void test_all();
+   static void test_sort(value_cont_type&);
+   static void test_insert(value_cont_type&);
+   static void test_swap(value_cont_type&);
+   static void test_find(value_cont_type&);
    static void test_impl();
 };
 
@@ -52,6 +53,22 @@ void test_generic_multiset<ValueTraits, ContainerDefiner>::test_all ()
       , value_traits<ValueTraits>
       , constant_time_size<value_type::constant_time_size>
       >::type multiset_type;
+#ifdef PRINT_TESTS
+   std::clog << "testing multiset with:\n"
+             << "  value_type = " << typeid(value_type).name() << "\n"
+             << "  sizeof(value_type) = " << sizeof(value_type) << "\n"
+             << "  link_mode = " << ValueTraits::link_mode << "\n"
+             << "  node = " << typeid(typename multiset_type::node).name() << "\n"
+             << "  sizeof(node) = " << sizeof(typename multiset_type::node) << "\n"
+             << "  node_ptr = " << typeid(typename multiset_type::node_ptr).name() << "\n"
+             << "  sizeof(node_ptr) = " << sizeof(typename multiset_type::node_ptr) << "\n"
+             << "  constant_time_size = " << multiset_type::constant_time_size << "\n"
+             << "  has_container_from_iterator = " << multiset_type::has_container_from_iterator << "\n"
+             << "  has_splay = " << has_splay< multiset_type >::value << "\n"
+             << "  has_rebalance = " << has_rebalance< multiset_type >::value << "\n"
+             << "  has_insert_before = " << has_insert_before< multiset_type >::value << "\n"
+             << "  sizeof(multiset_type) = " << sizeof(multiset_type) << "\n";
+#endif
    {
       multiset_type testset(values.begin(), values.end());
       test::test_container(testset);

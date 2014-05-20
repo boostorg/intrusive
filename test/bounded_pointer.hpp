@@ -222,43 +222,91 @@ std::vector< bool > Bounded_Allocator< T >::_in_use;
 
 template < typename T >
 class Bounded_Reference_Cont
-    : public std::vector< Bounded_Reference< T > >
+    : private std::vector< Bounded_Reference< T > >
 {
 private:
-    typedef T value_type;
+    typedef T val_type;
     typedef std::vector< Bounded_Reference< T > > Base;
     typedef Bounded_Allocator< T > allocator_type;
     typedef Bounded_Pointer< T > pointer;
 
 public:
+    typedef typename Base::value_type value_type;
+    typedef typename Base::iterator iterator;
+    typedef typename Base::const_iterator const_iterator;
+    typedef typename Base::reference reference;
+    typedef typename Base::const_reference const_reference;
+    typedef typename Base::reverse_iterator reverse_iterator;
+    typedef typename Base::const_reverse_iterator const_reverse_iterator;
+
+    iterator begin() { return Base::begin(); }
+    iterator end() { return Base::end(); }
+    const_iterator begin() const { return Base::begin(); }
+    const_iterator end() const { return Base::end(); }
+    reverse_iterator rbegin() { return Base::rbegin(); }
+    reverse_iterator rend() { return Base::rend(); }
+    const_reverse_iterator rbegin() const { return Base::rbegin(); }
+    const_reverse_iterator rend() const { return Base::rend(); }
+    reference front() { return Base::front(); }
+    const_reference front() const { return Base::front(); }
+    reference back() { return Base::back(); }
+    const_reference back() const { return Base::back(); }
+    size_t size() const { return Base::size(); }
+    reference operator [] (size_t i) { return Base::operator [] (i); }
+    const_reference operator [] (size_t i) const { return Base::operator [] (i); }
+    void push_back(const value_type& v) { Base::push_back(v); }
+
     Bounded_Reference_Cont(size_t n = 0) : Base(), _allocator()
     {
         for (size_t i = 0; i < n; ++i)
         {
             pointer p = _allocator.allocate(1);
-            new (p.raw()) value_type();
+            new (p.raw()) val_type();
             Base::push_back(*p);
         }
     }
     Bounded_Reference_Cont(const Bounded_Reference_Cont& other) : Base(), _allocator(other._allocator)
     {
         //std::clog << "copying values container\n";
-        for (typename Base::const_iterator it = other.begin(); it != other.end(); ++it)
+        *this = other;
+    }
+    template < typename InputIterator >
+    Bounded_Reference_Cont(InputIterator it_start, InputIterator it_end) : Base(), _allocator()
+    {
+        for (InputIterator it = it_start; it != it_end; ++it)
         {
             pointer p = _allocator.allocate(1);
-            new (p.raw()) value_type(*it);
+            new (p.raw()) val_type(*it);
             Base::push_back(*p);
         }
     }
     ~Bounded_Reference_Cont()
     {
+        clear();
+    }
+    void clear()
+    {
         while (not Base::empty())
         {
             pointer p = &Base::back();
-            p->~value_type();
+            p->~val_type();
             _allocator.deallocate(p, 1);
             Base::pop_back();
         }
+    }
+    Bounded_Reference_Cont& operator = (const Bounded_Reference_Cont& other)
+    {
+        if (&other != this)
+        {
+            clear();
+            for (typename Base::const_iterator it = other.begin(); it != other.end(); ++it)
+            {
+                pointer p = _allocator.allocate(1);
+                new (p.raw()) val_type(*it);
+                Base::push_back(*p);
+            }
+        }
+        return *this;
     }
 
 private:

@@ -21,13 +21,13 @@
 namespace boost { namespace intrusive { namespace test {
 
 #if !defined (BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-template<class T, class O1, class O2, class O3, class O4>
+template<class T, class O1, class O2, class O3, class O4, class O5>
 #else
 template<class T, class ...Options>
 #endif
 struct has_insert_before<boost::intrusive::set<T,
    #if !defined (BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-   O1, O2, O3, O4
+   O1, O2, O3, O4, O5
    #else
    Options...
    #endif
@@ -245,7 +245,7 @@ int main( int, char* [] )
    // test (plain pointers) x (nonconst/const size) x (standard node allocator)
    test_main_template<void*, false, false>()();
    test_main_template<void*, true, false>()();
-   // test (bounded pointers) x ((nonconst/const size) x (special node allocator)
+   // test (bounded pointers) x (nonconst/const size) x (special node allocator)
    test_main_template_bptr< true >()();
    test_main_template_bptr< false >()();
 

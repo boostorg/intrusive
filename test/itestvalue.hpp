@@ -118,16 +118,15 @@ void swap_nodes(testvalue< Hooks, ConstantTimeSize >& lhs, testvalue< Hooks, Con
     lhs.swap_nodes(rhs);
 }
 
-template<class Hooks, bool ConstantTimeSize>
-std::size_t hash_value(const testvalue<Hooks, ConstantTimeSize> &t)
+template < typename Value_Type >
+std::size_t hash_value(const Value_Type& t)
 {
    boost::hash<int> hasher;
-   return hasher(t.value_);
+   return hasher((&t)->value_);
 }
 
-template<class Hooks, bool ConstantTimeSize>
-bool priority_order( const testvalue<Hooks, ConstantTimeSize> &t1
-                   , const testvalue<Hooks, ConstantTimeSize> &t2)
+template < typename Value_Type >
+bool priority_order(const Value_Type& t1, const Value_Type& t2)
 {
    std::size_t hash1 = hash_value(t1);
    boost::hash_combine(hash1, &t1);

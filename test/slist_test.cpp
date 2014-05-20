@@ -50,26 +50,27 @@ struct test_slist
    typedef typename value_traits::value_type value_type;
    typedef typename list_type::node_algorithms node_algorithms;
 
-   static void test_all(Value_Container& values);
-   static void test_front(Value_Container& values);
-   static void test_back(Value_Container& values, detail::bool_<true>);
-   static void test_back(Value_Container& values, detail::bool_<false>);
-   static void test_sort(Value_Container& values);
-   static void test_merge(Value_Container& values);
-   static void test_remove_unique(Value_Container& values);
-   static void test_insert(Value_Container& values);
-   static void test_shift(Value_Container& values);
-   static void test_swap(Value_Container& values);
-   static void test_slow_insert(Value_Container& values);
-   static void test_clone(Value_Container& values);
-   static void test_container_from_end(Value_Container &, detail::bool_<true>){}
-   static void test_container_from_end(Value_Container &values, detail::bool_<false>);
+   static void test_all(Value_Container&);
+   static void test_front(Value_Container&);
+   static void test_back(Value_Container&, detail::true_type);
+   static void test_back(Value_Container&, detail::false_type) {}
+   static void test_sort(Value_Container&);
+   static void test_merge(Value_Container&);
+   static void test_remove_unique(Value_Container&);
+   static void test_insert(Value_Container&);
+   static void test_shift(Value_Container&);
+   static void test_swap(Value_Container&);
+   static void test_slow_insert(Value_Container&);
+   static void test_clone(Value_Container&);
+   static void test_container_from_end(Value_Container&, detail::true_type);
+   static void test_container_from_end(Value_Container&, detail::false_type) {}
 };
 
 template < typename List_Type, typename Value_Container >
 void test_slist< List_Type, Value_Container >
    ::test_all (Value_Container& values)
 {
+#ifdef PRINT_TESTS
    std::clog << "testing slist with:\n"
              << "  value_type = " << typeid(value_type).name() << "\n"
              << "  sizeof(value_type) = " << sizeof(value_type) << "\n"
@@ -83,6 +84,7 @@ void test_slist< List_Type, Value_Container >
              << "  cache_last = " << list_type::cache_last << "\n"
              << "  has_container_from_iterator = " << list_type::has_container_from_iterator << "\n"
              << "  sizeof(list_type) = " << sizeof(list_type) << "\n";
+#endif
    {
       list_type list(values.begin(), values.end());
       test::test_container(list);
@@ -91,7 +93,7 @@ void test_slist< List_Type, Value_Container >
       test::test_sequence_container(list, values);
    }
    test_front(values);
-   test_back(values, detail::bool_<list_type::cache_last>());
+   test_back(values, detail::bool_< list_type::cache_last >());
    test_sort(values);
    test_merge (values);
    test_remove_unique(values);
@@ -100,7 +102,7 @@ void test_slist< List_Type, Value_Container >
    test_slow_insert (values);
    test_swap(values);
    test_clone(values);
-   test_container_from_end(values, detail::bool_<list_type::linear or not list_type::has_container_from_iterator>());
+   test_container_from_end(values, detail::bool_< not list_type::linear and list_type::has_container_from_iterator >());
 }
 
 //test: push_front, pop_front, front, size, empty:
@@ -130,7 +132,7 @@ void test_slist< List_Type, Value_Container >
 //test: push_front, pop_front, front, size, empty:
 template < typename List_Type, typename Value_Container >
 void test_slist< List_Type, Value_Container >
-   ::test_back(Value_Container& values, detail::bool_<true>)
+   ::test_back(Value_Container& values, detail::true_type)
 {
    list_type testlist;
    BOOST_TEST (testlist.empty());
@@ -144,13 +146,6 @@ void test_slist< List_Type, Value_Container >
    BOOST_TEST (&testlist.front() == &values[0]);
    BOOST_TEST (&testlist.back() == &values[1]);
 }
-
-//test: push_front, pop_front, front, size, empty:
-template < typename List_Type, typename Value_Container >
-void test_slist< List_Type, Value_Container >
-   ::test_back(Value_Container&, detail::bool_<false>)
-{}
-
 
 //test: merge due to error in merge implementation:
 template < typename List_Type, typename Value_Container >
@@ -440,10 +435,8 @@ void test_slist< List_Type, Value_Container >
 
 template < typename List_Type, typename Value_Container >
 void test_slist< List_Type, Value_Container >
-   ::test_container_from_end(Value_Container& values
-                            ,detail::bool_<false>)
+   ::test_container_from_end(Value_Container& values, detail::true_type)
 {
-
    list_type testlist1 (values.begin(), values.begin() + values.size());
    BOOST_TEST (testlist1 == list_type::container_from_end_iterator(testlist1.end()));
    BOOST_TEST (testlist1 == list_type::container_from_end_iterator(testlist1.cend()));
@@ -782,17 +775,18 @@ struct test_main_template_bptr
 
 int main(int, char* [])
 {
-   // test combinations of (regular/smart)_ptr x (const/nonconst)_size x (default/non-default)_header_holder
-   // skip smart_ptr with non-default header_holder
+   // test (plain/smart pointers) x (nonconst/const size) x (void node allocator)
    test_main_template<void*, false, true>()();
-   test_main_template<smart_ptr<void>, false, true>()();
+   test_main_template<boost::intrusive::smart_ptr<void>, false, true>()();
    test_main_template<void*, true, true>()();
-   test_main_template<smart_ptr<void>, true, true>()();
+   test_main_template<boost::intrusive::smart_ptr<void>, true, true>()();
+   // test (plain pointers) x (nonconst/const size) x (standard node allocator)
    test_main_template<void*, false, false>()();
    test_main_template<void*, true, false>()();
-   // test bounded pointers with const/non_const size (always with non-default header_holder)
+   // test (bounded pointers) x ((nonconst/const size) x (special node allocator)
    test_main_template_bptr< true >()();
    test_main_template_bptr< false >()();
+
 
    return boost::report_errors();
 }

@@ -78,38 +78,32 @@ struct test_generic_assoc
    typedef typename Value_Container< value_type >::type value_cont_type;
    typedef typename ValueTraits::reference reference;
    typedef typename ValueTraits::const_reference const_reference;
-   static void test_all(value_cont_type& values);
-   static void test_clone(value_cont_type& values);
+   static void test_all(value_cont_type&);
+   static void test_clone(value_cont_type&);
    static void test_insert_erase_burst();
-   static void test_container_from_end(value_cont_type& values);
-   static void test_splay_up(value_cont_type& values);
-   static void test_splay_up(value_cont_type& values, boost::intrusive::detail::true_type);
-   static void test_splay_up(value_cont_type& values, boost::intrusive::detail::false_type);
-   static void test_splay_down(value_cont_type& values);
-   static void test_splay_down(value_cont_type& values, boost::intrusive::detail::true_type);
-   static void test_splay_down(value_cont_type& values, boost::intrusive::detail::false_type);
-   static void test_rebalance(value_cont_type& values);
-   static void test_rebalance(value_cont_type& values, boost::intrusive::detail::true_type);
-   static void test_rebalance(value_cont_type& values, boost::intrusive::detail::false_type);
-   static void test_insert_before(value_cont_type& values);
-   static void test_insert_before(value_cont_type& values, boost::intrusive::detail::true_type);
-   static void test_insert_before(value_cont_type& values, boost::intrusive::detail::false_type);
-   static void test_container_from_iterator(value_cont_type& values);
+   static void test_container_from_end(value_cont_type&, detail::true_type);
+   static void test_container_from_end(value_cont_type&, detail::false_type) {}
+   static void test_splay_up(value_cont_type&, detail::true_type);
+   static void test_splay_up(value_cont_type&, detail::false_type) {}
+   static void test_splay_down(value_cont_type&, detail::true_type);
+   static void test_splay_down(value_cont_type&, detail::false_type) {}
+   static void test_rebalance(value_cont_type&, detail::true_type);
+   static void test_rebalance(value_cont_type&, detail::false_type) {}
+   static void test_insert_before(value_cont_type&, detail::true_type);
+   static void test_insert_before(value_cont_type&, detail::false_type) {}
+   static void test_container_from_iterator(value_cont_type&, detail::true_type);
+   static void test_container_from_iterator(value_cont_type&, detail::false_type) {}
 };
 
-template < bool Has_Container_From_Iterator, typename assoc_type, typename Value_Container >
-struct test_container_from_iterator_impl
+template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
+void test_generic_assoc<ValueTraits, ContainerDefiner>::
+   test_container_from_iterator(value_cont_type& values, detail::true_type)
 {
-    void operator () (Value_Container&)
-    {
-        std::clog << "skipping test_container_from_iterator\n";
-    }
-};
-template < typename assoc_type, typename Value_Container >
-struct test_container_from_iterator_impl< true, assoc_type, Value_Container >
-{
-    void operator () (Value_Container& values)
-{
+   typedef typename ContainerDefiner
+     < value_type
+     , value_traits<ValueTraits>
+     , constant_time_size<value_type::constant_time_size>
+     >::type assoc_type;
    assoc_type testset(values.begin(), values.end());
    typedef typename assoc_type::iterator        it_type;
    typedef typename assoc_type::const_iterator  cit_type;
@@ -126,19 +120,6 @@ struct test_container_from_iterator_impl< true, assoc_type, Value_Container >
       s.insert(*b);
       BOOST_TEST(testset.size() == sz);
    }
-}
-};
-
-template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
-void test_generic_assoc<ValueTraits, ContainerDefiner>::
-   test_container_from_iterator(value_cont_type& values)
-{
-    typedef typename ContainerDefiner
-      < value_type
-      , value_traits<ValueTraits>
-      , constant_time_size<value_type::constant_time_size>
-      >::type assoc_type;
-    test_container_from_iterator_impl< assoc_type::has_container_from_iterator, assoc_type, value_cont_type >()(values);
 }
 
 template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
@@ -202,14 +183,20 @@ void test_generic_assoc<ValueTraits, ContainerDefiner>::test_insert_erase_burst(
 template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
 void test_generic_assoc<ValueTraits, ContainerDefiner>::test_all(value_cont_type& values)
 {
+   typedef typename ContainerDefiner
+      < value_type
+      , value_traits<ValueTraits>
+      , constant_time_size<value_type::constant_time_size>
+      >::type assoc_type;
+
    test_clone(values);
-   test_container_from_end(values);
-   test_splay_up(values);
-   test_splay_down(values);
-   test_rebalance(values);
-   test_insert_before(values);
+   test_container_from_end(values, detail::bool_< assoc_type::has_container_from_iterator >());
+   test_splay_up(values, detail::bool_< has_splay< assoc_type >::value >());
+   test_splay_down(values, detail::bool_< has_splay< assoc_type >::value >());
+   test_rebalance(values, detail::bool_< has_rebalance< assoc_type >::value >());
+   test_insert_before(values, detail::bool_< has_insert_before< assoc_type >::value >());
    test_insert_erase_burst();
-   test_container_from_iterator(values);
+   test_container_from_iterator(values, detail::bool_< assoc_type::has_container_from_iterator >());
 }
 
 template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
@@ -230,28 +217,9 @@ void test_generic_assoc<ValueTraits, ContainerDefiner>
    BOOST_TEST (testset2.empty());
 }
 
-template < bool Has_Container_From_Iterator, typename assoc_type, typename value_cont_type >
-struct test_container_from_end_impl
-{
-    void operator () (value_cont_type&)
-    {
-        std::clog << "skipping test_container_from_end\n";
-    }
-};
-template < typename assoc_type, typename value_cont_type >
-struct test_container_from_end_impl< true, assoc_type, value_cont_type >
-{
-    void operator () (value_cont_type& values)
-{
-   assoc_type testset (values.begin(), values.begin() + values.size());
-   BOOST_TEST (testset == assoc_type::container_from_end_iterator(testset.end()));
-   BOOST_TEST (testset == assoc_type::container_from_end_iterator(testset.cend()));
-}
-};
-
 template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
 void test_generic_assoc<ValueTraits, ContainerDefiner>
-   ::test_container_from_end(value_cont_type& values)
+   ::test_container_from_end(value_cont_type& values, detail::true_type)
 {
    typedef typename ValueTraits::value_type value_type;
    typedef typename ContainerDefiner
@@ -259,12 +227,14 @@ void test_generic_assoc<ValueTraits, ContainerDefiner>
       , value_traits<ValueTraits>
       , constant_time_size<value_type::constant_time_size>
       >::type assoc_type;
-   test_container_from_end_impl< assoc_type::has_container_from_iterator, assoc_type, value_cont_type >()(values);
+   assoc_type testset (values.begin(), values.begin() + values.size());
+   BOOST_TEST (testset == assoc_type::container_from_end_iterator(testset.end()));
+   BOOST_TEST (testset == assoc_type::container_from_end_iterator(testset.cend()));
 }
 
 template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
 void test_generic_assoc<ValueTraits, ContainerDefiner>::test_splay_up
-(value_cont_type& values, boost::intrusive::detail::true_type)
+(value_cont_type& values, detail::true_type)
 {
    typedef typename ValueTraits::value_type value_type;
    typedef typename ContainerDefiner
@@ -279,7 +249,7 @@ void test_generic_assoc<ValueTraits, ContainerDefiner>::test_splay_up
    {
       assoc_type testset (values.begin(), values.end());
       num_values = testset.size();
-      original_testset.insert(original_testset.end(), testset.begin(), testset.end());
+      original_testset = value_cont_type(testset.begin(), testset.end());
    }
 
    for(std::size_t i = 0; i != num_values; ++i){
@@ -301,27 +271,8 @@ void test_generic_assoc<ValueTraits, ContainerDefiner>::test_splay_up
 }
 
 template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
-void test_generic_assoc<ValueTraits, ContainerDefiner>::test_splay_up
-(value_cont_type&, boost::intrusive::detail::false_type)
-{}
-
-template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
-void test_generic_assoc<ValueTraits, ContainerDefiner>::test_splay_up
-(value_cont_type& values)
-{
-   typedef typename ContainerDefiner
-      < value_type
-      , value_traits<ValueTraits>
-      , constant_time_size<value_type::constant_time_size>
-      >::type assoc_type;
-   typedef typename detail::remove_const<assoc_type>::type Type;
-   typedef detail::bool_<has_splay<Type>::value> enabler;
-   test_splay_up(values, enabler());
-}
-
-template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
 void test_generic_assoc<ValueTraits, ContainerDefiner>::test_splay_down
-(value_cont_type& values, boost::intrusive::detail::true_type)
+(value_cont_type& values, detail::true_type)
 {
    typedef typename ValueTraits::value_type value_type;
    typedef typename ContainerDefiner
@@ -336,7 +287,7 @@ void test_generic_assoc<ValueTraits, ContainerDefiner>::test_splay_down
    {
       assoc_type testset (values.begin(), values.end());
       num_values = testset.size();
-      original_testset.insert(original_testset.end(), testset.begin(), testset.end());
+      original_testset = value_cont_type(testset.begin(), testset.end());
    }
 
    for(std::size_t i = 0; i != num_values; ++i){
@@ -359,27 +310,8 @@ void test_generic_assoc<ValueTraits, ContainerDefiner>::test_splay_down
 }
 
 template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
-void test_generic_assoc<ValueTraits, ContainerDefiner>::test_splay_down
-(value_cont_type&, boost::intrusive::detail::false_type)
-{}
-
-template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
-void test_generic_assoc<ValueTraits, ContainerDefiner>::test_splay_down
-(value_cont_type& values)
-{
-   typedef typename ContainerDefiner
-      < value_type
-      , value_traits<ValueTraits>
-      , constant_time_size<value_type::constant_time_size>
-      >::type assoc_type;
-   typedef typename detail::remove_const<assoc_type>::type Type;
-   typedef detail::bool_<has_splay<Type>::value> enabler;
-   test_splay_down(values, enabler());
-}
-
-template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
 void test_generic_assoc<ValueTraits, ContainerDefiner>::test_rebalance
-(value_cont_type& values, boost::intrusive::detail::true_type)
+(value_cont_type& values, detail::true_type)
 {
    typedef typename ValueTraits::value_type value_type;
    typedef typename ContainerDefiner
@@ -391,7 +323,8 @@ void test_generic_assoc<ValueTraits, ContainerDefiner>::test_rebalance
    orig_set_t original_testset;
    {
       assoc_type testset (values.begin(), values.end());
-      original_testset.insert(original_testset.end(), testset.begin(), testset.end());
+      //original_testset.insert(original_testset.end(), testset.begin(), testset.end());
+      original_testset = value_cont_type(testset.begin(), testset.end());
    }
    {
       assoc_type testset(values.begin(), values.end());
@@ -417,27 +350,8 @@ void test_generic_assoc<ValueTraits, ContainerDefiner>::test_rebalance
 }
 
 template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
-void test_generic_assoc<ValueTraits, ContainerDefiner>::test_rebalance
-(value_cont_type&, boost::intrusive::detail::false_type)
-{}
-
-template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
-void test_generic_assoc<ValueTraits, ContainerDefiner>::test_rebalance
-(value_cont_type& values)
-{
-   typedef typename ContainerDefiner
-      < value_type
-      , value_traits<ValueTraits>
-      , constant_time_size<value_type::constant_time_size>
-      >::type assoc_type;
-   typedef typename detail::remove_const<assoc_type>::type Type;
-   typedef detail::bool_<has_rebalance<Type>::value> enabler;
-   test_rebalance(values, enabler());
-}
-
-template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
 void test_generic_assoc<ValueTraits, ContainerDefiner>::test_insert_before
-(value_cont_type& values, boost::intrusive::detail::true_type)
+(value_cont_type& values, detail::true_type)
 {
    typedef typename ValueTraits::value_type value_type;
    typedef typename ContainerDefiner
@@ -483,25 +397,6 @@ void test_generic_assoc<ValueTraits, ContainerDefiner>::test_insert_before
       BOOST_TEST(testset.size() == values.size());
       TEST_INTRUSIVE_SEQUENCE_EXPECTED(values, testset.begin());
    }
-}
-
-template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
-void test_generic_assoc<ValueTraits, ContainerDefiner>::test_insert_before
-(value_cont_type&, boost::intrusive::detail::false_type)
-{}
-
-template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
-void test_generic_assoc<ValueTraits, ContainerDefiner>::test_insert_before
-(value_cont_type& values)
-{
-   typedef typename ContainerDefiner
-      < value_type
-      , value_traits<ValueTraits>
-      , constant_time_size<value_type::constant_time_size>
-      >::type assoc_type;
-   typedef typename detail::remove_const<assoc_type>::type Type;
-   typedef detail::bool_<has_insert_before<Type>::value> enabler;
-   test_insert_before(values, enabler());
 }
 
 }}}   //namespace boost::intrusive::test
