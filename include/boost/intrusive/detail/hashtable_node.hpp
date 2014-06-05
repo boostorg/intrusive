@@ -20,13 +20,11 @@
 #include <boost/intrusive/circular_list_algorithms.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/utilities.hpp>
-#include <boost/intrusive/slist.hpp> //remove-me
-#include <boost/intrusive/pointer_traits.hpp>
+#include <boost/intrusive/slist.hpp> //make_slist
 #include <boost/intrusive/trivial_value_traits.hpp>
 #include <cstddef>
 #include <climits>
 #include <boost/type_traits/make_unsigned.hpp>
-#include <boost/pointer_cast.hpp>
 #include <boost/move/core.hpp>
 
 

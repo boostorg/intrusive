@@ -15,7 +15,6 @@
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
-
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 

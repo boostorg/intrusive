@@ -16,12 +16,10 @@
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
-#include <boost/pointer_cast.hpp>
 #include <boost/intrusive/detail/utilities.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/slist_hook.hpp>
 #include <boost/intrusive/options.hpp>
-#include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/detail/generic_hook.hpp>
 
 namespace boost {
