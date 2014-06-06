@@ -18,6 +18,7 @@
 #include "test_macros.hpp"
 #include "test_container.hpp"
 #include "generic_assoc_test.hpp"
+#include <typeinfo>
 
 namespace boost{
 namespace intrusive{
@@ -33,14 +34,16 @@ template<class ValueTraits, template <class = void, class = void, class = void, 
 struct test_generic_set
 {
    typedef typename ValueTraits::value_type value_type;
+   typedef typename Value_Container< value_type >::type value_cont_type;
+   typedef typename ValueTraits::reference reference;
+   typedef typename ValueTraits::const_reference const_reference;
    static void test_all();
-   static void test_sort(std::vector<value_type>& values);
-   static void test_insert(std::vector<value_type>& values);
-   static void test_insert_advanced(std::vector<value_type>& values, boost::intrusive::detail::true_type);
-   static void test_insert_advanced(std::vector<value_type>& values, boost::intrusive::detail::false_type);
-   static void test_insert_advanced(std::vector<value_type>& values);
-   static void test_swap(std::vector<value_type>& values);
-   static void test_find(std::vector<value_type>& values);
+   static void test_sort(value_cont_type&);
+   static void test_insert(value_cont_type&);
+   static void test_insert_advanced(value_cont_type&, detail::true_type);
+   static void test_insert_advanced(value_cont_type&, detail::false_type);
+   static void test_swap(value_cont_type&);
+   static void test_find(value_cont_type&);
    static void test_impl();
 };
 
@@ -50,15 +53,32 @@ void test_generic_set<ValueTraits, ContainerDefiner>::test_all()
 {
    typedef typename ValueTraits::value_type value_type;
    static const int random_init[6] = { 3, 2, 4, 1, 5, 2 };
-   std::vector<value_type> values (6);
+   value_cont_type values(6);
    for (int i = 0; i < 6; ++i)
-      values[i].value_ = random_init[i];
+      (&values[i])->value_ = random_init[i];
 
    typedef typename ContainerDefiner
       < value_type
       , value_traits<ValueTraits>
       , constant_time_size<value_type::constant_time_size>
       >::type set_type;
+#ifdef PRINT_TESTS
+   std::clog << "testing set with:\n"
+             << "  value_type = " << typeid(value_type).name() << "\n"
+             << "  sizeof(value_type) = " << sizeof(value_type) << "\n"
+             << "  link_mode = " << ValueTraits::link_mode << "\n"
+             << "  node = " << typeid(typename set_type::node).name() << "\n"
+             << "  sizeof(node) = " << sizeof(typename set_type::node) << "\n"
+             << "  node_ptr = " << typeid(typename set_type::node_ptr).name() << "\n"
+             << "  sizeof(node_ptr) = " << sizeof(typename set_type::node_ptr) << "\n"
+             << "  constant_time_size = " << set_type::constant_time_size << "\n"
+             << "  has_container_from_iterator = " << set_type::has_container_from_iterator << "\n"
+             << "  is_treap = " << is_treap< set_type >::value << "\n"
+             << "  has_splay = " << has_splay< set_type >::value << "\n"
+             << "  has_rebalance = " << has_rebalance< set_type >::value << "\n"
+             << "  has_insert_before = " << has_insert_before< set_type >::value << "\n"
+             << "  sizeof(set_type) = " << sizeof(set_type) << "\n";
+#endif
    {
       set_type testset(values.begin(), values.end());
       test::test_container(testset);
@@ -74,7 +94,7 @@ void test_generic_set<ValueTraits, ContainerDefiner>::test_all()
    }
    test_sort(values);
    test_insert(values);
-   test_insert_advanced(values);
+   test_insert_advanced(values, detail::bool_< is_treap< set_type >::value >());
    test_swap(values);
    test_find(values);
    test_impl();
@@ -86,9 +106,9 @@ template<class ValueTraits, template <class = void, class = void, class = void, 
 void test_generic_set<ValueTraits, ContainerDefiner>::test_impl()
 {
    typedef typename ValueTraits::value_type value_type;
-   std::vector<value_type> values (5);
+   value_cont_type values (5);
    for (int i = 0; i < 5; ++i)
-      values[i].value_ = i;
+      (&values[i])->value_ = i;
 
    typedef typename ValueTraits::value_type value_type;
    typedef typename ContainerDefiner
@@ -110,7 +130,7 @@ void test_generic_set<ValueTraits, ContainerDefiner>::test_impl()
 
 //test: constructor, iterator, clear, reverse_iterator, front, back, size:
 template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
-void test_generic_set<ValueTraits, ContainerDefiner>::test_sort(std::vector<typename ValueTraits::value_type>& values)
+void test_generic_set<ValueTraits, ContainerDefiner>::test_sort(value_cont_type& values)
 {
    typedef typename ValueTraits::value_type value_type;
    typedef typename ContainerDefiner
@@ -132,7 +152,7 @@ void test_generic_set<ValueTraits, ContainerDefiner>::test_sort(std::vector<type
       , value_traits<ValueTraits>
       , constant_time_size<value_type::constant_time_size>
       >::type set_type2;
-   set_type2 testset2 (&values[0], &values[0] + 6);
+   set_type2 testset2 (values.begin(), values.begin() + 6);
    {  int init_values [] = { 5, 3, 1, 4, 2 };
       TEST_INTRUSIVE_SEQUENCE( init_values, testset2.rbegin() );  }
    BOOST_TEST (testset2.begin()->value_ == 2);
@@ -141,7 +161,7 @@ void test_generic_set<ValueTraits, ContainerDefiner>::test_sort(std::vector<type
 
 //test: insert, const_iterator, const_reverse_iterator, erase, s_iterator_to:
 template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
-void test_generic_set<ValueTraits, ContainerDefiner>::test_insert(std::vector<typename ValueTraits::value_type>& values)
+void test_generic_set<ValueTraits, ContainerDefiner>::test_insert(value_cont_type& values)
 {
    typedef typename ValueTraits::value_type value_type;
    typedef typename ContainerDefiner
@@ -151,7 +171,7 @@ void test_generic_set<ValueTraits, ContainerDefiner>::test_insert(std::vector<ty
       >::type set_type;
    {
       set_type testset;
-      testset.insert(&values[0] + 2, &values[0] + 5);
+      testset.insert(values.begin() + 2, values.begin() + 5);
 
       const set_type& const_testset = testset;
       {  int init_values [] = { 1, 4, 5 };
@@ -173,9 +193,9 @@ void test_generic_set<ValueTraits, ContainerDefiner>::test_insert(std::vector<ty
       BOOST_TEST (&*i == &values[2]);
 
       typename set_type::const_iterator ic;
-      ic = testset.iterator_to (const_cast<const value_type &>(values[2]));
+      ic = testset.iterator_to (static_cast< const_reference >(values[2]));
       BOOST_TEST (&*ic == &values[2]);
-      ic = set_type::s_iterator_to (const_cast<const value_type &>(values[2]));
+      ic = set_type::s_iterator_to (static_cast< const_reference >(values[2]));
       BOOST_TEST (&*ic == &values[2]);
 
       testset.erase (i);
@@ -184,9 +204,10 @@ void test_generic_set<ValueTraits, ContainerDefiner>::test_insert(std::vector<ty
    }
 }
 
+// treap version
 template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
 void test_generic_set<ValueTraits, ContainerDefiner>::test_insert_advanced
-(std::vector<typename ValueTraits::value_type>& values, boost::intrusive::detail::true_type)
+(value_cont_type& values, detail::true_type)
 {
    typedef typename ValueTraits::value_type value_type;
    typedef typename ContainerDefiner
@@ -196,7 +217,7 @@ void test_generic_set<ValueTraits, ContainerDefiner>::test_insert_advanced
       >::type set_type;
    {
       set_type testset;
-      testset.insert(&values[0], &values[0] + values.size());
+      testset.insert(values.begin(), values.begin() + values.size());
       value_type v(1);
       typename set_type::insert_commit_data data;
       BOOST_TEST (!testset.insert_check(v, testset.value_comp(), testset.priority_comp(), data).second);
@@ -204,28 +225,10 @@ void test_generic_set<ValueTraits, ContainerDefiner>::test_insert_advanced
    }
 }
 
-
-template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
-void test_generic_set<ValueTraits, ContainerDefiner>::test_insert_advanced
-(std::vector<typename ValueTraits::value_type>& values)
-{
-   typedef typename ValueTraits::value_type value_type;
-   typedef typename ContainerDefiner
-      < value_type
-      , value_traits<ValueTraits>
-      , constant_time_size<value_type::constant_time_size>
-      >::type set_type;
-   typedef typename detail::remove_const<set_type>::type Type;
-   typedef detail::bool_<is_treap<Type>::value> enabler;
-   test_insert_advanced(values, enabler());
-}
-
-
 //test: insert, const_iterator, const_reverse_iterator, erase, s_iterator_to:
 template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
 void test_generic_set<ValueTraits, ContainerDefiner>::test_insert_advanced
-   ( std::vector<typename ValueTraits::value_type>& values
-   , boost::intrusive::detail::false_type)
+(value_cont_type& values, detail::false_type)
 {
    typedef typename ValueTraits::value_type value_type;
    typedef typename ContainerDefiner
@@ -235,7 +238,7 @@ void test_generic_set<ValueTraits, ContainerDefiner>::test_insert_advanced
       >::type set_type;
    {
       set_type testset;
-      testset.insert(&values[0], &values[0] + values.size());
+      testset.insert(values.begin(), values.begin() + values.size());
       value_type v(1);
       typename set_type::insert_commit_data data;
       BOOST_TEST (!testset.insert_check(v, testset.value_comp(), data).second);
@@ -243,10 +246,9 @@ void test_generic_set<ValueTraits, ContainerDefiner>::test_insert_advanced
    }
 }
 
-
 //test: insert (seq-version), swap, erase (seq-version), size:
 template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
-void test_generic_set<ValueTraits, ContainerDefiner>::test_swap(std::vector<typename ValueTraits::value_type>& values)
+void test_generic_set<ValueTraits, ContainerDefiner>::test_swap(value_cont_type& values)
 {
    typedef typename ValueTraits::value_type value_type;
    typedef typename ContainerDefiner
@@ -254,9 +256,9 @@ void test_generic_set<ValueTraits, ContainerDefiner>::test_swap(std::vector<type
       , value_traits<ValueTraits>
       , constant_time_size<value_type::constant_time_size>
       >::type set_type;
-   set_type testset1 (&values[0], &values[0] + 2);
+   set_type testset1 (values.begin(), values.begin() + 2);
    set_type testset2;
-   testset2.insert (&values[0] + 2, &values[0] + 6);
+   testset2.insert (values.begin() + 2, values.begin() + 6);
    testset1.swap (testset2);
 
    {  int init_values [] = { 1, 2, 4, 5 };
@@ -273,7 +275,7 @@ void test_generic_set<ValueTraits, ContainerDefiner>::test_swap(std::vector<type
 
 //test: find, equal_range (lower_bound, upper_bound), bounded_range:
 template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
-void test_generic_set<ValueTraits, ContainerDefiner>::test_find(std::vector<typename ValueTraits::value_type>& values)
+void test_generic_set<ValueTraits, ContainerDefiner>::test_find(value_cont_type& values)
 {
    typedef typename ValueTraits::value_type value_type;
    typedef typename ContainerDefiner
@@ -285,8 +287,10 @@ void test_generic_set<ValueTraits, ContainerDefiner>::test_find(std::vector<type
    typedef typename set_type::iterator       iterator;
 
    {
-      value_type cmp_val;
-      cmp_val.value_ = 2;
+      //value_type cmp_val;
+      value_cont_type cmp_val_cont(1);
+      reference cmp_val = cmp_val_cont.front();
+      (&cmp_val)->value_ = 2;
       iterator i = testset.find (cmp_val);
       BOOST_TEST (i->value_ == 2);
       BOOST_TEST ((++i)->value_ != 2);
@@ -296,7 +300,7 @@ void test_generic_set<ValueTraits, ContainerDefiner>::test_find(std::vector<type
       BOOST_TEST (range.second->value_ == 3);
       BOOST_TEST (std::distance (range.first, range.second) == 1);
 
-      cmp_val.value_ = 7;
+      (&cmp_val)->value_ = 7;
       BOOST_TEST (testset.find (cmp_val) == testset.end());
    }
 
@@ -305,10 +309,13 @@ void test_generic_set<ValueTraits, ContainerDefiner>::test_find(std::vector<type
       std::pair<iterator,iterator> range;
       std::pair<typename search_const_iterator<set_type>::type
                ,typename search_const_iterator<set_type>::type> const_range;
-      value_type cmp_val_lower, cmp_val_upper;
+      //value_type cmp_val_lower, cmp_val_upper;
+      value_cont_type cmp_val_cont(2);
+      reference cmp_val_lower = cmp_val_cont.front();
+      reference cmp_val_upper = cmp_val_cont.back();
       {
-      cmp_val_lower.value_ = 1;
-      cmp_val_upper.value_ = 2;
+      (&cmp_val_lower)->value_ = 1;
+      (&cmp_val_upper)->value_ = 2;
       //left-closed, right-closed
       range = testset.bounded_range (cmp_val_lower, cmp_val_upper, true, true);
       BOOST_TEST (range.first->value_ == 1);
@@ -316,39 +323,39 @@ void test_generic_set<ValueTraits, ContainerDefiner>::test_find(std::vector<type
       BOOST_TEST (std::distance (range.first, range.second) == 2);
       }
       {
-      cmp_val_lower.value_ = 1;
-      cmp_val_upper.value_ = 2;
+      (&cmp_val_lower)->value_ = 1;
+      (&cmp_val_upper)->value_ = 2;
       const_range = const_testset.bounded_range (cmp_val_lower, cmp_val_upper, true, false);
       BOOST_TEST (const_range.first->value_ == 1);
       BOOST_TEST (const_range.second->value_ == 2);
       BOOST_TEST (std::distance (const_range.first, const_range.second) == 1);
 
-      cmp_val_lower.value_ = 1;
-      cmp_val_upper.value_ = 3;
+      (&cmp_val_lower)->value_ = 1;
+      (&cmp_val_upper)->value_ = 3;
       range = testset.bounded_range (cmp_val_lower, cmp_val_upper, true, false);
       BOOST_TEST (range.first->value_ == 1);
       BOOST_TEST (range.second->value_ == 3);
       BOOST_TEST (std::distance (range.first, range.second) == 2);
       }
       {
-      cmp_val_lower.value_ = 1;
-      cmp_val_upper.value_ = 2;
+      (&cmp_val_lower)->value_ = 1;
+      (&cmp_val_upper)->value_ = 2;
       const_range = const_testset.bounded_range (cmp_val_lower, cmp_val_upper, false, true);
       BOOST_TEST (const_range.first->value_ == 2);
       BOOST_TEST (const_range.second->value_ == 3);
       BOOST_TEST (std::distance (const_range.first, const_range.second) == 1);
       }
       {
-      cmp_val_lower.value_ = 1;
-      cmp_val_upper.value_ = 2;
+      (&cmp_val_lower)->value_ = 1;
+      (&cmp_val_upper)->value_ = 2;
       range = testset.bounded_range (cmp_val_lower, cmp_val_upper, false, false);
       BOOST_TEST (range.first->value_ == 2);
       BOOST_TEST (range.second->value_ == 2);
       BOOST_TEST (std::distance (range.first, range.second) == 0);
       }
       {
-      cmp_val_lower.value_ = 5;
-      cmp_val_upper.value_ = 6;
+      (&cmp_val_lower)->value_ = 5;
+      (&cmp_val_upper)->value_ = 6;
       const_range = const_testset.bounded_range (cmp_val_lower, cmp_val_upper, true, false);
       BOOST_TEST (const_range.first->value_ == 5);
       BOOST_TEST (const_range.second == const_testset.end());

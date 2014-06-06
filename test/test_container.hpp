@@ -428,12 +428,15 @@ void test_unordered_associative_container(Container & c, Data & d)
 template< class Container, class Data >
 void test_unique_container(Container & c, Data & d)
 {
-   typedef typename Container::value_type value_type;
+   //typedef typename Container::value_type value_type;
    c.clear();
    c.insert(d.begin(),d.end());
    typename Container::size_type old_size = c.size();
-   value_type v(*d.begin());
-   c.insert(v);
+   //value_type v(*d.begin());
+   //c.insert(v);
+   Data d2(1);
+   (&d2.front())->value_ = (&d.front())->value_;
+   c.insert(d2.front());
    BOOST_TEST( c.size() == old_size );
    c.clear();
 }
@@ -441,12 +444,15 @@ void test_unique_container(Container & c, Data & d)
 template< class Container, class Data >
 void test_non_unique_container(Container & c, Data & d)
 {
-   typedef typename Container::value_type value_type;
+   //typedef typename Container::value_type value_type;
    c.clear();
    c.insert(d.begin(),d.end());
    typename Container::size_type old_size = c.size();
-   value_type v(*d.begin());
-   c.insert(v);
+   //value_type v(*d.begin());
+   //c.insert(v);
+   Data d2(1);
+   (&d2.front())->value_ = (&d.front())->value_;
+   c.insert(d2.front());
    BOOST_TEST( c.size() == (old_size+1) );
    c.clear();
 }

@@ -42,6 +42,7 @@ struct list_defaults
    typedef detail::default_list_hook proto_value_traits;
    static const bool constant_time_size = true;
    typedef std::size_t size_type;
+   typedef void header_holder_type;
 };
 
 /// @endcond
@@ -59,7 +60,7 @@ struct list_defaults
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 class list_impl
 {
@@ -82,9 +83,12 @@ class list_impl
    typedef typename node_traits::node_ptr                            node_ptr;
    typedef typename node_traits::const_node_ptr                      const_node_ptr;
    typedef circular_list_algorithms<node_traits>                     node_algorithms;
+   typedef Header_Holder                                             header_holder_type;
 
    static const bool constant_time_size = ConstantTimeSize;
    static const bool stateful_value_traits = detail::is_stateful_value_traits<value_traits>::value;
+   static const bool has_container_from_iterator =
+        boost::is_same< header_holder_type, detail::default_header_holder< node_traits > >::value;
 
    /// @cond
 
@@ -102,15 +106,13 @@ class list_impl
                       ));
 
    node_ptr get_root_node()
-   {  return pointer_traits<node_ptr>::pointer_to(data_.root_plus_size_.root_);  }
+   { return data_.root_plus_size_.get_node(); }
 
    const_node_ptr get_root_node() const
-   {  return pointer_traits<const_node_ptr>::pointer_to(data_.root_plus_size_.root_);  }
+   { return data_.root_plus_size_.get_node(); }
 
-   struct root_plus_size : public size_traits
-   {
-      node root_;
-   };
+   struct root_plus_size : public header_holder_type, public size_traits
+   { };
 
    struct data_t : public value_traits
    {
@@ -1254,8 +1256,10 @@ class list_impl
    private:
    static list_impl &priv_container_from_end_iterator(const const_iterator &end_iterator)
    {
-      root_plus_size *r = detail::parent_from_member<root_plus_size, node>
-         ( boost::intrusive::detail::to_raw_pointer(end_iterator.pointed_node()), &root_plus_size::root_);
+      BOOST_STATIC_ASSERT((has_container_from_iterator));
+      node_ptr p = end_iterator.pointed_node();
+      header_holder_type* h = header_holder_type::get_holder(p);
+      root_plus_size* r = static_cast< root_plus_size* >(h);
       data_t *d = detail::parent_from_member<data_t, root_plus_size>
          ( r, &data_t::root_plus_size_);
       list_impl *s  = detail::parent_from_member<list_impl, data_t>(d, &list_impl::data_);
@@ -1267,29 +1271,29 @@ class list_impl
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 inline bool operator<
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
 #else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &y)
 #endif
 {  return std::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 bool operator==
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
 #else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &y)
 #endif
 {
-   typedef list_impl<ValueTraits, SizeType, ConstantTimeSize> list_type;
+   typedef list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> list_type;
    typedef typename list_type::const_iterator const_iterator;
    const bool C = list_type::constant_time_size;
    if(C && x.size() != y.size()){
@@ -1319,65 +1323,65 @@ bool operator==
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 inline bool operator!=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
 #else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &y)
 #endif
 {  return !(x == y); }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 inline bool operator>
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
 #else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &y)
 #endif
 {  return y < x;  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 inline bool operator<=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
 #else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &y)
 #endif
 {  return !(y < x);  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 inline bool operator>=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const list_impl<T, Options...> &x, const list_impl<T, Options...> &y)
 #else
-(const list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &y)
 #endif
 {  return !(x < y);  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize>
+template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename Header_Holder>
 #endif
 inline void swap
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (list_impl<T, Options...> &x, list_impl<T, Options...> &y)
 #else
-(list_impl<ValueTraits, SizeType, ConstantTimeSize> &x, list_impl<ValueTraits, SizeType, ConstantTimeSize> &y)
+(list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &x, list_impl<ValueTraits, SizeType, ConstantTimeSize, Header_Holder> &y)
 #endif
 {  x.swap(y);  }
 
@@ -1386,7 +1390,7 @@ inline void swap
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) || defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template<class T, class ...Options>
 #else
-template<class T, class O1 = void, class O2 = void, class O3 = void>
+template<class T, class O1 = void, class O2 = void, class O3 = void, class O4 = void>
 #endif
 struct make_list
 {
@@ -1394,7 +1398,7 @@ struct make_list
    typedef typename pack_options
       < list_defaults,
          #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-         O1, O2, O3
+         O1, O2, O3, O4
          #else
          Options...
          #endif
@@ -1402,12 +1406,15 @@ struct make_list
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
+   typedef typename detail::get_header_holder_type
+      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
 
    typedef list_impl
       <
          value_traits,
          typename packed_options::size_type,
-         packed_options::constant_time_size
+         packed_options::constant_time_size,
+         header_holder_type
       > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -1417,14 +1424,14 @@ struct make_list
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
 #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-template<class T, class O1, class O2, class O3>
+template<class T, class O1, class O2, class O3, class O4>
 #else
 template<class T, class ...Options>
 #endif
 class list
    :  public make_list<T,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3
+      O1, O2, O3, O4
       #else
       Options...
       #endif
@@ -1433,7 +1440,7 @@ class list
    typedef typename make_list
       <T,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3
+      O1, O2, O3, O4
       #else
       Options...
       #endif
