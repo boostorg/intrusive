@@ -37,17 +37,17 @@ namespace intrusive {
 
 /// @cond
 
-template<class Node, class NodePtr, bool>
-struct root_plus_last
+template<class Header_Holder, class NodePtr, bool>
+struct header_holder_plus_last
 {
-   Node     root_;
+   Header_Holder header_holder_;
    NodePtr  last_;
 };
 
-template<class Node, class NodePtr>
-struct root_plus_last<Node, NodePtr, false>
+template<class Header_Holder, class NodePtr>
+struct header_holder_plus_last<Header_Holder, NodePtr, false>
 {
-   Node root_;
+   Header_Holder header_holder_;
 };
 
 struct slist_defaults
@@ -57,6 +57,7 @@ struct slist_defaults
    static const bool linear = false;
    typedef std::size_t size_type;
    static const bool cache_last = false;
+   typedef void header_holder_type;
 };
 
 struct slist_bool_flags
@@ -95,7 +96,7 @@ struct slist_bool_flags
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags>
+template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename Header_Holder>
 #endif
 class slist_impl
 {
@@ -115,11 +116,14 @@ class slist_impl
    typedef typename node_traits::node                                node;
    typedef typename node_traits::node_ptr                            node_ptr;
    typedef typename node_traits::const_node_ptr                      const_node_ptr;
+   typedef Header_Holder                                             header_holder_type;
 
    static const bool constant_time_size = 0 != (BoolFlags & slist_bool_flags::constant_time_size_pos);
    static const bool stateful_value_traits = detail::is_stateful_value_traits<value_traits>::value;
    static const bool linear = 0 != (BoolFlags & slist_bool_flags::linear_pos);
    static const bool cache_last = 0 != (BoolFlags & slist_bool_flags::cache_last_pos);
+   static const bool has_container_from_iterator =
+        boost::is_same< header_holder_type, detail::default_header_holder< node_traits > >::value;
 
    typedef typename detail::if_c
       < linear
@@ -152,10 +156,10 @@ class slist_impl
          (linear ? const_node_ptr() : this->get_root_node());  }
 
    node_ptr get_root_node()
-   {  return pointer_traits<node_ptr>::pointer_to(data_.root_plus_size_.root_);  }
+   { return data_.root_plus_size_.header_holder_.get_node(); }
 
    const_node_ptr get_root_node() const
-   {  return pointer_traits<const_node_ptr>::pointer_to(data_.root_plus_size_.root_);  }
+   { return data_.root_plus_size_.header_holder_.get_node(); }
 
    node_ptr get_last_node()
    {  return this->get_last_node(detail::bool_<cache_last>());  }
@@ -197,9 +201,10 @@ class slist_impl
       }
    }
 
+   typedef header_holder_plus_last<header_holder_type, node_ptr, cache_last> header_holder_plus_last_t;
    struct root_plus_size
       :  public size_traits
-      ,  public root_plus_last<node, node_ptr, cache_last>
+      ,  public header_holder_plus_last_t
    {};
 
    struct data_t
@@ -224,16 +229,6 @@ class slist_impl
 
    value_traits &priv_value_traits()
    {  return data_;  }
-
-   protected:
-   node &prot_root_node()
-   {  return data_.root_plus_size_.root_; }
-
-   node const &prot_root_node() const
-   {  return data_.root_plus_size_.root_; }
-
-   void prot_set_size(size_type s)
-   {  data_.root_plus_size_.set_size(s);  }
 
    public:
 
@@ -1959,8 +1954,12 @@ class slist_impl
       //Obtaining the container from the end iterator is not possible with linear
       //singly linked lists (because "end" is represented by the null pointer)
       BOOST_STATIC_ASSERT(!linear);
-      root_plus_size *r = detail::parent_from_member<root_plus_size, node>
-         ( boost::intrusive::detail::to_raw_pointer(end_iterator.pointed_node()), (&root_plus_size::root_));
+      BOOST_STATIC_ASSERT((has_container_from_iterator));
+      node_ptr p = end_iterator.pointed_node();
+      header_holder_type* h = header_holder_type::get_holder(p);
+      header_holder_plus_last_t* hpl = detail::parent_from_member< header_holder_plus_last_t, header_holder_type>
+                                         (h, &header_holder_plus_last_t::header_holder_);
+      root_plus_size* r = static_cast< root_plus_size* >(hpl);
       data_t *d = detail::parent_from_member<data_t, root_plus_size>
          ( r, &data_t::root_plus_size_);
       slist_impl *s  = detail::parent_from_member<slist_impl, data_t>(d, &slist_impl::data_);
@@ -1971,31 +1970,31 @@ class slist_impl
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags>
+template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename Header_Holder>
 #endif
 inline bool operator<
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const slist_impl<T, Options...> &x, const slist_impl<T, Options...> &y)
 #else
-( const slist_impl<ValueTraits, SizeType, BoolFlags> &x
-, const slist_impl<ValueTraits, SizeType, BoolFlags> &y)
+( const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &x
+, const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &y)
 #endif
 {  return std::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags>
+template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename Header_Holder>
 #endif
 bool operator==
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const slist_impl<T, Options...> &x, const slist_impl<T, Options...> &y)
 #else
-( const slist_impl<ValueTraits, SizeType, BoolFlags> &x
-, const slist_impl<ValueTraits, SizeType, BoolFlags> &y)
+( const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &x
+, const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &y)
 #endif
 {
-   typedef slist_impl<ValueTraits, SizeType, BoolFlags> slist_type;
+   typedef slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> slist_type;
    typedef typename slist_type::const_iterator const_iterator;
    const bool C = slist_type::constant_time_size;
    if(C && x.size() != y.size()){
@@ -2025,70 +2024,70 @@ bool operator==
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags>
+template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename Header_Holder>
 #endif
 inline bool operator!=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const slist_impl<T, Options...> &x, const slist_impl<T, Options...> &y)
 #else
-( const slist_impl<ValueTraits, SizeType, BoolFlags> &x
-, const slist_impl<ValueTraits, SizeType, BoolFlags> &y)
+( const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &x
+, const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &y)
 #endif
 {  return !(x == y); }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags>
+template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename Header_Holder>
 #endif
 inline bool operator>
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const slist_impl<T, Options...> &x, const slist_impl<T, Options...> &y)
 #else
-( const slist_impl<ValueTraits, SizeType, BoolFlags> &x
-, const slist_impl<ValueTraits, SizeType, BoolFlags> &y)
+( const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &x
+, const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &y)
 #endif
 {  return y < x;  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags>
+template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename Header_Holder>
 #endif
 inline bool operator<=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const slist_impl<T, Options...> &x, const slist_impl<T, Options...> &y)
 #else
-( const slist_impl<ValueTraits, SizeType, BoolFlags> &x
-, const slist_impl<ValueTraits, SizeType, BoolFlags> &y)
+( const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &x
+, const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &y)
 #endif
 {  return !(y < x);  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags>
+template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename Header_Holder>
 #endif
 inline bool operator>=
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (const slist_impl<T, Options...> &x, const slist_impl<T, Options...> &y)
 #else
-( const slist_impl<ValueTraits, SizeType, BoolFlags> &x
-, const slist_impl<ValueTraits, SizeType, BoolFlags> &y)
+( const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &x
+, const slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &y)
 #endif
 {  return !(x < y);  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags>
+template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename Header_Holder>
 #endif
 inline void swap
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 (slist_impl<T, Options...> &x, slist_impl<T, Options...> &y)
 #else
-( slist_impl<ValueTraits, SizeType, BoolFlags> &x
-, slist_impl<ValueTraits, SizeType, BoolFlags> &y)
+( slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &x
+, slist_impl<ValueTraits, SizeType, BoolFlags, Header_Holder> &y)
 #endif
 {  x.swap(y);  }
 
@@ -2097,7 +2096,7 @@ inline void swap
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) || defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template<class T, class ...Options>
 #else
-template<class T, class O1 = void, class O2 = void, class O3 = void, class O4 = void, class O5 = void>
+template<class T, class O1 = void, class O2 = void, class O3 = void, class O4 = void, class O5 = void, class O6 = void>
 #endif
 struct make_slist
 {
@@ -2105,19 +2104,22 @@ struct make_slist
    typedef typename pack_options
       < slist_defaults,
          #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-         O1, O2, O3, O4, O5
+         O1, O2, O3, O4, O5, O6
          #else
          Options...
          #endif
       >::type packed_options;
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
+   typedef typename detail::get_header_holder_type
+      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
    typedef slist_impl
       < value_traits
       , typename packed_options::size_type
       ,  (std::size_t(packed_options::linear)*slist_bool_flags::linear_pos)
         |(std::size_t(packed_options::constant_time_size)*slist_bool_flags::constant_time_size_pos)
         |(std::size_t(packed_options::cache_last)*slist_bool_flags::cache_last_pos)
+      , header_holder_type
       > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -2127,14 +2129,14 @@ struct make_slist
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
 #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-template<class T, class O1, class O2, class O3, class O4, class O5>
+template<class T, class O1, class O2, class O3, class O4, class O5, class O6>
 #else
 template<class T, class ...Options>
 #endif
 class slist
    :  public make_slist<T,
          #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-         O1, O2, O3, O4, O5
+         O1, O2, O3, O4, O5, O6
          #else
          Options...
          #endif
@@ -2143,7 +2145,7 @@ class slist
    typedef typename make_slist
       <T,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4, O5
+      O1, O2, O3, O4, O5, O6
       #else
       Options...
       #endif
