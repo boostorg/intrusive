@@ -67,19 +67,6 @@ struct test_list
 template < typename List_Type, typename Value_Container >
 void test_list< List_Type, Value_Container >::test_all(Value_Container& values)
 {
-#ifdef PRINT_TESTS
-   std::clog << "testing list with:\n"
-             << "  value_type = " << typeid(value_type).name() << "\n"
-             << "  sizeof(value_type) = " << sizeof(value_type) << "\n"
-             << "  link_mode = " << value_traits::link_mode << "\n"
-             << "  node = " << typeid(typename list_type::node).name() << "\n"
-             << "  sizeof(node) = " << sizeof(typename list_type::node) << "\n"
-             << "  node_ptr = " << typeid(typename list_type::node_ptr).name() << "\n"
-             << "  sizeof(node_ptr) = " << sizeof(typename list_type::node_ptr) << "\n"
-             << "  constant_time_size = " << list_type::constant_time_size << "\n"
-             << "  has_container_from_iterator = " << list_type::has_container_from_iterator << "\n"
-             << "  sizeof(list_type) = " << sizeof(list_type) << "\n";
-#endif
    {
       list_type list(values.begin(), values.end());
       test::test_container(list);
@@ -363,23 +350,23 @@ void test_list< List_Type, Value_Container >
       BOOST_TEST (testlist2.empty());
 }
 
-template < typename Value_Traits, bool Constant_Time_Size, bool Default_Holder, typename Value_Container >
+template < typename Value_Traits, bool ConstantTimeSize, bool Default_Holder, typename Value_Container >
 struct make_and_test_list
    : test_list< list< typename Value_Traits::value_type,
                       value_traits< Value_Traits >,
                       size_type< std::size_t >,
-                      constant_time_size< Constant_Time_Size >
+                      constant_time_size< ConstantTimeSize >
                     >,
                 Value_Container
               >
 {};
 
-template < typename Value_Traits, bool Constant_Time_Size, typename Value_Container >
-struct make_and_test_list< Value_Traits, Constant_Time_Size, false, Value_Container >
+template < typename Value_Traits, bool ConstantTimeSize, typename Value_Container >
+struct make_and_test_list< Value_Traits, ConstantTimeSize, false, Value_Container >
    : test_list< list< typename Value_Traits::value_type,
                       value_traits< Value_Traits >,
                       size_type< std::size_t >,
-                      constant_time_size< Constant_Time_Size >,
+                      constant_time_size< ConstantTimeSize >,
                       header_holder_type< pointer_holder< typename Value_Traits::node_traits::node > >
                     >,
                 Value_Container
@@ -490,7 +477,7 @@ class test_main_template< VoidPointer, false, Default_Holder >
    }
 };
 
-template < bool Constant_Time_Size >
+template < bool ConstantTimeSize >
 struct test_main_template_bptr
 {
    int operator()()
@@ -498,13 +485,13 @@ struct test_main_template_bptr
       typedef BPtr_Value value_type;
       typedef BPtr_Value_Traits< List_BPtr_Node_Traits > list_value_traits;
       typedef typename list_value_traits::node_ptr node_ptr;
-      typedef Bounded_Allocator< value_type > allocator_type;
+      typedef bounded_allocator< value_type > allocator_type;
 
       allocator_type::init();
       allocator_type allocator;
 
       {
-          Bounded_Reference_Cont< value_type > ref_cont;
+          bounded_reference_cont< value_type > ref_cont;
           for (int i = 0; i < 5; ++i)
           {
               node_ptr tmp = allocator.allocate(1);
@@ -515,10 +502,10 @@ struct test_main_template_bptr
           test_list < list < value_type,
                              value_traits< list_value_traits >,
                              size_type< std::size_t >,
-                             constant_time_size< Constant_Time_Size >,
-                             header_holder_type< Bounded_Pointer_Holder< value_type > >
+                             constant_time_size< ConstantTimeSize >,
+                             header_holder_type< bounded_pointer_holder< value_type > >
                            >,
-                      Bounded_Reference_Cont< value_type >
+                      bounded_reference_cont< value_type >
           >::test_all(ref_cont);
       }
 
@@ -528,7 +515,7 @@ struct test_main_template_bptr
    }
 };
 
-int main( int, char* [] )
+int main()
 {
    // test (plain/smart pointers) x (nonconst/const size) x (void node allocator)
    test_main_template<void*, false, true>()();

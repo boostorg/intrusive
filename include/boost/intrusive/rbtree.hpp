@@ -66,11 +66,11 @@ struct rbtree_defaults
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidOrKeyComp, class SizeType, bool ConstantTimeSize, typename Header_Holder>
+template<class ValueTraits, class VoidOrKeyComp, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
 #endif
 class rbtree_impl
    /// @cond
-   :  public bstree_impl<ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, RbTreeAlgorithms, Header_Holder>
+   :  public bstree_impl<ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, RbTreeAlgorithms, HeaderHolder>
    /// @endcond
 {
    public:
@@ -78,7 +78,7 @@ class rbtree_impl
    /// @cond
    typedef bstree_impl< ValueTraits, VoidOrKeyComp, SizeType
                       , ConstantTimeSize, RbTreeAlgorithms
-                      , Header_Holder>                               tree_type;
+                      , HeaderHolder>                               tree_type;
    typedef tree_type                                                 implementation_defined;
    /// @endcond
 

@@ -69,16 +69,16 @@ struct treap_defaults
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidOrKeyComp, class VoidOrPrioComp, class SizeType, bool ConstantTimeSize, typename Header_Holder>
+template<class ValueTraits, class VoidOrKeyComp, class VoidOrPrioComp, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
 #endif
 class treap_impl
    /// @cond
-   : public bstree_impl<ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, BsTreeAlgorithms, Header_Holder>
+   : public bstree_impl<ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, BsTreeAlgorithms, HeaderHolder>
    , public detail::ebo_functor_holder
          < typename get_prio
             < VoidOrPrioComp
             , typename bstree_impl
-               <ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, BsTreeAlgorithms, Header_Holder>::value_type>::type
+               <ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, BsTreeAlgorithms, HeaderHolder>::value_type>::type
          >
    /// @endcond
 {
@@ -87,7 +87,7 @@ class treap_impl
    /// @cond
    typedef bstree_impl< ValueTraits, VoidOrKeyComp, SizeType
                       , ConstantTimeSize, BsTreeAlgorithms
-                      , Header_Holder>                               tree_type;
+                      , HeaderHolder>                               tree_type;
    typedef tree_type                                                 implementation_defined;
    typedef get_prio
                < VoidOrPrioComp
@@ -372,7 +372,7 @@ class treap_impl
       if(safemode_or_autounlink)
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(to_insert));
       iterator ret(node_algorithms::insert_equal_upper_bound
-         (this->tree_type::header_ptr(), to_insert, key_node_comp, key_node_pcomp), this->value_traits_ptr());
+         (this->tree_type::header_ptr(), to_insert, key_node_comp, key_node_pcomp), this->priv_value_traits_ptr());
       this->tree_type::sz_traits().increment();
       return ret;
    }
@@ -401,7 +401,7 @@ class treap_impl
       if(safemode_or_autounlink)
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(to_insert));
       iterator ret (node_algorithms::insert_equal
-         (this->tree_type::header_ptr(), hint.pointed_node(), to_insert, key_node_comp, key_node_pcomp), this->value_traits_ptr());
+         (this->tree_type::header_ptr(), hint.pointed_node(), to_insert, key_node_comp, key_node_pcomp), this->priv_value_traits_ptr());
       this->tree_type::sz_traits().increment();
       return ret;
    }
@@ -548,7 +548,7 @@ class treap_impl
       std::pair<node_ptr, bool> ret =
          (node_algorithms::insert_unique_check
             (this->tree_type::header_ptr(), key, ocomp, pcomp, commit_data));
-      return std::pair<iterator, bool>(iterator(ret.first, this->value_traits_ptr()), ret.second);
+      return std::pair<iterator, bool>(iterator(ret.first, this->priv_value_traits_ptr()), ret.second);
    }
 
    //! <b>Requires</b>: key_value_comp must be a comparison function that induces
@@ -600,7 +600,7 @@ class treap_impl
       std::pair<node_ptr, bool> ret =
          (node_algorithms::insert_unique_check
             (this->tree_type::header_ptr(), hint.pointed_node(), key, ocomp, pcomp, commit_data));
-      return std::pair<iterator, bool>(iterator(ret.first, this->value_traits_ptr()), ret.second);
+      return std::pair<iterator, bool>(iterator(ret.first, this->priv_value_traits_ptr()), ret.second);
    }
 
    //! <b>Requires</b>: value must be an lvalue of type value_type. commit_data
@@ -627,7 +627,7 @@ class treap_impl
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(to_insert));
       node_algorithms::insert_unique_commit(this->tree_type::header_ptr(), to_insert, commit_data);
       this->tree_type::sz_traits().increment();
-      return iterator(to_insert, this->value_traits_ptr());
+      return iterator(to_insert, this->priv_value_traits_ptr());
    }
 
    //! <b>Requires</b>: value must be an lvalue, "pos" must be
@@ -652,7 +652,7 @@ class treap_impl
       detail::key_nodeptr_comp<priority_compare, value_traits>
          pcomp(this->priv_pcomp(), &this->get_value_traits());
       iterator ret (node_algorithms::insert_before
-         (this->tree_type::header_ptr(), pos.pointed_node(), to_insert, pcomp), this->value_traits_ptr());
+         (this->tree_type::header_ptr(), pos.pointed_node(), to_insert, pcomp), this->priv_value_traits_ptr());
       this->tree_type::sz_traits().increment();
       return ret;
    }

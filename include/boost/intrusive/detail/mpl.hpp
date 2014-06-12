@@ -21,6 +21,59 @@ namespace boost {
 namespace intrusive {
 namespace detail {
 
+template <typename T, typename U>
+struct is_same
+{
+   static const bool value = false;
+};
+
+template <typename T>
+struct is_same<T, T>
+{
+   static const bool value = true;
+};
+
+template<typename T>
+struct add_const
+{  typedef const T type;   };
+
+template<typename T>
+struct remove_const
+{  typedef  T type;   };
+
+template<typename T>
+struct remove_const<const T>
+{  typedef T type;   };
+
+template<typename T>
+struct remove_cv
+{  typedef  T type;   };
+
+template<typename T>
+struct remove_cv<const T>
+{  typedef T type;   };
+
+template<typename T>
+struct remove_cv<const volatile T>
+{  typedef T type;   };
+
+template<typename T>
+struct remove_cv<volatile T>
+{  typedef T type;   };
+
+template<class T>
+struct remove_reference
+{
+   typedef T type;
+};
+
+template<class T>
+struct remove_reference<T&>
+{
+   typedef T type;
+};
+
+
 typedef char one;
 struct two {one _[2];};
 
@@ -84,7 +137,7 @@ class is_convertible
    //overaligned types can't go through ellipsis
    static false_t dispatch(...);
    static true_t  dispatch(U);
-   static T &trigger();
+   static typename remove_reference<T>::type &trigger();
    public:
    static const bool value = sizeof(dispatch(trigger())) == sizeof(true_t);
 };
@@ -299,58 +352,6 @@ struct alignment_of
             < sizeof(alignment_of_hack<T>) - sizeof(T)
             , sizeof(T)
             >::value;
-};
-
-template <typename T, typename U>
-struct is_same
-{
-   static const bool value = false;
-};
-
-template <typename T>
-struct is_same<T, T>
-{
-   static const bool value = true;
-};
-
-template<typename T>
-struct add_const
-{  typedef const T type;   };
-
-template<typename T>
-struct remove_const
-{  typedef  T type;   };
-
-template<typename T>
-struct remove_const<const T>
-{  typedef T type;   };
-
-template<typename T>
-struct remove_cv
-{  typedef  T type;   };
-
-template<typename T>
-struct remove_cv<const T>
-{  typedef T type;   };
-
-template<typename T>
-struct remove_cv<const volatile T>
-{  typedef T type;   };
-
-template<typename T>
-struct remove_cv<volatile T>
-{  typedef T type;   };
-
-template<class T>
-struct remove_reference
-{
-   typedef T type;
-};
-
-template<class T>
-struct remove_reference<T&>
-{
-   typedef T type;
 };
 
 template<class Class>

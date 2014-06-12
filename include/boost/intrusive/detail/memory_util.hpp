@@ -65,8 +65,7 @@ struct LowPriorityConversion
       static char test(int, typename X::TNAME*);                           \
                                                                            \
       template <typename X>                                                \
-      static int test(boost::intrusive::detail::                           \
-         LowPriorityConversion<int>, void*);                               \
+      static int test(...);                                                \
                                                                            \
       struct DefaultWrap { typedef DefaultType TNAME; };                   \
                                                                            \
@@ -84,8 +83,7 @@ struct LowPriorityConversion
       static char test(int, typename X::TNAME*);                           \
                                                                            \
       template <typename X>                                                \
-      static int test(boost::intrusive::detail::                           \
-         LowPriorityConversion<int>, void*);                               \
+      static int test(...);                                                \
                                                                            \
       struct DefaultWrap                                                   \
       { typedef typename DefaultType::type TNAME; };                       \
@@ -145,6 +143,8 @@ namespace detail {
 
 BOOST_INTRUSIVE_INSTANTIATE_DEFAULT_TYPE_TMPLT(element_type)
 BOOST_INTRUSIVE_INSTANTIATE_DEFAULT_TYPE_TMPLT(difference_type)
+BOOST_INTRUSIVE_INSTANTIATE_DEFAULT_TYPE_TMPLT(reference)
+BOOST_INTRUSIVE_INSTANTIATE_DEFAULT_TYPE_TMPLT(value_traits_ptr)
 
 //////////////////////
 //struct first_param

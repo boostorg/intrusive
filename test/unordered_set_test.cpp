@@ -358,24 +358,6 @@ void test_unordered_set<ValueTraits, CacheBegin, CompareHash, Incremental>::
    {  int init_values [] = { 1, 2, 3, 4, 5 };
    TEST_INTRUSIVE_SEQUENCE( init_values, testset1.begin() );  }
 
-   //This incremental rehash should success because the new size is twice the original
-   //and split_count is the same as the old bucket count
-   BOOST_TEST(testset1.incremental_rehash(bucket_traits(
-      pointer_traits<typename unordered_set_type::bucket_ptr>::
-         pointer_to(buckets1[0]), BucketSize*2)) == true);
-   BOOST_TEST(testset1.split_count() == BucketSize);
-   {  int init_values [] = { 1, 2, 3, 4, 5 };
-   TEST_INTRUSIVE_SEQUENCE( init_values, testset1.begin() );  }
-
-   //This incremental rehash should also success because the new size is half the original
-   //and split_count is the same as the new bucket count
-   BOOST_TEST(testset1.incremental_rehash(bucket_traits(
-      pointer_traits<typename unordered_set_type::bucket_ptr>::
-         pointer_to(buckets1[0]), BucketSize)) == true);
-   BOOST_TEST(testset1.split_count() == BucketSize);
-   {  int init_values [] = { 1, 2, 3, 4, 5 };
-   TEST_INTRUSIVE_SEQUENCE( init_values, testset1.begin() );  }
-
    //
    //Try incremental hashing specifying a new bucket traits pointing to the same array
    //
@@ -731,7 +713,7 @@ class test_main_template<VoidPointer, false, incremental>
    }
 };
 
-int main( int, char* [] )
+int main()
 {
    test_main_template<void*, false, true>()();
    test_main_template<smart_ptr<void>, false, true>()();

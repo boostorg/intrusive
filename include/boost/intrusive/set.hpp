@@ -38,15 +38,15 @@ namespace intrusive {
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class Compare, class SizeType, bool ConstantTimeSize, typename Header_Holder>
+template<class ValueTraits, class Compare, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
 #endif
 class set_impl
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-   : public bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, RbTreeAlgorithms, Header_Holder>
+   : public bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, RbTreeAlgorithms, HeaderHolder>
 #endif
 {
    /// @cond
-   typedef bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, RbTreeAlgorithms, Header_Holder> tree_type;
+   typedef bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, RbTreeAlgorithms, HeaderHolder> tree_type;
    BOOST_MOVABLE_BUT_NOT_COPYABLE(set_impl)
 
    typedef tree_type implementation_defined;
@@ -510,15 +510,15 @@ class set
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class Compare, class SizeType, bool ConstantTimeSize, typename Header_Holder>
+template<class ValueTraits, class Compare, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
 #endif
 class multiset_impl
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-   : public bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, RbTreeAlgorithms, Header_Holder>
+   : public bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, RbTreeAlgorithms, HeaderHolder>
 #endif
 {
    /// @cond
-   typedef bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, RbTreeAlgorithms, Header_Holder> tree_type;
+   typedef bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, RbTreeAlgorithms, HeaderHolder> tree_type;
 
    BOOST_MOVABLE_BUT_NOT_COPYABLE(multiset_impl)
    typedef tree_type implementation_defined;

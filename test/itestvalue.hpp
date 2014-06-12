@@ -17,6 +17,7 @@
 #include <boost/intrusive/options.hpp>
 #include <boost/functional/hash.hpp>
 #include "nonhook_node.hpp"
+#include <boost/container/vector.hpp>
 
 namespace boost{
 namespace intrusive{
@@ -50,7 +51,7 @@ struct testvalue
       :  value_ (src.value_)
    {}
 
-   // testvalue is used in std::vector and thus prev and next
+   // testvalue is used in boost::container::vector and thus prev and next
    // have to be handled appropriately when copied:
    testvalue & operator= (const testvalue& src)
    {
@@ -168,28 +169,24 @@ struct Value_Container;
 template < class Hooks, bool ConstantTimeSize >
 struct Value_Container< testvalue< Hooks, ConstantTimeSize > >
 {
-    typedef std::vector< testvalue< Hooks, ConstantTimeSize > > type;
+    typedef boost::container::vector< testvalue< Hooks, ConstantTimeSize > > type;
 };
 
 template < typename T >
 class pointer_holder
 {
-public:
-    pointer_holder() : _ptr(new T())
-    {
-        //std::clog << "constructing holder pointing to &=" << (void*)_ptr << "\n";
-    }
-    ~pointer_holder()
-    {
-        //std::clog << "destructing holder pointing to &=" << (void*)_ptr << "\n";
-        delete _ptr;
-    }
+   public:
+   pointer_holder() : _ptr(new T())
+   {}
 
-    const T* get_node() const { return _ptr; }
-    T* get_node() { return _ptr; }
+   ~pointer_holder()
+   { delete _ptr;   }
 
-private:
-    T* const _ptr;
+   const T* get_node() const { return _ptr; }
+   T* get_node() { return _ptr; }
+
+   private:
+   T* const _ptr;
 };
 
 /*

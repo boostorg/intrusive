@@ -24,7 +24,6 @@
 #include <boost/intrusive/trivial_value_traits.hpp>
 #include <cstddef>
 #include <climits>
-#include <boost/type_traits/make_unsigned.hpp>
 #include <boost/move/core.hpp>
 
 
@@ -206,8 +205,7 @@ struct get_slist_impl
       < typename NodeTraits::node
       , boost::intrusive::value_traits<trivial_traits>
       , boost::intrusive::constant_time_size<false>
-	  , boost::intrusive::size_type<typename boost::make_unsigned
-         <typename pointer_traits<typename NodeTraits::node_ptr>::difference_type>::type >
+	   , boost::intrusive::size_type<std::size_t>
       >::type
    {};
 };

@@ -298,6 +298,12 @@
 			Name="Test headers"
 			Filter="">
 			<File
+				RelativePath="..\..\..\test\bounded_pointer.hpp">
+			</File>
+			<File
+				RelativePath="..\..\..\test\bptr_value.hpp">
+			</File>
+			<File
 				RelativePath="..\..\..\test\common_functors.hpp">
 			</File>
 			<File
@@ -335,9 +341,6 @@
 				RelativePath="..\..\..\example\doc_advanced_value_traits.cpp">
 			</File>
 			<File
-				RelativePath="..\..\..\example\doc_advanced_value_traits2.cpp">
-			</File>
-			<File
 				RelativePath="..\..\..\example\doc_any_hook.cpp">
 			</File>
 			<File
@@ -359,6 +362,9 @@
 				RelativePath="..\..\..\example\doc_clone_from.cpp">
 			</File>
 			<File
+				RelativePath="..\..\..\example\doc_derivation_value_traits.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\example\doc_entity.cpp">
 			</File>
 			<File
@@ -378,6 +384,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\example\doc_list_algorithms.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\example\doc_member_value_traits.cpp">
 			</File>
 			<File
 				RelativePath="..\..\..\example\doc_offset_ptr.cpp">

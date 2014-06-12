@@ -16,388 +16,384 @@
 #include <iostream>
 #include <cstdlib>
 #include <cassert>
-#include <vector>
-#include <boost/utility/enable_if.hpp>
-#include <boost/mpl/if.hpp>
-#include <boost/mpl/and.hpp>
+#include <boost/container/vector.hpp>
+#include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
-#include <boost/type_traits.hpp>
 
-#define CONST_CONVERSIONS(_type, _t) \
-    operator const _type< typename boost::add_const< _t >::type >& () const \
-    { return *reinterpret_cast< const _type< typename boost::add_const< _t >::type >* >(this); } \
-    operator _type< typename boost::add_const< _t >::type >& () \
-    { return *reinterpret_cast< _type< typename boost::add_const< _t >::type >* >(this); } \
-    \
-    const _type< typename boost::remove_const< _t >::type >& unconst() const \
-    { return *reinterpret_cast< const _type< typename boost::remove_const< _t >::type >* >(this); } \
-    _type< typename boost::remove_const< _t >::type >& unconst() \
-    { return *reinterpret_cast< _type< typename boost::remove_const< _t >::type >* >(this); }
+template < typename T >
+class bounded_pointer;
+
+template < typename T >
+class bounded_reference;
+
+template < typename T >
+class bounded_allocator;
 
 
 template < typename T >
-class Bounded_Pointer;
-template < typename T >
-class Bounded_Reference;
-template < typename T >
-class Bounded_Allocator;
-
-
-template < typename T >
-class Bounded_Pointer
+class bounded_pointer
 {
-public:
-    typedef typename boost::remove_const< T >::type mut_val_t;
-    typedef const mut_val_t const_val_t;
+   private:
+   void unspecified_bool_type_func() const {}
+   typedef void (bounded_pointer::*unspecified_bool_type)() const;
 
-    template <class U>
-    struct rebind
-    {
-        typedef typename boost::mpl::if_<
-            boost::is_same<
-                typename boost::remove_const< U >::type,
-                typename boost::remove_const< T >::type >,
-            Bounded_Pointer< U >,
-            U*
-        >::type type;
-    };
+   public:
+   typedef typename boost::remove_const< T >::type mut_val_t;
+   typedef const mut_val_t const_val_t;
 
-    Bounded_Pointer() : _offset(255) {}
-    Bounded_Pointer(const Bounded_Pointer& other) : _offset(other._offset) {}
-    Bounded_Pointer& operator = (const Bounded_Pointer& other) { _offset = other._offset; return *this; }
-    CONST_CONVERSIONS(Bounded_Pointer, T)
+   typedef bounded_reference<T>  reference;
 
-    static mut_val_t* base()
-    {
-        assert(Bounded_Allocator< mut_val_t >::inited());
-        return &Bounded_Allocator< mut_val_t >::_base[0];
-    }
+   static const unsigned char max_offset = (unsigned char)-1;
 
-    operator bool() const { return _offset != 255; }
+   bounded_pointer() : m_offset(max_offset) {}
 
-    T* raw() const { return base() + _offset; }
-    Bounded_Reference< T > operator * () const { return Bounded_Reference< T >(*this); }
-    T* operator -> () const { return raw(); }
-    Bounded_Pointer& operator ++ () { ++_offset; return *this; }
-    Bounded_Pointer operator ++ (int) { Bounded_Pointer res(*this); ++(*this); return res; }
+   bounded_pointer(const bounded_pointer& other)
+      : m_offset(other.m_offset)
+   {}
 
-    template < typename U >
-    //           typename boost::enable_if< boost::is_same< typename boost::remove_const< U >::type,
-    //                                                      typename boost::remove_const< T >::type >, int >::type = 42 >
-    bool operator == (const Bounded_Pointer< U >& rhs) const
-    {
-        return _offset == rhs._offset;
-    }
-    template < typename U >
-    //           typename boost::enable_if< boost::is_same< typename boost::remove_const< U >::type,
-    //                                                      typename boost::remove_const< T >::type >, int >::type = 42 >
-    bool operator < (const Bounded_Pointer< U >& rhs) const
-    {
-        return _offset < rhs._offset;
-    }
+   template<class T2>
+   bounded_pointer(const bounded_pointer<T2> &other, typename boost::intrusive::detail::enable_if_c
+      <boost::intrusive::detail::is_convertible<T2*, T*>::value>::type* = 0)
+      :  m_offset(other.m_offset)
+   {}
 
-    friend std::ostream& operator << (std::ostream& os, const Bounded_Pointer< T >& ptr)
-    {
-        os << static_cast< int >(ptr._offset);
-        return os;
-    }
-private:
-    template <typename> friend class Bounded_Pointer;
-    friend class Bounded_Reference< T >;
-    friend class Bounded_Allocator< T >;
+   bounded_pointer& operator = (const bounded_pointer& other)
+   { m_offset = other.m_offset; return *this; }
 
-    uint8_t _offset;
-}; // class Bounded_Pointer
+   template <class T2>
+   typename boost::intrusive::detail::enable_if_c
+      <boost::intrusive::detail::is_convertible<T2*, T*>::value, bounded_pointer&>::type
+      operator= (const bounded_pointer<T2> & other)
+   {  m_offset = other.m_offset;  return *this;  }
+
+   const bounded_pointer< typename boost::intrusive::detail::remove_const< T >::type >& unconst() const 
+   { return *reinterpret_cast< const bounded_pointer< typename boost::intrusive::detail::remove_const< T >::type >* >(this); } 
+
+   bounded_pointer< typename boost::intrusive::detail::remove_const< T >::type >& unconst() 
+   { return *reinterpret_cast< bounded_pointer< typename boost::intrusive::detail::remove_const< T >::type >* >(this); }
+
+   static mut_val_t* base()
+   {
+      assert(bounded_allocator< mut_val_t >::inited());
+      return &bounded_allocator< mut_val_t >::m_base[0];
+   }
+
+   static bounded_pointer pointer_to(bounded_reference< T > r) { return &r; }
+
+   template<class U>
+   static bounded_pointer const_cast_from(const bounded_pointer<U> &uptr)
+   {  return uptr.unconst();  }
+
+   operator unspecified_bool_type() const
+   {
+      return m_offset != max_offset? &bounded_pointer::unspecified_bool_type_func : 0;
+   }
+
+   T* raw() const
+   { return base() + m_offset; }
+
+   bounded_reference< T > operator * () const
+   { return bounded_reference< T >(*this); }
+
+   T* operator -> () const
+      { return raw(); }
+
+   bounded_pointer& operator ++ ()
+   { ++m_offset; return *this; }
+
+   bounded_pointer operator ++ (int)
+   { bounded_pointer res(*this); ++(*this); return res; }
+
+   friend bool operator == (const bounded_pointer& lhs, const bounded_pointer& rhs)
+   { return lhs.m_offset == rhs.m_offset;   }
+
+   friend bool operator != (const bounded_pointer& lhs, const bounded_pointer& rhs)
+   { return lhs.m_offset != rhs.m_offset;   }
+
+   friend bool operator < (const bounded_pointer& lhs, const bounded_pointer& rhs)
+   { return lhs.m_offset < rhs.m_offset;   }
+
+   friend bool operator <= (const bounded_pointer& lhs, const bounded_pointer& rhs)
+   { return lhs.m_offset <= rhs.m_offset;   }
+
+   friend bool operator >= (const bounded_pointer& lhs, const bounded_pointer& rhs)
+   { return lhs.m_offset >= rhs.m_offset;   }
+
+   friend bool operator > (const bounded_pointer& lhs, const bounded_pointer& rhs)
+   { return lhs.m_offset > rhs.m_offset;   }
+
+   friend std::ostream& operator << (std::ostream& os, const bounded_pointer& ptr)
+   {
+      os << static_cast< int >(ptr.m_offset);
+      return os;
+   }
+   private:
+
+   template <typename> friend class bounded_pointer;
+   friend class bounded_reference< T >;
+   friend class bounded_allocator< T >;
+
+   unsigned char m_offset;
+}; // class bounded_pointer
 
 template < typename T >
-class Bounded_Reference
+class bounded_reference
 {
-public:
-    typedef typename boost::remove_const< T >::type mut_val_t;
-    typedef const mut_val_t const_val_t;
+   public:
+   typedef typename boost::remove_const< T >::type mut_val_t;
+   typedef const mut_val_t const_val_t;
+   typedef bounded_pointer< T > pointer;
+   static const unsigned char max_offset = pointer::max_offset;
 
-    Bounded_Reference() : _offset(255) {}
-    Bounded_Reference(const Bounded_Reference& other) : _offset(other._offset) {}
-    CONST_CONVERSIONS(Bounded_Reference, T)
 
-    T& raw() const { assert(_offset != 255); return *(Bounded_Pointer< T >::base() + _offset); }
-    operator T& () const { assert(_offset != 255); return raw(); }
-    Bounded_Pointer< T > operator & () const { assert(_offset != 255); Bounded_Pointer< T > res; res._offset = _offset; return res; }
+   bounded_reference()
+      : m_offset(max_offset)
+   {}
+   
+   bounded_reference(const bounded_reference& other)
+      : m_offset(other.m_offset)
+   {}
 
-    Bounded_Reference& operator = (const T& rhs) { assert(_offset != 255); raw() = rhs; return *this; }
-    Bounded_Reference& operator = (const Bounded_Reference& rhs) { assert(_offset != 255); raw() = rhs.raw(); return *this; }
+   T& raw() const
+   { assert(m_offset != max_offset); return *(bounded_pointer< T >::base() + m_offset); }
 
-    friend std::ostream& operator << (std::ostream& os, const Bounded_Reference< T >& ref)
-    {
-        os << "[bptr=" << static_cast< int >(ref._offset) << ",deref=" << ref.raw() << "]";
-        return os;
-    }
+   operator T& () const
+   { assert(m_offset != max_offset); return raw(); }
 
-    // the copy asop is shallow; we need swap overload to shuffle a vector of references
-    friend void swap(Bounded_Reference& lhs, Bounded_Reference& rhs)
-    {
-        std::swap(lhs._offset, rhs._offset);
-    }
+   bounded_pointer< T > operator & () const
+   { assert(m_offset != max_offset); bounded_pointer< T > res; res.m_offset = m_offset; return res; }
 
-private:
-    friend class Bounded_Pointer< T >;
-    Bounded_Reference(Bounded_Pointer< T > bptr) : _offset(bptr._offset) { assert(_offset != 255); }
+   bounded_reference& operator = (const T& rhs)
+   { assert(m_offset != max_offset); raw() = rhs; return *this; }
 
-    uint8_t _offset;
-}; // class Bounded_Reference
+   bounded_reference& operator = (const bounded_reference& rhs)
+   { assert(m_offset != max_offset); raw() = rhs.raw(); return *this; }
+
+   template<class T2>
+   bounded_reference(const bounded_reference<T2> &other, typename boost::intrusive::detail::enable_if_c
+      <boost::intrusive::detail::is_convertible<T2&, T&>::value>::type* = 0)
+      :  m_offset(other.m_offset)
+   {}
+
+   template <class T2>
+   typename boost::intrusive::detail::enable_if_c
+      <boost::intrusive::detail::is_convertible<T2&, T&>::value, bounded_reference&>::type
+   operator= (const bounded_reference<T2> & other)
+   {  m_offset = other.m_offset;  return *this;  }
+
+   friend std::ostream& operator << (std::ostream& os, const bounded_reference< T >& ref)
+   {
+      os << "[bptr=" << static_cast< int >(ref.m_offset) << ",deref=" << ref.raw() << "]";
+      return os;
+   }
+
+   // the copy asop is shallow; we need swap overload to shuffle a vector of references
+   friend void swap(bounded_reference& lhs, bounded_reference& rhs)
+   {  std::swap(lhs.m_offset, rhs.m_offset); }
+
+   private:
+   template <typename> friend class bounded_reference;
+   friend class bounded_pointer< T >;
+   bounded_reference(bounded_pointer< T > bptr) : m_offset(bptr.m_offset) { assert(m_offset != max_offset); }
+
+   unsigned char m_offset;
+}; // class bounded_reference
 
 template < typename T >
-class Bounded_Allocator
+class bounded_allocator
 {
-public:
-    typedef T value_type;
-    typedef Bounded_Pointer< T > pointer;
+   public:
+   typedef T value_type;
+   typedef bounded_pointer< T > pointer;
 
-    pointer allocate(size_t n)
-    {
-        assert(inited());
-        assert(n == 1);
-        pointer p;
-        uint8_t i;
-        for (i = 0; i < 255 and _in_use[i]; ++i);
-        assert(i < 255);
-        p._offset = i;
-        _in_use[p._offset] = true;
-        //std::clog << "allocating node " << static_cast< int >(p._offset) << "\n";
-        return p;
-    }
-    void deallocate(pointer p, size_t n)
-    {
-        assert(inited());
-        assert(n == 1);
-        assert(_in_use[p._offset]);
-        //std::clog << "deallocating node " << static_cast< int >(p._offset) << "\n";
-        _in_use[p._offset] = false;
-    }
+   static const unsigned char max_offset = pointer::max_offset;
 
-    // static methods
-    static void init()
-    {
-        assert(_in_use.empty());
-        _in_use = std::vector< bool >(255, false);
-        // allocate non-constructed storage
-        _base = static_cast< T* >(::operator new [] (255 * sizeof(T)));
-    }
-    static bool inited()
-    {
-        return _in_use.size() == 255;
-    }
-    static bool is_clear()
-    {
-        assert(inited());
-        for (uint8_t i = 0; i < 255; ++i)
-        {
-            if (_in_use[i])
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-    static void destroy()
-    {
-        // deallocate storage without destructors
-        ::operator delete [] (_base);
-        _in_use.clear();
-    }
+   pointer allocate(size_t n)
+   {
+      assert(inited());
+      assert(n == 1);
+      pointer p;
+      unsigned char i;
+      for (i = 0; i < max_offset && m_in_use[i]; ++i);
+      assert(i < max_offset);
+      p.m_offset = i;
+      m_in_use[p.m_offset] = true;
+      return p;
+   }
+   
+   void deallocate(pointer p, size_t n)
+   {
+      assert(inited());
+      assert(n == 1);
+      assert(m_in_use[p.m_offset]);
+      m_in_use[p.m_offset] = false;
+   }
 
-private:
-    friend class Bounded_Pointer< T >;
-    friend class Bounded_Pointer< const T >;
-    static T* _base;
-    static std::vector< bool > _in_use;
-}; // class Bounded_Allocator
+   // static methods
+   static void init()
+   {
+      assert(m_in_use.empty());
+      m_in_use = boost::container::vector< bool >(max_offset, false);
+      // allocate non-constructed storage
+      m_base = static_cast< T* >(::operator new [] (max_offset * sizeof(T)));
+   }
+   
+   static bool inited()
+   {
+      return m_in_use.size() == max_offset;
+   }
+   
+   static bool is_clear()
+   {
+      assert(inited());
+      for (unsigned char i = 0; i < max_offset; ++i)
+      {
+         if (m_in_use[i])
+         {
+               return false;
+         }
+      }
+      return true;
+   }
+   
+   static void destroy()
+   {
+      // deallocate storage without destructors
+      ::operator delete [] (m_base);
+      m_in_use.clear();
+   }
 
-template < typename T >
-T* Bounded_Allocator< T >::_base = NULL;
-
-template < typename T >
-std::vector< bool > Bounded_Allocator< T >::_in_use;
-
+   private:
+   friend class bounded_pointer< T >;
+   friend class bounded_pointer< const T >;
+   static T* m_base;
+   static boost::container::vector< bool > m_in_use;
+}; // class bounded_allocator
 
 template < typename T >
-class Bounded_Reference_Cont
-    : private std::vector< Bounded_Reference< T > >
+T* bounded_allocator< T >::m_base = 0;
+
+template < typename T >
+boost::container::vector< bool > bounded_allocator< T >::m_in_use;
+
+
+template < typename T >
+class bounded_reference_cont
+    : private boost::container::vector< bounded_reference< T > >
 {
-private:
-    typedef T val_type;
-    typedef std::vector< Bounded_Reference< T > > Base;
-    typedef Bounded_Allocator< T > allocator_type;
-    typedef Bounded_Pointer< T > pointer;
+   private:
+   typedef T val_type;
+   typedef boost::container::vector< bounded_reference< T > > Base;
+   typedef bounded_allocator< T > allocator_type;
+   typedef bounded_pointer< T > pointer;
 
-public:
-    typedef typename Base::value_type value_type;
-    typedef typename Base::iterator iterator;
-    typedef typename Base::const_iterator const_iterator;
-    typedef typename Base::reference reference;
-    typedef typename Base::const_reference const_reference;
-    typedef typename Base::reverse_iterator reverse_iterator;
-    typedef typename Base::const_reverse_iterator const_reverse_iterator;
+   public:
+   typedef typename Base::value_type value_type;
+   typedef typename Base::iterator iterator;
+   typedef typename Base::const_iterator const_iterator;
+   typedef typename Base::reference reference;
+   typedef typename Base::const_reference const_reference;
+   typedef typename Base::reverse_iterator reverse_iterator;
+   typedef typename Base::const_reverse_iterator const_reverse_iterator;
 
-    iterator begin() { return Base::begin(); }
-    iterator end() { return Base::end(); }
-    const_iterator begin() const { return Base::begin(); }
-    const_iterator end() const { return Base::end(); }
-    reverse_iterator rbegin() { return Base::rbegin(); }
-    reverse_iterator rend() { return Base::rend(); }
-    const_reverse_iterator rbegin() const { return Base::rbegin(); }
-    const_reverse_iterator rend() const { return Base::rend(); }
-    reference front() { return Base::front(); }
-    const_reference front() const { return Base::front(); }
-    reference back() { return Base::back(); }
-    const_reference back() const { return Base::back(); }
-    size_t size() const { return Base::size(); }
-    reference operator [] (size_t i) { return Base::operator [] (i); }
-    const_reference operator [] (size_t i) const { return Base::operator [] (i); }
-    void push_back(const value_type& v) { Base::push_back(v); }
+   using Base::begin;
+   using Base::rbegin;
+   using Base::end;
+   using Base::rend;
+   using Base::front;
+   using Base::back;
+   using Base::size;
+   using Base::operator[];
+   using Base::push_back;
 
-    Bounded_Reference_Cont(size_t n = 0) : Base(), _allocator()
-    {
-        for (size_t i = 0; i < n; ++i)
-        {
-            pointer p = _allocator.allocate(1);
+   bounded_reference_cont(size_t n = 0)
+      : Base(), m_allocator()
+   {
+      for (size_t i = 0; i < n; ++i){
+         pointer p = m_allocator.allocate(1);
+         BOOST_TRY{
             new (p.raw()) val_type();
-            Base::push_back(*p);
-        }
-    }
-    Bounded_Reference_Cont(const Bounded_Reference_Cont& other) : Base(), _allocator(other._allocator)
-    {
-        //std::clog << "copying values container\n";
-        *this = other;
-    }
-    template < typename InputIterator >
-    Bounded_Reference_Cont(InputIterator it_start, InputIterator it_end) : Base(), _allocator()
-    {
-        for (InputIterator it = it_start; it != it_end; ++it)
-        {
-            pointer p = _allocator.allocate(1);
-            new (p.raw()) val_type(*it);
-            Base::push_back(*p);
-        }
-    }
-    ~Bounded_Reference_Cont()
-    {
-        clear();
-    }
-    void clear()
-    {
-        while (not Base::empty())
-        {
-            pointer p = &Base::back();
-            p->~val_type();
-            _allocator.deallocate(p, 1);
-            Base::pop_back();
-        }
-    }
-    Bounded_Reference_Cont& operator = (const Bounded_Reference_Cont& other)
-    {
-        if (&other != this)
-        {
-            clear();
-            for (typename Base::const_iterator it = other.begin(); it != other.end(); ++it)
-            {
-                pointer p = _allocator.allocate(1);
-                new (p.raw()) val_type(*it);
-                Base::push_back(*p);
-            }
-        }
-        return *this;
-    }
+         }
+         BOOST_CATCH(...){
+            m_allocator.deallocate(p, 1);
+            BOOST_RETHROW
+         }
+         BOOST_CATCH_END
+         Base::push_back(*p);
+      }
+   }
 
-private:
-    allocator_type _allocator;
-}; // class Bounded_Reference_Cont
+   bounded_reference_cont(const bounded_reference_cont& other)
+      : Base(), m_allocator(other.m_allocator)
+   {  *this = other;  }
 
-template < typename T >
-class Bounded_Pointer_Holder
-{
-public:
-    typedef T value_type;
-    typedef Bounded_Pointer< value_type > pointer;
-    typedef Bounded_Pointer< const value_type > const_pointer;
-    typedef Bounded_Allocator< value_type > allocator_type;
+   template < typename InputIterator >
+   bounded_reference_cont(InputIterator it_start, InputIterator it_end)
+      : Base(), m_allocator()
+   {
+      for (InputIterator it = it_start; it != it_end; ++it){
+         pointer p = m_allocator.allocate(1);
+         new (p.raw()) val_type(*it);
+         Base::push_back(*p);
+      }
+   }
 
-    Bounded_Pointer_Holder() : _ptr(allocator_type().allocate(1))
-    {
-        new (_ptr.raw()) value_type();
-    }
-    ~Bounded_Pointer_Holder()
-    {
-        _ptr->~value_type();
-        allocator_type().deallocate(_ptr, 1);
-    }
+   ~bounded_reference_cont()
+   {  clear();  }
 
-    const_pointer get_node () const { return _ptr; }
-    pointer get_node () { return _ptr; }
+   void clear()
+   {
+      while (!Base::empty()){
+         pointer p = &Base::back();
+         p->~val_type();
+         m_allocator.deallocate(p, 1);
+         Base::pop_back();
+      }
+   }
 
-private:
-    const pointer _ptr;
-}; // class Bounded_Pointer_Holder
+   bounded_reference_cont& operator = (const bounded_reference_cont& other)
+   {
+      if (&other != this){
+         clear();
+         for (typename Base::const_iterator it = other.begin(); it != other.end(); ++it){
+               pointer p = m_allocator.allocate(1);
+               new (p.raw()) val_type(*it);
+               Base::push_back(*p);
+         }
+      }
+      return *this;
+   }
 
-
-namespace boost
-{
-namespace intrusive
-{
+   private:
+   allocator_type m_allocator;
+}; // class bounded_reference_cont
 
 template < typename T >
-struct pointer_traits< Bounded_Pointer< T > >
+class bounded_pointer_holder
 {
-    typedef T element_type;
-    typedef Bounded_Pointer< T > pointer;
-    typedef Bounded_Pointer< const T > const_pointer;
-    typedef ptrdiff_t difference_type;
-    typedef Bounded_Reference< T > reference;
+   public:
+   typedef T value_type;
+   typedef bounded_pointer< value_type > pointer;
+   typedef bounded_pointer< const value_type > const_pointer;
+   typedef bounded_allocator< value_type > allocator_type;
 
-    template <class U>
-    struct rebind_pointer
-    {
-        typedef typename Bounded_Pointer< T >::template rebind< U >::type type;
-    };
+   bounded_pointer_holder() : _ptr(allocator_type().allocate(1))
+   {  new (_ptr.raw()) value_type();   }
 
-    static pointer pointer_to(reference r) { return &r; }
-    static pointer const_cast_from(const_pointer cptr) { return cptr.unconst(); }
-};
+   ~bounded_pointer_holder()
+   {
+      _ptr->~value_type();
+      allocator_type().deallocate(_ptr, 1);
+   }
 
-} // namespace intrusive
-} // namespace boost
+   const_pointer get_node () const
+   { return _ptr; }
 
-template < typename T, typename U >
-//           typename boost::enable_if< boost::is_same< typename boost::remove_const< T >::type,
-//                                                      typename boost::remove_const< U >::type >, int >::type = 42 >
-bool operator != (const Bounded_Pointer< T >& lhs, const Bounded_Pointer< U >& rhs)
-{
-    return !(lhs == rhs);
-}
-template < typename T >
-bool operator == (const Bounded_Pointer< T >& lhs, const void* p)
-{
-    assert(!p);
-    return lhs == Bounded_Pointer< T >();
-}
-template < typename T >
-bool operator == (const void* p, const Bounded_Pointer< T >& rhs)
-{
-    assert(!p);
-    return Bounded_Pointer< T >() == rhs;
-}
-template < typename T >
-bool operator != (const Bounded_Pointer< T >& lhs, const void* p)
-{
-    assert(!p);
-    return lhs != Bounded_Pointer< T >();
-}
-template < typename T >
-bool operator != (const void* p, const Bounded_Pointer< T >& rhs)
-{
-    assert(!p);
-    return Bounded_Pointer< T >() != rhs;
-}
+   pointer get_node ()
+   { return _ptr; }
 
+   private:
+   const pointer _ptr;
+}; // class bounded_pointer_holder
 
 #endif

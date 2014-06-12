@@ -36,15 +36,15 @@ namespace intrusive {
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class Compare, class SizeType, bool ConstantTimeSize, typename Header_Holder>
+template<class ValueTraits, class Compare, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
 #endif
 class avl_set_impl
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-   : public bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, AvlTreeAlgorithms, Header_Holder>
+   : public bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, AvlTreeAlgorithms, HeaderHolder>
 #endif
 {
    /// @cond
-   typedef bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, AvlTreeAlgorithms, Header_Holder> tree_type;
+   typedef bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, AvlTreeAlgorithms, HeaderHolder> tree_type;
    BOOST_MOVABLE_BUT_NOT_COPYABLE(avl_set_impl)
 
    typedef tree_type implementation_defined;
@@ -170,7 +170,7 @@ class avl_set_impl
    //! @copydoc ::boost::intrusive::avltree::clone_from
    template <class Cloner, class Disposer>
    void clone_from(const avl_set_impl &src, Cloner cloner, Disposer disposer);
-   
+
    #endif   //#ifdef BOOST_iNTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::avltree::insert_unique(reference)
@@ -510,15 +510,15 @@ class avl_set
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class Compare, class SizeType, bool ConstantTimeSize, typename Header_Holder>
+template<class ValueTraits, class Compare, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
 #endif
 class avl_multiset_impl
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-   : public bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, AvlTreeAlgorithms, Header_Holder>
+   : public bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, AvlTreeAlgorithms, HeaderHolder>
 #endif
 {
    /// @cond
-   typedef bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, AvlTreeAlgorithms, Header_Holder> tree_type;
+   typedef bstree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, AvlTreeAlgorithms, HeaderHolder> tree_type;
 
    BOOST_MOVABLE_BUT_NOT_COPYABLE(avl_multiset_impl)
    typedef tree_type implementation_defined;

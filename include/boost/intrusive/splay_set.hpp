@@ -36,15 +36,15 @@ namespace intrusive {
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class Compare, class SizeType, bool ConstantTimeSize, typename Header_Holder>
+template<class ValueTraits, class Compare, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
 #endif
 class splay_set_impl
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-   : public splaytree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, Header_Holder>
+   : public splaytree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, HeaderHolder>
 #endif
 {
    /// @cond
-   typedef splaytree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, Header_Holder> tree_type;
+   typedef splaytree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, HeaderHolder> tree_type;
    BOOST_MOVABLE_BUT_NOT_COPYABLE(splay_set_impl)
 
    typedef tree_type implementation_defined;
@@ -531,15 +531,15 @@ class splay_set
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class Compare, class SizeType, bool ConstantTimeSize, typename Header_Holder>
+template<class ValueTraits, class Compare, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
 #endif
 class splay_multiset_impl
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-   : public splaytree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, Header_Holder>
+   : public splaytree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, HeaderHolder>
 #endif
 {
    /// @cond
-   typedef splaytree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, Header_Holder> tree_type;
+   typedef splaytree_impl<ValueTraits, Compare, SizeType, ConstantTimeSize, HeaderHolder> tree_type;
 
    BOOST_MOVABLE_BUT_NOT_COPYABLE(splay_multiset_impl)
    typedef tree_type implementation_defined;

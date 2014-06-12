@@ -36,16 +36,16 @@ namespace intrusive {
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidOrKeyComp, class VoidOrPrioComp, class SizeType, bool ConstantTimeSize, typename Header_Holder>
+template<class ValueTraits, class VoidOrKeyComp, class VoidOrPrioComp, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
 #endif
 class treap_set_impl
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-   : public treap_impl<ValueTraits, VoidOrKeyComp, VoidOrPrioComp, SizeType, ConstantTimeSize, Header_Holder>
+   : public treap_impl<ValueTraits, VoidOrKeyComp, VoidOrPrioComp, SizeType, ConstantTimeSize, HeaderHolder>
 #endif
 {
    /// @cond
    public:
-   typedef treap_impl<ValueTraits, VoidOrKeyComp, VoidOrPrioComp, SizeType, ConstantTimeSize, Header_Holder> tree_type;
+   typedef treap_impl<ValueTraits, VoidOrKeyComp, VoidOrPrioComp, SizeType, ConstantTimeSize, HeaderHolder> tree_type;
    BOOST_MOVABLE_BUT_NOT_COPYABLE(treap_set_impl)
 
    typedef tree_type implementation_defined;
@@ -540,15 +540,15 @@ class treap_set
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidOrKeyComp, class VoidOrPrioComp, class SizeType, bool ConstantTimeSize, typename Header_Holder>
+template<class ValueTraits, class VoidOrKeyComp, class VoidOrPrioComp, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
 #endif
 class treap_multiset_impl
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-   : public treap_impl<ValueTraits, VoidOrKeyComp, VoidOrPrioComp, SizeType, ConstantTimeSize, Header_Holder>
+   : public treap_impl<ValueTraits, VoidOrKeyComp, VoidOrPrioComp, SizeType, ConstantTimeSize, HeaderHolder>
 #endif
 {
    /// @cond
-   typedef treap_impl<ValueTraits, VoidOrKeyComp, VoidOrPrioComp, SizeType, ConstantTimeSize, Header_Holder> tree_type;
+   typedef treap_impl<ValueTraits, VoidOrKeyComp, VoidOrPrioComp, SizeType, ConstantTimeSize, HeaderHolder> tree_type;
    BOOST_MOVABLE_BUT_NOT_COPYABLE(treap_multiset_impl)
 
    typedef tree_type implementation_defined;

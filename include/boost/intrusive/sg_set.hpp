@@ -36,15 +36,15 @@ namespace intrusive {
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class Compare, class SizeType, bool FloatingPoint, typename Header_Holder>
+template<class ValueTraits, class Compare, class SizeType, bool FloatingPoint, typename HeaderHolder>
 #endif
 class sg_set_impl
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-   : public sgtree_impl<ValueTraits, Compare, SizeType, FloatingPoint, Header_Holder>
+   : public sgtree_impl<ValueTraits, Compare, SizeType, FloatingPoint, HeaderHolder>
 #endif
 {
    /// @cond
-   typedef sgtree_impl<ValueTraits, Compare, SizeType, FloatingPoint, Header_Holder> tree_type;
+   typedef sgtree_impl<ValueTraits, Compare, SizeType, FloatingPoint, HeaderHolder> tree_type;
    BOOST_MOVABLE_BUT_NOT_COPYABLE(sg_set_impl)
 
    typedef tree_type implementation_defined;
@@ -521,15 +521,15 @@ class sg_set
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class Compare, class SizeType, bool FloatingPoint, typename Header_Holder>
+template<class ValueTraits, class Compare, class SizeType, bool FloatingPoint, typename HeaderHolder>
 #endif
 class sg_multiset_impl
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-   : public sgtree_impl<ValueTraits, Compare, SizeType, FloatingPoint, Header_Holder>
+   : public sgtree_impl<ValueTraits, Compare, SizeType, FloatingPoint, HeaderHolder>
 #endif
 {
    /// @cond
-   typedef sgtree_impl<ValueTraits, Compare, SizeType, FloatingPoint, Header_Holder> tree_type;
+   typedef sgtree_impl<ValueTraits, Compare, SizeType, FloatingPoint, HeaderHolder> tree_type;
 
    BOOST_MOVABLE_BUT_NOT_COPYABLE(sg_multiset_impl)
    typedef tree_type implementation_defined;

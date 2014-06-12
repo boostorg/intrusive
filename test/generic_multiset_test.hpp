@@ -10,7 +10,7 @@
 // See http://www.boost.org/libs/intrusive for documentation.
 //
 /////////////////////////////////////////////////////////////////////////////
-#include <vector>
+#include <boost/container/vector.hpp>
 #include <boost/intrusive/detail/config_begin.hpp>
 #include "common_functors.hpp"
 #include <boost/detail/lightweight_test.hpp>
@@ -47,28 +47,12 @@ void test_generic_multiset<ValueTraits, ContainerDefiner>::test_all ()
    value_cont_type values (6);
    for (int i = 0; i < 6; ++i)
       (&values[i])->value_ = random_init[i];
-
-   typedef typename ContainerDefiner
+   typedef ContainerDefiner
       < value_type
       , value_traits<ValueTraits>
       , constant_time_size<value_type::constant_time_size>
-      >::type multiset_type;
-#ifdef PRINT_TESTS
-   std::clog << "testing multiset with:\n"
-             << "  value_type = " << typeid(value_type).name() << "\n"
-             << "  sizeof(value_type) = " << sizeof(value_type) << "\n"
-             << "  link_mode = " << ValueTraits::link_mode << "\n"
-             << "  node = " << typeid(typename multiset_type::node).name() << "\n"
-             << "  sizeof(node) = " << sizeof(typename multiset_type::node) << "\n"
-             << "  node_ptr = " << typeid(typename multiset_type::node_ptr).name() << "\n"
-             << "  sizeof(node_ptr) = " << sizeof(typename multiset_type::node_ptr) << "\n"
-             << "  constant_time_size = " << multiset_type::constant_time_size << "\n"
-             << "  has_container_from_iterator = " << multiset_type::has_container_from_iterator << "\n"
-             << "  has_splay = " << has_splay< multiset_type >::value << "\n"
-             << "  has_rebalance = " << has_rebalance< multiset_type >::value << "\n"
-             << "  has_insert_before = " << has_insert_before< multiset_type >::value << "\n"
-             << "  sizeof(multiset_type) = " << sizeof(multiset_type) << "\n";
-#endif
+      > definer_function;
+   typedef typename definer_function::type multiset_type;
    {
       multiset_type testset(values.begin(), values.end());
       test::test_container(testset);
@@ -99,11 +83,12 @@ void test_generic_multiset<ValueTraits, ContainerDefiner>::test_impl()
    for (int i = 0; i < 5; ++i)
       (&values[i])->value_ = i;
    typedef typename ValueTraits::value_type value_type;
-   typedef typename ContainerDefiner
+   typedef ContainerDefiner
       < value_type
       , value_traits<ValueTraits>
       , constant_time_size<value_type::constant_time_size>
-      >::type multiset_type;
+      > definer_function;
+   typedef typename definer_function::type multiset_type;
 
    multiset_type testset;
    for (int i = 0; i < 5; ++i)
@@ -122,11 +107,12 @@ template<class ValueTraits, template <class = void, class = void, class = void, 
 void test_generic_multiset<ValueTraits, ContainerDefiner>::test_sort(value_cont_type& values)
 {
    typedef typename ValueTraits::value_type value_type;
-   typedef typename ContainerDefiner
+   typedef ContainerDefiner
       < value_type
       , value_traits<ValueTraits>
       , constant_time_size<value_type::constant_time_size>
-      >::type multiset_type;
+      > definer_function;
+   typedef typename definer_function::type multiset_type;
 
    multiset_type testset1 (values.begin(), values.end());
    {  int init_values [] = { 1, 2, 2, 3, 4, 5 };
@@ -135,12 +121,14 @@ void test_generic_multiset<ValueTraits, ContainerDefiner>::test_sort(value_cont_
    testset1.clear();
    BOOST_TEST (testset1.empty());
 
-   typedef typename ContainerDefiner
-      <value_type
+   typedef ContainerDefiner
+      < value_type
       , compare<even_odd>
       , value_traits<ValueTraits>
       , constant_time_size<value_type::constant_time_size>
-      >::type multiset_type2;
+      > definer_function2;
+   typedef typename definer_function2::type multiset_type2;
+
    multiset_type2 testset2 (values.begin(), values.begin() + 6);
    {  int init_values [] = { 5, 3, 1, 4, 2, 2 };
       TEST_INTRUSIVE_SEQUENCE( init_values, testset2.rbegin() );  }
@@ -154,12 +142,12 @@ template<class ValueTraits, template <class = void, class = void, class = void, 
 void test_generic_multiset<ValueTraits, ContainerDefiner>::test_insert(value_cont_type& values)
 {
    typedef typename ValueTraits::value_type value_type;
-   typedef typename ContainerDefiner
+   typedef ContainerDefiner
       < value_type
       , value_traits<ValueTraits>
-      , size_type<std::size_t>
       , constant_time_size<value_type::constant_time_size>
-      >::type multiset_type;
+      > definer_function;
+   typedef typename definer_function::type multiset_type;
 
    multiset_type testset;
    testset.insert(values.begin() + 2, values.begin() + 5);
@@ -192,12 +180,12 @@ template<class ValueTraits, template <class = void, class = void, class = void, 
 void test_generic_multiset<ValueTraits, ContainerDefiner>::test_swap(value_cont_type& values)
 {
    typedef typename ValueTraits::value_type value_type;
-   typedef typename ContainerDefiner
+   typedef ContainerDefiner
       < value_type
       , value_traits<ValueTraits>
-      , size_type<std::size_t>
       , constant_time_size<value_type::constant_time_size>
-      >::type multiset_type;
+      > definer_function;
+   typedef typename definer_function::type multiset_type;
    multiset_type testset1 (values.begin(), values.begin() + 2);
    multiset_type testset2;
    testset2.insert (values.begin() + 2, values.begin() + 6);
@@ -218,12 +206,12 @@ template<class ValueTraits, template <class = void, class = void, class = void, 
 void test_generic_multiset<ValueTraits, ContainerDefiner>::test_find(value_cont_type& values)
 {
    typedef typename ValueTraits::value_type value_type;
-   typedef typename ContainerDefiner
+   typedef ContainerDefiner
       < value_type
       , value_traits<ValueTraits>
-      , size_type<std::size_t>
       , constant_time_size<value_type::constant_time_size>
-      >::type multiset_type;
+      > definer_function;
+   typedef typename definer_function::type multiset_type;
    multiset_type testset (values.begin(), values.end());
    typedef typename multiset_type::iterator        iterator;
 

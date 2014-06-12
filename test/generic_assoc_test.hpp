@@ -10,7 +10,7 @@
 // See http://www.boost.org/libs/intrusive for documentation.
 //
 /////////////////////////////////////////////////////////////////////////////
-#include <vector> //vector
+#include <boost/container/vector.hpp> //vector
 #include <algorithm> //sort, random_shuffle
 #include <boost/intrusive/detail/config_begin.hpp>
 #include "common_functors.hpp"
@@ -99,11 +99,12 @@ template<class ValueTraits, template <class = void, class = void, class = void, 
 void test_generic_assoc<ValueTraits, ContainerDefiner>::
    test_container_from_iterator(value_cont_type& values, detail::true_type)
 {
-   typedef typename ContainerDefiner
-     < value_type
-     , value_traits<ValueTraits>
-     , constant_time_size<value_type::constant_time_size>
-     >::type assoc_type;
+   typedef ContainerDefiner
+      < value_type
+      , value_traits<ValueTraits>
+      , constant_time_size<value_type::constant_time_size>
+      > definer_function;
+   typedef typename definer_function::type assoc_type;
    assoc_type testset(values.begin(), values.end());
    typedef typename assoc_type::iterator        it_type;
    typedef typename assoc_type::const_iterator  cit_type;
@@ -134,48 +135,45 @@ void test_generic_assoc<ValueTraits, ContainerDefiner>::test_insert_erase_burst(
       (&values[i])->value_ = i;
    }
 
-   typedef typename ContainerDefiner
+   typedef ContainerDefiner
       < value_type
       , value_traits<ValueTraits>
       , constant_time_size<value_type::constant_time_size>
-      >::type assoc_type;
+      > definer_function;
+   typedef typename definer_function::type assoc_type;
    typedef typename assoc_type::iterator iterator;
 
-   //First ordered insertions
-   assoc_type testset (values.begin(), values.begin() + values.size());
-   TEST_INTRUSIVE_SEQUENCE_EXPECTED(testset, testset.begin());
+   {  //Ordered insertion + erasure
+      assoc_type testset (values.begin(), values.begin() + values.size());
+      TEST_INTRUSIVE_SEQUENCE_EXPECTED(testset, testset.begin());
 
-   //Ordered erasure
-   {
       iterator it(testset.begin()), itend(testset.end());
       for(int i = 0; it != itend; ++i){
          BOOST_TEST(&*it == &values[i]);
          it = testset.erase(it);
       }
+      BOOST_TEST(testset.empty());
    }
-
-   BOOST_TEST(testset.empty());
-
-   //Now random insertions
-   std::random_shuffle(values.begin(), values.end());
-   testset.insert(values.begin(), values.begin() + values.size());
-   TEST_INTRUSIVE_SEQUENCE_EXPECTED(testset, testset.begin());
-
-   {
-      typedef typename value_cont_type::const_iterator cvec_iterator;
-      //Random erasure
-      std::vector<cvec_iterator> it_vector;
-
-      for(cvec_iterator it(values.begin()), itend(values.end())
+  
+   {  //Now random insertions + erasure
+      assoc_type testset;
+      typedef typename value_cont_type::iterator vec_iterator;
+      boost::container::vector<vec_iterator> it_vector;
+      //Random insertion
+      for(vec_iterator it(values.begin()), itend(values.end())
          ; it != itend
          ; ++it){
          it_vector.push_back(it);
       }
+      for(int i = 0; i != MaxValues; ++i){
+         testset.insert(*it_vector[i]);
+      }
+      TEST_INTRUSIVE_SEQUENCE_EXPECTED(testset, testset.begin());
+      //Random erasure
       std::random_shuffle(it_vector.begin(), it_vector.end());
       for(int i = 0; i != MaxValues; ++i){
          testset.erase(testset.iterator_to(*it_vector[i]));
       }
-
       BOOST_TEST(testset.empty());
    }
 }
@@ -183,11 +181,12 @@ void test_generic_assoc<ValueTraits, ContainerDefiner>::test_insert_erase_burst(
 template<class ValueTraits, template <class = void, class = void, class = void, class = void> class ContainerDefiner>
 void test_generic_assoc<ValueTraits, ContainerDefiner>::test_all(value_cont_type& values)
 {
-   typedef typename ContainerDefiner
+   typedef ContainerDefiner
       < value_type
       , value_traits<ValueTraits>
       , constant_time_size<value_type::constant_time_size>
-      >::type assoc_type;
+      > definer_function;
+   typedef typename definer_function::type assoc_type;
 
    test_clone(values);
    test_container_from_end(values, detail::bool_< assoc_type::has_container_from_iterator >());
@@ -203,11 +202,12 @@ template<class ValueTraits, template <class = void, class = void, class = void, 
 void test_generic_assoc<ValueTraits, ContainerDefiner>
    ::test_clone(value_cont_type& values)
 {
-   typedef typename ContainerDefiner
+   typedef ContainerDefiner
       < value_type
       , value_traits<ValueTraits>
       , constant_time_size<value_type::constant_time_size>
-      >::type assoc_type;
+      > definer_function;
+   typedef typename definer_function::type assoc_type;
    assoc_type testset1 (values.begin(), values.begin() + values.size());
    assoc_type testset2;
 
@@ -222,11 +222,12 @@ void test_generic_assoc<ValueTraits, ContainerDefiner>
    ::test_container_from_end(value_cont_type& values, detail::true_type)
 {
    typedef typename ValueTraits::value_type value_type;
-   typedef typename ContainerDefiner
+   typedef ContainerDefiner
       < value_type
       , value_traits<ValueTraits>
       , constant_time_size<value_type::constant_time_size>
-      >::type assoc_type;
+      > definer_function;
+   typedef typename definer_function::type assoc_type;
    assoc_type testset (values.begin(), values.begin() + values.size());
    BOOST_TEST (testset == assoc_type::container_from_end_iterator(testset.end()));
    BOOST_TEST (testset == assoc_type::container_from_end_iterator(testset.cend()));
@@ -237,11 +238,13 @@ void test_generic_assoc<ValueTraits, ContainerDefiner>::test_splay_up
 (value_cont_type& values, detail::true_type)
 {
    typedef typename ValueTraits::value_type value_type;
-   typedef typename ContainerDefiner
+   typedef ContainerDefiner
       < value_type
       , value_traits<ValueTraits>
       , constant_time_size<value_type::constant_time_size>
-      >::type assoc_type;
+      > definer_function;
+   typedef typename definer_function::type assoc_type;
+
    typedef typename assoc_type::iterator iterator;
    typedef value_cont_type orig_set_t;
    std::size_t num_values;
@@ -275,11 +278,13 @@ void test_generic_assoc<ValueTraits, ContainerDefiner>::test_splay_down
 (value_cont_type& values, detail::true_type)
 {
    typedef typename ValueTraits::value_type value_type;
-   typedef typename ContainerDefiner
+   typedef ContainerDefiner
       < value_type
       , value_traits<ValueTraits>
       , constant_time_size<value_type::constant_time_size>
-      >::type assoc_type;
+      > definer_function;
+   typedef typename definer_function::type assoc_type;
+
    typedef typename assoc_type::iterator iterator;
    typedef value_cont_type orig_set_t;
    std::size_t num_values;
@@ -314,11 +319,12 @@ void test_generic_assoc<ValueTraits, ContainerDefiner>::test_rebalance
 (value_cont_type& values, detail::true_type)
 {
    typedef typename ValueTraits::value_type value_type;
-   typedef typename ContainerDefiner
+   typedef ContainerDefiner
       < value_type
       , value_traits<ValueTraits>
       , constant_time_size<value_type::constant_time_size>
-      >::type assoc_type;
+      > definer_function;
+   typedef typename definer_function::type assoc_type;
    typedef value_cont_type orig_set_t;
    orig_set_t original_testset;
    {
@@ -354,11 +360,12 @@ void test_generic_assoc<ValueTraits, ContainerDefiner>::test_insert_before
 (value_cont_type& values, detail::true_type)
 {
    typedef typename ValueTraits::value_type value_type;
-   typedef typename ContainerDefiner
+   typedef ContainerDefiner
       < value_type
       , value_traits<ValueTraits>
       , constant_time_size<value_type::constant_time_size>
-      >::type assoc_type;
+      > definer_function;
+   typedef typename definer_function::type assoc_type;
    {
       assoc_type testset;
       typedef typename value_cont_type::iterator vec_iterator;

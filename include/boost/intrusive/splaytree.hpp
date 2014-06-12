@@ -65,11 +65,11 @@ struct splaytree_defaults
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidOrKeyComp, class SizeType, bool ConstantTimeSize, typename Header_Holder>
+template<class ValueTraits, class VoidOrKeyComp, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
 #endif
 class splaytree_impl
    /// @cond
-   :  public bstree_impl<ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, SplayTreeAlgorithms, Header_Holder>
+   :  public bstree_impl<ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, SplayTreeAlgorithms, HeaderHolder>
    /// @endcond
 {
    public:
@@ -77,7 +77,7 @@ class splaytree_impl
    /// @cond
    typedef bstree_impl< ValueTraits, VoidOrKeyComp, SizeType
                       , ConstantTimeSize, SplayTreeAlgorithms
-                      , Header_Holder>                               tree_type;
+                      , HeaderHolder>                               tree_type;
    typedef tree_type                                                 implementation_defined;
    /// @endcond
 
@@ -460,7 +460,7 @@ class splaytree_impl
       detail::key_nodeptr_comp<value_compare, value_traits>
          key_node_comp(comp, &this->get_value_traits());
       node_ptr r = node_algorithms::splay_down(tree_type::header_ptr(), key, key_node_comp);
-      return iterator(r, this->value_traits_ptr());
+      return iterator(r, this->priv_value_traits_ptr());
    }
 
    //! <b>Effects</b>: Rearranges the container so that if *this stores an element

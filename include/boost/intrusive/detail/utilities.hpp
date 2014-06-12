@@ -21,7 +21,7 @@
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/intrusive/detail/is_stateful_value_traits.hpp>
-#include <boost/intrusive/pointer_traits.hpp>
+#include <boost/intrusive/detail/memory_util.hpp>
 #include <boost/cstdint.hpp>
 #include <cstddef>
 #include <climits>
@@ -187,16 +187,16 @@ struct size_holder<false, SizeType, Tag>
    {}
 };
 
-template<class KeyValueCompare, class RealValueTraits>
+template<class KeyValueCompare, class ValueTraits>
 struct key_nodeptr_comp
    :  private detail::ebo_functor_holder<KeyValueCompare>
 {
-   typedef RealValueTraits                               real_value_traits;
-   typedef typename real_value_traits::value_type        value_type;
-   typedef typename real_value_traits::node_ptr          node_ptr;
-   typedef typename real_value_traits::const_node_ptr    const_node_ptr;
+   typedef ValueTraits                              value_traits;
+   typedef typename value_traits::value_type        value_type;
+   typedef typename value_traits::node_ptr          node_ptr;
+   typedef typename value_traits::const_node_ptr    const_node_ptr;
    typedef detail::ebo_functor_holder<KeyValueCompare>   base_t;
-   key_nodeptr_comp(KeyValueCompare kcomp, const RealValueTraits *traits)
+   key_nodeptr_comp(KeyValueCompare kcomp, const ValueTraits *traits)
       :  base_t(kcomp), traits_(traits)
    {}
 
@@ -220,29 +220,29 @@ struct key_nodeptr_comp
    bool operator()(const KeyType &key1, const KeyType2 &key2) const
    {  return base_t::get()(this->key_forward(key1), this->key_forward(key2));  }
 
-   const RealValueTraits *traits_;
+   const ValueTraits *const traits_;
 };
 
-template<class F, class RealValueTraits, algo_types AlgoType>
+template<class F, class ValueTraits, algo_types AlgoType>
 struct node_cloner
    :  private detail::ebo_functor_holder<F>
 {
-   typedef RealValueTraits                         real_value_traits;
-   typedef typename real_value_traits::node_traits node_traits;
+   typedef ValueTraits                         value_traits;
+   typedef typename value_traits::node_traits node_traits;
    typedef typename node_traits::node_ptr          node_ptr;
    typedef detail::ebo_functor_holder<F>           base_t;
    typedef typename get_algo< AlgoType
                             , node_traits>::type   node_algorithms;
    static const bool safemode_or_autounlink =
-      is_safe_autounlink<real_value_traits::link_mode>::value;
-   typedef typename real_value_traits::value_type  value_type;
-   typedef typename real_value_traits::pointer     pointer;
+      is_safe_autounlink<value_traits::link_mode>::value;
+   typedef typename value_traits::value_type  value_type;
+   typedef typename value_traits::pointer     pointer;
    typedef typename node_traits::node              node;
-   typedef typename real_value_traits::const_node_ptr    const_node_ptr;
-   typedef typename real_value_traits::reference   reference;
-   typedef typename real_value_traits::const_reference const_reference;
+   typedef typename value_traits::const_node_ptr    const_node_ptr;
+   typedef typename value_traits::reference   reference;
+   typedef typename value_traits::const_reference const_reference;
 
-   node_cloner(F f, const RealValueTraits *traits)
+   node_cloner(F f, const ValueTraits *traits)
       :  base_t(f), traits_(traits)
    {}
 
@@ -270,23 +270,23 @@ struct node_cloner
       return n;
    }
 
-   const RealValueTraits *traits_;
+   const ValueTraits * const traits_;
 };
 
-template<class F, class RealValueTraits, algo_types AlgoType>
+template<class F, class ValueTraits, algo_types AlgoType>
 struct node_disposer
    :  private detail::ebo_functor_holder<F>
 {
-   typedef RealValueTraits                         real_value_traits;
-   typedef typename real_value_traits::node_traits node_traits;
+   typedef ValueTraits                         value_traits;
+   typedef typename value_traits::node_traits node_traits;
    typedef typename node_traits::node_ptr          node_ptr;
    typedef detail::ebo_functor_holder<F>           base_t;
    typedef typename get_algo< AlgoType
                             , node_traits>::type   node_algorithms;
    static const bool safemode_or_autounlink =
-      is_safe_autounlink<real_value_traits::link_mode>::value;
+      is_safe_autounlink<value_traits::link_mode>::value;
 
-   node_disposer(F f, const RealValueTraits *cont)
+   node_disposer(F f, const ValueTraits *cont)
       :  base_t(f), traits_(cont)
    {}
 
@@ -296,7 +296,7 @@ struct node_disposer
          node_algorithms::init(p);
       base_t::get()(traits_->to_value_ptr(p));
    }
-   const RealValueTraits *traits_;
+   const ValueTraits * const traits_;
 };
 
 template<class VoidPointer>
@@ -670,54 +670,52 @@ class exception_array_disposer
    }
 };
 
-template<class RealValueTraits, bool IsConst>
+template<class ValueTraits, bool IsConst>
 struct node_to_value
    :  public detail::select_constptr
       < typename pointer_traits
-            <typename RealValueTraits::pointer>::template rebind_pointer<void>::type
-      , is_stateful_value_traits<RealValueTraits>::value
+            <typename ValueTraits::pointer>::template rebind_pointer<void>::type
+      , is_stateful_value_traits<ValueTraits>::value
       >::type
 {
-   static const bool stateful_value_traits = is_stateful_value_traits<RealValueTraits>::value;
+   static const bool stateful_value_traits = is_stateful_value_traits<ValueTraits>::value;
    typedef typename detail::select_constptr
       < typename pointer_traits
-            <typename RealValueTraits::pointer>::
+            <typename ValueTraits::pointer>::
                template rebind_pointer<void>::type
       , stateful_value_traits >::type                 Base;
 
-   typedef RealValueTraits                                  real_value_traits;
-   typedef typename real_value_traits::value_type           value_type;
-   typedef typename real_value_traits::node_traits::node    node;
+   typedef ValueTraits                                 value_traits;
+   typedef typename value_traits::value_type           value_type;
+   typedef typename value_traits::node_traits::node    node;
    typedef typename detail::add_const_if_c
-         <value_type, IsConst>::type                        vtype;
+         <value_type, IsConst>::type                   vtype;
    typedef typename detail::add_const_if_c
-         <node, IsConst>::type                              ntype;
+         <node, IsConst>::type                         ntype;
    typedef typename pointer_traits
-      <typename RealValueTraits::pointer>::
-         template rebind_pointer<ntype>::type               npointer;
+      <typename ValueTraits::pointer>::
+         template rebind_pointer<ntype>::type          npointer;
    typedef typename pointer_traits<npointer>::
-      template rebind_pointer<const RealValueTraits>::type  const_real_value_traits_ptr;
+      template rebind_pointer<const ValueTraits>::type const_value_traits_ptr;
 
-   node_to_value(const const_real_value_traits_ptr &ptr)
+   node_to_value(const const_value_traits_ptr &ptr)
       :  Base(ptr)
    {}
 
    typedef vtype &                                 result_type;
    typedef ntype &                                 first_argument_type;
 
-   const_real_value_traits_ptr get_real_value_traits() const
-   {
-      if(stateful_value_traits)
-         return pointer_traits<const_real_value_traits_ptr>::static_cast_from(Base::get_ptr());
-      else
-         return const_real_value_traits_ptr();
-   }
+   const_value_traits_ptr get_value_traits() const
+   {  return pointer_traits<const_value_traits_ptr>::static_cast_from(Base::get_ptr());  }
+
+   result_type to_value(first_argument_type arg, false_) const
+   {  return *(value_traits::to_value_ptr(pointer_traits<npointer>::pointer_to(arg)));  }
+
+   result_type to_value(first_argument_type arg, true_) const
+   {  return *(this->get_value_traits()->to_value_ptr(pointer_traits<npointer>::pointer_to(arg))); }
 
    result_type operator()(first_argument_type arg) const
-   {
-      return *(this->get_real_value_traits()->to_value_ptr
-         (pointer_traits<npointer>::pointer_to(arg)));
-   }
+   {  return this->to_value(arg, bool_<stateful_value_traits>()); }
 };
 
 //This is not standard, but should work with all compilers
@@ -907,10 +905,10 @@ static typename uncast_types<ConstNodePtr>::non_const_pointer
 }
 
 // trivial header node holder
-template < typename Node_Traits >
-struct default_header_holder : public Node_Traits::node
+template < typename NodeTraits >
+struct default_header_holder : public NodeTraits::node
 {
-    typedef Node_Traits node_traits;
+    typedef NodeTraits node_traits;
     typedef typename node_traits::node node;
     typedef typename node_traits::node_ptr node_ptr;
     typedef typename node_traits::const_node_ptr const_node_ptr;
@@ -919,25 +917,20 @@ struct default_header_holder : public Node_Traits::node
 
     const_node_ptr get_node() const
     { return pointer_traits< const_node_ptr >::pointer_to(*static_cast< const node* >(this)); }
+
     node_ptr get_node()
     { return pointer_traits< node_ptr >::pointer_to(*static_cast< node* >(this)); }
 
     // (unsafe) downcast used to implement container-from-iterator
-    static default_header_holder* get_holder(node_ptr p)
+    static default_header_holder* get_holder(const node_ptr &p)
     { return static_cast< default_header_holder* >(boost::intrusive::detail::to_raw_pointer(p)); }
 };
 
-//BOOST_TTI_HAS_MEMBER_FUNCTION(get_node)
-
 // type function producing the header node holder
-template < typename Value_Traits, typename Header_Holder >
+template < typename Value_Traits, typename HeaderHolder >
 struct get_header_holder_type
 {
-    //typedef typename Value_Traits::node_ptr node_ptr;
-    //typedef typename Value_Traits::const_node_ptr const_node_ptr;
-    //BOOST_STATIC_ASSERT((has_member_function_get_node< Header_Holder, node_ptr () >::value));
-    //BOOST_STATIC_ASSERT((has_member_function_get_node< Header_Holder, const_node_ptr () const>::value));
-    typedef Header_Holder type;
+    typedef HeaderHolder type;
 };
 template < typename Value_Traits >
 struct get_header_holder_type< Value_Traits, void >
@@ -1156,19 +1149,32 @@ struct fhtraits
    {  return const_hook_ptr(&*static_cast<const hook_type*>(&*n));  }
 };
 
-template<class RealValueTraits, bool IsConst, class Category>
+template<class ValueTraits>
+struct value_traits_pointers
+{
+   typedef BOOST_INTRUSIVE_OBTAIN_TYPE_WITH_DEFAULT
+      (boost::intrusive::detail::
+      , ValueTraits, value_traits_ptr
+      , typename pointer_traits<typename ValueTraits::node_traits::node_ptr>::template
+         rebind_pointer<ValueTraits>::type)   value_traits_ptr;
+
+   typedef typename pointer_traits<value_traits_ptr>::template
+      rebind_pointer<ValueTraits const>::type const_value_traits_ptr;
+};
+
+template<class ValueTraits, bool IsConst, class Category>
 struct iiterator
 {
-   typedef RealValueTraits                                     real_value_traits;
-   typedef typename real_value_traits::node_traits             node_traits;
+   typedef ValueTraits                                         value_traits;
+   typedef typename value_traits::node_traits                  node_traits;
    typedef typename node_traits::node                          node;
    typedef typename node_traits::node_ptr                      node_ptr;
    typedef ::boost::intrusive::pointer_traits<node_ptr>        nodepointer_traits_t;
    typedef typename nodepointer_traits_t::template
       rebind_pointer<void>::type                               void_pointer;
-   typedef typename RealValueTraits::value_type                value_type;
-   typedef typename RealValueTraits::pointer                   nonconst_pointer;
-   typedef typename RealValueTraits::const_pointer             yesconst_pointer;
+   typedef typename ValueTraits::value_type                    value_type;
+   typedef typename ValueTraits::pointer                       nonconst_pointer;
+   typedef typename ValueTraits::const_pointer                 yesconst_pointer;
    typedef typename ::boost::intrusive::pointer_traits
       <nonconst_pointer>::reference                            nonconst_reference;
    typedef typename ::boost::intrusive::pointer_traits
@@ -1185,47 +1191,44 @@ struct iiterator
          , pointer
          , reference
          > iterator_traits;
+   typedef typename value_traits_pointers
+      <ValueTraits>::value_traits_ptr                          value_traits_ptr;
+   typedef typename value_traits_pointers
+      <ValueTraits>::const_value_traits_ptr                    const_value_traits_ptr;
    static const bool stateful_value_traits =
-      detail::is_stateful_value_traits<real_value_traits>::value;
+      detail::is_stateful_value_traits<value_traits>::value;
 };
 
-template<class NodePtr, bool StatefulValueTraits = true>
+template<class NodePtr, class StoredPointer, bool StatefulValueTraits = true>
 struct iiterator_members
 {
-   typedef ::boost::intrusive::pointer_traits<NodePtr>   pointer_traits_t;
-   typedef typename pointer_traits_t::template
-      rebind_pointer<const void>::type                   const_void_pointer;
 
    iiterator_members()
    {}
 
-   iiterator_members(const NodePtr &n_ptr, const const_void_pointer &data)
+   iiterator_members(const NodePtr &n_ptr, const StoredPointer &data)
       :  nodeptr_(n_ptr), ptr_(data)
    {}
 
-   const_void_pointer get_ptr() const
+   StoredPointer get_ptr() const
    {  return ptr_;  }
 
    NodePtr nodeptr_;
-   const_void_pointer ptr_;
+   StoredPointer ptr_;
 };
 
-template<class NodePtr>
-struct iiterator_members<NodePtr, false>
+template<class NodePtr, class StoredPointer>
+struct iiterator_members<NodePtr, StoredPointer, false>
 {
-   typedef ::boost::intrusive::pointer_traits<NodePtr>   pointer_traits_t;
-   typedef typename pointer_traits_t::template
-      rebind_pointer<const void>::type                   const_void_pointer;
-
    iiterator_members()
    {}
 
-   iiterator_members(const NodePtr &n_ptr, const const_void_pointer &)
+   iiterator_members(const NodePtr &n_ptr, const StoredPointer &)
       : nodeptr_(n_ptr)
    {}
 
-   const_void_pointer get_ptr() const
-   {  return const_void_pointer();  }
+   StoredPointer get_ptr() const
+   {  return StoredPointer();  }
 
    NodePtr nodeptr_;
 };
