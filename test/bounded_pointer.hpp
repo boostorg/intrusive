@@ -158,7 +158,7 @@ class bounded_reference
    T& raw() const
    { assert(m_offset != max_offset); return *(bounded_pointer< T >::base() + m_offset); }
 
-   operator T& () const
+   operator const T& () const
    { assert(m_offset != max_offset); return raw(); }
 
    bounded_pointer< T > operator & () const
