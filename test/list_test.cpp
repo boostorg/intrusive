@@ -492,6 +492,7 @@ struct test_main_template_bptr
 
       {
           bounded_reference_cont< value_type > ref_cont;
+          ref_cont.reserve(5);
           for (int i = 0; i < 5; ++i)
           {
               node_ptr tmp = allocator.allocate(1);
