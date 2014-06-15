@@ -133,7 +133,8 @@ struct alpha_holder
    typedef boost::intrusive::detail::h_alpha_t           h_alpha_t;
    typedef boost::intrusive::detail::alpha_by_max_size_t multiply_by_alpha_t;
 
-   alpha_holder() : max_tree_size_(0)
+   alpha_holder()
+      : max_tree_size_()
    {  set_alpha(0.70711f);   } // ~1/sqrt(2)
 
    float get_alpha() const
@@ -165,6 +166,10 @@ struct alpha_holder<false, SizeType>
    //Downside: alpha CAN't be changed.
    typedef boost::intrusive::detail::h_alpha_sqrt2_t           h_alpha_t;
    typedef boost::intrusive::detail::alpha_0_75_by_max_size_t  multiply_by_alpha_t;
+
+   alpha_holder()
+      : max_tree_size_()
+   {}
 
    float get_alpha() const
    {  return 0.70710677f;  }
