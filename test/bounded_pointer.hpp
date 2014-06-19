@@ -38,6 +38,7 @@ class bounded_pointer
    typedef void (bounded_pointer::*unspecified_bool_type)() const;
 
    public:
+   typedef T element_type;
    typedef typename boost::remove_const< T >::type mut_val_t;
    typedef const mut_val_t const_val_t;
 
@@ -157,7 +158,7 @@ class bounded_reference
    T& raw() const
    { assert(m_offset != max_offset); return *(bounded_pointer< T >::base() + m_offset); }
 
-   operator T& () const
+   operator const T& () const
    { assert(m_offset != max_offset); return raw(); }
 
    bounded_pointer< T > operator & () const
@@ -305,10 +306,12 @@ class bounded_reference_cont
    using Base::size;
    using Base::operator[];
    using Base::push_back;
+   using Base::reserve;
 
    bounded_reference_cont(size_t n = 0)
       : Base(), m_allocator()
    {
+      reserve(n);
       for (size_t i = 0; i < n; ++i){
          pointer p = m_allocator.allocate(1);
          BOOST_TRY{
@@ -327,11 +330,14 @@ class bounded_reference_cont
       : Base(), m_allocator(other.m_allocator)
    {  *this = other;  }
 
-   template < typename InputIterator >
-   bounded_reference_cont(InputIterator it_start, InputIterator it_end)
+   template < typename ForwardIterator >
+   bounded_reference_cont(ForwardIterator it_start, ForwardIterator it_end)
       : Base(), m_allocator()
    {
-      for (InputIterator it = it_start; it != it_end; ++it){
+      size_t n = 0;
+      for (ForwardIterator it = it_start; it != it_end; ++it, ++n);
+      reserve(n);
+      for (ForwardIterator it = it_start; it != it_end; ++it){
          pointer p = m_allocator.allocate(1);
          new (p.raw()) val_type(*it);
          Base::push_back(*p);
@@ -355,6 +361,7 @@ class bounded_reference_cont
    {
       if (&other != this){
          clear();
+         reserve(other.size());
          for (typename Base::const_iterator it = other.begin(); it != other.end(); ++it){
                pointer p = m_allocator.allocate(1);
                new (p.raw()) val_type(*it);
