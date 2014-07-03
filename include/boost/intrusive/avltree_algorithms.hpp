@@ -453,7 +453,6 @@ class avltree_algorithms
             }
             else {
                // x is left child (x_parent_right is the right child)
-               const node_ptr x_parent_right(NodeTraits::get_right(x_parent));
                BOOST_INTRUSIVE_INVARIANT_ASSERT(x_parent_right);
                if (NodeTraits::get_balance(x_parent_right) == NodeTraits::negative()) {
                   // x_parent_right MUST have then a left child
