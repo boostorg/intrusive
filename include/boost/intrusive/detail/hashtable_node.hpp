@@ -205,7 +205,7 @@ struct get_slist_impl
       < typename NodeTraits::node
       , boost::intrusive::value_traits<trivial_traits>
       , boost::intrusive::constant_time_size<false>
-	   , boost::intrusive::size_type<std::size_t>
+      , boost::intrusive::size_type<std::size_t>
       >::type
    {};
 };
