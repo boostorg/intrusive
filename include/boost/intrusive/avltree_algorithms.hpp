@@ -411,7 +411,9 @@ class avltree_algorithms
 
    static void rebalance_after_erasure(const node_ptr & header, node_ptr x, node_ptr x_parent)
    {
-      for (node_ptr root = NodeTraits::get_parent(header); x != root; root = NodeTraits::get_parent(header)) {
+      for ( node_ptr root = NodeTraits::get_parent(header)
+          ; x != root
+          ; root = NodeTraits::get_parent(header), x_parent = NodeTraits::get_parent(x)) {
          const balance x_parent_balance = NodeTraits::get_balance(x_parent);
          //Don't cache x_is_leftchild or similar because x can be null and
          //equal to both x_parent_left and x_parent_right
@@ -453,7 +455,6 @@ class avltree_algorithms
             }
             else {
                // x is left child (x_parent_right is the right child)
-               const node_ptr x_parent_right(NodeTraits::get_right(x_parent));
                BOOST_INTRUSIVE_INVARIANT_ASSERT(x_parent_right);
                if (NodeTraits::get_balance(x_parent_right) == NodeTraits::negative()) {
                   // x_parent_right MUST have then a left child
@@ -473,7 +474,6 @@ class avltree_algorithms
          else{
             BOOST_INTRUSIVE_INVARIANT_ASSERT(false);  // never reached
          }
-         x_parent = NodeTraits::get_parent(x);
       }
    }
 
