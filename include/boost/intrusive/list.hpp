@@ -88,7 +88,7 @@ class list_impl
    static const bool constant_time_size = ConstantTimeSize;
    static const bool stateful_value_traits = detail::is_stateful_value_traits<value_traits>::value;
    static const bool has_container_from_iterator =
-        boost::is_same< header_holder_type, detail::default_header_holder< node_traits > >::value;
+        detail::is_same< header_holder_type, detail::default_header_holder< node_traits > >::value;
 
    /// @cond
 

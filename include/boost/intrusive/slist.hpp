@@ -25,6 +25,7 @@
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/intrusive/options.hpp>
 #include <boost/intrusive/detail/utilities.hpp>
+#include <boost/intrusive/detail/mpl.hpp>
 #include <iterator>
 #include <functional>
 #include <algorithm>
@@ -123,7 +124,7 @@ class slist_impl
    static const bool linear = 0 != (BoolFlags & slist_bool_flags::linear_pos);
    static const bool cache_last = 0 != (BoolFlags & slist_bool_flags::cache_last_pos);
    static const bool has_container_from_iterator =
-        boost::is_same< header_holder_type, detail::default_header_holder< node_traits > >::value;
+        detail::is_same< header_holder_type, detail::default_header_holder< node_traits > >::value;
 
    typedef typename detail::if_c
       < linear
