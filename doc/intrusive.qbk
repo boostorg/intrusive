@@ -3761,13 +3761,6 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 [section:release_notes Release Notes]
 
-[section:release_notes_boost_1_57_00 Boost 1.57 Release]
-
-*  Fixed bugs:
-   *  [@https://github.com/boostorg/intrusive/pull/12 GitHub #12: ['Fix MSVC14 warning C4456: declaration of 'x_parent_right' hides previous local declaration]]
-
-[endsect]
-
 [section:release_notes_boost_1_56_00 Boost 1.56 Release]
 
 *  Improved Doxygen generated reference and updated and fixed forward-declaration header.
@@ -3787,6 +3780,7 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
    *  [@https://svn.boost.org/trac/boost/ticket/9948 #9948: remove use of const_cast in intrusive containers]
    *  [@https://svn.boost.org/trac/boost/ticket/9949 #9949: clear header node hooks upon intrusive container destruction]
    *  [@https://svn.boost.org/trac/boost/ticket/9961 #9961: tests for hooks not derived frorm generic_hook]
+   *  [@https://github.com/boostorg/intrusive/pull/12 GitHub #12: ['Fix MSVC14 warning C4456: declaration of 'x_parent_right' hides previous local declaration]]
 
 *  Optimized tree rebalancing code to avoid redundant assignments.
 
