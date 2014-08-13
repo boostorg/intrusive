@@ -40,6 +40,7 @@ enum algo_types
    CircularListAlgorithms,
    CircularSListAlgorithms,
    LinearSListAlgorithms,
+   CommonSListAlgorithms,
    BsTreeAlgorithms,
    RbTreeAlgorithms,
    AvlTreeAlgorithms,
@@ -218,6 +219,10 @@ struct key_nodeptr_comp
    template<class KeyType, class KeyType2>
    bool operator()(const KeyType &key1, const KeyType2 &key2) const
    {  return base_t::get()(this->key_forward(key1), this->key_forward(key2));  }
+
+   template<class KeyType>
+   bool operator()(const KeyType &key1) const
+   {  return base_t::get()(this->key_forward(key1));  }
 
    const ValueTraits *const traits_;
 };

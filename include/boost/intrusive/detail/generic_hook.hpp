@@ -177,8 +177,11 @@ class generic_hook
    void unlink()
    {
       BOOST_STATIC_ASSERT(( (int)hooktags::link_mode == (int)auto_unlink ));
-      node_algorithms::unlink(this->this_ptr());
-      node_algorithms::init(this->this_ptr());
+      node_ptr n(this->this_ptr());
+      if(!node_algorithms::inited(n)){
+         node_algorithms::unlink(n);
+         node_algorithms::init(n);
+      }
    }
 };
 
