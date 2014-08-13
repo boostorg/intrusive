@@ -62,7 +62,7 @@ struct pointer_traits
 
       //!Ptr::reference if such a type exists (non-standard extension); otherwise, element_type &
       //!
-      typedef element_type &reference;
+      typedef unspecified_type reference;
    #else
       typedef Ptr                                                             pointer;
       //
