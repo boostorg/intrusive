@@ -16,6 +16,7 @@
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/detail/assert.hpp>
+#include <boost/intrusive/detail/utilities.hpp>
 #include <cstddef>
 
 namespace boost {
@@ -88,9 +89,83 @@ class common_slist_algorithms
          NodeTraits::set_next(bp, next_b);
       }
    }
+
+   struct stable_partition_info
+   {
+      std::size_t num_1st_partition;
+      std::size_t num_2nd_partition;
+      node_ptr    beg_2st_partition;
+      node_ptr    new_last_node;
+   };
+
+   template<class Pred>
+   static void stable_partition(node_ptr before_beg, const node_ptr &end, Pred pred, stable_partition_info &info)
+   {
+      node_ptr bcur = before_beg;
+      node_ptr cur  = node_traits::get_next(bcur);
+      node_ptr new_f = end;
+
+      std::size_t num1 = 0, num2 = 0;
+      while(cur != end){
+         if(pred(cur)){
+            ++num1;
+            bcur = cur;
+            cur  = node_traits::get_next(cur);
+         }
+         else{
+            ++num2;
+            node_ptr last_to_remove = bcur;
+            new_f = cur;
+            bcur = cur;
+            cur  = node_traits::get_next(cur);
+            BOOST_TRY{
+               //Main loop
+               while(cur != end){
+                  if(pred(cur)){ //Might throw
+                     ++num1;
+                     //Process current node
+                     node_traits::set_next(last_to_remove, cur);
+                     last_to_remove = cur;
+                     node_ptr nxt = node_traits::get_next(cur);
+                     node_traits::set_next(bcur, nxt);
+                     cur = nxt;
+                  }
+                  else{
+                     ++num2;
+                     bcur = cur;
+                     cur  = node_traits::get_next(cur);
+                  }
+               }
+            }
+            BOOST_CATCH(...){
+               node_traits::set_next(last_to_remove, new_f);
+               throw;
+            }
+            BOOST_CATCH_END
+            node_traits::set_next(last_to_remove, new_f);
+            break;
+         }
+      }
+      info.num_1st_partition = num1;
+      info.num_2nd_partition = num2;
+      info.beg_2st_partition = new_f;
+      info.new_last_node = bcur;
+   }
 };
 
+/// @endcond
+
 } //namespace detail
+
+/// @cond
+
+template<class NodeTraits>
+struct get_algo<CommonSListAlgorithms, NodeTraits>
+{
+   typedef detail::common_slist_algorithms<NodeTraits> type;
+};
+
+
 } //namespace intrusive
 } //namespace boost
 

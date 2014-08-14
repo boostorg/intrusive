@@ -88,7 +88,7 @@ class list_impl
    static const bool constant_time_size = ConstantTimeSize;
    static const bool stateful_value_traits = detail::is_stateful_value_traits<value_traits>::value;
    static const bool has_container_from_iterator =
-        boost::is_same< header_holder_type, detail::default_header_holder< node_traits > >::value;
+        detail::is_same< header_holder_type, detail::default_header_holder< node_traits > >::value;
 
    /// @cond
 
@@ -1081,7 +1081,17 @@ class list_impl
    //!   and iterators to elements that are not removed remain valid.
    template<class Pred>
    void remove_if(Pred pred)
-   {  this->remove_and_dispose_if(pred, detail::null_disposer());   }
+   {
+      const node_ptr root_node = this->get_root_node();
+      typename node_algorithms::stable_partition_info info;
+      node_algorithms::stable_partition
+         (node_traits::get_next(root_node), root_node, detail::key_nodeptr_comp<Pred, value_traits>(pred, &this->priv_value_traits()), info);
+      //Invariants preserved by stable_partition so erase can be safely called
+      //The first element might have changed so calculate it again
+      this->erase( const_iterator(node_traits::get_next(root_node), this->priv_value_traits_ptr())
+                 , const_iterator(info.beg_2st_partition, this->priv_value_traits_ptr())
+                 , info.num_1st_partition);
+   }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!
@@ -1098,16 +1108,15 @@ class list_impl
    template<class Pred, class Disposer>
    void remove_and_dispose_if(Pred pred, Disposer disposer)
    {
-      const_iterator cur(this->cbegin());
-      const_iterator last(this->cend());
-      while(cur != last) {
-         if(pred(*cur)){
-            cur = this->erase_and_dispose(cur, disposer);
-         }
-         else{
-            ++cur;
-         }
-      }
+      const node_ptr root_node = this->get_root_node();
+      typename node_algorithms::stable_partition_info info;
+      node_algorithms::stable_partition
+         (node_traits::get_next(root_node), root_node, detail::key_nodeptr_comp<Pred, value_traits>(pred, &this->priv_value_traits()), info);
+      //Invariants preserved by stable_partition so erase can be safely called
+      //The first element might have changed so calculate it again
+      this->erase_and_dispose( const_iterator(node_traits::get_next(root_node), this->priv_value_traits_ptr())
+                             , const_iterator(info.beg_2st_partition, this->priv_value_traits_ptr())
+                             , disposer);
    }
 
    //! <b>Effects</b>: Removes adjacent duplicate elements or adjacent

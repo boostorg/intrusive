@@ -160,6 +160,26 @@ void test_slist< List_Type, Value_Container >
       TEST_INTRUSIVE_SEQUENCE( init_values, list.begin() );
    }
    {
+      list_type list(values.begin(), values.end());
+      list.remove_if(is_odd());
+      int init_values [] = { 2, 4 };
+      TEST_INTRUSIVE_SEQUENCE( init_values, list.begin() );
+   }
+   {
+      list_type list(values.begin(), values.end());
+      list.remove_and_dispose_if(is_even(), test::empty_disposer());
+      int init_values [] = { 1, 3, 5 };
+      typename list_type::iterator i = list.begin(), e = list.end();
+      TEST_INTRUSIVE_SEQUENCE( init_values, list.begin() );
+   }
+   {
+      list_type list(values.begin(), values.end());
+      list.remove_and_dispose_if(is_odd(), test::empty_disposer());
+      int init_values [] = { 2, 4 };
+      typename list_type::iterator i = list.begin(), e = list.end();
+      TEST_INTRUSIVE_SEQUENCE( init_values, list.begin() );
+   }
+   {
       Value_Container values2(values);
       list_type list(values.begin(), values.end());
       list.insert_after(list.before_begin(), values2.begin(), values2.end());

@@ -25,6 +25,7 @@
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/intrusive/options.hpp>
 #include <boost/intrusive/detail/utilities.hpp>
+#include <boost/intrusive/detail/mpl.hpp>
 #include <iterator>
 #include <functional>
 #include <algorithm>
@@ -123,7 +124,7 @@ class slist_impl
    static const bool linear = 0 != (BoolFlags & slist_bool_flags::linear_pos);
    static const bool cache_last = 0 != (BoolFlags & slist_bool_flags::cache_last_pos);
    static const bool has_container_from_iterator =
-        boost::is_same< header_holder_type, detail::default_header_holder< node_traits > >::value;
+        detail::is_same< header_holder_type, detail::default_header_holder< node_traits > >::value;
 
    typedef typename detail::if_c
       < linear
@@ -1537,7 +1538,20 @@ class slist_impl
    //!   and iterators to elements that are not removed remain valid.
    template<class Pred>
    void remove_if(Pred pred)
-   {  this->remove_and_dispose_if(pred, detail::null_disposer());   }
+   {
+      const node_ptr bbeg = this->get_root_node();
+      typename node_algorithms::stable_partition_info info;
+      node_algorithms::stable_partition
+         (bbeg, this->get_end_node(), detail::key_nodeptr_comp<Pred, value_traits>(pred, &this->priv_value_traits()), info);
+      //After cache last is set, slist invariants are preserved...
+      if(cache_last){
+         this->set_last_node(info.new_last_node);
+      }
+      //...so erase can be safely called
+      this->erase_after( const_iterator(bbeg, this->priv_value_traits_ptr())
+                       , const_iterator(info.beg_2st_partition, this->priv_value_traits_ptr())
+                       , info.num_1st_partition);
+   }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!
@@ -1554,20 +1568,18 @@ class slist_impl
    template<class Pred, class Disposer>
    void remove_and_dispose_if(Pred pred, Disposer disposer)
    {
-      const_iterator bcur(this->before_begin()), cur(this->begin()), e(this->end());
-
-      while(cur != e){
-         if (pred(*cur)){
-            cur = this->erase_after_and_dispose(bcur, disposer);
-         }
-         else{
-            bcur = cur;
-            ++cur;
-         }
-      }
+      const node_ptr bbeg = this->get_root_node();
+      typename node_algorithms::stable_partition_info info;
+      node_algorithms::stable_partition
+         (bbeg, this->get_end_node(), detail::key_nodeptr_comp<Pred, value_traits>(pred, &this->priv_value_traits()), info);
+      //After cache last is set, slist invariants are preserved...
       if(cache_last){
-         this->set_last_node(bcur.pointed_node());
+         this->set_last_node(info.new_last_node);
       }
+      //...so erase can be safely called
+      this->erase_after_and_dispose( const_iterator(bbeg, this->priv_value_traits_ptr())
+                                   , const_iterator(info.beg_2st_partition, this->priv_value_traits_ptr())
+                                   , disposer);
    }
 
    //! <b>Effects</b>: Removes adjacent duplicate elements or adjacent

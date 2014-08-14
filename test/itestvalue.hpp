@@ -163,6 +163,14 @@ struct is_even
    {  return ((&v1)->value_ & 1) == 0;  }
 };
 
+struct is_odd
+{
+   template <typename value_type>
+   bool operator()
+      (const value_type& v1) const
+   {  return ((&v1)->value_ & 1) != 0;  }
+};
+
 template <typename>
 struct Value_Container;
 

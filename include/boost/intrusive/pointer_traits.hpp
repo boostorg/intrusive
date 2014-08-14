@@ -62,7 +62,7 @@ struct pointer_traits
 
       //!Ptr::reference if such a type exists (non-standard extension); otherwise, element_type &
       //!
-      typedef element_type &reference;
+      typedef unspecified_type reference;
    #else
       typedef Ptr                                                             pointer;
       //
@@ -190,12 +190,12 @@ struct pointer_traits
    static pointer priv_dynamic_cast_from(boost::intrusive::detail::false_, const UPtr &uptr)
    {
       element_type *p = dynamic_cast<element_type*>(&*uptr);
-	  if(!p){
-		  return pointer();
-	  }
-	  else{
-		  return pointer_to(*p);
-	  }
+     if(!p){
+        return pointer();
+     }
+     else{
+        return pointer_to(*p);
+     }
    }
    ///@endcond
 };
