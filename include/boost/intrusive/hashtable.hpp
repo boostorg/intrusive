@@ -23,7 +23,6 @@
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/functional/hash.hpp>
-#include <boost/pointer_cast.hpp>
 //General intrusive utilities
 #include <boost/intrusive/detail/hashtable_node.hpp>
 #include <boost/intrusive/detail/transform_iterator.hpp>
@@ -437,13 +436,13 @@ struct hashtable_defaults
    static const bool incremental          = false;
 };
 
-template<class RealValueTraits, bool IsConst>
+template<class ValueTraits, bool IsConst>
 struct downcast_node_to_value_t
-   :  public detail::node_to_value<RealValueTraits, IsConst>
+   :  public detail::node_to_value<ValueTraits, IsConst>
 {
-   typedef detail::node_to_value<RealValueTraits, IsConst>  base_t;
+   typedef detail::node_to_value<ValueTraits, IsConst>  base_t;
    typedef typename base_t::result_type                     result_type;
-   typedef RealValueTraits                                  value_traits;
+   typedef ValueTraits                                  value_traits;
    typedef typename detail::get_slist_impl
       <typename detail::reduced_slist_node_traits
          <typename value_traits::node_traits>::type
@@ -451,12 +450,12 @@ struct downcast_node_to_value_t
    typedef typename detail::add_const_if_c
          <typename slist_impl::node, IsConst>::type      &  first_argument_type;
    typedef typename detail::add_const_if_c
-         < typename RealValueTraits::node_traits::node
+         < typename ValueTraits::node_traits::node
          , IsConst>::type                                &  intermediate_argument_type;
    typedef typename pointer_traits
-      <typename RealValueTraits::pointer>::
+      <typename ValueTraits::pointer>::
          template rebind_pointer
-            <const RealValueTraits>::type                   const_value_traits_ptr;
+            <const ValueTraits>::type                   const_value_traits_ptr;
 
    downcast_node_to_value_t(const const_value_traits_ptr &ptr)
       :  base_t(ptr)
@@ -542,7 +541,7 @@ struct bucket_plus_vtraits : public ValueTraits
    bucket_plus_vtraits & operator =(const bucket_plus_vtraits &x)
    {  bucket_traits_ = x.bucket_traits_;  return *this;  }
 
-   const_value_traits_ptr value_traits_ptr() const
+   const_value_traits_ptr priv_value_traits_ptr() const
    {  return pointer_traits<const_value_traits_ptr>::pointer_to(this->priv_value_traits());  }
 
    //bucket_value_traits
@@ -2177,7 +2176,7 @@ class hashtable_impl
    static local_iterator s_local_iterator_to(reference value)
    {
       BOOST_STATIC_ASSERT((!stateful_value_traits));
-      siterator sit = bucket_type::s_iterator_to(((hashtable_impl*)0)->priv_value_to_node(value));
+      siterator sit = bucket_type::s_iterator_to(*value_traits::to_node_ptr(value));
       return local_iterator(sit, const_value_traits_ptr());
    }
 
@@ -2197,7 +2196,7 @@ class hashtable_impl
    {
       BOOST_STATIC_ASSERT((!stateful_value_traits));
       node_reference r = *pointer_traits<node_ptr>::const_cast_from
-         (pointer_traits<const_node_ptr>::pointer_to(((hashtable_impl*)0)->priv_value_to_node(value)));
+         (value_traits::to_node_ptr(value));
       siterator sit = bucket_type::s_iterator_to(r);
       return const_local_iterator(sit, const_value_traits_ptr());
    }
@@ -2214,7 +2213,7 @@ class hashtable_impl
    local_iterator local_iterator_to(reference value)
    {
       siterator sit = bucket_type::s_iterator_to(this->priv_value_to_node(value));
-      return local_iterator(sit, this->value_traits_ptr());
+      return local_iterator(sit, this->priv_value_traits_ptr());
    }
 
    //! <b>Requires</b>: value must be an lvalue and shall be in a unordered_set of
@@ -2231,7 +2230,7 @@ class hashtable_impl
       node_reference r = *pointer_traits<node_ptr>::const_cast_from
          (pointer_traits<const_node_ptr>::pointer_to(this->priv_value_to_node(value)));
       siterator sit = bucket_type::s_iterator_to(r);
-      return const_local_iterator(sit, this->value_traits_ptr());
+      return const_local_iterator(sit, this->priv_value_traits_ptr());
    }
 
    //! <b>Effects</b>: Returns the number of buckets passed in the constructor
@@ -2301,7 +2300,7 @@ class hashtable_impl
    //! <b>Note</b>:  [this->begin(n), this->end(n)) is a valid range
    //!   containing all of the elements in the nth bucket.
    local_iterator begin(size_type n)
-   {  return local_iterator(this->priv_bucket_pointer()[n].begin(), this->value_traits_ptr());  }
+   {  return local_iterator(this->priv_bucket_pointer()[n].begin(), this->priv_value_traits_ptr());  }
 
    //! <b>Requires</b>: n is in the range [0, this->bucket_count()).
    //!
@@ -2331,7 +2330,7 @@ class hashtable_impl
    const_local_iterator cbegin(size_type n) const
    {
       bucket_reference br = pointer_traits<bucket_ptr>::const_cast_from(this->priv_bucket_pointer())[n];
-      return const_local_iterator(br.begin(), this->value_traits_ptr());
+      return const_local_iterator(br.begin(), this->priv_value_traits_ptr());
    }
 
    //! <b>Requires</b>: n is in the range [0, this->bucket_count()).
@@ -2346,7 +2345,7 @@ class hashtable_impl
    //! <b>Note</b>:  [this->begin(n), this->end(n)) is a valid range
    //!   containing all of the elements in the nth bucket.
    local_iterator end(size_type n)
-   {  return local_iterator(this->priv_bucket_pointer()[n].end(), this->value_traits_ptr());  }
+   {  return local_iterator(this->priv_bucket_pointer()[n].end(), this->priv_value_traits_ptr());  }
 
    //! <b>Requires</b>: n is in the range [0, this->bucket_count()).
    //!
@@ -2376,7 +2375,7 @@ class hashtable_impl
    const_local_iterator cend(size_type n) const
    {
       bucket_reference br = pointer_traits<bucket_ptr>::const_cast_from(this->priv_bucket_pointer())[n];
-      return const_local_iterator ( br.end(), this->value_traits_ptr());
+      return const_local_iterator ( br.end(), this->priv_value_traits_ptr());
    }
 
    //! <b>Requires</b>: new_bucket_traits can hold a pointer to a new bucket array
@@ -2691,8 +2690,8 @@ class hashtable_impl
    const value_traits &priv_value_traits() const
    {  return this->data_type::internal.internal.internal.internal.priv_value_traits(); }
 
-   const_value_traits_ptr value_traits_ptr() const
-   {  return this->data_type::internal.internal.internal.internal.value_traits_ptr(); }
+   const_value_traits_ptr priv_value_traits_ptr() const
+   {  return this->data_type::internal.internal.internal.internal.priv_value_traits_ptr(); }
 
    siterator priv_invalid_local_it() const
    {  return this->data_type::internal.internal.internal.internal.priv_invalid_local_it(); }

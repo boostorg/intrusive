@@ -25,10 +25,10 @@ namespace intrusive{
 
 //This node will only be used in safe or auto unlink modes
 //so test it's been properly released
-template < typename Node_Traits, template <typename> class Node_Algorithms >
-struct nonhook_node_member : public Node_Traits::node
+template < typename NodeTraits, template <typename> class Node_Algorithms >
+struct nonhook_node_member : public NodeTraits::node
 {
-   typedef Node_Traits                                               node_traits;
+   typedef NodeTraits                                               node_traits;
    typedef typename node_traits::node                                node;
    typedef typename node_traits::node_ptr                            node_ptr;
    typedef typename node_traits::const_node_ptr                      const_node_ptr;

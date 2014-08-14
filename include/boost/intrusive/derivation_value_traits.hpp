@@ -15,11 +15,8 @@
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
-
 #include <boost/intrusive/link_mode.hpp>
-#include <boost/pointer_cast.hpp>
-#include <boost/pointer_to_other.hpp>
-#include <iterator>
+#include <boost/intrusive/pointer_traits.hpp>
 
 namespace boost {
 namespace intrusive {
@@ -41,8 +38,10 @@ struct derivation_value_traits
    typedef typename node_traits::node                                node;
    typedef typename node_traits::node_ptr                            node_ptr;
    typedef typename node_traits::const_node_ptr                      const_node_ptr;
-   typedef typename boost::pointer_to_other<node_ptr, T>::type       pointer;
-   typedef typename boost::pointer_to_other<node_ptr, const T>::type const_pointer;
+   typedef typename pointer_traits<node_ptr>::
+      template rebind_pointer<value_type>::type                      pointer;
+   typedef typename pointer_traits<node_ptr>::
+      template rebind_pointer<const value_type>::type                const_pointer;
    typedef typename boost::intrusive::
       pointer_traits<pointer>::reference                             reference;
    typedef typename boost::intrusive::
@@ -57,18 +56,12 @@ struct derivation_value_traits
 
    static pointer to_value_ptr(const node_ptr &n)
    {
-//      This still fails in gcc < 4.4 so forget about it
-//      using ::boost::static_pointer_cast;
-//      return static_pointer_cast<value_type>(n));
-      return pointer(&static_cast<value_type&>(*n));
+      return pointer_traits<pointer>::pointer_to(static_cast<reference>(*n));
    }
 
    static const_pointer to_value_ptr(const const_node_ptr &n)
    {
-//      This still fails in gcc < 4.4 so forget about it
-//      using ::boost::static_pointer_cast;
-//      return static_pointer_cast<const value_type>(n));
-      return const_pointer(&static_cast<const value_type&>(*n));
+      return pointer_traits<pointer>::pointer_to(static_cast<const_reference>(*n));
    }
 };
 

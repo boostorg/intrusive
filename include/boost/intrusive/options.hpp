@@ -182,6 +182,9 @@ struct get_node_traits
 //!obtain constant-time size() member.
 BOOST_INTRUSIVE_OPTION_CONSTANT(constant_time_size, bool, Enabled, constant_time_size)
 
+//!This option setter specifies a container header holder type
+BOOST_INTRUSIVE_OPTION_TYPE(header_holder_type, HeaderHolder, HeaderHolder, header_holder_type)
+
 //!This option setter specifies the type that
 //!the container will use to store its size.
 BOOST_INTRUSIVE_OPTION_TYPE(size_type, SizeType, SizeType, size_type)

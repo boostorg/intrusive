@@ -3035,8 +3035,7 @@ Let's explain each type and function:
    as `node_ptr`: If `node_ptr` is `node*`, `pointer` must be `value_type*`. If
    `node_ptr` is `smart_ptr<node_traits::node>`, `pointer` must be `smart_ptr<value_type>`.
    This can be generically achieved using `boost::intrusive::pointer_traits` (portable implementation of C++11
-   `std::pointer_traits`) or `boost::pointer_to_other` utility from [*Boost SmartPointers]
-   defined in `<boost/pointer_to_other.hpp>`.
+   `std::pointer_traits`).
 
 *  [*['const_pointer]]: The type of a pointer to a `const value_type`. It must be the same pointer type
    as `node_ptr`: If `node_ptr` is `node*`, `const_pointer` must be `const value_type*`. If
@@ -3101,14 +3100,7 @@ intrusive containers, so [*Boost.Intrusive] offers a templatized
 [classref boost::intrusive::trivial_value_traits trivial_value_traits] class
 that does exactly what we want:
 
-[c++]
-
-   #include <boost/intrusive/trivial_value_traits.hpp>
-
-   //Now we can define legacy_value_traits just with a single line
-   using namespace boost::intrusive;
-   typedef trivial_value_traits<legacy_node_traits, normal_link> legacy_value_traits;
-
+[doc_value_traits_trivial]
 
 Now we can just define the containers that will store the legacy abi objects and write
 a little test:
@@ -3160,30 +3152,15 @@ The previous example can be further simplified using the
 class to define a value traits class with a value that stores the
 `simple_node` as a base class:
 
-[c++]
-
-   #include <boost/intrusive/derivation_value_traits.hpp>
-
-   //value_1, value_2, simple_node and simple_node_traits are defined
-   //as in the previous example...
-   //...
-
-   using namespace boost::intrusive;
-
-   //Now define the needed value traits using
-   typedef derivation_value_traits<value_1, simple_node_traits, normal_link> ValueTraits1;
-   typedef derivation_value_traits<value_2, simple_node_traits, normal_link> ValueTraits2;
-
-   //Now define the containers
-   typedef list <value1, value_traits<ValueTraits1> > Value1List;
-   typedef list <value2, value_traits<ValueTraits2> > Value2List;
+[import ../example/doc_derivation_value_traits.cpp]
+[doc_derivation_value_traits_value_traits]
 
 We can even choose to store `simple_node` as a member of `value_1` and `value_2`
 classes and use [classref boost::intrusive::member_value_traits member_value_traits]
 to define the needed value traits classes:
 
-[import ../example/doc_advanced_value_traits2.cpp]
-[doc_advanced_value_traits2_value_traits]
+[import ../example/doc_member_value_traits.cpp]
+[doc_member_value_traits_value_traits]
 
 [endsect]
 
@@ -3803,6 +3780,7 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
    *  [@https://svn.boost.org/trac/boost/ticket/9948 #9948: remove use of const_cast in intrusive containers]
    *  [@https://svn.boost.org/trac/boost/ticket/9949 #9949: clear header node hooks upon intrusive container destruction]
    *  [@https://svn.boost.org/trac/boost/ticket/9961 #9961: tests for hooks not derived frorm generic_hook]
+   *  [@https://github.com/boostorg/intrusive/pull/12 GitHub #12: ['Fix MSVC14 warning C4456: declaration of 'x_parent_right' hides previous local declaration]]
 
 *  Optimized tree rebalancing code to avoid redundant assignments.
 

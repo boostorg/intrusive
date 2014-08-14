@@ -48,6 +48,7 @@ struct treap_defaults
    typedef std::size_t size_type;
    typedef void compare;
    typedef void priority;
+   typedef void header_holder_type;
 };
 
 /// @endcond
@@ -68,16 +69,16 @@ struct treap_defaults
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidOrKeyComp, class VoidOrPrioComp, class SizeType, bool ConstantTimeSize>
+template<class ValueTraits, class VoidOrKeyComp, class VoidOrPrioComp, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
 #endif
 class treap_impl
    /// @cond
-   : public bstree_impl<ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, BsTreeAlgorithms>
+   : public bstree_impl<ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, BsTreeAlgorithms, HeaderHolder>
    , public detail::ebo_functor_holder
          < typename get_prio
             < VoidOrPrioComp
             , typename bstree_impl
-               <ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, BsTreeAlgorithms>::value_type>::type 
+               <ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, BsTreeAlgorithms, HeaderHolder>::value_type>::type
          >
    /// @endcond
 {
@@ -85,7 +86,8 @@ class treap_impl
    typedef ValueTraits                                               value_traits;
    /// @cond
    typedef bstree_impl< ValueTraits, VoidOrKeyComp, SizeType
-                      , ConstantTimeSize, BsTreeAlgorithms>          tree_type;
+                      , ConstantTimeSize, BsTreeAlgorithms
+                      , HeaderHolder>                               tree_type;
    typedef tree_type                                                 implementation_defined;
    typedef get_prio
                < VoidOrPrioComp
@@ -370,7 +372,7 @@ class treap_impl
       if(safemode_or_autounlink)
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(to_insert));
       iterator ret(node_algorithms::insert_equal_upper_bound
-         (this->tree_type::header_ptr(), to_insert, key_node_comp, key_node_pcomp), this->value_traits_ptr());
+         (this->tree_type::header_ptr(), to_insert, key_node_comp, key_node_pcomp), this->priv_value_traits_ptr());
       this->tree_type::sz_traits().increment();
       return ret;
    }
@@ -399,7 +401,7 @@ class treap_impl
       if(safemode_or_autounlink)
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(to_insert));
       iterator ret (node_algorithms::insert_equal
-         (this->tree_type::header_ptr(), hint.pointed_node(), to_insert, key_node_comp, key_node_pcomp), this->value_traits_ptr());
+         (this->tree_type::header_ptr(), hint.pointed_node(), to_insert, key_node_comp, key_node_pcomp), this->priv_value_traits_ptr());
       this->tree_type::sz_traits().increment();
       return ret;
    }
@@ -546,7 +548,7 @@ class treap_impl
       std::pair<node_ptr, bool> ret =
          (node_algorithms::insert_unique_check
             (this->tree_type::header_ptr(), key, ocomp, pcomp, commit_data));
-      return std::pair<iterator, bool>(iterator(ret.first, this->value_traits_ptr()), ret.second);
+      return std::pair<iterator, bool>(iterator(ret.first, this->priv_value_traits_ptr()), ret.second);
    }
 
    //! <b>Requires</b>: key_value_comp must be a comparison function that induces
@@ -598,7 +600,7 @@ class treap_impl
       std::pair<node_ptr, bool> ret =
          (node_algorithms::insert_unique_check
             (this->tree_type::header_ptr(), hint.pointed_node(), key, ocomp, pcomp, commit_data));
-      return std::pair<iterator, bool>(iterator(ret.first, this->value_traits_ptr()), ret.second);
+      return std::pair<iterator, bool>(iterator(ret.first, this->priv_value_traits_ptr()), ret.second);
    }
 
    //! <b>Requires</b>: value must be an lvalue of type value_type. commit_data
@@ -625,7 +627,7 @@ class treap_impl
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(to_insert));
       node_algorithms::insert_unique_commit(this->tree_type::header_ptr(), to_insert, commit_data);
       this->tree_type::sz_traits().increment();
-      return iterator(to_insert, this->value_traits_ptr());
+      return iterator(to_insert, this->priv_value_traits_ptr());
    }
 
    //! <b>Requires</b>: value must be an lvalue, "pos" must be
@@ -650,7 +652,7 @@ class treap_impl
       detail::key_nodeptr_comp<priority_compare, value_traits>
          pcomp(this->priv_pcomp(), &this->get_value_traits());
       iterator ret (node_algorithms::insert_before
-         (this->tree_type::header_ptr(), pos.pointed_node(), to_insert, pcomp), this->value_traits_ptr());
+         (this->tree_type::header_ptr(), pos.pointed_node(), to_insert, pcomp), this->priv_value_traits_ptr());
       this->tree_type::sz_traits().increment();
       return ret;
    }
@@ -1062,14 +1064,15 @@ void swap(treap_impl<T, Options...> &x, treap_impl<T, Options...> &y);
 template<class T, class ...Options>
 #else
 template<class T, class O1 = void, class O2 = void
-                , class O3 = void, class O4 = void>
+                , class O3 = void, class O4 = void
+                , class O5 = void>
 #endif
 struct make_treap
 {
    typedef typename pack_options
       < treap_defaults,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
+      O1, O2, O3, O4, O5
       #else
       Options...
       #endif
@@ -1077,6 +1080,8 @@ struct make_treap
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
+   typedef typename detail::get_header_holder_type
+      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
 
    typedef treap_impl
          < value_traits
@@ -1084,6 +1089,7 @@ struct make_treap
          , typename packed_options::priority
          , typename packed_options::size_type
          , packed_options::constant_time_size
+         , header_holder_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -1092,14 +1098,14 @@ struct make_treap
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
 #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-template<class T, class O1, class O2, class O3, class O4>
+template<class T, class O1, class O2, class O3, class O4, class O5>
 #else
 template<class T, class ...Options>
 #endif
 class treap
    :  public make_treap<T,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
+      O1, O2, O3, O4, O5
       #else
       Options...
       #endif
@@ -1108,7 +1114,7 @@ class treap
    typedef typename make_treap
       <T,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
+      O1, O2, O3, O4, O5
       #else
       Options...
       #endif

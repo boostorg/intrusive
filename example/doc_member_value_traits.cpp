@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 //
-// (C) Copyright Ion Gaztanaga  2006-2013
+// (C) Copyright Ion Gaztanaga  2006-2014
 //
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
@@ -32,7 +32,7 @@ struct simple_node_traits
    static void set_previous(node *n, node *prev)   {  n->prev_ = prev;  }
 };
 
-//[doc_advanced_value_traits2_value_traits
+//[doc_member_value_traits_value_traits
 class base_1{};
 class base_2{};
 
@@ -61,7 +61,7 @@ typedef list <value_1, value_traits<ValueTraits1> > Value1List;
 typedef list <value_2, value_traits<ValueTraits2> > Value2List;
 //]
 
-//[doc_advanced_value_traits2_test
+//[doc_member_value_traits_test
 int main()
 {
    typedef std::vector<value_1> Vect1;

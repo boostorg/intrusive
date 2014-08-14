@@ -25,9 +25,9 @@ template <class T>
 struct priority_compare
 {
    //Compatibility with std::binary_function
-	typedef T      first_argument_type;
-	typedef T      second_argument_type;
-	typedef bool   result_type;
+   typedef T      first_argument_type;
+   typedef T      second_argument_type;
+   typedef bool   result_type;
 
    bool operator()(const T &val, const T &val2) const
    {

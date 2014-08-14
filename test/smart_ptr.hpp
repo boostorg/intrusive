@@ -13,7 +13,6 @@
 
 #include <boost/iterator.hpp>
 #include <boost/intrusive/pointer_plus_bits.hpp>
-#include <boost/pointer_cast.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 
 #if (defined _MSC_VER)

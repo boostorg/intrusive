@@ -50,6 +50,14 @@ class new_default_factory
    {  return new T();  }
 };
 
+class empty_disposer
+{
+   public:
+   template<class T>
+   void operator()(const T &)
+   {}
+};
+
 }  //namespace test       {
 }  //namespace intrusive  {
 }  //namespace boost      {

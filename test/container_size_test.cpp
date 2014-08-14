@@ -23,6 +23,7 @@
 #include <boost/intrusive/treap_set.hpp>
 #include <boost/intrusive/unordered_set.hpp>
 #include <boost/static_assert.hpp>
+#include "itestvalue.hpp"
 
 using namespace boost::intrusive;
 
@@ -71,6 +72,16 @@ void test_sizes(boolean<true>, std::size_t wordsize)
       BOOST_TEST_EQ(sizeof(c), wordsize*2);
       test_iterator_sizes(c, wordsize);
    }
+   {
+      list< node< list_base_hook<> >, header_holder_type< pointer_holder< list_node<void*> > > > c;
+      BOOST_TEST_EQ(sizeof(c), wordsize*2);
+      test_iterator_sizes(c, wordsize);
+   }
+   {
+      list< node< list_base_hook<> >, constant_time_size<false>, header_holder_type< pointer_holder< list_node<void*> > > > c;
+      BOOST_TEST_EQ(sizeof(c), wordsize*1);
+      test_iterator_sizes(c, wordsize);
+   }
    {  //slist
       slist<node< node< slist_base_hook<> > > > c;
       BOOST_TEST_EQ(sizeof(c), wordsize*2);
@@ -101,6 +112,16 @@ void test_sizes(boolean<true>, std::size_t wordsize)
       BOOST_TEST_EQ(sizeof(c), wordsize*3);
       test_iterator_sizes(c, wordsize);
    }
+   {
+      set< node< set_base_hook<> >, header_holder_type< pointer_holder< rbtree_node<void*> > > > c;
+      BOOST_TEST_EQ(sizeof(c), wordsize*2);
+      test_iterator_sizes(c, wordsize);
+   }
+   {
+      set< node< set_base_hook<> >, constant_time_size<false>, header_holder_type< pointer_holder< rbtree_node<void*> > > > c;
+      BOOST_TEST_EQ(sizeof(c), wordsize*1);
+      test_iterator_sizes(c, wordsize);
+   }
    {  //avl
       avl_set<node< node< avl_set_base_hook<> > > > c;
       BOOST_TEST_EQ(sizeof(c), wordsize*5);
@@ -114,6 +135,16 @@ void test_sizes(boolean<true>, std::size_t wordsize)
    {
       avl_set<node< node< avl_set_base_hook<optimize_size<true> > > > , constant_time_size<false> > c;
       BOOST_TEST_EQ(sizeof(c), wordsize*3);
+      test_iterator_sizes(c, wordsize);
+   }
+   {
+      avl_set< node< avl_set_base_hook<> >, header_holder_type< pointer_holder< avltree_node<void*> > > > c;
+      BOOST_TEST_EQ(sizeof(c), wordsize*2);
+      test_iterator_sizes(c, wordsize);
+   }
+   {
+      avl_set< node< avl_set_base_hook<> >, constant_time_size<false>, header_holder_type< pointer_holder< avltree_node<void*> > > > c;
+      BOOST_TEST_EQ(sizeof(c), wordsize*1);
       test_iterator_sizes(c, wordsize);
    }
    {  //splay

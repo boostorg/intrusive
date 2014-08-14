@@ -19,7 +19,6 @@
 #include <boost/intrusive/pointer_traits.hpp>
 #include <cstddef>
 #include <boost/intrusive/detail/mpl.hpp>
-#include <boost/pointer_cast.hpp>
 
 namespace boost {
 namespace intrusive {
@@ -281,7 +280,7 @@ class any_algorithms
       any_algorithms<VoidPointer>::template function_not_available_for_any_hooks<node_ptr>();
    }
 
-   static void swap_nodes(const node_ptr & l, const node_ptr & r)
+   static void swap_nodes(const node_ptr &, const node_ptr &)
    {
       //Any nodes have no swap_nodes capability because they don't know
       //what algorithm they must use to unlink the node from the container

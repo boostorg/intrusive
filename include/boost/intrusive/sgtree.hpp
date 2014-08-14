@@ -133,7 +133,8 @@ struct alpha_holder
    typedef boost::intrusive::detail::h_alpha_t           h_alpha_t;
    typedef boost::intrusive::detail::alpha_by_max_size_t multiply_by_alpha_t;
 
-   alpha_holder() : max_tree_size_(0)
+   alpha_holder()
+      : max_tree_size_()
    {  set_alpha(0.70711f);   } // ~1/sqrt(2)
 
    float get_alpha() const
@@ -166,6 +167,10 @@ struct alpha_holder<false, SizeType>
    typedef boost::intrusive::detail::h_alpha_sqrt2_t           h_alpha_t;
    typedef boost::intrusive::detail::alpha_0_75_by_max_size_t  multiply_by_alpha_t;
 
+   alpha_holder()
+      : max_tree_size_()
+   {}
+
    float get_alpha() const
    {  return 0.70710677f;  }
 
@@ -192,6 +197,7 @@ struct sgtree_defaults
    typedef std::size_t size_type;
    typedef void compare;
    static const bool floating_point = true;
+   typedef void header_holder_type;
 };
 
 /// @endcond
@@ -212,11 +218,11 @@ struct sgtree_defaults
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidOrKeyComp, class SizeType, bool FloatingPoint>
+template<class ValueTraits, class VoidOrKeyComp, class SizeType, bool FloatingPoint, typename HeaderHolder>
 #endif
 class sgtree_impl
    /// @cond
-   :  public bstree_impl<ValueTraits, VoidOrKeyComp, SizeType, true, SgTreeAlgorithms>
+   :  public bstree_impl<ValueTraits, VoidOrKeyComp, SizeType, true, SgTreeAlgorithms, HeaderHolder>
    ,  public detail::alpha_holder<FloatingPoint, SizeType>
    /// @endcond
 {
@@ -224,7 +230,7 @@ class sgtree_impl
    typedef ValueTraits                                               value_traits;
    /// @cond
    typedef bstree_impl< ValueTraits, VoidOrKeyComp, SizeType
-                      , true, SgTreeAlgorithms>                      tree_type;
+                      , true, SgTreeAlgorithms, HeaderHolder>       tree_type;
    typedef tree_type                                                 implementation_defined;
 
    /// @endcond
@@ -422,7 +428,7 @@ class sgtree_impl
          , (size_type)this->size(), this->get_h_alpha_func(), max_tree_size);
       this->tree_type::sz_traits().increment();
       this->max_tree_size_ = (size_type)max_tree_size;
-      return iterator(p, this->value_traits_ptr());
+      return iterator(p, this->priv_value_traits_ptr());
    }
 
    //! @copydoc ::boost::intrusive::bstree::insert_equal(const_iterator,reference)
@@ -439,7 +445,7 @@ class sgtree_impl
          , (std::size_t)this->size(), this->get_h_alpha_func(), max_tree_size);
       this->tree_type::sz_traits().increment();
       this->max_tree_size_ = (size_type)max_tree_size;
-      return iterator(p, this->value_traits_ptr());
+      return iterator(p, this->priv_value_traits_ptr());
    }
 
    //! @copydoc ::boost::intrusive::bstree::insert_equal(Iterator,Iterator)
@@ -481,7 +487,7 @@ class sgtree_impl
       std::pair<node_ptr, bool> ret =
          (node_algorithms::insert_unique_check
             (this->tree_type::header_ptr(), key, comp, commit_data));
-      return std::pair<iterator, bool>(iterator(ret.first, this->value_traits_ptr()), ret.second);
+      return std::pair<iterator, bool>(iterator(ret.first, this->priv_value_traits_ptr()), ret.second);
    }
 
    //! @copydoc ::boost::intrusive::bstree::insert_unique_check(const_iterator,const KeyType&,KeyValueCompare,insert_commit_data&)
@@ -495,7 +501,7 @@ class sgtree_impl
       std::pair<node_ptr, bool> ret =
          (node_algorithms::insert_unique_check
             (this->tree_type::header_ptr(), hint.pointed_node(), key, comp, commit_data));
-      return std::pair<iterator, bool>(iterator(ret.first, this->value_traits_ptr()), ret.second);
+      return std::pair<iterator, bool>(iterator(ret.first, this->priv_value_traits_ptr()), ret.second);
    }
 
    //! @copydoc ::boost::intrusive::bstree::insert_unique_commit
@@ -510,7 +516,7 @@ class sgtree_impl
          , (std::size_t)this->size(), this->get_h_alpha_func(), max_tree_size);
       this->tree_type::sz_traits().increment();
       this->max_tree_size_ = (size_type)max_tree_size;
-      return iterator(to_insert, this->value_traits_ptr());
+      return iterator(to_insert, this->priv_value_traits_ptr());
    }
 
    //! @copydoc ::boost::intrusive::bstree::insert_unique(Iterator,Iterator)
@@ -540,7 +546,7 @@ class sgtree_impl
          , (size_type)this->size(), this->get_h_alpha_func(), max_tree_size);
       this->tree_type::sz_traits().increment();
       this->max_tree_size_ = (size_type)max_tree_size;
-      return iterator(p, this->value_traits_ptr());
+      return iterator(p, this->priv_value_traits_ptr());
    }
 
    //! @copydoc ::boost::intrusive::bstree::push_back
@@ -872,7 +878,8 @@ void swap(sgtree_impl<T, Options...> &x, sgtree_impl<T, Options...> &y);
 template<class T, class ...Options>
 #else
 template<class T, class O1 = void, class O2 = void
-                , class O3 = void, class O4 = void>
+                , class O3 = void, class O4 = void
+                , class O5 = void>
 #endif
 struct make_sgtree
 {
@@ -880,7 +887,7 @@ struct make_sgtree
    typedef typename pack_options
       < sgtree_defaults,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
+      O1, O2, O3, O4, O5
       #else
       Options...
       #endif
@@ -888,12 +895,15 @@ struct make_sgtree
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
+   typedef typename detail::get_header_holder_type
+      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
 
    typedef sgtree_impl
          < value_traits
          , typename packed_options::compare
          , typename packed_options::size_type
          , packed_options::floating_point
+         , header_holder_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -903,14 +913,14 @@ struct make_sgtree
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
 #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-template<class T, class O1, class O2, class O3, class O4>
+template<class T, class O1, class O2, class O3, class O4, class O5>
 #else
 template<class T, class ...Options>
 #endif
 class sgtree
    :  public make_sgtree<T,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
+      O1, O2, O3, O4, O5
       #else
       Options...
       #endif
@@ -919,7 +929,7 @@ class sgtree
    typedef typename make_sgtree
       <T,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
+      O1, O2, O3, O4, O5
       #else
       Options...
       #endif
