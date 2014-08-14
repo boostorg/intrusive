@@ -45,6 +45,50 @@ struct data_for_rebalance_t
    NodePtr  y;
 };
 
+namespace detail {
+
+template<class ValueTraits, class NodePtrCompare, class ExtraChecker>
+struct bstree_node_checker
+   : public ExtraChecker
+{
+   typedef ExtraChecker                            base_checker_t;
+   typedef ValueTraits                             value_traits;
+   typedef typename value_traits::node_traits      node_traits;
+   typedef typename node_traits::node_ptr          node_ptr;
+
+   struct return_type
+      : public base_checker_t::return_type
+   {
+      return_type() : min_key_node_ptr(node_ptr()), max_key_node_ptr(node_ptr()), node_count(0) {}
+
+      node_ptr min_key_node_ptr;
+      node_ptr max_key_node_ptr;
+      size_t   node_count;
+   };
+
+   bstree_node_checker(const NodePtrCompare& comp, ExtraChecker extra_checker)
+      : base_checker_t(extra_checker), comp_(comp)
+   {}
+
+   void operator () (const node_ptr& p,
+                     const return_type& check_return_left, const return_type& check_return_right,
+                     return_type& check_return)
+   {
+      if (check_return_left.max_key_node_ptr)
+         BOOST_INTRUSIVE_INVARIANT_ASSERT(!comp_(p, check_return_left.max_key_node_ptr));
+      if (check_return_right.min_key_node_ptr)
+         BOOST_INTRUSIVE_INVARIANT_ASSERT(!comp_(check_return_right.min_key_node_ptr, p));
+      check_return.min_key_node_ptr = node_traits::get_left(p)? check_return_left.min_key_node_ptr : p;
+      check_return.max_key_node_ptr = node_traits::get_right(p)? check_return_right.max_key_node_ptr : p;
+      check_return.node_count = check_return_left.node_count + check_return_right.node_count + 1;
+      base_checker_t::operator()(p, check_return_left, check_return_right, check_return);
+   }
+
+   const NodePtrCompare comp_;
+};
+
+} // namespace detail
+
 /// @endcond
 
 
@@ -1442,6 +1486,32 @@ class bstree_algorithms
       return new_root;
    }
 
+   template<class Checker>
+   static void check(const node_ptr & header, Checker checker, typename Checker::return_type& checker_return)
+   {
+       node_ptr root_node_ptr = NodeTraits::get_parent(header);
+       if (!root_node_ptr)
+       {
+           // check left&right header pointers
+           BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_left(header) == header);
+           BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_right(header) == header);
+       }
+       else
+       {
+           // check parent pointer of root node
+           BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_parent(root_node_ptr) == header);
+           // check subtree from root
+           check_subtree(root_node_ptr, checker, checker_return);
+           // check left&right header pointers
+           node_ptr p = root_node_ptr;
+           while (NodeTraits::get_left(p)) { p = NodeTraits::get_left(p); }
+           BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_left(header) == p);
+           p = root_node_ptr;
+           while (NodeTraits::get_right(p)) { p = NodeTraits::get_right(p); }
+           BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_right(header) == p);
+       }
+   }
+
    protected:
    static void erase(const node_ptr & header, const node_ptr & z, data_for_rebalance &info)
    {
@@ -1997,6 +2067,26 @@ class bstree_algorithms
       }
       return y;
    }
+
+   template<class Checker>
+   static void check_subtree(const node_ptr& node, Checker checker, typename Checker::return_type& check_return)
+   {
+      node_ptr left = NodeTraits::get_left(node);
+      node_ptr right = NodeTraits::get_right(node);
+      typename Checker::return_type check_return_left;
+      typename Checker::return_type check_return_right;
+      if (left)
+      {
+         BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_parent(left) == node);
+         check_subtree(left, checker, check_return_left);
+      }
+      if (right)
+      {
+         BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_parent(right) == node);
+         check_subtree(right, checker, check_return_right);
+      }
+      checker(node, check_return_left, check_return_right, check_return);
+   }
 };
 
 /// @cond
@@ -2005,6 +2095,12 @@ template<class NodeTraits>
 struct get_algo<BsTreeAlgorithms, NodeTraits>
 {
    typedef bstree_algorithms<NodeTraits> type;
+};
+
+template <class ValueTraits, class NodePtrCompare, class ExtraChecker>
+struct get_node_checker<BsTreeAlgorithms, ValueTraits, NodePtrCompare, ExtraChecker>
+{
+   typedef detail::bstree_node_checker<ValueTraits, NodePtrCompare, ExtraChecker> type;
 };
 
 /// @endcond

@@ -706,6 +706,12 @@ struct get_algo<SplayTreeAlgorithms, NodeTraits>
    typedef splaytree_algorithms<NodeTraits> type;
 };
 
+template <class ValueTraits, class NodePtrCompare, class ExtraChecker>
+struct get_node_checker<SplayTreeAlgorithms, ValueTraits, NodePtrCompare, ExtraChecker>
+{
+   typedef detail::bstree_node_checker<ValueTraits, NodePtrCompare, ExtraChecker> type;
+};
+
 /// @endcond
 
 } //namespace intrusive

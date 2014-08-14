@@ -73,6 +73,7 @@ void test_container( Container & c )
       BOOST_TEST( it == itend );
       BOOST_TEST( c.size() == i );
    }
+   c.check();
 }
 
 
