@@ -54,15 +54,15 @@ struct bstree_node_checker
    typedef ExtraChecker                            base_checker_t;
    typedef ValueTraits                             value_traits;
    typedef typename value_traits::node_traits      node_traits;
-   typedef typename node_traits::node_ptr          node_ptr;
+   typedef typename node_traits::const_node_ptr    const_node_ptr;
 
    struct return_type
       : public base_checker_t::return_type
    {
-      return_type() : min_key_node_ptr(node_ptr()), max_key_node_ptr(node_ptr()), node_count(0) {}
+      return_type() : min_key_node_ptr(const_node_ptr()), max_key_node_ptr(const_node_ptr()), node_count(0) {}
 
-      node_ptr min_key_node_ptr;
-      node_ptr max_key_node_ptr;
+      const_node_ptr min_key_node_ptr;
+      const_node_ptr max_key_node_ptr;
       size_t   node_count;
    };
 
@@ -70,7 +70,7 @@ struct bstree_node_checker
       : base_checker_t(extra_checker), comp_(comp)
    {}
 
-   void operator () (const node_ptr& p,
+   void operator () (const const_node_ptr& p,
                      const return_type& check_return_left, const return_type& check_return_right,
                      return_type& check_return)
    {
@@ -1487,9 +1487,9 @@ class bstree_algorithms
    }
 
    template<class Checker>
-   static void check(const node_ptr & header, Checker checker, typename Checker::return_type& checker_return)
+   static void check(const const_node_ptr& header, Checker checker, typename Checker::return_type& checker_return)
    {
-       node_ptr root_node_ptr = NodeTraits::get_parent(header);
+       const_node_ptr root_node_ptr = NodeTraits::get_parent(header);
        if (!root_node_ptr)
        {
            // check left&right header pointers
@@ -1503,7 +1503,7 @@ class bstree_algorithms
            // check subtree from root
            check_subtree(root_node_ptr, checker, checker_return);
            // check left&right header pointers
-           node_ptr p = root_node_ptr;
+           const_node_ptr p = root_node_ptr;
            while (NodeTraits::get_left(p)) { p = NodeTraits::get_left(p); }
            BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_left(header) == p);
            p = root_node_ptr;
@@ -2069,10 +2069,10 @@ class bstree_algorithms
    }
 
    template<class Checker>
-   static void check_subtree(const node_ptr& node, Checker checker, typename Checker::return_type& check_return)
+   static void check_subtree(const const_node_ptr& node, Checker checker, typename Checker::return_type& check_return)
    {
-      node_ptr left = NodeTraits::get_left(node);
-      node_ptr right = NodeTraits::get_right(node);
+      const_node_ptr left = NodeTraits::get_left(node);
+      const_node_ptr right = NodeTraits::get_right(node);
       typename Checker::return_type check_return_left;
       typename Checker::return_type check_return_right;
       if (left)

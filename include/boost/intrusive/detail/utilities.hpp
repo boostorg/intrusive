@@ -311,11 +311,11 @@ struct empty_node_checker
 {
    typedef ValueTraits                             value_traits;
    typedef typename value_traits::node_traits      node_traits;
-   typedef typename node_traits::node_ptr          node_ptr;
+   typedef typename node_traits::const_node_ptr    const_node_ptr;
 
    struct return_type {};
 
-   void operator () (const node_ptr&, const return_type&, const return_type&, return_type&) {}
+   void operator () (const const_node_ptr&, const return_type&, const return_type&, return_type&) {}
 };
 
 template<class VoidPointer>

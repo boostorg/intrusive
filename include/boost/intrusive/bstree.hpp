@@ -1854,7 +1854,7 @@ class bstree_impl
    }
 
    template <class ExtraChecker>
-   void check(ExtraChecker extra_checker)
+   void check(ExtraChecker extra_checker) const
    {
       typedef detail::key_nodeptr_comp<value_compare, value_traits> nodeptr_comp_t;
       nodeptr_comp_t nodeptr_comp(this->comp(), &this->get_value_traits());
@@ -1865,7 +1865,7 @@ class bstree_impl
          BOOST_INTRUSIVE_INVARIANT_ASSERT(this->sz_traits().get_size() == checker_return.node_count);
    }
 
-   void check()
+   void check() const
    {
       check(detail::empty_node_checker<ValueTraits>());
    }

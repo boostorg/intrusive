@@ -66,7 +66,7 @@ struct rbtree_node_checker
    typedef bstree_node_checker<ValueTraits, NodePtrCompare, ExtraChecker> base_checker_t;
    typedef ValueTraits                             value_traits;
    typedef typename value_traits::node_traits      node_traits;
-   typedef typename node_traits::node_ptr          node_ptr;
+   typedef typename node_traits::const_node_ptr    const_node_ptr;
 
    typedef typename base_checker_t::return_type    return_type;
 
@@ -74,7 +74,7 @@ struct rbtree_node_checker
       : base_checker_t(comp, extra_checker)
    {}
 
-   void operator () (const node_ptr& p,
+   void operator () (const const_node_ptr& p,
                      const return_type& check_return_left, const return_type& check_return_right,
                      return_type& check_return)
    {
