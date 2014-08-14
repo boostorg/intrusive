@@ -68,12 +68,7 @@ struct rbtree_node_checker
    typedef typename value_traits::node_traits      node_traits;
    typedef typename node_traits::node_ptr          node_ptr;
 
-   struct return_type
-      : public base_checker_t::return_type
-   {
-      return_type() : is_red(false) {}
-      bool is_red;
-   };
+   typedef typename base_checker_t::return_type    return_type;
 
    rbtree_node_checker(const NodePtrCompare& comp, ExtraChecker extra_checker)
       : base_checker_t(comp, extra_checker)
@@ -83,11 +78,12 @@ struct rbtree_node_checker
                      const return_type& check_return_left, const return_type& check_return_right,
                      return_type& check_return)
    {
-      check_return.is_red = (node_traits::get_color(p) == node_traits::red());
-      if (check_return.is_red)
+      if (node_traits::get_color(p) == node_traits::red())
       {
-         BOOST_INTRUSIVE_INVARIANT_ASSERT(!check_return_left.is_red);
-         BOOST_INTRUSIVE_INVARIANT_ASSERT(!check_return_right.is_red);
+         if (node_traits::get_left(p))
+            BOOST_INTRUSIVE_INVARIANT_ASSERT(node_traits::get_color(node_traits::get_left(p)) == node_traits::black());
+         if (node_traits::get_right(p))
+            BOOST_INTRUSIVE_INVARIANT_ASSERT(node_traits::get_color(node_traits::get_right(p)) == node_traits::black());
       }
       base_checker_t::operator()(p, check_return_left, check_return_right, check_return);
    }
