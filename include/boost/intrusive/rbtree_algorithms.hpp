@@ -57,6 +57,40 @@ struct rbtree_node_cloner
    }
 };
 
+namespace detail {
+
+template<class ValueTraits, class NodePtrCompare, class ExtraChecker>
+struct rbtree_node_checker
+   : public bstree_node_checker<ValueTraits, NodePtrCompare, ExtraChecker>
+{
+   typedef bstree_node_checker<ValueTraits, NodePtrCompare, ExtraChecker> base_checker_t;
+   typedef ValueTraits                             value_traits;
+   typedef typename value_traits::node_traits      node_traits;
+   typedef typename node_traits::const_node_ptr    const_node_ptr;
+
+   typedef typename base_checker_t::return_type    return_type;
+
+   rbtree_node_checker(const NodePtrCompare& comp, ExtraChecker extra_checker)
+      : base_checker_t(comp, extra_checker)
+   {}
+
+   void operator () (const const_node_ptr& p,
+                     const return_type& check_return_left, const return_type& check_return_right,
+                     return_type& check_return)
+   {
+      if (node_traits::get_color(p) == node_traits::red())
+      {
+         if (node_traits::get_left(p))
+            BOOST_INTRUSIVE_INVARIANT_ASSERT(node_traits::get_color(node_traits::get_left(p)) == node_traits::black());
+         if (node_traits::get_right(p))
+            BOOST_INTRUSIVE_INVARIANT_ASSERT(node_traits::get_color(node_traits::get_right(p)) == node_traits::black());
+      }
+      base_checker_t::operator()(p, check_return_left, check_return_right, check_return);
+   }
+};
+
+} // namespace detail
+
 #endif   //#ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
 //! rbtree_algorithms provides basic algorithms to manipulate
@@ -517,6 +551,12 @@ template<class NodeTraits>
 struct get_algo<RbTreeAlgorithms, NodeTraits>
 {
    typedef rbtree_algorithms<NodeTraits> type;
+};
+
+template <class ValueTraits, class NodePtrCompare, class ExtraChecker>
+struct get_node_checker<RbTreeAlgorithms, ValueTraits, NodePtrCompare, ExtraChecker>
+{
+    typedef detail::rbtree_node_checker<ValueTraits, NodePtrCompare, ExtraChecker> type;
 };
 
 /// @endcond
