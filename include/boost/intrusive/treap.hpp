@@ -904,6 +904,19 @@ class treap_impl
       this->tree_type::sz_traits().set_size(0);
    }
 
+   template <class ExtraChecker>
+   void check(ExtraChecker extra_checker) const
+   {
+      typedef detail::key_nodeptr_comp<priority_compare, value_traits> nodeptr_prio_comp_t;
+      nodeptr_prio_comp_t nodeptr_prio_comp(priv_pcomp(), &this->get_value_traits());
+      tree_type::check(detail::treap_node_extra_checker<ValueTraits, nodeptr_prio_comp_t, ExtraChecker>(nodeptr_prio_comp, extra_checker));
+   }
+
+   void check() const
+   {
+      check(detail::empty_node_checker<ValueTraits>());
+   }
+
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::bstree::count(const_reference)const
    size_type count(const_reference value) const;

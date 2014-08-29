@@ -359,6 +359,12 @@ struct get_algo<SgTreeAlgorithms, NodeTraits>
    typedef sgtree_algorithms<NodeTraits> type;
 };
 
+template <class ValueTraits, class NodePtrCompare, class ExtraChecker>
+struct get_node_checker<SgTreeAlgorithms, ValueTraits, NodePtrCompare, ExtraChecker>
+{
+   typedef detail::bstree_node_checker<ValueTraits, NodePtrCompare, ExtraChecker> type;
+};
+
 /// @endcond
 
 } //namespace intrusive

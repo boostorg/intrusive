@@ -1838,6 +1838,48 @@ class slist_impl
 
    ///@endcond
 
+   //! <b>Effects</b>: Asserts the integrity of the container.
+   //!
+   //! <b>Complexity</b>: Linear time.
+   //!
+   //! <b>Note</b>: The method has no effect when asserts are turned off (e.g., with NDEBUG).
+   void check() const
+   {
+      const_node_ptr header_ptr = get_root_node();
+      // header's next is never null
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(node_traits::get_next(header_ptr));
+      if (node_traits::get_next(header_ptr) == header_ptr)
+      {
+         if (constant_time_size)
+            BOOST_INTRUSIVE_INVARIANT_ASSERT(this->priv_size_traits().get_size() == 0);
+         return;
+      }
+      size_t node_count = 0;
+      const_node_ptr p = header_ptr;
+      while (true)
+      {
+         const_node_ptr next_p = node_traits::get_next(p);
+         if (!linear)
+         {
+            BOOST_INTRUSIVE_INVARIANT_ASSERT(next_p);
+         }
+         else
+         {
+            BOOST_INTRUSIVE_INVARIANT_ASSERT(next_p != header_ptr);
+         }
+         if ((!linear && next_p == header_ptr) || (linear && !next_p))
+         {
+            if (cache_last)
+               BOOST_INTRUSIVE_INVARIANT_ASSERT(get_last_node() == p);
+            break;
+         }
+         p = next_p;
+         ++node_count;
+      }
+      if (constant_time_size)
+         BOOST_INTRUSIVE_INVARIANT_ASSERT(this->priv_size_traits().get_size() == node_count);
+   }
+
    private:
    void priv_splice_after(const node_ptr & prev_pos_n, slist_impl &x, const node_ptr & before_f_n, const node_ptr & before_l_n)
    {
