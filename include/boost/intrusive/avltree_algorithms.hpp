@@ -49,6 +49,45 @@ struct avltree_node_cloner
    }
 };
 
+namespace detail {
+
+template<class ValueTraits, class NodePtrCompare, class ExtraChecker>
+struct avltree_node_checker
+      : public bstree_node_checker<ValueTraits, NodePtrCompare, ExtraChecker>
+{
+   typedef bstree_node_checker<ValueTraits, NodePtrCompare, ExtraChecker> base_checker_t;
+   typedef ValueTraits                             value_traits;
+   typedef typename value_traits::node_traits      node_traits;
+   typedef typename node_traits::const_node_ptr    const_node_ptr;
+
+   struct return_type
+         : public base_checker_t::return_type
+   {
+      return_type() : height(0) {}
+      int height;
+   };
+
+   avltree_node_checker(const NodePtrCompare& comp, ExtraChecker extra_checker)
+      : base_checker_t(comp, extra_checker)
+   {}
+
+   void operator () (const const_node_ptr& p,
+                     const return_type& check_return_left, const return_type& check_return_right,
+                     return_type& check_return)
+   {
+      int height_diff = check_return_right.height - check_return_left.height;
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(
+         (height_diff == -1 && node_traits::get_balance(p) == node_traits::negative()) ||
+         (height_diff ==  0 && node_traits::get_balance(p) == node_traits::zero()) ||
+         (height_diff ==  1 && node_traits::get_balance(p) == node_traits::positive())
+      );
+      check_return.height = 1 + std::max(check_return_left.height, check_return_right.height);
+      base_checker_t::operator()(p, check_return_left, check_return_right, check_return);
+   }
+};
+
+} // namespace detail
+
 /// @endcond
 
 //! avltree_algorithms is configured with a NodeTraits class, which encapsulates the
@@ -626,6 +665,12 @@ template<class NodeTraits>
 struct get_algo<AvlTreeAlgorithms, NodeTraits>
 {
    typedef avltree_algorithms<NodeTraits> type;
+};
+
+template <class ValueTraits, class NodePtrCompare, class ExtraChecker>
+struct get_node_checker<AvlTreeAlgorithms, ValueTraits, NodePtrCompare, ExtraChecker>
+{
+   typedef detail::avltree_node_checker<ValueTraits, NodePtrCompare, ExtraChecker> type;
 };
 
 /// @endcond

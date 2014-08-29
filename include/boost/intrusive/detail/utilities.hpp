@@ -52,6 +52,9 @@ enum algo_types
 template<algo_types AlgoType, class NodeTraits>
 struct get_algo;
 
+template<algo_types AlgoType, class ValueTraits, class NodePtrCompare, class ExtraChecker>
+struct get_node_checker;
+
 template <link_mode_type link_mode>
 struct is_safe_autounlink
 {
@@ -301,6 +304,18 @@ struct node_disposer
       base_t::get()(traits_->to_value_ptr(p));
    }
    const ValueTraits * const traits_;
+};
+
+template<class ValueTraits>
+struct empty_node_checker
+{
+   typedef ValueTraits                             value_traits;
+   typedef typename value_traits::node_traits      node_traits;
+   typedef typename node_traits::const_node_ptr    const_node_ptr;
+
+   struct return_type {};
+
+   void operator () (const const_node_ptr&, const return_type&, const return_type&, return_type&) {}
 };
 
 template<class VoidPointer>

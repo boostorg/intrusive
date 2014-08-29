@@ -1853,6 +1853,23 @@ class bstree_impl
          node_algorithms::init(to_remove);
    }
 
+   template <class ExtraChecker>
+   void check(ExtraChecker extra_checker) const
+   {
+      typedef detail::key_nodeptr_comp<value_compare, value_traits> nodeptr_comp_t;
+      nodeptr_comp_t nodeptr_comp(this->comp(), &this->get_value_traits());
+      typedef typename get_node_checker<AlgoType, ValueTraits, nodeptr_comp_t, ExtraChecker>::type node_checker_t;
+      typename node_checker_t::return_type checker_return;
+      node_algorithms::check(this->header_ptr(), node_checker_t(nodeptr_comp, extra_checker), checker_return);
+      if (constant_time_size)
+         BOOST_INTRUSIVE_INVARIANT_ASSERT(this->sz_traits().get_size() == checker_return.node_count);
+   }
+
+   void check() const
+   {
+      check(detail::empty_node_checker<ValueTraits>());
+   }
+
    /// @cond
    private:
    template<class Disposer>

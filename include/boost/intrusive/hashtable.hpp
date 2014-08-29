@@ -2659,6 +2659,7 @@ class hashtable_impl
       return size_type(*bound);
    }
    /// @cond
+   void check() const {}
    private:
    size_traits &priv_size_traits()
    {  return static_cast<size_traits&>(static_cast<data_type&>(*this));  }
