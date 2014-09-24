@@ -123,6 +123,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "parent_from_member", "paren
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "null_iterator", "null_iterator\null_iterator.vcproj", "{32A79B10-B2A0-C1B8-9458-9456152413B5}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -255,6 +259,10 @@ Global
 		{3A279B10-2A0B-B8C1-5894-9461524135B5}.Debug.Build.0 = Debug|Win32
 		{3A279B10-2A0B-B8C1-5894-9461524135B5}.Release.ActiveCfg = Release|Win32
 		{3A279B10-2A0B-B8C1-5894-9461524135B5}.Release.Build.0 = Release|Win32
+		{32A79B10-B2A0-C1B8-9458-9456152413B5}.Debug.ActiveCfg = Debug|Win32
+		{32A79B10-B2A0-C1B8-9458-9456152413B5}.Debug.Build.0 = Debug|Win32
+		{32A79B10-B2A0-C1B8-9458-9456152413B5}.Release.ActiveCfg = Release|Win32
+		{32A79B10-B2A0-C1B8-9458-9456152413B5}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

@@ -256,6 +256,7 @@ class hashtable_iterator
    typedef typename iterator_traits::iterator_category  iterator_category;
 
    hashtable_iterator ()
+      : slist_it_()  //Value initialization to achieve "null iterators" (N3644)
    {}
 
    explicit hashtable_iterator(siterator ptr, const BucketValueTraits *cont)

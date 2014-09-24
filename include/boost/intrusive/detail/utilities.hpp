@@ -22,6 +22,7 @@
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/intrusive/detail/is_stateful_value_traits.hpp>
 #include <boost/intrusive/detail/memory_util.hpp>
+#include <boost/intrusive/detail/iterator.hpp>
 #include <boost/cstdint.hpp>
 #include <cstddef>
 #include <climits>
@@ -796,116 +797,7 @@ class array_initializer
    private:
    detail::max_align rawbuf[(N*sizeof(T)-1)/sizeof(detail::max_align)+1];
 };
-
-
-
-
-template<class It>
-class reverse_iterator
-   : public std::iterator<
-      typename std::iterator_traits<It>::iterator_category,
-      typename std::iterator_traits<It>::value_type,
-      typename std::iterator_traits<It>::difference_type,
-      typename std::iterator_traits<It>::pointer,
-      typename std::iterator_traits<It>::reference>
-{
-   public:
-   typedef typename std::iterator_traits<It>::pointer pointer;
-   typedef typename std::iterator_traits<It>::reference reference;
-    typedef typename std::iterator_traits<It>::difference_type difference_type;
-   typedef It iterator_type;
-
-   reverse_iterator(){}
-
-   explicit reverse_iterator(It r)
-      : m_current(r)
-   {}
-
-   template<class OtherIt>
-   reverse_iterator(const reverse_iterator<OtherIt>& r)
-      : m_current(r.base())
-   {}
-
-   It base() const
-   {  return m_current;  }
-
-   reference operator*() const
-   {  It temp(m_current);   --temp; return *temp; }
-
-   pointer operator->() const
-   {  It temp(m_current);   --temp; return temp.operator->(); }
-
-   reference operator[](difference_type off) const
-   {  return this->m_current[-off];  }
-
-   reverse_iterator& operator++()
-   {  --m_current;   return *this;   }
-
-   reverse_iterator operator++(int)
-   {
-      reverse_iterator temp = *this;
-      --m_current;
-      return temp;
-   }
-
-   reverse_iterator& operator--()
-   {
-      ++m_current;
-      return *this;
-   }
-
-   reverse_iterator operator--(int)
-   {
-      reverse_iterator temp(*this);
-      ++m_current;
-      return temp;
-   }
-
-   friend bool operator==(const reverse_iterator& l, const reverse_iterator& r)
-   {  return l.m_current == r.m_current;  }
-
-   friend bool operator!=(const reverse_iterator& l, const reverse_iterator& r)
-   {  return l.m_current != r.m_current;  }
-
-   friend bool operator<(const reverse_iterator& l, const reverse_iterator& r)
-   {  return l.m_current < r.m_current;  }
-
-   friend bool operator<=(const reverse_iterator& l, const reverse_iterator& r)
-   {  return l.m_current <= r.m_current;  }
-
-   friend bool operator>(const reverse_iterator& l, const reverse_iterator& r)
-   {  return l.m_current > r.m_current;  }
-
-   friend bool operator>=(const reverse_iterator& l, const reverse_iterator& r)
-   {  return l.m_current >= r.m_current;  }
-
-   reverse_iterator& operator+=(difference_type off)
-   {  m_current -= off; return *this;  }
-
-   friend reverse_iterator operator+(const reverse_iterator & l, difference_type off)
-   {
-      reverse_iterator tmp(l.m_current);
-      tmp.m_current -= off;
-      return tmp;
-   }
-
-   reverse_iterator& operator-=(difference_type off)
-   {  m_current += off; return *this;  }
-
-   friend reverse_iterator operator-(const reverse_iterator & l, difference_type off)
-   {
-      reverse_iterator tmp(l.m_current);
-      tmp.m_current += off;
-      return tmp;
-   }
-
-   friend difference_type operator-(const reverse_iterator& l, const reverse_iterator& r)
-   {  return r.m_current - l.m_current;  }
-
-   private:
-   It m_current;   // the wrapped iterator
-};
-
+   
 template<class ConstNodePtr>
 struct uncast_types
 {
@@ -1223,6 +1115,7 @@ struct iiterator_members
 {
 
    iiterator_members()
+      : nodeptr_()//Value initialization to achieve "null iterators" (N3644)
    {}
 
    iiterator_members(const NodePtr &n_ptr, const StoredPointer &data)
@@ -1240,6 +1133,7 @@ template<class NodePtr, class StoredPointer>
 struct iiterator_members<NodePtr, StoredPointer, false>
 {
    iiterator_members()
+      : nodeptr_()//Value initialization to achieve "null iterators" (N3644)
    {}
 
    iiterator_members(const NodePtr &n_ptr, const StoredPointer &)
