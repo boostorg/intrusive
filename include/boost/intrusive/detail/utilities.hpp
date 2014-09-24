@@ -1223,6 +1223,7 @@ struct iiterator_members
 {
 
    iiterator_members()
+      :  nodeptr_(), ptr_()
    {}
 
    iiterator_members(const NodePtr &n_ptr, const StoredPointer &data)
@@ -1240,6 +1241,7 @@ template<class NodePtr, class StoredPointer>
 struct iiterator_members<NodePtr, StoredPointer, false>
 {
    iiterator_members()
+      :  nodeptr_()
    {}
 
    iiterator_members(const NodePtr &n_ptr, const StoredPointer &)
