@@ -22,17 +22,15 @@ namespace detail {
 
 template<class It>
 class reverse_iterator
-   : public std::iterator<
-      typename std::iterator_traits<It>::iterator_category,
-      typename std::iterator_traits<It>::value_type,
-      typename std::iterator_traits<It>::difference_type,
-      typename std::iterator_traits<It>::pointer,
-      typename std::iterator_traits<It>::reference>
 {
    public:
-   typedef typename std::iterator_traits<It>::pointer pointer;
-   typedef typename std::iterator_traits<It>::reference reference;
-    typedef typename std::iterator_traits<It>::difference_type difference_type;
+   typedef typename std::iterator_traits<It>::pointer             pointer;
+   typedef typename std::iterator_traits<It>::reference           reference;
+   typedef typename std::iterator_traits<It>::difference_type     difference_type;
+   typedef typename std::iterator_traits<It>::iterator_category   iterator_category;
+   typedef typename std::iterator_traits<It>::value_type          value_type;
+
+
    typedef It iterator_type;
 
    reverse_iterator()
