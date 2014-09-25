@@ -30,7 +30,7 @@
 #include <algorithm>
 #include <functional>
 #include <cstddef>
-#include <boost/move/move.hpp>
+#include <boost/move/utility_core.hpp>
 
 namespace boost {
 namespace intrusive {
@@ -1267,6 +1267,7 @@ class list_impl
    //! <b>Complexity</b>: Linear time.
    //!
    //! <b>Note</b>: The method has no effect when asserts are turned off (e.g., with NDEBUG).
+   //!   Experimental function, interface might change in future versions.
    void check() const
    {
       const_node_ptr header_ptr = get_root_node();

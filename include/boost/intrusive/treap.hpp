@@ -33,7 +33,7 @@
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/treap_algorithms.hpp>
 #include <boost/intrusive/link_mode.hpp>
-#include <boost/move/move.hpp>
+#include <boost/move/utility_core.hpp>
 #include <boost/intrusive/priority_compare.hpp>
 
 namespace boost {
@@ -904,6 +904,7 @@ class treap_impl
       this->tree_type::sz_traits().set_size(0);
    }
 
+   //! @copydoc ::boost::intrusive::bstree::check(ExtraChecker)const
    template <class ExtraChecker>
    void check(ExtraChecker extra_checker) const
    {
@@ -912,10 +913,9 @@ class treap_impl
       tree_type::check(detail::treap_node_extra_checker<ValueTraits, nodeptr_prio_comp_t, ExtraChecker>(nodeptr_prio_comp, extra_checker));
    }
 
+   //! @copydoc ::boost::intrusive::bstree::check()const
    void check() const
-   {
-      check(detail::empty_node_checker<ValueTraits>());
-   }
+   {  check(detail::empty_node_checker<ValueTraits>());  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::bstree::count(const_reference)const

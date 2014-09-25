@@ -31,7 +31,7 @@
 #include <boost/intrusive/options.hpp>
 #include <boost/intrusive/splaytree_algorithms.hpp>
 #include <boost/intrusive/link_mode.hpp>
-#include <boost/move/move.hpp>
+#include <boost/move/utility_core.hpp>
 
 namespace boost {
 namespace intrusive {

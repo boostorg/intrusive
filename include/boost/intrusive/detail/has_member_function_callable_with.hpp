@@ -19,8 +19,9 @@
       #include <boost/intrusive/detail/workaround.hpp>
       #include <boost/intrusive/detail/preprocessor.hpp>
       #include <boost/intrusive/detail/mpl.hpp>
+      #include <boost/move/utility_core.hpp>
       #include <boost/static_assert.hpp>
-      #include <boost/move/move.hpp>
+
 
       //Mark that we don't support 0 arg calls due to compiler ICE in GCC 3.4/4.0/4.1 and
       //wrong SFINAE for GCC 4.2/4.3

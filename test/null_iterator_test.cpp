@@ -26,8 +26,6 @@
 
 using namespace boost::intrusive;
 
-
-#include <boost/intrusive/detail/memory_util.hpp>
 struct Type
    : list_base_hook<>
    , slist_base_hook<>

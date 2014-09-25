@@ -22,7 +22,7 @@
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/intrusive/detail/is_stateful_value_traits.hpp>
 #include <boost/intrusive/detail/memory_util.hpp>
-#include <boost/intrusive/detail/iterator.hpp>
+#include <boost/intrusive/detail/reverse_iterator.hpp>
 #include <boost/cstdint.hpp>
 #include <cstddef>
 #include <climits>

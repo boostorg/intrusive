@@ -1486,6 +1486,14 @@ class bstree_algorithms
       return new_root;
    }
 
+   //! <b>Effects</b>: Asserts the integrity of the container with additional checks provided by the user.
+   //!
+   //! <b>Requires</b>: header must be the header of a tree.
+   //!
+   //! <b>Complexity</b>: Linear time.
+   //!
+   //! <b>Note</b>: The method might not have effect when asserts are turned off (e.g., with NDEBUG).
+   //!   Experimental function, interface might change in future versions.
    template<class Checker>
    static void check(const const_node_ptr& header, Checker checker, typename Checker::return_type& checker_return)
    {

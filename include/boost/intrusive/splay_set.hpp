@@ -16,7 +16,7 @@
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/splaytree.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
-#include <boost/move/move.hpp>
+#include <boost/move/utility_core.hpp>
 #include <iterator>
 
 namespace boost {
