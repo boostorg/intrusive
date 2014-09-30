@@ -3768,6 +3768,7 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 *  Fixed bugs:
    *  [@https://github.com/boostorg/intrusive/pull/12 GitHub Pull #12: ['Fix MSVC14 warning C4456: declaration of 'x_parent_right' hides previous local declaration]]
    *  [@https://svn.boost.org/trac/boost/ticket/10520 Boost Trac #10520: ['Conversion warning in intrusive/detail/utilities.hpp]]
+   *  [@https://svn.boost.org/trac/boost/ticket/10469 Boost Trac #10469: ['Erasing from intrusive unordered_multiset with optimize_multikey goes into an infinite loop]]
 
 [endsect]
 
