@@ -158,7 +158,6 @@ void test_list< List_Type, Value_Container >
       list_type list(values.begin(), values.end());
       list.remove_and_dispose_if(is_odd(), test::empty_disposer());
       int init_values [] = { 2, 4 };
-      typename list_type::iterator i = list.begin(), e = list.end();
       TEST_INTRUSIVE_SEQUENCE( init_values, list.begin() );
    }
    {
