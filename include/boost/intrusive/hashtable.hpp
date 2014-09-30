@@ -253,7 +253,7 @@ struct group_functions
          if(group_algorithms::unique(first_in_group))
             group_algorithms::link_after(first_in_group, n);
          else{
-            group_algorithms::link_after(group_algorithms::node_traits::get_next(first_in_group), n);
+            group_algorithms::link_after(node_traits::get_next(first_in_group), n);
          }
       }
       else{
@@ -272,8 +272,8 @@ struct group_functions
 
       //It's the last in group if the next_node is a bucket
       slist_node_ptr nxt(node_traits::get_next(elem));
-      bool last_in_group = (first_end_ptr <= nxt && nxt <= last_end_ptr)/* ||
-                            (group_traits::get_next(nxt) != elem)*/;
+      bool last_in_group = (first_end_ptr <= nxt && nxt <= last_end_ptr) ||
+                            (group_traits::get_next(detail::dcast_bucket_ptr<node>(nxt)) != elem);
       //It's the first in group if group_previous's next_node is not
       //itself, as group list does not link bucket
       node_ptr prev_in_group(group_traits::get_next(elem));
