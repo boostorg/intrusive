@@ -3766,7 +3766,8 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 *  Experimental version of node checkers, contributed by Matei David. Many thanks!
 *  Implemented [@http://www.open-std.org/JTC1/sc22/WG21/docs/papers/2013/n3644.pdf N3644: Null Forward Iterators] from C++14.
 *  Fixed bugs:
-   *  [@https://github.com/boostorg/intrusive/pull/12 GitHub #12: ['Fix MSVC14 warning C4456: declaration of 'x_parent_right' hides previous local declaration]]
+   *  [@https://github.com/boostorg/intrusive/pull/12 GitHub Pull #12: ['Fix MSVC14 warning C4456: declaration of 'x_parent_right' hides previous local declaration]]
+   *  [@https://svn.boost.org/trac/boost/ticket/10520 Boost Trac #10520: ['Conversion warning in intrusive/detail/utilities.hpp]]
 
 [endsect]
 
