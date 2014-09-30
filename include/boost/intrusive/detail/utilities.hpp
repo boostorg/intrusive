@@ -590,7 +590,7 @@ inline float fast_log2 (float val)
    //3rd degree polynomial keeping first derivate continuity.
    //For less precision the line can be commented out
    val = ((-1.f/3.f) * val + 2.f) * val - (2.f/3.f);
-   return (val + log_2);
+   return val + static_cast<float>(log_2);
 }
 
 inline std::size_t ceil_log2 (std::size_t x)
