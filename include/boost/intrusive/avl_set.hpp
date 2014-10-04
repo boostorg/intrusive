@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 //
-// (C) Copyright Ion Gaztanaga 2007-2013
+// (C) Copyright Ion Gaztanaga 2007-2014
 //
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
@@ -17,6 +17,7 @@
 #include <boost/intrusive/avltree.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/move/utility_core.hpp>
+#include <boost/static_assert.hpp>
 #include <iterator>
 
 namespace boost {

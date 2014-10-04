@@ -3000,7 +3000,9 @@ class hashtable_impl
             to_return.second = bucket_type::s_iterator_to
                (*node_traits::get_next(group_functions_t::get_last_in_group
                   (detail::dcast_bucket_ptr<node>(it.pointed_node()), optimize_multikey_t())));
-            cnt = std::distance(it, to_return.second);
+
+            cnt = 0;
+            for(; it != to_return.second; ++it){ ++cnt; }
             if(to_return.second !=  b.end()){
                bucket_number_second = bucket_number_first;
                return to_return;

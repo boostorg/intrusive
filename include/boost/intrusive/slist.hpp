@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
 //
 // (C) Copyright Olaf Krzikalla 2004-2006.
-// (C) Copyright Ion Gaztanaga  2006-2013
+// (C) Copyright Ion Gaztanaga  2006-2014
 //
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
@@ -25,8 +25,9 @@
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/intrusive/options.hpp>
 #include <boost/intrusive/detail/utilities.hpp>
+#include <boost/intrusive/detail/default_header_holder.hpp>
+#include <boost/intrusive/detail/uncast.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
-#include <iterator>
 #include <functional>
 #include <algorithm>
 #include <cstddef>   //std::size_t
@@ -900,7 +901,7 @@ class slist_impl
    //!   erased element.
    iterator erase_after(const_iterator before_f, const_iterator l, size_type n)
    {
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(std::distance(++const_iterator(before_f), l) == difference_type(n));
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(node_algorithms::distance((++const_iterator(before_f)).pointed_node(), l.pointed_node()) == n);
       if(safemode_or_autounlink){
          return this->erase_after(before_f, l);
       }
@@ -1234,7 +1235,7 @@ class slist_impl
    void splice_after(const_iterator prev_pos, slist_impl &x, const_iterator before_f, const_iterator before_l)
    {
       if(constant_time_size)
-         this->splice_after(prev_pos, x, before_f, before_l, std::distance(before_f, before_l));
+         this->splice_after(prev_pos, x, before_f, before_l, node_algorithms::distance(before_f.pointed_node(), before_l.pointed_node()));
       else
          this->priv_splice_after
             (prev_pos.pointed_node(), x, before_f.pointed_node(), before_l.pointed_node());
@@ -1256,7 +1257,7 @@ class slist_impl
    //!   list. Iterators of this list and all the references are not invalidated.
    void splice_after(const_iterator prev_pos, slist_impl &x, const_iterator before_f, const_iterator before_l, size_type n)
    {
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(std::distance(before_f, before_l) == difference_type(n));
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(node_algorithms::distance(before_f.pointed_node(), before_l.pointed_node()) == n);
       this->priv_splice_after
          (prev_pos.pointed_node(), x, before_f.pointed_node(), before_l.pointed_node());
       if(constant_time_size){
@@ -1799,7 +1800,7 @@ class slist_impl
    void incorporate_after(const_iterator prev_pos, const node_ptr & f, const node_ptr & before_l)
    {
       if(constant_time_size)
-         this->incorporate_after(prev_pos, f, before_l, std::distance(f, before_l)+1);
+         this->incorporate_after(prev_pos, f, before_l, node_algorithms::distance(f.pointed_node(), before_l.pointed_node())+1);
       else
          this->priv_incorporate_after(prev_pos.pointed_node(), f, before_l);
    }

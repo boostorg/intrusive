@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 //
-// (C) Copyright Ion Gaztanaga  2013-2013
+// (C) Copyright Ion Gaztanaga  2013-2014
 //
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
@@ -18,6 +18,7 @@
 #include <boost/intrusive/bstree.hpp>
 #include <iterator>
 #include <boost/move/utility_core.hpp>
+#include <boost/static_assert.hpp>
 
 namespace boost {
 namespace intrusive {

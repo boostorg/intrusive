@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
 //
 // (C) Copyright Olaf Krzikalla 2004-2006.
-// (C) Copyright Ion Gaztanaga  2006-2013
+// (C) Copyright Ion Gaztanaga  2006-2014
 //
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
@@ -16,7 +16,8 @@
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
-#include <boost/intrusive/detail/utilities.hpp>
+#include <boost/intrusive/detail/algo_type.hpp>
+#include <boost/core/no_exceptions_support.hpp>
 #include <cstddef>
 
 namespace boost {
@@ -399,6 +400,24 @@ class circular_list_algorithms
          last = NodeTraits::get_previous(last);
       }
       link_after(last, p);
+   }
+
+   //! <b>Requires</b>: f and l must be in a circular list.
+   //!
+   //! <b>Effects</b>: Returns the number of nodes in the range [f, l).
+   //!
+   //! <b>Complexity</b>: Linear
+   //!
+   //! <b>Throws</b>: Nothing.
+   static std::size_t distance(const const_node_ptr &f, const const_node_ptr &l)
+   {
+      const_node_ptr i(f);
+      std::size_t result = 0;
+      while(i != l){
+         i = NodeTraits::get_next(i);
+         ++result;
+      }
+      return result;
    }
 
    struct stable_partition_info

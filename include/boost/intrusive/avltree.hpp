@@ -14,7 +14,6 @@
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
-#include <algorithm>
 #include <cstddef>
 #include <functional>
 #include <iterator>

@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
 //
 // (C) Copyright Daniel K. O. 2005.
-// (C) Copyright Ion Gaztanaga 2007-2013
+// (C) Copyright Ion Gaztanaga 2007-2014
 //
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
@@ -20,10 +20,9 @@
 #include <cstddef>
 
 #include <boost/intrusive/detail/assert.hpp>
-#include <boost/intrusive/detail/utilities.hpp>
+#include <boost/intrusive/detail/algo_type.hpp>
+#include <boost/intrusive/detail/ebo_functor_holder.hpp>
 #include <boost/intrusive/bstree_algorithms.hpp>
-#include <boost/intrusive/pointer_traits.hpp>
-
 
 namespace boost {
 namespace intrusive {
@@ -81,7 +80,8 @@ struct avltree_node_checker
          (height_diff ==  0 && node_traits::get_balance(p) == node_traits::zero()) ||
          (height_diff ==  1 && node_traits::get_balance(p) == node_traits::positive())
       );
-      check_return.height = 1 + std::max(check_return_left.height, check_return_right.height);
+      check_return.height = 1 +
+         (check_return_left.height > check_return_right.height ? check_return_left.height : check_return_right.height);
       base_checker_t::operator()(p, check_return_left, check_return_right, check_return);
    }
 };

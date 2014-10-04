@@ -6,7 +6,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 //
-// (C) Copyright Ion Gaztanaga 2011-2013. Distributed under the Boost
+// (C) Copyright Ion Gaztanaga 2011-2014. Distributed under the Boost
 // Software License, Version 1.0. (See accompanying file
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
@@ -25,6 +25,11 @@
 #include <boost/intrusive/detail/workaround.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/preprocessor.hpp>
+#include <boost/preprocessor/iteration/iterate.hpp>
+
+#if defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
+#  include <boost/preprocessor/iteration/local.hpp>
+#endif
 
 namespace boost {
 namespace intrusive {
@@ -57,46 +62,46 @@ struct LowPriorityConversion
 };
 
 // Infrastructure for providing a default type for T::TNAME if absent.
-#define BOOST_INTRUSIVE_INSTANTIATE_DEFAULT_TYPE_TMPLT(TNAME)              \
-   template <typename T, typename DefaultType>                             \
-   struct boost_intrusive_default_type_ ## TNAME                           \
-   {                                                                       \
-      template <typename X>                                                \
-      static char test(int, typename X::TNAME*);                           \
-                                                                           \
-      template <typename X>                                                \
-      static int test(...);                                                \
-                                                                           \
-      struct DefaultWrap { typedef DefaultType TNAME; };                   \
-                                                                           \
-      static const bool value = (1 == sizeof(test<T>(0, 0)));              \
-                                                                           \
-      typedef typename                                                     \
-         ::boost::intrusive::detail::if_c                                  \
-            <value, T, DefaultWrap>::type::TNAME type;                     \
-   };                                                                      \
-                                                                           \
-   template <typename T, typename DefaultType>                             \
-   struct boost_intrusive_eval_default_type_ ## TNAME                      \
-   {                                                                       \
-      template <typename X>                                                \
-      static char test(int, typename X::TNAME*);                           \
-                                                                           \
-      template <typename X>                                                \
-      static int test(...);                                                \
-                                                                           \
-      struct DefaultWrap                                                   \
-      { typedef typename DefaultType::type TNAME; };                       \
-                                                                           \
-      static const bool value = (1 == sizeof(test<T>(0, 0)));              \
-                                                                           \
-      typedef typename                                                     \
-         ::boost::intrusive::detail::eval_if_c                             \
-            < value                                                        \
-            , ::boost::intrusive::detail::identity<T>                      \
-            , ::boost::intrusive::detail::identity<DefaultWrap>            \
-            >::type::TNAME type;                                           \
-   };                                                                      \
+#define BOOST_INTRUSIVE_INSTANTIATE_DEFAULT_TYPE_TMPLT(TNAME)     \
+   template <typename T, typename DefaultType>                    \
+   struct boost_intrusive_default_type_ ## TNAME                  \
+   {                                                              \
+      template <typename X>                                       \
+      static char test(int, typename X::TNAME*);                  \
+                                                                  \
+      template <typename X>                                       \
+      static int test(...);                                       \
+                                                                  \
+      struct DefaultWrap { typedef DefaultType TNAME; };          \
+                                                                  \
+      static const bool value = (1 == sizeof(test<T>(0, 0)));     \
+                                                                  \
+      typedef typename                                            \
+         ::boost::intrusive::detail::if_c                         \
+            <value, T, DefaultWrap>::type::TNAME type;            \
+   };                                                             \
+                                                                  \
+   template <typename T, typename DefaultType>                    \
+   struct boost_intrusive_eval_default_type_ ## TNAME             \
+   {                                                              \
+      template <typename X>                                       \
+      static char test(int, typename X::TNAME*);                  \
+                                                                  \
+      template <typename X>                                       \
+      static int test(...);                                       \
+                                                                  \
+      struct DefaultWrap                                          \
+      { typedef typename DefaultType::type TNAME; };              \
+                                                                  \
+      static const bool value = (1 == sizeof(test<T>(0, 0)));     \
+                                                                  \
+      typedef typename                                            \
+         ::boost::intrusive::detail::eval_if_c                    \
+            < value                                               \
+            , ::boost::intrusive::detail::identity<T>             \
+            , ::boost::intrusive::detail::identity<DefaultWrap>   \
+            >::type::TNAME type;                                  \
+   };                                                           \
 //
 
 #define BOOST_INTRUSIVE_OBTAIN_TYPE_WITH_DEFAULT(INSTANTIATION_NS_PREFIX, T, TNAME, TIMPL)   \

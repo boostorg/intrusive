@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 //
-// (C) Copyright Ion Gaztanaga  2013-2013
+// (C) Copyright Ion Gaztanaga  2013-2014
 //
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <functional>
-#include <iterator>
 #include <utility>
 
 #include <boost/intrusive/detail/assert.hpp>
@@ -30,6 +29,8 @@
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/detail/function_detector.hpp>
 #include <boost/intrusive/detail/utilities.hpp>
+#include <boost/intrusive/detail/default_header_holder.hpp>
+#include <boost/intrusive/detail/reverse_iterator.hpp>
 #include <boost/intrusive/options.hpp>
 #include <boost/intrusive/bstree_algorithms.hpp>
 #include <boost/intrusive/link_mode.hpp>
@@ -1456,7 +1457,9 @@ class bstree_impl
    size_type count(const KeyType &key, KeyValueCompare comp) const
    {
       std::pair<const_iterator, const_iterator> ret = this->equal_range(key, comp);
-      return size_type(std::distance(ret.first, ret.second));
+      size_type n = 0;
+      for(; ret.first != ret.second; ++ret.first){ ++n; }
+      return n;
    }
 
    #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
@@ -1470,7 +1473,9 @@ class bstree_impl
    size_type count(const KeyType &key, KeyValueCompare comp)
    {
       std::pair<const_iterator, const_iterator> ret = this->equal_range(key, comp);
-      return size_type(std::distance(ret.first, ret.second));
+      size_type n = 0;
+      for(; ret.first != ret.second; ++ret.first){ ++n; }
+      return n;
    }
 
    #else //defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)

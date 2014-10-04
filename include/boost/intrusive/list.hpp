@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
 //
 // (C) Copyright Olaf Krzikalla 2004-2006.
-// (C) Copyright Ion Gaztanaga  2006-2013
+// (C) Copyright Ion Gaztanaga  2006-2014
 //
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
@@ -26,7 +26,9 @@
 #include <boost/intrusive/options.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/detail/utilities.hpp>
-#include <iterator>
+#include <boost/intrusive/detail/default_header_holder.hpp>
+#include <boost/intrusive/detail/reverse_iterator.hpp>
+#include <boost/intrusive/detail/uncast.hpp>
 #include <algorithm>
 #include <functional>
 #include <cstddef>
@@ -597,9 +599,9 @@ class list_impl
    //!
    //! <b>Note</b>: Invalidates the iterators (but not the references) to the
    //!   erased elements.
-   iterator erase(const_iterator b, const_iterator e, difference_type n)
+   iterator erase(const_iterator b, const_iterator e, size_type n)
    {
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(std::distance(b, e) == difference_type(n));
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(node_algorithms::distance(b.pointed_node(), e.pointed_node()) == n);
       if(safemode_or_autounlink || constant_time_size){
          return this->erase_and_dispose(b, e, detail::null_disposer());
       }
@@ -891,7 +893,7 @@ class list_impl
    void splice(const_iterator p, list_impl&x, const_iterator f, const_iterator e)
    {
       if(constant_time_size)
-         this->splice(p, x, f, e, std::distance(f, e));
+         this->splice(p, x, f, e, node_algorithms::distance(f.pointed_node(), e.pointed_node()));
       else
          this->splice(p, x, f, e, 1);//distance is a dummy value
    }
@@ -909,11 +911,11 @@ class list_impl
    //!
    //! <b>Note</b>: Iterators of values obtained from list x now point to elements of this
    //!   list. Iterators of this list and all the references are not invalidated.
-   void splice(const_iterator p, list_impl&x, const_iterator f, const_iterator e, difference_type n)
+   void splice(const_iterator p, list_impl&x, const_iterator f, const_iterator e, size_type n)
    {
       if(n){
          if(constant_time_size){
-            BOOST_INTRUSIVE_INVARIANT_ASSERT(n == std::distance(f, e));
+            BOOST_INTRUSIVE_INVARIANT_ASSERT(n == node_algorithms::distance(f.pointed_node(), e.pointed_node()));
             node_algorithms::transfer(p.pointed_node(), f.pointed_node(), e.pointed_node());
             size_traits &thist = this->priv_size_traits();
             size_traits &xt = x.priv_size_traits();

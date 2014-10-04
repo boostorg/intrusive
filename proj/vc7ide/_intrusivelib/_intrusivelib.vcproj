@@ -227,6 +227,9 @@
 				Name="detail"
 				Filter="">
 				<File
+					RelativePath="..\..\..\..\..\boost\intrusive\detail\algo_type.hpp">
+				</File>
+				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\any_node_and_algorithms.hpp">
 				</File>
 				<File
@@ -240,6 +243,9 @@
 				</File>
 				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\config_end.hpp">
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\boost\intrusive\detail\default_header_holder.hpp">
 				</File>
 				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\ebo_functor_holder.hpp">
@@ -266,6 +272,9 @@
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\list_node.hpp">
 				</File>
 				<File
+					RelativePath="..\..\..\..\..\boost\intrusive\detail\math.hpp">
+				</File>
+				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\memory_util.hpp">
 				</File>
 				<File
@@ -284,10 +293,16 @@
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\slist_node.hpp">
 				</File>
 				<File
+					RelativePath="..\..\..\..\..\boost\intrusive\detail\to_raw_pointer.hpp">
+				</File>
+				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\transform_iterator.hpp">
 				</File>
 				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\tree_node.hpp">
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\boost\intrusive\detail\uncast.hpp">
 				</File>
 				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\utilities.hpp">
