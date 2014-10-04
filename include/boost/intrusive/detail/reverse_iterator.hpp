@@ -88,16 +88,16 @@ class reverse_iterator
    {  return l.m_current != r.m_current;  }
 
    friend bool operator<(const reverse_iterator& l, const reverse_iterator& r)
-   {  return l.m_current < r.m_current;  }
-
-   friend bool operator<=(const reverse_iterator& l, const reverse_iterator& r)
-   {  return l.m_current <= r.m_current;  }
-
-   friend bool operator>(const reverse_iterator& l, const reverse_iterator& r)
    {  return l.m_current > r.m_current;  }
 
-   friend bool operator>=(const reverse_iterator& l, const reverse_iterator& r)
+   friend bool operator<=(const reverse_iterator& l, const reverse_iterator& r)
    {  return l.m_current >= r.m_current;  }
+
+   friend bool operator>(const reverse_iterator& l, const reverse_iterator& r)
+   {  return l.m_current < r.m_current;  }
+
+   friend bool operator>=(const reverse_iterator& l, const reverse_iterator& r)
+   {  return l.m_current <= r.m_current;  }
 
    reverse_iterator& operator+=(difference_type off)
    {  m_current -= off; return *this;  }
