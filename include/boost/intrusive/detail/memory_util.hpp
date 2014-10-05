@@ -27,10 +27,6 @@
 #include <boost/intrusive/detail/preprocessor.hpp>
 #include <boost/preprocessor/iteration/iterate.hpp>
 
-#if defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
-#  include <boost/preprocessor/iteration/local.hpp>
-#endif
-
 namespace boost {
 namespace intrusive {
 namespace detail {
@@ -101,7 +97,7 @@ struct LowPriorityConversion
             , ::boost::intrusive::detail::identity<T>             \
             , ::boost::intrusive::detail::identity<DefaultWrap>   \
             >::type::TNAME type;                                  \
-   };                                                           \
+   };                                                             \
 //
 
 #define BOOST_INTRUSIVE_OBTAIN_TYPE_WITH_DEFAULT(INSTANTIATION_NS_PREFIX, T, TNAME, TIMPL)   \
@@ -168,19 +164,93 @@ template <typename T> struct first_param
 
 #else //C++03 compilers
 
-   #define BOOST_PP_LOCAL_MACRO(n)                                                  \
-   template < template <typename                                                    \
-               BOOST_PP_ENUM_TRAILING(n, BOOST_INTRUSIVE_PP_IDENTITY, typename) >   \
-            class TemplateClass                                                     \
-            , typename T BOOST_PP_ENUM_TRAILING_PARAMS(n, class P)>                 \
-   struct first_param                                                               \
-      < TemplateClass<T BOOST_PP_ENUM_TRAILING_PARAMS(n, P)> >                      \
-   {                                                                                \
-      typedef T type;                                                               \
-   };                                                                               \
-   //
-   #define BOOST_PP_LOCAL_LIMITS (0, BOOST_INTRUSIVE_MAX_CONSTRUCTOR_PARAMETERS)
-   #include BOOST_PP_LOCAL_ITERATE()
+   template < template  //0arg
+               <class
+               > class TemplateClass, class T
+            >
+   struct first_param
+      < TemplateClass<T> >
+   {  typedef T type;   };
+
+   template < template  //1arg
+               <class,class
+               > class TemplateClass, class T
+            , class P0>
+   struct first_param
+      < TemplateClass<T, P0> >
+   {  typedef T type;   };
+
+   template < template  //2arg
+               <class,class,class
+               > class TemplateClass, class T
+            , class P0, class P1>
+   struct first_param
+      < TemplateClass<T, P0, P1> >
+   {  typedef T type;   };
+
+   template < template  //3arg
+               <class,class,class,class
+               > class TemplateClass, class T
+            , class P0, class P1, class P2>
+   struct first_param
+      < TemplateClass<T, P0, P1, P2> >
+   {  typedef T type;   };
+
+   template < template  //4arg
+               <class,class,class,class,class
+               > class TemplateClass, class T
+            , class P0, class P1, class P2, class P3>
+   struct first_param
+      < TemplateClass<T, P0, P1, P2, P3> >
+   {  typedef T type;   };
+
+   template < template  //5arg
+               <class,class,class,class,class,class
+               > class TemplateClass, class T
+            , class P0, class P1, class P2, class P3, class P4>
+   struct first_param
+      < TemplateClass<T, P0, P1, P2, P3, P4> >
+   {  typedef T type;   };
+
+   template < template  //6arg
+               <class,class,class,class,class,class,class
+               > class TemplateClass, class T
+            , class P0, class P1, class P2, class P3, class P4, class P5>
+   struct first_param
+      < TemplateClass<T, P0, P1, P2, P3, P4, P5> >
+   {  typedef T type;   };
+
+   template < template  //7arg
+               <class,class,class,class,class,class,class,class
+               > class TemplateClass, class T
+            , class P0, class P1, class P2, class P3, class P4, class P5, class P6>
+   struct first_param
+      < TemplateClass<T, P0, P1, P2, P3, P4, P5, P6> >
+   {  typedef T type;   };
+
+   template < template  //8arg
+               <class,class,class,class,class,class,class,class,class
+               > class TemplateClass, class T
+            , class P0, class P1, class P2, class P3, class P4, class P5, class P6, class P7>
+   struct first_param
+      < TemplateClass<T, P0, P1, P2, P3, P4, P5, P6, P7> >
+   {  typedef T type;   };
+
+   template < template  //9arg
+               <class,class,class,class,class,class,class,class,class,class
+               > class TemplateClass, class T
+            , class P0, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8>
+   struct first_param
+      < TemplateClass<T, P0, P1, P2, P3, P4, P5, P6, P7, P8> >
+   {  typedef T type;   };
+
+   template < template  //10arg
+               <class,class,class,class,class,class,class,class,class,class,class
+               > class TemplateClass, class T
+            , class P0, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8, class P9>
+   struct first_param
+      < TemplateClass<T, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9> >
+   {  typedef T type;   };
 
 #endif   //!defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
 
@@ -263,20 +333,71 @@ struct type_rebinder<Ptr<T>, U, 0u >
 
 #else //C++03 compilers
 
-#define BOOST_PP_LOCAL_MACRO(n)                                                  \
-template < template <typename                                                    \
-            BOOST_PP_ENUM_TRAILING(n, BOOST_INTRUSIVE_PP_IDENTITY, typename) >   \
-           class Ptr                                                             \
-         , typename T BOOST_PP_ENUM_TRAILING_PARAMS(n, class P)                  \
-         , class U>                                                              \
-struct type_rebinder                                                             \
-   < Ptr<T BOOST_PP_ENUM_TRAILING_PARAMS(n, P)>, U, 0u >                         \
-{                                                                                \
-   typedef Ptr<U BOOST_PP_ENUM_TRAILING_PARAMS(n, P)> type;                      \
-};                                                                               \
-//
-#define BOOST_PP_LOCAL_LIMITS (0, BOOST_INTRUSIVE_MAX_CONSTRUCTOR_PARAMETERS)
-#include BOOST_PP_LOCAL_ITERATE()
+template <template <class> class Ptr  //0arg
+         , typename T
+         , class U>
+struct type_rebinder<Ptr<T>, U, 0u>
+{  typedef Ptr<U> type;   };
+
+template <template <class, class> class Ptr  //1arg
+         , typename T, class P0
+         , class U>
+struct type_rebinder<Ptr<T, P0>, U, 0u>
+{  typedef Ptr<U, P0> type;   };
+
+template <template <class, class, class> class Ptr  //2arg
+         , typename T, class P0, class P1
+         , class U>
+struct type_rebinder<Ptr<T, P0, P1>, U, 0u>
+{  typedef Ptr<U, P0, P1> type;   };
+
+template <template <class, class, class, class> class Ptr  //3arg
+         , typename T, class P0, class P1, class P2
+         , class U>
+struct type_rebinder<Ptr<T, P0, P1, P2>, U, 0u>
+{  typedef Ptr<U, P0, P1, P2> type;   };
+
+template <template <class, class, class, class, class> class Ptr  //4arg
+         , typename T, class P0, class P1, class P2, class P3
+         , class U>
+struct type_rebinder<Ptr<T, P0, P1, P2, P3>, U, 0u>
+{  typedef Ptr<U, P0, P1, P2, P3> type;   };
+
+template <template <class, class, class, class, class, class> class Ptr  //5arg
+         , typename T, class P0, class P1, class P2, class P3, class P4
+         , class U>
+struct type_rebinder<Ptr<T, P0, P1, P2, P3, P4>, U, 0u>
+{  typedef Ptr<U, P0, P1, P2, P3, P4> type;   };
+
+template <template <class, class, class, class, class, class, class> class Ptr  //6arg
+         , typename T, class P0, class P1, class P2, class P3, class P4, class P5
+         , class U>
+struct type_rebinder<Ptr<T, P0, P1, P2, P3, P4, P5>, U, 0u>
+{  typedef Ptr<U, P0, P1, P2, P3, P4, P5> type;   };
+
+template <template <class, class, class, class, class, class, class, class> class Ptr  //7arg
+         , typename T, class P0, class P1, class P2, class P3, class P4, class P5, class P6
+         , class U>
+struct type_rebinder<Ptr<T, P0, P1, P2, P3, P4, P5, P6>, U, 0u>
+{  typedef Ptr<U, P0, P1, P2, P3, P4, P5, P6> type;   };
+
+template <template <class, class, class, class, class, class, class, class, class> class Ptr  //8arg
+         , typename T, class P0, class P1, class P2, class P3, class P4, class P5, class P6, class P7
+         , class U>
+struct type_rebinder<Ptr<T, P0, P1, P2, P3, P4, P5, P6, P7>, U, 0u>
+{  typedef Ptr<U, P0, P1, P2, P3, P4, P5, P6, P7> type;   };
+
+template <template <class, class, class, class, class, class, class, class, class, class> class Ptr  //9arg
+         , typename T, class P0, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8
+         , class U>
+struct type_rebinder<Ptr<T, P0, P1, P2, P3, P4, P5, P6, P7, P8>, U, 0u>
+{  typedef Ptr<U, P0, P1, P2, P3, P4, P5, P6, P7, P8> type;   };
+
+template <template <class, class, class, class, class, class, class, class, class, class, class> class Ptr  //10arg
+         , typename T, class P0, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8, class P9
+         , class U>
+struct type_rebinder<Ptr<T, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9>, U, 0u>
+{  typedef Ptr<U, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9> type;   };
 
 #endif   //!defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
 
