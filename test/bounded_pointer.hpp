@@ -211,7 +211,7 @@ class bounded_allocator
    pointer allocate(size_t n)
    {
       assert(inited());
-      assert(n == 1);
+      assert(n == 1);(void)n;
       pointer p;
       unsigned char i;
       for (i = 0; i < max_offset && m_in_use[i]; ++i);
@@ -224,7 +224,7 @@ class bounded_allocator
    void deallocate(pointer p, size_t n)
    {
       assert(inited());
-      assert(n == 1);
+      assert(n == 1);(void)n;
       assert(m_in_use[p.m_offset]);
       m_in_use[p.m_offset] = false;
    }

@@ -74,7 +74,7 @@ struct avltree_node_checker
                      const return_type& check_return_left, const return_type& check_return_right,
                      return_type& check_return)
    {
-      int height_diff = check_return_right.height - check_return_left.height;
+      const int height_diff = check_return_right.height - check_return_left.height; (void)height_diff;
       BOOST_INTRUSIVE_INVARIANT_ASSERT(
          (height_diff == -1 && node_traits::get_balance(p) == node_traits::negative()) ||
          (height_diff ==  0 && node_traits::get_balance(p) == node_traits::zero()) ||
