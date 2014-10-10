@@ -15,21 +15,7 @@
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
-
-
-
-#include <boost/intrusive/detail/mpl.hpp>
-#include <boost/intrusive/detail/assert.hpp>
-#include <boost/intrusive/detail/is_stateful_value_traits.hpp>
-#include <boost/intrusive/detail/memory_util.hpp>
-#include <boost/intrusive/detail/algo_type.hpp>
-#include <cstddef>
-#include <climits>
-#include <iterator>
-#include <boost/static_assert.hpp>
-#include <boost/core/no_exceptions_support.hpp>
-#include <iterator>
-#include <functional>
+#include <boost/intrusive/detail/to_raw_pointer.hpp>
 
 namespace boost {
 namespace intrusive {

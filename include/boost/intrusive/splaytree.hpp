@@ -16,7 +16,6 @@
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <cstddef>
 #include <functional>
-#include <iterator>
 #include <utility>
 
 #include <boost/intrusive/detail/assert.hpp>

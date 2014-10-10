@@ -18,7 +18,6 @@
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/move/utility_core.hpp>
 #include <boost/static_assert.hpp>
-#include <iterator>
 
 namespace boost {
 namespace intrusive {

@@ -26,7 +26,6 @@
 #include <boost/intrusive/detail/tree_node.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
-#include <boost/intrusive/detail/function_detector.hpp>
 #include <boost/intrusive/detail/utilities.hpp>
 #include <boost/intrusive/options.hpp>
 #include <boost/intrusive/rbtree_algorithms.hpp>

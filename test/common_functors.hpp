@@ -28,7 +28,7 @@ class delete_disposer
    template <class Pointer>
       void operator()(Pointer p)
    {
-      typedef typename std::iterator_traits<Pointer>::value_type value_type;
+      typedef typename boost::intrusive::iterator_traits<Pointer>::value_type value_type;
       BOOST_STATIC_ASSERT(( detail::is_same<T, value_type>::value ));
       delete boost::intrusive::detail::to_raw_pointer(p);
    }

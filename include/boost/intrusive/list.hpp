@@ -24,10 +24,12 @@
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/intrusive/options.hpp>
+#include <boost/intrusive/detail/is_stateful_value_traits.hpp>
 #include <boost/intrusive/detail/utilities.hpp>
 #include <boost/intrusive/detail/default_header_holder.hpp>
 #include <boost/intrusive/detail/reverse_iterator.hpp>
 #include <boost/intrusive/detail/uncast.hpp>
+#include <boost/intrusive/detail/list_iterator.hpp>
 #include <algorithm>
 #include <functional>
 #include <cstddef>

@@ -14,7 +14,7 @@
 #define BOOST_INTRUSIVE_DETAIL_TO_RAW_POINTER_HPP
 
 #include <boost/intrusive/detail/config_begin.hpp>
-#include <boost/intrusive/pointer_traits.hpp>
+#include <boost/intrusive/detail/pointer_element.hpp>
 
 namespace boost {
 namespace intrusive {
@@ -25,7 +25,7 @@ inline T* to_raw_pointer(T* p)
 {  return p; }
 
 template <class Pointer>
-inline typename boost::intrusive::pointer_traits<Pointer>::element_type*
+inline typename boost::intrusive::pointer_element<Pointer>::type*
 to_raw_pointer(const Pointer &p)
 {  return boost::intrusive::detail::to_raw_pointer(p.operator->());  }
 

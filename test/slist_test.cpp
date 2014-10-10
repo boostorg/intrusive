@@ -31,12 +31,12 @@ struct my_tag;
 template<class VoidPointer>
 struct hooks
 {
-   typedef slist_base_hook<void_pointer<VoidPointer> >                base_hook_type;
+   typedef slist_base_hook<void_pointer<VoidPointer> >                  base_hook_type;
    typedef slist_base_hook< link_mode<auto_unlink>
-                         , void_pointer<VoidPointer>, tag<my_tag> >  auto_base_hook_type;
-   typedef slist_member_hook<void_pointer<VoidPointer>, tag<my_tag> > member_hook_type;
+                         , void_pointer<VoidPointer>, tag<my_tag> >     auto_base_hook_type;
+   typedef slist_member_hook<void_pointer<VoidPointer>, tag<my_tag> >   member_hook_type;
    typedef slist_member_hook< link_mode<auto_unlink>
-                           , void_pointer<VoidPointer> >             auto_member_hook_type;
+                           , void_pointer<VoidPointer> >                auto_member_hook_type;
    typedef nonhook_node_member< slist_node_traits< VoidPointer >,
                                 circular_slist_algorithms
                               > nonhook_node_member_type;
@@ -783,9 +783,6 @@ int main(int, char* [])
    test_main_template<boost::intrusive::smart_ptr<void>, false, true>()();
    test_main_template<void*, true, true>()();
    test_main_template<boost::intrusive::smart_ptr<void>, true, true>()();
-   // test (plain pointers) x (nonconst/const size) x (standard node allocator)
-   test_main_template<void*, false, false>()();
-   test_main_template<void*, true, false>()();
    // test (bounded pointers) x ((nonconst/const size) x (special node allocator)
    test_main_template_bptr< true >()();
    test_main_template_bptr< false >()();

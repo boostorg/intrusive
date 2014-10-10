@@ -14,7 +14,7 @@
 #define BOOST_INTRUSIVE_DETAIL_ITERATOR_HPP
 
 #include <boost/intrusive/detail/config_begin.hpp>
-#include <iterator>
+#include <boost/intrusive/detail/iiterator.hpp>
 
 namespace boost {
 namespace intrusive {
@@ -24,11 +24,11 @@ template<class It>
 class reverse_iterator
 {
    public:
-   typedef typename std::iterator_traits<It>::pointer             pointer;
-   typedef typename std::iterator_traits<It>::reference           reference;
-   typedef typename std::iterator_traits<It>::difference_type     difference_type;
-   typedef typename std::iterator_traits<It>::iterator_category   iterator_category;
-   typedef typename std::iterator_traits<It>::value_type          value_type;
+   typedef typename boost::intrusive::iterator_traits<It>::pointer             pointer;
+   typedef typename boost::intrusive::iterator_traits<It>::reference           reference;
+   typedef typename boost::intrusive::iterator_traits<It>::difference_type     difference_type;
+   typedef typename boost::intrusive::iterator_traits<It>::iterator_category   iterator_category;
+   typedef typename boost::intrusive::iterator_traits<It>::value_type          value_type;
 
 
    typedef It iterator_type;

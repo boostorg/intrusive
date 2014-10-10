@@ -167,6 +167,9 @@
 				RelativePath="..\..\..\..\..\boost\intrusive\pointer_plus_bits.hpp">
 			</File>
 			<File
+				RelativePath="..\..\..\..\..\boost\intrusive\pointer_rebind.hpp">
+			</File>
+			<File
 				RelativePath="..\..\..\..\..\boost\intrusive\pointer_traits.hpp">
 			</File>
 			<File
@@ -263,10 +266,13 @@
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\hashtable_node.hpp">
 				</File>
 				<File
+					RelativePath="..\..\..\..\..\boost\intrusive\detail\iiterator.hpp">
+				</File>
+				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\is_stateful_value_traits.hpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\boost\intrusive\detail\iterator.hpp">
+					RelativePath="..\..\..\..\..\boost\intrusive\detail\list_iterator.hpp">
 				</File>
 				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\list_node.hpp">
@@ -284,19 +290,31 @@
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\parent_from_member.hpp">
 				</File>
 				<File
+					RelativePath="..\..\..\..\..\boost\intrusive\detail\pointer_element.hpp">
+				</File>
+				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\preprocessor.hpp">
 				</File>
 				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\rbtree_node.hpp">
 				</File>
 				<File
+					RelativePath="..\..\..\..\..\boost\intrusive\detail\slist_iterator.hpp">
+				</File>
+				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\slist_node.hpp">
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\boost\intrusive\detail\std_fwd.hpp">
 				</File>
 				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\to_raw_pointer.hpp">
 				</File>
 				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\transform_iterator.hpp">
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\boost\intrusive\detail\tree_iterator.hpp">
 				</File>
 				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\tree_node.hpp">

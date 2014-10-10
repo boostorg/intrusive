@@ -15,7 +15,7 @@
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/detail/assert.hpp>
-#include <boost/intrusive/pointer_traits.hpp>
+#include <boost/intrusive/pointer_rebind.hpp>
 #include <cstddef>
 #include <boost/intrusive/detail/mpl.hpp>
 
@@ -25,8 +25,9 @@ namespace intrusive {
 template<class VoidPointer>
 struct any_node
 {
-   typedef typename pointer_traits
-      <VoidPointer>::template rebind_pointer<any_node>::type   node_ptr;
+   typedef any_node                                               node;
+   typedef typename pointer_rebind<VoidPointer, node>::type       node_ptr;
+   typedef typename pointer_rebind<VoidPointer, const node>::type const_node_ptr;
    node_ptr    node_ptr_1;
    node_ptr    node_ptr_2;
    node_ptr    node_ptr_3;
@@ -36,11 +37,9 @@ struct any_node
 template<class VoidPointer>
 struct any_list_node_traits
 {
-   typedef any_node<VoidPointer> node;
-   typedef typename pointer_traits
-      <VoidPointer>::template rebind_pointer<node>::type node_ptr;
-   typedef typename pointer_traits
-      <VoidPointer>::template rebind_pointer<const node>::type const_node_ptr;
+   typedef any_node<VoidPointer>          node;
+   typedef typename node::node_ptr        node_ptr;
+   typedef typename node::const_node_ptr  const_node_ptr;
 
    static const node_ptr &get_next(const const_node_ptr & n)
    {  return n->node_ptr_1;  }
@@ -59,11 +58,9 @@ struct any_list_node_traits
 template<class VoidPointer>
 struct any_slist_node_traits
 {
-   typedef any_node<VoidPointer> node;
-   typedef typename pointer_traits
-      <VoidPointer>::template rebind_pointer<node>::type         node_ptr;
-   typedef typename pointer_traits
-      <VoidPointer>::template rebind_pointer<const node>::type   const_node_ptr;
+   typedef any_node<VoidPointer>          node;
+   typedef typename node::node_ptr        node_ptr;
+   typedef typename node::const_node_ptr  const_node_ptr;
 
    static const node_ptr &get_next(const const_node_ptr & n)
    {  return n->node_ptr_1;  }
@@ -108,12 +105,9 @@ struct any_unordered_node_traits
 template<class VoidPointer>
 struct any_rbtree_node_traits
 {
-   typedef any_node<VoidPointer> node;
-
-   typedef typename pointer_traits
-      <VoidPointer>::template rebind_pointer<node>::type         node_ptr;
-   typedef typename pointer_traits
-      <VoidPointer>::template rebind_pointer<const node>::type   const_node_ptr;
+   typedef any_node<VoidPointer>          node;
+   typedef typename node::node_ptr        node_ptr;
+   typedef typename node::const_node_ptr  const_node_ptr;
 
    typedef std::size_t color;
 
@@ -152,12 +146,10 @@ struct any_rbtree_node_traits
 template<class VoidPointer>
 struct any_avltree_node_traits
 {
-   typedef any_node<VoidPointer> node;
+   typedef any_node<VoidPointer>          node;
+   typedef typename node::node_ptr        node_ptr;
+   typedef typename node::const_node_ptr  const_node_ptr;
 
-   typedef typename pointer_traits
-      <VoidPointer>::template rebind_pointer<node>::type         node_ptr;
-   typedef typename pointer_traits
-      <VoidPointer>::template rebind_pointer<const node>::type   const_node_ptr;
    typedef std::size_t balance;
 
    static const node_ptr &get_parent(const const_node_ptr & n)
@@ -198,12 +190,9 @@ struct any_avltree_node_traits
 template<class VoidPointer>
 struct any_tree_node_traits
 {
-   typedef any_node<VoidPointer> node;
-
-   typedef typename pointer_traits
-      <VoidPointer>::template rebind_pointer<node>::type         node_ptr;
-   typedef typename pointer_traits
-      <VoidPointer>::template rebind_pointer<const node>::type   const_node_ptr;
+   typedef any_node<VoidPointer>          node;
+   typedef typename node::node_ptr        node_ptr;
+   typedef typename node::const_node_ptr  const_node_ptr;
 
    static const node_ptr &get_parent(const const_node_ptr & n)
    {  return n->node_ptr_1;  }
@@ -229,10 +218,8 @@ class any_node_traits
 {
    public:
    typedef any_node<VoidPointer>          node;
-   typedef typename pointer_traits
-      <VoidPointer>::template rebind_pointer<node>::type         node_ptr;
-   typedef typename pointer_traits
-      <VoidPointer>::template rebind_pointer<const node>::type   const_node_ptr;
+   typedef typename node::node_ptr        node_ptr;
+   typedef typename node::const_node_ptr  const_node_ptr;
 };
 
 template<class VoidPointer>
@@ -243,12 +230,10 @@ class any_algorithms
    {}
 
    public:
-   typedef any_node<VoidPointer>             node;
-   typedef typename pointer_traits
-      <VoidPointer>::template rebind_pointer<node>::type         node_ptr;
-   typedef typename pointer_traits
-      <VoidPointer>::template rebind_pointer<const node>::type   const_node_ptr;
-   typedef any_node_traits<VoidPointer>      node_traits;
+   typedef any_node<VoidPointer>          node;
+   typedef typename node::node_ptr        node_ptr;
+   typedef typename node::const_node_ptr  const_node_ptr;
+   typedef any_node_traits<VoidPointer>   node_traits;
 
    //! <b>Requires</b>: node must not be part of any tree.
    //!

@@ -25,6 +25,8 @@
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/detail/workaround.hpp>
 #include <boost/intrusive/detail/memory_util.hpp>
+#include <boost/intrusive/pointer_rebind.hpp>
+#include <boost/intrusive/detail/pointer_element.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <cstddef>
 
@@ -78,11 +80,11 @@ struct pointer_traits
       //
       template <class U> struct rebind_pointer
       {
-         typedef typename boost::intrusive::detail::type_rebinder<Ptr, U>::type  type;
+         typedef typename boost::intrusive::pointer_rebind<Ptr, U>::type  type;
       };
 
       #if !defined(BOOST_NO_CXX11_TEMPLATE_ALIASES)
-         template <class U> using rebind = typename boost::intrusive::detail::type_rebinder<Ptr, U>::type;
+         template <class U> using rebind = typename boost::intrusive::pointer_rebind<Ptr, U>::type;
       #endif
    #endif   //#if !defined(BOOST_NO_CXX11_TEMPLATE_ALIASES)
 

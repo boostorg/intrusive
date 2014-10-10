@@ -14,20 +14,17 @@
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
-#include <algorithm>
-#include <cstddef>
-#include <functional>
-#include <utility>
 
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/bs_set_hook.hpp>
 #include <boost/intrusive/detail/tree_node.hpp>
+#include <boost/intrusive/detail/tree_iterator.hpp>
 #include <boost/intrusive/detail/ebo_functor_holder.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
-#include <boost/intrusive/detail/function_detector.hpp>
+#include <boost/intrusive/detail/is_stateful_value_traits.hpp>
 #include <boost/intrusive/detail/utilities.hpp>
 #include <boost/intrusive/detail/default_header_holder.hpp>
 #include <boost/intrusive/detail/reverse_iterator.hpp>
@@ -36,6 +33,12 @@
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/intrusive/parent_from_member.hpp>
 #include <boost/move/utility_core.hpp>
+
+#include <utility>   //pair,lexicographical_compare
+#include <algorithm> //swap
+#include <cstddef>   //size_t...
+#include <functional>//less, equal_to
+
 
 namespace boost {
 namespace intrusive {

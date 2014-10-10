@@ -18,7 +18,6 @@
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/intrusive/detail/uncast.hpp>
-#include <boost/intrusive/detail/utilities.hpp>
 #include <boost/intrusive/detail/math.hpp>
 #include <boost/intrusive/detail/algo_type.hpp>
 #include <utility>

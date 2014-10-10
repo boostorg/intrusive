@@ -8,8 +8,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 
-#include <boost/intrusive/detail/config_begin.hpp>
-#include <boost/intrusive/detail/workaround.hpp>
 //Just for BOOST_INTRUSIVE_DETAIL_HAS_MEMBER_FUNCTION_CALLABLE_WITH_0_ARGS_UNSUPPORTED
 #include <boost/intrusive/detail/has_member_function_callable_with.hpp>
 #include <cstddef>
@@ -23,6 +21,12 @@ namespace has_member_function_callable_with {
 struct dont_care
 {
    dont_care(...);
+};
+
+template<class T>
+struct make_dontcare
+{
+   typedef has_member_function_callable_with::dont_care type;
 };
 
 struct private_type
@@ -163,21 +167,17 @@ class has_member_function_named_func
    namespace intrusive{
    namespace intrusive_detail{
 
-
-   template<typename Fun>
-   struct funwrap1_func : Fun
-   {
-      using Fun::func;
-      has_member_function_callable_with::private_type
-         func( has_member_function_callable_with::dont_care) const;
-   };
-
    template<typename Fun , class P0>
    struct has_member_function_callable_with_func_impl
       <Fun, true , P0 , void , void>
    {
 
-      typedef funwrap1_func<Fun> FunWrap;
+      struct FunWrap : Fun
+      {
+         using Fun::func;
+         has_member_function_callable_with::private_type
+            func( has_member_function_callable_with::dont_care) const;
+      };
 
       static bool const value = (sizeof(has_member_function_callable_with::no_type) ==
                                  sizeof(has_member_function_callable_with::is_private_type
@@ -192,20 +192,16 @@ class has_member_function_named_func
    namespace intrusive{
    namespace intrusive_detail{
 
-
-   template<typename Fun>
-   struct funwrap2_func: Fun
-   {
-      using Fun::func;
-      has_member_function_callable_with::private_type
-         func( has_member_function_callable_with::dont_care , has_member_function_callable_with::dont_care)  const;
-   };
-
    template<typename Fun , class P0 , class P1>
    struct has_member_function_callable_with_func_impl
       <Fun, true , P0 , P1 , void>
    {
-      typedef funwrap2_func<Fun> FunWrap;
+      struct FunWrap: Fun
+      {
+         using Fun::func;
+         has_member_function_callable_with::private_type
+            func( has_member_function_callable_with::dont_care , has_member_function_callable_with::dont_care)  const;
+      };
 
       static bool const value = (sizeof(has_member_function_callable_with::no_type) ==
                                  sizeof(has_member_function_callable_with::is_private_type
@@ -222,22 +218,18 @@ class has_member_function_named_func
    namespace intrusive{
    namespace intrusive_detail{
 
-
-   template<typename Fun>
-   struct funwrap3_func: Fun
-   {
-      using Fun::func;
-      has_member_function_callable_with::private_type
-         func( has_member_function_callable_with::dont_care
-            , has_member_function_callable_with::dont_care
-            , has_member_function_callable_with::dont_care)  const;
-   };
-
    template<typename Fun , class P0 , class P1 , class P2>
    struct has_member_function_callable_with_func_impl
       <Fun, true , P0 , P1 , P2 >
    {
-      typedef funwrap3_func<Fun> FunWrap;
+      struct FunWrap: Fun
+      {
+         using Fun::func;
+         has_member_function_callable_with::private_type
+            func( has_member_function_callable_with::dont_care
+               , has_member_function_callable_with::dont_care
+               , has_member_function_callable_with::dont_care)  const;
+      };
 
       static bool const value = (sizeof(has_member_function_callable_with::no_type) ==
                                  sizeof(has_member_function_callable_with::is_private_type
@@ -328,26 +320,19 @@ class has_member_function_named_func
    namespace intrusive{
    namespace intrusive_detail{
 
-
-   template<typename Fun, class ...DontCares>
-   struct funwrap_func : Fun
-   {
-      using Fun::func;
-      has_member_function_callable_with::private_type
-         func(DontCares...) const;
-   };
-
    template<typename Fun, class ...Args>
    struct has_member_function_callable_with_func_impl
       <Fun, true , Args...>
    {
-      template<class T>
-      struct make_dontcare
+      template<class ...DontCares>
+      struct FunWrapTmpl : Fun
       {
-         typedef has_member_function_callable_with::dont_care type;
+         using Fun::func;
+         has_member_function_callable_with::private_type
+            func(DontCares...) const;
       };
 
-      typedef funwrap_func<Fun, typename make_dontcare<Args>::type...> FunWrap;
+      typedef FunWrapTmpl<typename has_member_function_callable_with::make_dontcare<Args>::type...> FunWrap;
 
       static bool const value = (sizeof(has_member_function_callable_with::no_type) ==
                                  sizeof(has_member_function_callable_with::is_private_type
@@ -473,4 +458,3 @@ int main()
    return 0;
 
 }
-#include <boost/intrusive/detail/config_end.hpp>

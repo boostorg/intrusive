@@ -19,9 +19,6 @@
 #include <boost/static_assert.hpp>
 #include <boost/move/utility_core.hpp>
 
-#include <iterator>
-
-
 namespace boost {
 namespace intrusive {
 
