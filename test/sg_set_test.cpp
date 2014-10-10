@@ -271,7 +271,6 @@ struct Get_Preset_Container
     };
 };
 
-template < bool ConstantTimeSize >
 struct test_main_template_bptr
 {
     void operator () ()
@@ -282,8 +281,8 @@ struct test_main_template_bptr
 
         allocator_type::init();
         test::test_generic_set< value_traits,
-                                Get_Preset_Container< value_traits, ConstantTimeSize,
-                                                      bounded_pointer_holder< value_type > >::template GetContainer
+                                Get_Preset_Container< value_traits, true,
+                                                      bounded_pointer_holder< value_type > >::GetContainer
                               >::test_all();
         assert(allocator_type::is_clear());
         allocator_type::destroy();
@@ -298,8 +297,7 @@ int main()
    // test (plain pointers) x (const size) x (standard node allocator)
    test_main_template<void*, false>()();
    // test (bounded pointers) x (nonconst/const size) x (special node allocator)
-   test_main_template_bptr< true >()();
-   test_main_template_bptr< false >()();
+   test_main_template_bptr()();
 
    return boost::report_errors();
 }

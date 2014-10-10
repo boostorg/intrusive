@@ -8,7 +8,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 #include <boost/intrusive/detail/config_begin.hpp>
-#include <boost/type_traits/is_same.hpp>
+#include <boost/intrusive/detail/mpl.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 
@@ -120,13 +120,13 @@ int main()
    int dummy;
 
    //Raw pointer
-   BOOST_STATIC_ASSERT(( boost::is_same<boost::intrusive::pointer_traits
+   BOOST_STATIC_ASSERT(( boost::intrusive::detail::is_same<boost::intrusive::pointer_traits
                        <int*>::element_type, int>::value ));
-   BOOST_STATIC_ASSERT(( boost::is_same<boost::intrusive::pointer_traits
+   BOOST_STATIC_ASSERT(( boost::intrusive::detail::is_same<boost::intrusive::pointer_traits
                        <int*>::pointer, int*>::value ));
-   BOOST_STATIC_ASSERT(( boost::is_same<boost::intrusive::pointer_traits
+   BOOST_STATIC_ASSERT(( boost::intrusive::detail::is_same<boost::intrusive::pointer_traits
                        <int*>::difference_type, std::ptrdiff_t>::value ));
-   BOOST_STATIC_ASSERT(( boost::is_same<boost::intrusive::pointer_traits
+   BOOST_STATIC_ASSERT(( boost::intrusive::detail::is_same<boost::intrusive::pointer_traits
                        <int*>::rebind_pointer<double>::type
                        , double*>::value ));
    if(boost::intrusive::pointer_traits<int*>::pointer_to(dummy) != &dummy){
@@ -143,13 +143,13 @@ int main()
    }
 
    //Complete smart pointer
-   BOOST_STATIC_ASSERT(( boost::is_same<boost::intrusive::pointer_traits
+   BOOST_STATIC_ASSERT(( boost::intrusive::detail::is_same<boost::intrusive::pointer_traits
                        < CompleteSmartPtr<int> >::element_type, int>::value ));
-   BOOST_STATIC_ASSERT(( boost::is_same<boost::intrusive::pointer_traits
+   BOOST_STATIC_ASSERT(( boost::intrusive::detail::is_same<boost::intrusive::pointer_traits
                        < CompleteSmartPtr<int> >::pointer, CompleteSmartPtr<int> >::value ));
-   BOOST_STATIC_ASSERT(( boost::is_same<boost::intrusive::pointer_traits
+   BOOST_STATIC_ASSERT(( boost::intrusive::detail::is_same<boost::intrusive::pointer_traits
                        < CompleteSmartPtr<int> >::difference_type, char>::value ));
-   BOOST_STATIC_ASSERT(( boost::is_same<boost::intrusive::pointer_traits
+   BOOST_STATIC_ASSERT(( boost::intrusive::detail::is_same<boost::intrusive::pointer_traits
                        < CompleteSmartPtr<int> >::rebind_pointer<double>::type
                        , CompleteSmartPtr<double> >::value ));
    if(boost::intrusive::pointer_traits< CompleteSmartPtr<int> >
@@ -170,13 +170,13 @@ int main()
    }
 
    //Simple smart pointer
-   BOOST_STATIC_ASSERT(( boost::is_same<boost::intrusive::pointer_traits
+   BOOST_STATIC_ASSERT(( boost::intrusive::detail::is_same<boost::intrusive::pointer_traits
                        < SimpleSmartPtr<int> >::element_type, int>::value ));
-   BOOST_STATIC_ASSERT(( boost::is_same<boost::intrusive::pointer_traits
+   BOOST_STATIC_ASSERT(( boost::intrusive::detail::is_same<boost::intrusive::pointer_traits
                        < SimpleSmartPtr<int> >::pointer, SimpleSmartPtr<int> >::value ));
-   BOOST_STATIC_ASSERT(( boost::is_same<boost::intrusive::pointer_traits
+   BOOST_STATIC_ASSERT(( boost::intrusive::detail::is_same<boost::intrusive::pointer_traits
                        < SimpleSmartPtr<int> >::difference_type, std::ptrdiff_t>::value ));
-   BOOST_STATIC_ASSERT(( boost::is_same<boost::intrusive::pointer_traits
+   BOOST_STATIC_ASSERT(( boost::intrusive::detail::is_same<boost::intrusive::pointer_traits
                        < SimpleSmartPtr<int> >::rebind_pointer<double>::type
                        , SimpleSmartPtr<double> >::value ));
    if(boost::intrusive::pointer_traits< SimpleSmartPtr<int> >

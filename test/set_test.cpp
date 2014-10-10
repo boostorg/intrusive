@@ -242,9 +242,6 @@ int main()
    test_main_template<boost::intrusive::smart_ptr<void>, false, true>()();
    test_main_template<void*, true, true>()();
    test_main_template<boost::intrusive::smart_ptr<void>, true, true>()();
-   //test (plain pointers) x (nonconst/const size) x (standard node allocator)
-   test_main_template<void*, false, false>()();
-   test_main_template<void*, true, false>()();
    // test (bounded pointers) x (nonconst/const size) x (special node allocator)
    test_main_template_bptr< true >()();
    test_main_template_bptr< false >()();
