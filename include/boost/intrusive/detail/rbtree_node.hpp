@@ -19,7 +19,6 @@
 #include <boost/intrusive/rbtree_algorithms.hpp>
 #include <boost/intrusive/pointer_plus_bits.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
-#include <boost/intrusive/detail/utilities.hpp>
 #include <boost/intrusive/detail/tree_node.hpp>
 
 namespace boost {
@@ -176,7 +175,7 @@ struct rbtree_node_traits_dispatch<VoidPointer, true>
    :  public compact_rbtree_node_traits_impl<VoidPointer>
 {};
 
-//Inherit from the detail::link_dispatch depending on the embedding capabilities
+//Inherit from rbtree_node_traits_dispatch depending on the embedding capabilities
 template<class VoidPointer, bool OptimizeSize = false>
 struct rbtree_node_traits
    :  public rbtree_node_traits_dispatch

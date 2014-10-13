@@ -13,7 +13,6 @@
 #ifndef BOOST_INTRUSIVE_COMMON_SLIST_ALGORITHMS_HPP
 #define BOOST_INTRUSIVE_COMMON_SLIST_ALGORITHMS_HPP
 
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/intrusive/detail/algo_type.hpp>
@@ -187,7 +186,5 @@ struct get_algo<CommonSListAlgorithms, NodeTraits>
 
 } //namespace intrusive
 } //namespace boost
-
-#include <boost/intrusive/detail/config_end.hpp>
 
 #endif //BOOST_INTRUSIVE_COMMON_SLIST_ALGORITHMS_HPP

@@ -215,134 +215,16 @@ struct identity
    typedef T type;
 };
 
-#if defined(BOOST_MSVC) || defined(__BORLANDC_)
-#define BOOST_INTRUSIVE_TT_DECL __cdecl
-#else
-#define BOOST_INTRUSIVE_TT_DECL
-#endif
+template<class T, bool Add>
+struct add_const_if_c
+{
+   typedef typename if_c
+      < Add
+      , typename add_const<T>::type
+      , T
+      >::type type;
+};
 
-#if defined(_MSC_EXTENSIONS) && !defined(__BORLAND__) && !defined(_WIN64) && !defined(_M_ARM) && !defined(UNDER_CE)
-#define BOOST_INTRUSIVE_TT_TEST_MSC_FUNC_SIGS
-#endif
-
-template <typename T>
-struct is_unary_or_binary_function_impl
-{  static const bool value = false; };
-
-// see boost ticket #4094
-// avoid duplicate definitions of is_unary_or_binary_function_impl
-#ifndef BOOST_INTRUSIVE_TT_TEST_MSC_FUNC_SIGS
-
-template <typename R>
-struct is_unary_or_binary_function_impl<R (*)()>
-{  static const bool value = true;  };
-
-template <typename R>
-struct is_unary_or_binary_function_impl<R (*)(...)>
-{  static const bool value = true;  };
-
-#else // BOOST_INTRUSIVE_TT_TEST_MSC_FUNC_SIGS
-
-template <typename R>
-struct is_unary_or_binary_function_impl<R (__stdcall*)()>
-{  static const bool value = true;  };
-
-#ifndef _MANAGED
-
-template <typename R>
-struct is_unary_or_binary_function_impl<R (__fastcall*)()>
-{  static const bool value = true;  };
-
-#endif
-
-template <typename R>
-struct is_unary_or_binary_function_impl<R (__cdecl*)()>
-{  static const bool value = true;  };
-
-template <typename R>
-struct is_unary_or_binary_function_impl<R (__cdecl*)(...)>
-{  static const bool value = true;  };
-
-#endif
-
-// see boost ticket #4094
-// avoid duplicate definitions of is_unary_or_binary_function_impl
-#ifndef BOOST_INTRUSIVE_TT_TEST_MSC_FUNC_SIGS
-
-template <typename R, class T0>
-struct is_unary_or_binary_function_impl<R (*)(T0)>
-{  static const bool value = true;  };
-
-template <typename R, class T0>
-struct is_unary_or_binary_function_impl<R (*)(T0...)>
-{  static const bool value = true;  };
-
-#else // BOOST_INTRUSIVE_TT_TEST_MSC_FUNC_SIGS
-
-template <typename R, class T0>
-struct is_unary_or_binary_function_impl<R (__stdcall*)(T0)>
-{  static const bool value = true;  };
-
-#ifndef _MANAGED
-
-template <typename R, class T0>
-struct is_unary_or_binary_function_impl<R (__fastcall*)(T0)>
-{  static const bool value = true;  };
-
-#endif
-
-template <typename R, class T0>
-struct is_unary_or_binary_function_impl<R (__cdecl*)(T0)>
-{  static const bool value = true;  };
-
-template <typename R, class T0>
-struct is_unary_or_binary_function_impl<R (__cdecl*)(T0...)>
-{  static const bool value = true;  };
-
-#endif
-
-// see boost ticket #4094
-// avoid duplicate definitions of is_unary_or_binary_function_impl
-#ifndef BOOST_INTRUSIVE_TT_TEST_MSC_FUNC_SIGS
-
-template <typename R, class T0, class T1>
-struct is_unary_or_binary_function_impl<R (*)(T0, T1)>
-{  static const bool value = true;  };
-
-template <typename R, class T0, class T1>
-struct is_unary_or_binary_function_impl<R (*)(T0, T1...)>
-{  static const bool value = true;  };
-
-#else // BOOST_INTRUSIVE_TT_TEST_MSC_FUNC_SIGS
-
-template <typename R, class T0, class T1>
-struct is_unary_or_binary_function_impl<R (__stdcall*)(T0, T1)>
-{  static const bool value = true;  };
-
-#ifndef _MANAGED
-
-template <typename R, class T0, class T1>
-struct is_unary_or_binary_function_impl<R (__fastcall*)(T0, T1)>
-{  static const bool value = true;  };
-
-#endif
-
-template <typename R, class T0, class T1>
-struct is_unary_or_binary_function_impl<R (__cdecl*)(T0, T1)>
-{  static const bool value = true;  };
-
-template <typename R, class T0, class T1>
-struct is_unary_or_binary_function_impl<R (__cdecl*)(T0, T1...)>
-{  static const bool value = true;  };
-#endif
-
-template <typename T>
-struct is_unary_or_binary_function_impl<T&>
-{  static const bool value = false; };
-
-template<typename T>
-struct is_unary_or_binary_function
-{  static const bool value = is_unary_or_binary_function_impl<T>::value;   };
 
 //boost::alignment_of yields to 10K lines of preprocessed code, so we
 //need an alternative
@@ -461,6 +343,24 @@ template <> struct unvoid_ref<const void> { struct type_impl { }; typedef type_i
 #define BOOST_INTRUSIVE_OBTAIN_TYPE_WITH_EVAL_DEFAULT(INSTANTIATION_NS_PREFIX, T, TNAME, TIMPL) \
       typename INSTANTIATION_NS_PREFIX                                                          \
          boost_intrusive_eval_default_type_ ## TNAME< T, TIMPL >::type                          \
+//
+
+#define BOOST_INTRUSIVE_INTERNAL_STATIC_BOOL_IS_TRUE(TRAITS_PREFIX, TYPEDEF_TO_FIND) \
+template <class T>\
+struct TRAITS_PREFIX##_bool\
+{\
+   template<bool Add>\
+   struct two_or_three {one _[2 + Add];};\
+   template <class U> static one test(...);\
+   template <class U> static two_or_three<U::TYPEDEF_TO_FIND> test (int);\
+   static const std::size_t value = sizeof(test<T>(0));\
+};\
+\
+template <class T>\
+struct TRAITS_PREFIX##_bool_is_true\
+{\
+   static const bool value = TRAITS_PREFIX##_bool<T>::value > sizeof(one)*2;\
+};\
 //
 
 } //namespace detail

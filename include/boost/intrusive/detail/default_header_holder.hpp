@@ -13,7 +13,6 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_DEFAULT_HEADER_HOLDER_HPP
 #define BOOST_INTRUSIVE_DETAIL_DEFAULT_HEADER_HOLDER_HPP
 
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/detail/to_raw_pointer.hpp>
 
@@ -58,7 +57,5 @@ struct get_header_holder_type< Value_Traits, void >
 } //namespace detail
 } //namespace intrusive
 } //namespace boost
-
-#include <boost/intrusive/detail/config_end.hpp>
 
 #endif //BOOST_INTRUSIVE_DETAIL_DEFAULT_HEADER_HOLDER_HPP

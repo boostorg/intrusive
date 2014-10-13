@@ -13,8 +13,6 @@
 #ifndef BOOST_INTRUSIVE_ANY_NODE_HPP
 #define BOOST_INTRUSIVE_ANY_NODE_HPP
 
-#include <boost/intrusive/detail/config_begin.hpp>
-#include <boost/intrusive/detail/assert.hpp>
 #include <boost/intrusive/pointer_rebind.hpp>
 #include <cstddef>
 #include <boost/intrusive/detail/mpl.hpp>
@@ -274,7 +272,5 @@ class any_algorithms
 
 } //namespace intrusive
 } //namespace boost
-
-#include <boost/intrusive/detail/config_end.hpp>
 
 #endif //BOOST_INTRUSIVE_ANY_NODE_HPP

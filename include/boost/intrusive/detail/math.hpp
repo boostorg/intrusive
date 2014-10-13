@@ -13,8 +13,6 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_MATH_HPP
 #define BOOST_INTRUSIVE_DETAIL_MATH_HPP
 
-#include <boost/intrusive/detail/config_begin.hpp>
-
 #include <cstddef>
 #include <climits>
 
@@ -265,7 +263,5 @@ inline std::size_t sqrt2_pow_2xplus1 (std::size_t x)
 } //namespace detail
 } //namespace intrusive
 } //namespace boost
-
-#include <boost/intrusive/detail/config_end.hpp>
 
 #endif //BOOST_INTRUSIVE_DETAIL_MATH_HPP

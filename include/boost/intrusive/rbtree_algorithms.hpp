@@ -423,7 +423,7 @@ class rbtree_algorithms
          const node_ptr x_parent_left(NodeTraits::get_left(x_parent));
          if(x == x_parent_left){ //x is left child
             node_ptr w = NodeTraits::get_right(x_parent);
-            BOOST_ASSERT(w);
+            BOOST_INTRUSIVE_INVARIANT_ASSERT(w);
             if(NodeTraits::get_color(w) == NodeTraits::red()){
                NodeTraits::set_color(w, NodeTraits::black());
                NodeTraits::set_color(x_parent, NodeTraits::red());

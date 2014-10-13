@@ -33,10 +33,11 @@
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/detail/assert.hpp>
-#include <cstddef>
 #include <boost/intrusive/detail/algo_type.hpp>
 #include <boost/intrusive/detail/uncast.hpp>
 #include <boost/intrusive/bstree_algorithms.hpp>
+
+#include <cstddef>
 
 namespace boost {
 namespace intrusive {

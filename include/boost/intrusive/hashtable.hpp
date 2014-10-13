@@ -28,8 +28,13 @@
 #include <boost/intrusive/detail/transform_iterator.hpp>
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/intrusive/detail/ebo_functor_holder.hpp>
-#include <boost/intrusive/detail/utilities.hpp>
 #include <boost/intrusive/detail/is_stateful_value_traits.hpp>
+#include <boost/intrusive/detail/node_to_value.hpp>
+#include <boost/intrusive/detail/exception_disposer.hpp>
+#include <boost/intrusive/detail/node_cloner_disposer.hpp>
+#include <boost/intrusive/detail/simple_disposers.hpp>
+#include <boost/intrusive/detail/size_holder.hpp>
+
 //Implementation utilities
 #include <boost/intrusive/unordered_set_hook.hpp>
 #include <boost/intrusive/slist.hpp>
@@ -767,6 +772,18 @@ struct bucket_plus_vtraits : public ValueTraits
    bucket_traits bucket_traits_;
 };
 
+template<class Hash, class T>
+struct get_hash
+{
+   typedef Hash type;
+};
+
+template<class T>
+struct get_hash<void, T>
+{
+   typedef ::boost::hash<T> type;
+};
+
 //bucket_hash_t
 //Stores bucket_plus_vtraits plust the hash function
 template<class VoidOrKeyHash, class ValueTraits, class BucketTraits>
@@ -803,6 +820,20 @@ struct bucket_hash_t
 
    bucket_plus_vtraits_t internal;  //4
 };
+
+
+template<class EqualTo, class T>
+struct get_equal_to
+{
+   typedef EqualTo type;
+};
+
+template<class T>
+struct get_equal_to<void, T>
+{
+   typedef ::std::equal_to<T> type;
+};
+
 
 //bucket_hash_equal_t
 //Stores bucket_hash_t and the equality function when the first

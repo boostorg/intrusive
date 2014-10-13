@@ -15,7 +15,6 @@
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
-#include <boost/intrusive/detail/utilities.hpp>
 #include <boost/intrusive/detail/any_node_and_algorithms.hpp>
 #include <boost/intrusive/options.hpp>
 #include <boost/intrusive/detail/generic_hook.hpp>
@@ -24,13 +23,7 @@
 namespace boost {
 namespace intrusive {
 
-/// @cond
-template<class VoidPointer>
-struct get_any_node_algo
-{
-   typedef any_algorithms<VoidPointer> type;
-};
-/// @endcond
+struct any_empty{};
 
 //! Helper metafunction to define a \c \c any_base_hook that yields to the same
 //! type when the same options (either explicitly or implicitly) are used.
@@ -52,7 +45,7 @@ struct make_any_base_hook
       >::type packed_options;
 
    typedef generic_hook
-   < get_any_node_algo<typename packed_options::void_pointer>
+   < any_algorithms<typename packed_options::void_pointer>
    , typename packed_options::tag
    , packed_options::link_mode
    , AnyBaseHookId
@@ -157,7 +150,7 @@ struct make_any_member_hook
       >::type packed_options;
 
    typedef generic_hook
-   < get_any_node_algo<typename packed_options::void_pointer>
+   < any_algorithms<typename packed_options::void_pointer>
    , member_tag
    , packed_options::link_mode
    , NoBaseHookId
@@ -260,7 +253,7 @@ struct any_to_get_member_pointer_type
 template<class BaseHook, template <class> class NodeTraits>
 struct any_to_some_hook
 {
-   typedef typename BaseHook::template pack<empty>::proto_value_traits old_proto_value_traits;
+   typedef typename BaseHook::template pack<any_empty>::proto_value_traits old_proto_value_traits;
 
    template<class Base>
    struct pack : public Base

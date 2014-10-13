@@ -14,7 +14,6 @@
 #ifndef BOOST_INTRUSIVE_LIST_ITERATOR_HPP
 #define BOOST_INTRUSIVE_LIST_ITERATOR_HPP
 
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/detail/std_fwd.hpp>
 #include <boost/intrusive/detail/iiterator.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
@@ -122,7 +121,5 @@ class list_iterator
 
 } //namespace intrusive
 } //namespace boost
-
-#include <boost/intrusive/detail/config_end.hpp>
 
 #endif //BOOST_INTRUSIVE_LIST_ITERATOR_HPP

@@ -40,6 +40,19 @@ enum link_mode_type{
    //!the container without using any function provided by the containers.
    auto_unlink
 };
+
+#ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
+
+template <link_mode_type link_mode>
+struct is_safe_autounlink
+{
+   static const bool value = 
+      (int)link_mode == (int)auto_unlink   ||
+      (int)link_mode == (int)safe_link;
+};
+
+#endif   //BOOST_INTRUSIVE_DOXYGEN_INVOKED
+
 } //namespace intrusive
 } //namespace boost
 

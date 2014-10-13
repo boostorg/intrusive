@@ -25,9 +25,16 @@
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/detail/is_stateful_value_traits.hpp>
-#include <boost/intrusive/detail/utilities.hpp>
+#include <boost/intrusive/detail/empty_node_checker.hpp>
 #include <boost/intrusive/detail/default_header_holder.hpp>
 #include <boost/intrusive/detail/reverse_iterator.hpp>
+#include <boost/intrusive/detail/exception_disposer.hpp>
+#include <boost/intrusive/detail/node_cloner_disposer.hpp>
+#include <boost/intrusive/detail/key_nodeptr_comp.hpp>
+#include <boost/intrusive/detail/simple_disposers.hpp>
+#include <boost/intrusive/detail/size_holder.hpp>
+#include <boost/intrusive/detail/algo_type.hpp>
+
 #include <boost/intrusive/options.hpp>
 #include <boost/intrusive/bstree_algorithms.hpp>
 #include <boost/intrusive/link_mode.hpp>
@@ -206,6 +213,18 @@ struct bstbase3
    static void init_node(reference value)
    { node_algorithms::init(value_traits::to_node_ptr(value)); }
 
+};
+
+template<class Less, class T>
+struct get_less
+{
+   typedef Less type;
+};
+
+template<class T>
+struct get_less<void, T>
+{
+   typedef ::std::less<T> type;
 };
 
 template<class ValueTraits, class VoidOrKeyComp, algo_types AlgoType, typename HeaderHolder>

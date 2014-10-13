@@ -18,7 +18,7 @@
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/intrusive/pack_options.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
-#include <boost/intrusive/detail/utilities.hpp>
+#include <boost/intrusive/detail/hook_traits.hpp>
 #include <boost/static_assert.hpp>
 
 namespace boost {
@@ -90,10 +90,13 @@ template <class BaseHook>
 struct any_hook_base_node_traits
 {  typedef typename BaseHook::node_traits type; };
 
+
+BOOST_INTRUSIVE_INTERNAL_STATIC_BOOL_IS_TRUE(internal_any_hook, is_any_hook)
+
 template<class T, class BaseHook>
 struct get_base_value_traits
 {
-   typedef typename detail::eval_if_c
+   typedef typename eval_if_c
       < internal_any_hook_bool_is_true<BaseHook>::value
       , any_hook_base_value_traits<T, BaseHook>
       , concrete_hook_base_value_traits<T, BaseHook>
@@ -103,7 +106,7 @@ struct get_base_value_traits
 template<class BaseHook>
 struct get_base_node_traits
 {
-   typedef typename detail::eval_if_c
+   typedef typename eval_if_c
       < internal_any_hook_bool_is_true<BaseHook>::value
       , any_hook_base_node_traits<BaseHook>
       , concrete_hook_base_node_traits<BaseHook>
@@ -122,27 +125,37 @@ struct get_member_node_traits
    typedef typename MemberHook::member_value_traits::node_traits type;
 };
 
+template <class T>
+struct internal_member_value_traits
+{
+   template <class U> static one test(...);
+   template <class U> static two test(typename U::member_value_traits* = 0);
+   static const bool value = sizeof(test<T>(0)) == sizeof(two);
+};
+
+BOOST_INTRUSIVE_INTERNAL_STATIC_BOOL_IS_TRUE(internal_base_hook, hooktags::is_base_hook)
+
 template<class T, class SupposedValueTraits>
 struct get_value_traits
 {
-   typedef typename detail::eval_if_c
-      <detail::is_convertible<SupposedValueTraits*, detail::default_hook_tag*>::value
-      ,detail::apply<SupposedValueTraits, T>
-      ,detail::identity<SupposedValueTraits>
+   typedef typename eval_if_c
+      <is_convertible<SupposedValueTraits*, default_hook_tag*>::value
+      ,apply<SupposedValueTraits, T>
+      ,identity<SupposedValueTraits>
    >::type supposed_value_traits;
 
    //...if it's a default hook
-   typedef typename detail::eval_if_c
+   typedef typename eval_if_c
       < internal_base_hook_bool_is_true<supposed_value_traits>::value
       //...get it's internal value traits using
       //the provided T value type.
       , get_base_value_traits<T, supposed_value_traits>
       //...else use its internal value traits tag
       //(member hooks and custom value traits are in this group)
-      , detail::eval_if_c
+      , eval_if_c
          < internal_member_value_traits<supposed_value_traits>::value
          , get_member_value_traits<T, supposed_value_traits>
-         , detail::identity<supposed_value_traits>
+         , identity<supposed_value_traits>
          >
       >::type type;
 };
@@ -158,14 +171,14 @@ struct get_node_traits
 {
    typedef SupposedValueTraits supposed_value_traits;
    //...if it's a base hook
-   typedef typename detail::eval_if_c
+   typedef typename eval_if_c
       < internal_base_hook_bool_is_true<supposed_value_traits>::value
       //...get it's internal value traits using
       //the provided T value type.
       , get_base_node_traits<supposed_value_traits>
       //...else use its internal value traits tag
       //(member hooks and custom value traits are in this group)
-      , detail::eval_if_c
+      , eval_if_c
          < internal_member_value_traits<supposed_value_traits>::value
          , get_member_node_traits<supposed_value_traits>
          , get_explicit_node_traits<supposed_value_traits>

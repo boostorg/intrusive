@@ -15,7 +15,6 @@
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
-#include <boost/intrusive/detail/utilities.hpp>
 #include <boost/detail/lightweight_test.hpp>
 #include <boost/static_assert.hpp>
 

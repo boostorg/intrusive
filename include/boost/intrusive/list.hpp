@@ -22,18 +22,25 @@
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/link_mode.hpp>
-#include <boost/static_assert.hpp>
 #include <boost/intrusive/options.hpp>
 #include <boost/intrusive/detail/is_stateful_value_traits.hpp>
-#include <boost/intrusive/detail/utilities.hpp>
 #include <boost/intrusive/detail/default_header_holder.hpp>
 #include <boost/intrusive/detail/reverse_iterator.hpp>
 #include <boost/intrusive/detail/uncast.hpp>
 #include <boost/intrusive/detail/list_iterator.hpp>
+#include <boost/intrusive/detail/array_initializer.hpp>
+#include <boost/intrusive/detail/exception_disposer.hpp>
+#include <boost/intrusive/detail/equal_to_value.hpp>
+#include <boost/intrusive/detail/key_nodeptr_comp.hpp>
+#include <boost/intrusive/detail/simple_disposers.hpp>
+#include <boost/intrusive/detail/size_holder.hpp>
+
+#include <boost/move/utility_core.hpp>
+#include <boost/static_assert.hpp>
+
 #include <algorithm>
 #include <functional>
 #include <cstddef>
-#include <boost/move/utility_core.hpp>
 
 namespace boost {
 namespace intrusive {

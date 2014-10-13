@@ -13,11 +13,9 @@
 #ifndef BOOST_INTRUSIVE_HASHTABLE_NODE_HPP
 #define BOOST_INTRUSIVE_HASHTABLE_NODE_HPP
 
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
-#include <boost/intrusive/detail/utilities.hpp>
 #include <boost/intrusive/trivial_value_traits.hpp>
 #include <boost/intrusive/slist.hpp> //make_slist
 #include <cstddef>

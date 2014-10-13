@@ -14,7 +14,6 @@
 #ifndef BOOST_INTRUSIVE_LIST_NODE_HPP
 #define BOOST_INTRUSIVE_LIST_NODE_HPP
 
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/pointer_rebind.hpp>
 
 namespace boost {
@@ -60,7 +59,5 @@ struct list_node_traits
 
 } //namespace intrusive
 } //namespace boost
-
-#include <boost/intrusive/detail/config_end.hpp>
 
 #endif //BOOST_INTRUSIVE_LIST_NODE_HPP

@@ -13,7 +13,6 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_IITERATOR_HPP
 #define BOOST_INTRUSIVE_DETAIL_IITERATOR_HPP
 
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/is_stateful_value_traits.hpp>
@@ -220,7 +219,5 @@ typename iterator_traits<InputIt>::difference_type iterator_distance(InputIt fir
 
 } //namespace intrusive
 } //namespace boost
-
-#include <boost/intrusive/detail/config_end.hpp>
 
 #endif //BOOST_INTRUSIVE_DETAIL_IITERATOR_HPP

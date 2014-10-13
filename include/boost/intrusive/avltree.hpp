@@ -18,7 +18,6 @@
 #include <functional>
 #include <utility>
 
-#include <boost/intrusive/detail/assert.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/intrusive/avl_set_hook.hpp>
 #include <boost/intrusive/detail/avltree_node.hpp>
@@ -28,7 +27,6 @@
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/options.hpp>
-#include <boost/intrusive/detail/utilities.hpp>
 #include <boost/intrusive/avltree_algorithms.hpp>
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/move/utility_core.hpp>

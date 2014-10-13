@@ -13,8 +13,6 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_ALGO_TYPE_HPP
 #define BOOST_INTRUSIVE_DETAIL_ALGO_TYPE_HPP
 
-#include <boost/intrusive/detail/config_begin.hpp>
-
 namespace boost {
 namespace intrusive {
 
@@ -40,7 +38,5 @@ struct get_node_checker;
 
 } //namespace intrusive
 } //namespace boost
-
-#include <boost/intrusive/detail/config_end.hpp>
 
 #endif //BOOST_INTRUSIVE_DETAIL_ALGO_TYPE_HPP

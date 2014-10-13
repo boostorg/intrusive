@@ -25,7 +25,6 @@
 #include <boost/intrusive/bstree.hpp>
 #include <boost/intrusive/detail/tree_node.hpp>
 #include <boost/intrusive/detail/ebo_functor_holder.hpp>
-#include <boost/intrusive/detail/utilities.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/options.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
@@ -33,6 +32,8 @@
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/move/utility_core.hpp>
 #include <boost/intrusive/priority_compare.hpp>
+#include <boost/intrusive/detail/node_cloner_disposer.hpp>
+#include <boost/intrusive/detail/key_nodeptr_comp.hpp>
 
 namespace boost {
 namespace intrusive {

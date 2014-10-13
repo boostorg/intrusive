@@ -163,7 +163,7 @@ struct avltree_node_traits_dispatch<VoidPointer, true>
    :  public compact_avltree_node_traits_impl<VoidPointer>
 {};
 
-//Inherit from the detail::link_dispatch depending on the embedding capabilities
+//Inherit from rbtree_node_traits_dispatch depending on the embedding capabilities
 template<class VoidPointer, bool OptimizeSize = false>
 struct avltree_node_traits
    :  public avltree_node_traits_dispatch
