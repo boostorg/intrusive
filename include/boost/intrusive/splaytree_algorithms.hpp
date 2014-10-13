@@ -30,6 +30,10 @@
 #ifndef BOOST_INTRUSIVE_SPLAYTREE_ALGORITHMS_HPP
 #define BOOST_INTRUSIVE_SPLAYTREE_ALGORITHMS_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/detail/assert.hpp>

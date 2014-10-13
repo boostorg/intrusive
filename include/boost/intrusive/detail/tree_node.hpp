@@ -13,6 +13,10 @@
 #ifndef BOOST_INTRUSIVE_TREE_NODE_HPP
 #define BOOST_INTRUSIVE_TREE_NODE_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/pointer_rebind.hpp>
 

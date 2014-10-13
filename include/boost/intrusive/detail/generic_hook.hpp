@@ -13,6 +13,10 @@
 #ifndef BOOST_INTRUSIVE_GENERIC_HOOK_HPP
 #define BOOST_INTRUSIVE_GENERIC_HOOK_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/intrusive/detail/mpl.hpp>

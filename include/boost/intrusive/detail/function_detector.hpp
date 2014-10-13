@@ -22,6 +22,10 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_FUNCTION_DETECTOR_HPP
 #define BOOST_INTRUSIVE_DETAIL_FUNCTION_DETECTOR_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 namespace boost {
 namespace intrusive {
 namespace function_detector {

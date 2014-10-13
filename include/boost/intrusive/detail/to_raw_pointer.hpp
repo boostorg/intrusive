@@ -13,6 +13,10 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_TO_RAW_POINTER_HPP
 #define BOOST_INTRUSIVE_DETAIL_TO_RAW_POINTER_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/detail/pointer_element.hpp>
 

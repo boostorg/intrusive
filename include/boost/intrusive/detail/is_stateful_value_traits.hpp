@@ -13,6 +13,10 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_IS_STATEFUL_VALUE_TRAITS_HPP
 #define BOOST_INTRUSIVE_DETAIL_IS_STATEFUL_VALUE_TRAITS_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 #if defined(_MSC_VER) && (_MSC_VER <= 1310)
 
 #include <boost/intrusive/detail/mpl.hpp>

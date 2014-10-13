@@ -14,6 +14,10 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_EBO_HOLDER_HPP
 #define BOOST_INTRUSIVE_DETAIL_EBO_HOLDER_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 #include <boost/config.hpp>
 
 namespace boost {

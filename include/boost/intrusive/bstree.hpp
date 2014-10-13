@@ -12,6 +12,10 @@
 #ifndef BOOST_INTRUSIVE_BSTREE_HPP
 #define BOOST_INTRUSIVE_BSTREE_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 

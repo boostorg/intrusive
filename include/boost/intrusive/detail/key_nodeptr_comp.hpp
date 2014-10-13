@@ -13,6 +13,10 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_KEY_NODEPTR_COMP_HPP
 #define BOOST_INTRUSIVE_DETAIL_KEY_NODEPTR_COMP_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/ebo_functor_holder.hpp>
 

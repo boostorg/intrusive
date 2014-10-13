@@ -13,6 +13,10 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_EQUAL_TO_VALUE_HPP
 #define BOOST_INTRUSIVE_DETAIL_EQUAL_TO_VALUE_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 namespace boost {
 namespace intrusive {
 namespace detail {

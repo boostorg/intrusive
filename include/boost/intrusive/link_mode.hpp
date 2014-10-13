@@ -10,8 +10,12 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef BOOST_INTRUSIVE_VALUE_LINK_TYPE_HPP
-#define BOOST_INTRUSIVE_VALUE_LINK_TYPE_HPP
+#ifndef BOOST_INTRUSIVE_LINK_MODE_HPP
+#define BOOST_INTRUSIVE_LINK_MODE_HPP
+
+#if defined(_MSC_VER)
+#  pragma once
+#endif
 
 namespace boost {
 namespace intrusive {
@@ -56,4 +60,4 @@ struct is_safe_autounlink
 } //namespace intrusive
 } //namespace boost
 
-#endif //BOOST_INTRUSIVE_VALUE_LINK_TYPE_HPP
+#endif //BOOST_INTRUSIVE_LINK_MODE_HPP

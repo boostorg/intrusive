@@ -13,6 +13,10 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_NODE_CLONER_DISPOSER_HPP
 #define BOOST_INTRUSIVE_DETAIL_NODE_CLONER_DISPOSER_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/intrusive/detail/ebo_functor_holder.hpp>
 #include <boost/intrusive/detail/algo_type.hpp>

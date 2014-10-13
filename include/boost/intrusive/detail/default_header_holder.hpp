@@ -13,6 +13,10 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_DEFAULT_HEADER_HOLDER_HPP
 #define BOOST_INTRUSIVE_DETAIL_DEFAULT_HEADER_HOLDER_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/detail/to_raw_pointer.hpp>
 

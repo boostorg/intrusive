@@ -13,6 +13,10 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_MATH_HPP
 #define BOOST_INTRUSIVE_DETAIL_MATH_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 #include <cstddef>
 #include <climits>
 

@@ -14,6 +14,10 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_MPL_HPP
 #define BOOST_INTRUSIVE_DETAIL_MPL_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <cstddef>
 

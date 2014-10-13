@@ -11,6 +11,10 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_WRKRND_HPP
 #define BOOST_INTRUSIVE_DETAIL_WRKRND_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 #ifndef BOOST_CONFIG_HPP
 #include <boost/config.hpp>
 #endif

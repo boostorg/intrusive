@@ -14,6 +14,10 @@
 #ifndef BOOST_INTRUSIVE_CIRCULAR_SLIST_ALGORITHMS_HPP
 #define BOOST_INTRUSIVE_CIRCULAR_SLIST_ALGORITHMS_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 #include <cstddef>
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>

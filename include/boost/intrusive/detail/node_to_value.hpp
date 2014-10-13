@@ -13,6 +13,10 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_NODE_TO_VALUE_HPP
 #define BOOST_INTRUSIVE_DETAIL_NODE_TO_VALUE_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/is_stateful_value_traits.hpp>

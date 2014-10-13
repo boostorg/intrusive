@@ -9,8 +9,12 @@
 // See http://www.boost.org/libs/intrusive for documentation.
 //
 /////////////////////////////////////////////////////////////////////////////
-#ifndef BOOST_INTRUSIVE_TRIE_SET_HPP
-#define BOOST_INTRUSIVE_TRIE_SET_HPP
+#ifndef BOOST_INTRUSIVE_TREAP_SET_HPP
+#define BOOST_INTRUSIVE_TREAP_SET_HPP
+
+#if defined(_MSC_VER)
+#  pragma once
+#endif
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
@@ -1001,4 +1005,4 @@ class treap_multiset
 
 #include <boost/intrusive/detail/config_end.hpp>
 
-#endif //BOOST_INTRUSIVE_TRIE_SET_HPP
+#endif //BOOST_INTRUSIVE_TREAP_SET_HPP

@@ -13,6 +13,10 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_ARRAY_INITIALIZER_HPP
 #define BOOST_INTRUSIVE_DETAIL_ARRAY_INITIALIZER_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 #include <boost/core/no_exceptions_support.hpp>
 
 namespace boost {

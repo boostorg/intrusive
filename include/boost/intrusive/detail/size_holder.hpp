@@ -13,6 +13,10 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_SIZE_HOLDER_HPP
 #define BOOST_INTRUSIVE_DETAIL_SIZE_HOLDER_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 namespace boost {
 namespace intrusive {
 namespace detail {

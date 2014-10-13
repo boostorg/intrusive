@@ -13,6 +13,10 @@
 #ifndef BOOST_INTRUSIVE_TREE_ITERATOR_HPP
 #define BOOST_INTRUSIVE_TREE_ITERATOR_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/detail/std_fwd.hpp>
 #include <boost/intrusive/detail/iiterator.hpp>

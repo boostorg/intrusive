@@ -14,6 +14,10 @@
 #ifndef BOOST_INTRUSIVE_LIST_NODE_HPP
 #define BOOST_INTRUSIVE_LIST_NODE_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 #include <boost/intrusive/pointer_rebind.hpp>
 
 namespace boost {

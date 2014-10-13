@@ -13,6 +13,10 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_HOOK_TRAITS_HPP
 #define BOOST_INTRUSIVE_DETAIL_HOOK_TRAITS_HPP
 
+#if defined(_MSC_VER)
+#  pragma once
+#endif
+
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/detail/parent_from_member.hpp>
 #include <boost/intrusive/link_mode.hpp>
