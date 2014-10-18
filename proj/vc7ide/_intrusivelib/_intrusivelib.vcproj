@@ -272,6 +272,9 @@
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\generic_hook.hpp">
 				</File>
 				<File
+					RelativePath="..\..\..\..\..\boost\intrusive\detail\get_value_traits.hpp">
+				</File>
+				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\has_member_function_callable_with.hpp">
 				</File>
 				<File

@@ -10,8 +10,6 @@
 // See http://www.boost.org/libs/intrusive for documentation.
 //
 /////////////////////////////////////////////////////////////////////////////
-
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/treap_set.hpp>
 #include "itestvalue.hpp"
 #include "bptr_value.hpp"
@@ -120,8 +118,7 @@ class test_main_template
                 , GetContainer_With_Holder< Default_Holder >::template GetContainer
                 >::test_all();
       test::test_generic_multiset < typename detail::get_member_value_traits
-                  < value_type
-                  , member_hook< value_type
+                  < member_hook< value_type
                                , typename hooks<VoidPointer>::member_hook_type
                                , &value_type::node_
                                >
@@ -156,8 +153,7 @@ class test_main_template<VoidPointer, false, Default_Holder>
                 >::test_all();
 
       test::test_generic_multiset < typename detail::get_member_value_traits
-                  < value_type
-                  , member_hook< value_type
+                  < member_hook< value_type
                                , typename hooks<VoidPointer>::member_hook_type
                                , &value_type::node_
                                >
@@ -173,8 +169,7 @@ class test_main_template<VoidPointer, false, Default_Holder>
                 >::test_all();
 
       test::test_generic_multiset < typename detail::get_member_value_traits
-                  < value_type
-                  , member_hook< value_type
+                  < member_hook< value_type
                                , typename hooks<VoidPointer>::auto_member_hook_type
                                , &value_type::auto_node_
                                >
@@ -242,5 +237,3 @@ int main()
 
    return boost::report_errors();
 }
-
-#include <boost/intrusive/detail/config_end.hpp>

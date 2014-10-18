@@ -30,7 +30,7 @@
 #include <boost/intrusive/detail/tree_node.hpp>
 #include <boost/intrusive/detail/ebo_functor_holder.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
-#include <boost/intrusive/options.hpp>
+#include <boost/intrusive/detail/get_value_traits.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/treap_algorithms.hpp>
 #include <boost/intrusive/link_mode.hpp>
@@ -46,7 +46,7 @@ namespace intrusive {
 
 struct treap_defaults
 {
-   typedef detail::default_bstree_hook proto_value_traits;
+   typedef default_bstree_hook_applier proto_value_traits;
    static const bool constant_time_size = true;
    typedef std::size_t size_type;
    typedef void compare;

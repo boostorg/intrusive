@@ -38,7 +38,7 @@
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/math.hpp>
-#include <boost/intrusive/options.hpp>
+#include <boost/intrusive/detail/get_value_traits.hpp>
 #include <boost/intrusive/sgtree_algorithms.hpp>
 #include <boost/intrusive/detail/key_nodeptr_comp.hpp>
 #include <boost/intrusive/link_mode.hpp>
@@ -195,7 +195,7 @@ struct alpha_holder<false, SizeType>
 
 struct sgtree_defaults
 {
-   typedef detail::default_bstree_hook proto_value_traits;
+   typedef default_bstree_hook_applier proto_value_traits;
    static const bool constant_time_size = true;
    typedef std::size_t size_type;
    typedef void compare;

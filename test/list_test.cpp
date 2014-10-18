@@ -1,3 +1,4 @@
+/*
 /////////////////////////////////////////////////////////////////////////////
 //
 // (C) Copyright Olaf Krzikalla 2004-2006.
@@ -10,7 +11,6 @@
 // See http://www.boost.org/libs/intrusive for documentation.
 //
 /////////////////////////////////////////////////////////////////////////////
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/list.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include "itestvalue.hpp"
@@ -410,7 +410,6 @@ class test_main_template
                            std::vector< value_type >
                          >::test_all(data);
       make_and_test_list < typename detail::get_member_value_traits <
-                              value_type,
                               member_hook< value_type, typename hooks<VoidPointer>::member_hook_type, &value_type::node_>
                            >::type,
                            ConstantTimeSize,
@@ -452,7 +451,6 @@ class test_main_template< VoidPointer, false, Default_Holder >
                            std::vector< value_type >
                          >::test_all(data);
       make_and_test_list < typename detail::get_member_value_traits <
-                              value_type,
                               member_hook< value_type, typename hooks<VoidPointer>::member_hook_type, &value_type::node_>
                            >::type,
                            false,
@@ -475,7 +473,6 @@ class test_main_template< VoidPointer, false, Default_Holder >
                            std::vector< value_type >
                          >::test_all(data);
       make_and_test_list < typename detail::get_member_value_traits <
-                              value_type,
                               member_hook< value_type, typename hooks<VoidPointer>::auto_member_hook_type, &value_type::auto_node_>
                             >::type,
                             false,
@@ -543,4 +540,12 @@ int main()
    test_main_template_bptr< false >()();
 
    return boost::report_errors();
+}
+*/
+
+#include <boost/intrusive/list_hook.hpp>
+
+int main()
+{
+   return 0;
 }

@@ -21,6 +21,7 @@
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/assert.hpp>
+#include <boost/intrusive/detail/node_holder.hpp>
 #include <boost/static_assert.hpp>
 
 namespace boost {

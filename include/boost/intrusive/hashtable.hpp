@@ -463,7 +463,7 @@ template<class ValueTraitsOrHookOption>
 struct unordered_bucket
    : public detail::unordered_bucket_impl
       <typename ValueTraitsOrHookOption::
-         template pack<none>::proto_value_traits
+         template pack<empty>::proto_value_traits
       >
 {};
 
@@ -472,10 +472,10 @@ struct unordered_bucket
 //!a hash container.
 template<class ValueTraitsOrHookOption>
 struct unordered_bucket_ptr
-   :  public detail::unordered_bucket_ptr_impl
-         <typename ValueTraitsOrHookOption::
-          template pack<none>::proto_value_traits
-         >
+   : public detail::unordered_bucket_ptr_impl
+      <typename ValueTraitsOrHookOption::
+         template pack<empty>::proto_value_traits
+      >
 {};
 
 //!This metafunction will obtain the type of the default bucket traits
@@ -486,7 +486,7 @@ template<class ValueTraitsOrHookOption>
 struct unordered_default_bucket_traits
 {
    typedef typename ValueTraitsOrHookOption::
-      template pack<none>::proto_value_traits   supposed_value_traits;
+      template pack<empty>::proto_value_traits   supposed_value_traits;
    typedef typename detail::
       get_slist_impl_from_supposed_value_traits
          <supposed_value_traits>::type          slist_impl;
@@ -497,9 +497,17 @@ struct unordered_default_bucket_traits
 
 struct default_bucket_traits;
 
+//hashtable default hook traits
+struct default_hashtable_hook_applier
+{  template <class T> struct apply{ typedef typename T::default_hashtable_hook type;  };  };
+
+template<>
+struct is_default_hook_tag<default_hashtable_hook_applier>
+{  static const bool value = true;  };
+
 struct hashtable_defaults
 {
-   typedef detail::default_hashtable_hook   proto_value_traits;
+   typedef default_hashtable_hook_applier   proto_value_traits;
    typedef std::size_t                 size_type;
    typedef void                        equal;
    typedef void                        hash;

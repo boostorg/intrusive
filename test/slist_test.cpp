@@ -11,7 +11,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/slist.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include "itestvalue.hpp"
@@ -494,8 +493,7 @@ class test_main_template
                  , std::vector< value_type >
                 >::test_all(data);
       make_and_test_slist < typename detail::get_member_value_traits
-                  < value_type
-                  , member_hook< value_type
+                  < member_hook< value_type
                                , typename hooks<VoidPointer>::member_hook_type
                                , &value_type::node_
                                >
@@ -531,8 +529,7 @@ class test_main_template
                 >::test_all(data);
 
       make_and_test_slist < typename detail::get_member_value_traits
-                  < value_type
-                  , member_hook< value_type
+                  < member_hook< value_type
                                , typename hooks<VoidPointer>::member_hook_type
                                , &value_type::node_
                                >
@@ -556,8 +553,7 @@ class test_main_template
                  , std::vector< value_type >
                 >::test_all(data);
       make_and_test_slist < typename detail::get_member_value_traits
-                  < value_type
-                  , member_hook< value_type
+                  < member_hook< value_type
                                , typename hooks<VoidPointer>::member_hook_type
                                , &value_type::node_
                                >
@@ -582,8 +578,7 @@ class test_main_template
                 >::test_all(data);
 
       make_and_test_slist < typename detail::get_member_value_traits
-                  < value_type
-                  , member_hook< value_type
+                  < member_hook< value_type
                                , typename hooks<VoidPointer>::member_hook_type
                                , &value_type::node_
                                >
@@ -621,8 +616,7 @@ class test_main_template<VoidPointer, false, Default_Holder>
                 >::test_all(data);
 
       make_and_test_slist < typename detail::get_member_value_traits
-                  < value_type
-                  , member_hook< value_type
+                  < member_hook< value_type
                                , typename hooks<VoidPointer>::member_hook_type
                                , &value_type::node_
                                >
@@ -646,8 +640,7 @@ class test_main_template<VoidPointer, false, Default_Holder>
                 >::test_all(data);
 
       make_and_test_slist < typename detail::get_member_value_traits
-                  < value_type
-                  , member_hook< value_type
+                  < member_hook< value_type
                                , typename hooks<VoidPointer>::auto_member_hook_type
                                , &value_type::auto_node_
                                >
@@ -671,8 +664,7 @@ class test_main_template<VoidPointer, false, Default_Holder>
                 >::test_all(data);
 
       make_and_test_slist < typename detail::get_member_value_traits
-                  < value_type
-                  , member_hook< value_type
+                  < member_hook< value_type
                                , typename hooks<VoidPointer>::member_hook_type
                                , &value_type::node_
                                >
@@ -697,8 +689,7 @@ class test_main_template<VoidPointer, false, Default_Holder>
                 >::test_all(data);
 
       make_and_test_slist < typename detail::get_member_value_traits
-                  < value_type
-                  , member_hook< value_type
+                  < member_hook< value_type
                                , typename hooks<VoidPointer>::member_hook_type
                                , &value_type::node_
                                >
@@ -722,8 +713,7 @@ class test_main_template<VoidPointer, false, Default_Holder>
                 >::test_all(data);
 
       make_and_test_slist < typename detail::get_member_value_traits
-                  < value_type
-                  , member_hook< value_type
+                  < member_hook< value_type
                                , typename hooks<VoidPointer>::member_hook_type
                                , &value_type::node_
                                >
@@ -790,4 +780,3 @@ int main(int, char* [])
 
    return boost::report_errors();
 }
-#include <boost/intrusive/detail/config_end.hpp>

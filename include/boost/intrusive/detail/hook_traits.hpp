@@ -83,62 +83,6 @@ struct bhtraits
    typedef NodeTraits node_traits;
 };
 
-/*
-template<class T, class NodePtr, typename pointer_traits<NodePtr>::element_type T::* P>
-struct mhtraits_base
-{
-   public:
-   typedef typename pointer_traits<NodePtr>::element_type            node;
-   typedef T                                                         value_type;
-   typedef NodePtr                                                   node_ptr;
-   typedef typename pointer_traits<node_ptr>::
-      template rebind_pointer<const node>::type                      const_node_ptr;
-   typedef typename pointer_traits<node_ptr>::
-      template rebind_pointer<T>::type                               pointer;
-   typedef typename pointer_traits<node_ptr>::
-      template rebind_pointer<const T>::type                         const_pointer;
-   typedef T &                                                       reference;
-   typedef const T &                                                 const_reference;
-   typedef node&                                                     node_reference;
-   typedef const node &                                              const_node_reference;
-
-   static node_ptr to_node_ptr(reference value)
-   {
-      return pointer_traits<node_ptr>::pointer_to
-         (static_cast<node_reference>(value.*P));
-   }
-
-   static const_node_ptr to_node_ptr(const_reference value)
-   {
-      return pointer_traits<const_node_ptr>::pointer_to
-         (static_cast<const_node_reference>(value.*P));
-   }
-
-   static pointer to_value_ptr(const node_ptr & n)
-   {
-      return pointer_traits<pointer>::pointer_to
-         (*detail::parent_from_member<T, node>
-            (boost::intrusive::detail::to_raw_pointer(n), P));
-   }
-
-   static const_pointer to_value_ptr(const const_node_ptr & n)
-   {
-      return pointer_traits<const_pointer>::pointer_to
-         (*detail::parent_from_member<T, node>
-            (boost::intrusive::detail::to_raw_pointer(n), P));
-   }
-};
-
-
-template<class T, class NodeTraits, typename NodeTraits::node T::* P, link_mode_type LinkMode>
-struct mhtraits
-   : public mhtraits_base<T, typename NodeTraits::node_ptr, P>
-{
-   static const link_mode_type link_mode = LinkMode;
-   typedef NodeTraits node_traits;
-};
-*/
-
 
 template<class T, class Hook, Hook T::* P>
 struct mhtraits

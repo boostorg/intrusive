@@ -26,7 +26,7 @@
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/link_mode.hpp>
-#include <boost/intrusive/options.hpp>
+#include <boost/intrusive/detail/get_value_traits.hpp>
 #include <boost/intrusive/detail/is_stateful_value_traits.hpp>
 #include <boost/intrusive/detail/default_header_holder.hpp>
 #include <boost/intrusive/detail/reverse_iterator.hpp>
@@ -51,9 +51,16 @@ namespace intrusive {
 
 /// @cond
 
+struct default_list_hook_applier
+{  template <class T> struct apply{ typedef typename T::default_list_hook type;  };  };
+
+template<>
+struct is_default_hook_tag<default_list_hook_applier>
+{  static const bool value = true;  };
+
 struct list_defaults
 {
-   typedef detail::default_list_hook proto_value_traits;
+   typedef default_list_hook_applier proto_value_traits;
    static const bool constant_time_size = true;
    typedef std::size_t size_type;
    typedef void header_holder_type;

@@ -10,7 +10,6 @@
 // See http://www.boost.org/libs/intrusive for documentation.
 //
 /////////////////////////////////////////////////////////////////////////////
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/unordered_set.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include "itestvalue.hpp"
@@ -632,8 +631,7 @@ class test_main_template
                 , incremental
                 >::test_all(data);
       test_unordered_set < typename detail::get_member_value_traits
-                  < value_type
-                  , member_hook< value_type
+                  < member_hook< value_type
                                , typename hooks<VoidPointer>::member_hook_type
                                , &value_type::node_
                                >
@@ -678,8 +676,7 @@ class test_main_template<VoidPointer, false, incremental>
                 >::test_all(data);
 
       test_unordered_set < typename detail::get_member_value_traits
-                  < value_type
-                  , member_hook< value_type
+                  < member_hook< value_type
                                , typename hooks<VoidPointer>::member_hook_type
                                , &value_type::node_
                                >
@@ -699,8 +696,7 @@ class test_main_template<VoidPointer, false, incremental>
                 >::test_all(data);
 
       test_unordered_set < typename detail::get_member_value_traits
-                  < value_type
-                  , member_hook< value_type
+                  < member_hook< value_type
                                , typename hooks<VoidPointer>::auto_member_hook_type
                                , &value_type::auto_node_
                                >
@@ -725,4 +721,3 @@ int main()
    test_main_template<smart_ptr<void>, true, false>()();
    return boost::report_errors();
 }
-#include <boost/intrusive/detail/config_end.hpp>

@@ -9,7 +9,6 @@
 // See http://www.boost.org/libs/intrusive for documentation.
 //
 /////////////////////////////////////////////////////////////////////////////
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/detail/lightweight_test.hpp>
 #include <cstddef>
 
@@ -215,5 +214,3 @@ int main()
    test_sizes(boolean< pow2_and_equal_sizes<std::size_t, void*>::value >(), sizeof(std::size_t));
    return ::boost::report_errors();
 }
-
-#include <boost/intrusive/detail/config_end.hpp>
