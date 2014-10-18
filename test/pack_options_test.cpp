@@ -7,7 +7,6 @@
 // See http://www.boost.org/libs/intrusive for documentation.
 //
 //////////////////////////////////////////////////////////////////////////////
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/pack_options.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/static_assert.hpp>
@@ -54,5 +53,3 @@ int main()
 {
    return 0;
 }
-
-#include <boost/intrusive/detail/config_end.hpp>
