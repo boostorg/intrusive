@@ -53,7 +53,6 @@ struct key_nodeptr_comp
    const T & key_forward(const T &key, typename enable_if_c<!is_node_ptr<T>::value>::type* = 0) const
    {  return key;  }
 
-
    template<class KeyType, class KeyType2>
    bool operator()(const KeyType &key1, const KeyType2 &key2) const
    {  return base_t::get()(this->key_forward(key1), this->key_forward(key2));  }
