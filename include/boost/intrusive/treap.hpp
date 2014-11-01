@@ -90,7 +90,7 @@ class treap_impl
    /// @cond
    typedef bstree_impl< ValueTraits, VoidOrKeyComp, SizeType
                       , ConstantTimeSize, BsTreeAlgorithms
-                      , HeaderHolder>                               tree_type;
+                      , HeaderHolder>                                tree_type;
    typedef tree_type                                                 implementation_defined;
    typedef get_prio
                < VoidOrPrioComp
@@ -184,7 +184,7 @@ class treap_impl
 
    //! @copydoc ::boost::intrusive::bstree::bstree(bstree &&)
    treap_impl(BOOST_RV_REF(treap_impl) x)
-      : tree_type(::boost::move(static_cast<tree_type&>(x)))
+      : tree_type(BOOST_MOVE_BASE(tree_type, x))
       , prio_base(::boost::move(x.priv_pcomp()))
    {}
 
@@ -1096,8 +1096,6 @@ struct make_treap
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
-   typedef typename detail::get_header_holder_type
-      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
 
    typedef treap_impl
          < value_traits
@@ -1105,7 +1103,7 @@ struct make_treap
          , typename packed_options::priority
          , typename packed_options::size_type
          , packed_options::constant_time_size
-         , header_holder_type
+         , typename packed_options::header_holder_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -1164,11 +1162,11 @@ class treap
    {}
 
    treap(BOOST_RV_REF(treap) x)
-      :  Base(::boost::move(static_cast<Base&>(x)))
+      :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
    treap& operator=(BOOST_RV_REF(treap) x)
-   {  return static_cast<treap&>(this->Base::operator=(::boost::move(static_cast<Base&>(x))));  }
+   {  return static_cast<treap&>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    static treap &container_from_end_iterator(iterator end_iterator)
    {  return static_cast<treap &>(Base::container_from_end_iterator(end_iterator));   }

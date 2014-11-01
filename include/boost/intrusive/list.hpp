@@ -104,7 +104,8 @@ class list_impl
    typedef typename node_traits::node_ptr                            node_ptr;
    typedef typename node_traits::const_node_ptr                      const_node_ptr;
    typedef circular_list_algorithms<node_traits>                     node_algorithms;
-   typedef HeaderHolder                                              header_holder_type;
+   typedef typename detail::get_header_holder_type
+      < value_traits, HeaderHolder >::type                           header_holder_type;
 
    static const bool constant_time_size = ConstantTimeSize;
    static const bool stateful_value_traits = detail::is_stateful_value_traits<value_traits>::value;
@@ -1475,15 +1476,12 @@ struct make_list
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
-   typedef typename detail::get_header_holder_type
-      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
-
    typedef list_impl
       <
          value_traits,
          typename packed_options::size_type,
          packed_options::constant_time_size,
-         header_holder_type
+         typename packed_options::header_holder_type
       > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -1533,11 +1531,11 @@ class list
    {}
 
    list(BOOST_RV_REF(list) x)
-      :  Base(::boost::move(static_cast<Base&>(x)))
+      :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
    list& operator=(BOOST_RV_REF(list) x)
-   {  return static_cast<list &>(this->Base::operator=(::boost::move(static_cast<Base&>(x))));  }
+   {  return static_cast<list &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    static list &container_from_end_iterator(iterator end_iterator)
    {  return static_cast<list &>(Base::container_from_end_iterator(end_iterator));   }

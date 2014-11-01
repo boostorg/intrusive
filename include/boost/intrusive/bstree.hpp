@@ -94,7 +94,8 @@ struct bstbase3
    typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<pointer>::reference)                  reference;
    typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<const_pointer>::reference)            const_reference;
    typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<const_pointer>::difference_type)      difference_type;
-   typedef HeaderHolder                                                                        header_holder_type;
+   typedef typename detail::get_header_holder_type
+      < value_traits,HeaderHolder >::type                                                       header_holder_type;
 
    static const bool safemode_or_autounlink = is_safe_autounlink<value_traits::link_mode>::value;
    static const bool stateful_value_traits = detail::is_stateful_value_traits<value_traits>::value;
@@ -246,7 +247,7 @@ struct bstbase2
                             >::type>
    , public bstbase3<ValueTraits, AlgoType, HeaderHolder>
 {
-   typedef bstbase3<ValueTraits, AlgoType, HeaderHolder>            treeheader_t;
+   typedef bstbase3<ValueTraits, AlgoType, HeaderHolder>             treeheader_t;
    typedef typename treeheader_t::value_traits                       value_traits;
    typedef typename treeheader_t::node_algorithms                    node_algorithms;
    typedef typename get_less
@@ -2085,8 +2086,6 @@ struct make_bstree
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
-   typedef typename detail::get_header_holder_type
-      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
 
    typedef bstree_impl
          < value_traits
@@ -2094,7 +2093,7 @@ struct make_bstree
          , typename packed_options::size_type
          , packed_options::constant_time_size
          , BsTreeAlgorithms
-         , header_holder_type
+         , typename packed_options::header_holder_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -2149,11 +2148,11 @@ class bstree
    {}
 
    bstree(BOOST_RV_REF(bstree) x)
-      :  Base(::boost::move(static_cast<Base&>(x)))
+      :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
    bstree& operator=(BOOST_RV_REF(bstree) x)
-   {  return static_cast<bstree &>(this->Base::operator=(::boost::move(static_cast<Base&>(x))));  }
+   {  return static_cast<bstree &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    static bstree &container_from_end_iterator(iterator end_iterator)
    {  return static_cast<bstree &>(Base::container_from_end_iterator(end_iterator));   }

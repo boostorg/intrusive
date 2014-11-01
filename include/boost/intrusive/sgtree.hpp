@@ -105,7 +105,6 @@ struct h_alpha_t
       //    floor(log2(n)/-log2(alpha))
       //    floor(log2(n)*(1/-log2(alpha)))
       ////////////////////////////////////////////////////////////
-      //return static_cast<std::size_t>(std::log(float(n))*inv_minus_logalpha_);
       return static_cast<std::size_t>(detail::fast_log2(float(n))*inv_minus_logalpha_);
    }
 
@@ -233,7 +232,7 @@ class sgtree_impl
    typedef ValueTraits                                               value_traits;
    /// @cond
    typedef bstree_impl< ValueTraits, VoidOrKeyComp, SizeType
-                      , true, SgTreeAlgorithms, HeaderHolder>       tree_type;
+                      , true, SgTreeAlgorithms, HeaderHolder>        tree_type;
    typedef tree_type                                                 implementation_defined;
 
    /// @endcond
@@ -304,14 +303,14 @@ class sgtree_impl
 
    //! @copydoc ::boost::intrusive::bstree::bstree(bstree &&)
    sgtree_impl(BOOST_RV_REF(sgtree_impl) x)
-      :  tree_type(::boost::move(static_cast<tree_type&>(x))), alpha_traits(x.get_alpha_traits())
+      :  tree_type(BOOST_MOVE_BASE(tree_type, x)), alpha_traits(x.get_alpha_traits())
    {  std::swap(this->get_alpha_traits(), x.get_alpha_traits());   }
 
    //! @copydoc ::boost::intrusive::bstree::operator=(bstree &&)
    sgtree_impl& operator=(BOOST_RV_REF(sgtree_impl) x)
    {
       this->get_alpha_traits() = x.get_alpha_traits();
-      return static_cast<sgtree_impl&>(tree_type::operator=(::boost::move(static_cast<tree_type&>(x))));
+      return static_cast<sgtree_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x)));
    }
 
    /// @cond
@@ -898,15 +897,13 @@ struct make_sgtree
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
-   typedef typename detail::get_header_holder_type
-      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
 
    typedef sgtree_impl
          < value_traits
          , typename packed_options::compare
          , typename packed_options::size_type
          , packed_options::floating_point
-         , header_holder_type
+         , typename packed_options::header_holder_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -963,11 +960,11 @@ class sgtree
    {}
 
    sgtree(BOOST_RV_REF(sgtree) x)
-      :  Base(::boost::move(static_cast<Base&>(x)))
+      :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
    sgtree& operator=(BOOST_RV_REF(sgtree) x)
-   {  return static_cast<sgtree &>(this->Base::operator=(::boost::move(static_cast<Base&>(x))));  }
+   {  return static_cast<sgtree &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    static sgtree &container_from_end_iterator(iterator end_iterator)
    {  return static_cast<sgtree &>(Base::container_from_end_iterator(end_iterator));   }

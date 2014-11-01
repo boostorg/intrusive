@@ -139,7 +139,8 @@ class slist_impl
    typedef typename node_traits::node                                node;
    typedef typename node_traits::node_ptr                            node_ptr;
    typedef typename node_traits::const_node_ptr                      const_node_ptr;
-   typedef HeaderHolder                                             header_holder_type;
+   typedef typename detail::get_header_holder_type
+      < value_traits, HeaderHolder >::type                           header_holder_type;
 
    static const bool constant_time_size = 0 != (BoolFlags & slist_bool_flags::constant_time_size_pos);
    static const bool stateful_value_traits = detail::is_stateful_value_traits<value_traits>::value;
@@ -2184,17 +2185,16 @@ struct make_slist
          Options...
          #endif
       >::type packed_options;
+
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
-   typedef typename detail::get_header_holder_type
-      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
    typedef slist_impl
       < value_traits
       , typename packed_options::size_type
       ,  (std::size_t(packed_options::linear)*slist_bool_flags::linear_pos)
         |(std::size_t(packed_options::constant_time_size)*slist_bool_flags::constant_time_size_pos)
         |(std::size_t(packed_options::cache_last)*slist_bool_flags::cache_last_pos)
-      , header_holder_type
+      , typename packed_options::header_holder_type
       > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -2253,11 +2253,11 @@ class slist
    {}
 
    slist(BOOST_RV_REF(slist) x)
-      :  Base(::boost::move(static_cast<Base&>(x)))
+      :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
    slist& operator=(BOOST_RV_REF(slist) x)
-   {  return static_cast<slist &>(this->Base::operator=(::boost::move(static_cast<Base&>(x))));  }
+   {  return static_cast<slist &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    static slist &container_from_end_iterator(iterator end_iterator)
    {  return static_cast<slist &>(Base::container_from_end_iterator(end_iterator));   }

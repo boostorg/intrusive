@@ -156,13 +156,13 @@ class unordered_set_impl
    //! <b>Effects</b>: to-do
    //!
    unordered_set_impl(BOOST_RV_REF(unordered_set_impl) x)
-      :  table_type(::boost::move(static_cast<table_type&>(x)))
+      :  table_type(BOOST_MOVE_BASE(table_type, x))
    {}
 
    //! <b>Effects</b>: to-do
    //!
    unordered_set_impl& operator=(BOOST_RV_REF(unordered_set_impl) x)
-   {  return static_cast<unordered_set_impl&>(table_type::operator=(::boost::move(static_cast<table_type&>(x)))); }
+   {  return static_cast<unordered_set_impl&>(table_type::operator=(BOOST_MOVE_BASE(table_type, x))); }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! <b>Effects</b>: Detaches all elements from this. The objects in the unordered_set
@@ -1110,11 +1110,11 @@ class unordered_set
    {}
 
    unordered_set(BOOST_RV_REF(unordered_set) x)
-      :  Base(::boost::move(static_cast<Base&>(x)))
+      :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
    unordered_set& operator=(BOOST_RV_REF(unordered_set) x)
-   {  return static_cast<unordered_set&>(this->Base::operator=(::boost::move(static_cast<Base&>(x))));  }
+   {  return static_cast<unordered_set&>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 };
 
 #endif
@@ -1249,13 +1249,13 @@ class unordered_multiset_impl
    //! <b>Effects</b>: to-do
    //!
    unordered_multiset_impl(BOOST_RV_REF(unordered_multiset_impl) x)
-      :  table_type(::boost::move(static_cast<table_type&>(x)))
+      :  table_type(BOOST_MOVE_BASE(table_type, x))
    {}
 
    //! <b>Effects</b>: to-do
    //!
    unordered_multiset_impl& operator=(BOOST_RV_REF(unordered_multiset_impl) x)
-   {  return static_cast<unordered_multiset_impl&>(table_type::operator=(::boost::move(static_cast<table_type&>(x))));  }
+   {  return static_cast<unordered_multiset_impl&>(table_type::operator=(BOOST_MOVE_BASE(table_type, x)));  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
@@ -2146,11 +2146,11 @@ class unordered_multiset
    {}
 
    unordered_multiset(BOOST_RV_REF(unordered_multiset) x)
-      :  Base(::boost::move(static_cast<Base&>(x)))
+      :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
    unordered_multiset& operator=(BOOST_RV_REF(unordered_multiset) x)
-   {  return static_cast<unordered_multiset&>(this->Base::operator=(::boost::move(static_cast<Base&>(x))));  }
+   {  return static_cast<unordered_multiset&>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 };
 
 #endif

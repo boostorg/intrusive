@@ -117,13 +117,13 @@ class treap_set_impl
    //! <b>Effects</b>: to-do
    //!
    treap_set_impl(BOOST_RV_REF(treap_set_impl) x)
-      :  tree_type(::boost::move(static_cast<tree_type&>(x)))
+      :  tree_type(BOOST_MOVE_BASE(tree_type, x))
    {}
 
    //! <b>Effects</b>: to-do
    //!
    treap_set_impl& operator=(BOOST_RV_REF(treap_set_impl) x)
-   {  return static_cast<treap_set_impl&>(tree_type::operator=(::boost::move(static_cast<tree_type&>(x))));  }
+   {  return static_cast<treap_set_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x)));  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::treap::~treap()
@@ -443,8 +443,6 @@ struct make_treap_set
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
-   typedef typename detail::get_header_holder_type
-      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
 
    typedef treap_set_impl
          < value_traits
@@ -452,7 +450,7 @@ struct make_treap_set
          , typename packed_options::priority
          , typename packed_options::size_type
          , packed_options::constant_time_size
-         , header_holder_type
+         , typename packed_options::header_holder_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -509,11 +507,11 @@ class treap_set
    {}
 
    treap_set(BOOST_RV_REF(treap_set) x)
-      :  Base(::boost::move(static_cast<Base&>(x)))
+      :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
    treap_set& operator=(BOOST_RV_REF(treap_set) x)
-   {  return static_cast<treap_set &>(this->Base::operator=(::boost::move(static_cast<Base&>(x))));  }
+   {  return static_cast<treap_set &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    static treap_set &container_from_end_iterator(iterator end_iterator)
    {  return static_cast<treap_set &>(Base::container_from_end_iterator(end_iterator));   }
@@ -620,13 +618,13 @@ class treap_multiset_impl
    //! <b>Effects</b>: to-do
    //!
    treap_multiset_impl(BOOST_RV_REF(treap_multiset_impl) x)
-      :  tree_type(::boost::move(static_cast<tree_type&>(x)))
+      :  tree_type(BOOST_MOVE_BASE(tree_type, x))
    {}
 
    //! <b>Effects</b>: to-do
    //!
    treap_multiset_impl& operator=(BOOST_RV_REF(treap_multiset_impl) x)
-   {  return static_cast<treap_multiset_impl&>(tree_type::operator=(::boost::move(static_cast<tree_type&>(x))));  }
+   {  return static_cast<treap_multiset_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x)));  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::treap::~treap()
@@ -913,8 +911,6 @@ struct make_treap_multiset
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
-   typedef typename detail::get_header_holder_type
-      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
 
    typedef treap_multiset_impl
          < value_traits
@@ -922,7 +918,7 @@ struct make_treap_multiset
          , typename packed_options::priority
          , typename packed_options::size_type
          , packed_options::constant_time_size
-         , header_holder_type
+         , typename packed_options::header_holder_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -979,11 +975,11 @@ class treap_multiset
    {}
 
    treap_multiset(BOOST_RV_REF(treap_multiset) x)
-      :  Base(::boost::move(static_cast<Base&>(x)))
+      :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
    treap_multiset& operator=(BOOST_RV_REF(treap_multiset) x)
-   {  return static_cast<treap_multiset &>(this->Base::operator=(::boost::move(static_cast<Base&>(x))));  }
+   {  return static_cast<treap_multiset &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    static treap_multiset &container_from_end_iterator(iterator end_iterator)
    {  return static_cast<treap_multiset &>(Base::container_from_end_iterator(end_iterator));   }

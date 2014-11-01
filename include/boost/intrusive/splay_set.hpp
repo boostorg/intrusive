@@ -95,12 +95,12 @@ class splay_set_impl
 
    //! @copydoc ::boost::intrusive::splaytree::splaytree(splaytree &&)
    splay_set_impl(BOOST_RV_REF(splay_set_impl) x)
-      :  tree_type(::boost::move(static_cast<tree_type&>(x)))
+      :  tree_type(BOOST_MOVE_BASE(tree_type, x))
    {}
 
    //! @copydoc ::boost::intrusive::splaytree::operator=(splaytree &&)
    splay_set_impl& operator=(BOOST_RV_REF(splay_set_impl) x)
-   {  return static_cast<splay_set_impl&>(tree_type::operator=(::boost::move(static_cast<tree_type&>(x)))); }
+   {  return static_cast<splay_set_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x))); }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::splaytree::~splaytree()
@@ -439,15 +439,13 @@ struct make_splay_set
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
-   typedef typename detail::get_header_holder_type
-      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
 
    typedef splay_set_impl
          < value_traits
          , typename packed_options::compare
          , typename packed_options::size_type
          , packed_options::constant_time_size
-         , header_holder_type
+         , typename packed_options::header_holder_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;
@@ -896,15 +894,13 @@ struct make_splay_multiset
 
    typedef typename detail::get_value_traits
       <T, typename packed_options::proto_value_traits>::type value_traits;
-   typedef typename detail::get_header_holder_type
-      < value_traits, typename packed_options::header_holder_type >::type header_holder_type;
 
    typedef splay_multiset_impl
          < value_traits
          , typename packed_options::compare
          , typename packed_options::size_type
          , packed_options::constant_time_size
-         , header_holder_type
+         , typename packed_options::header_holder_type
          > implementation_defined;
    /// @endcond
    typedef implementation_defined type;

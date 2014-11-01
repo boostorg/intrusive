@@ -3287,11 +3287,11 @@ class hashtable
    {}
 
    hashtable(BOOST_RV_REF(hashtable) x)
-      :  Base(::boost::move(static_cast<Base&>(x)))
+      :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
    hashtable& operator=(BOOST_RV_REF(hashtable) x)
-   {  return static_cast<hashtable&>(this->Base::operator=(::boost::move(static_cast<Base&>(x))));  }
+   {  return static_cast<hashtable&>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 };
 
 #endif
