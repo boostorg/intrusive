@@ -37,8 +37,7 @@ struct fhtraits;
 template<class T, class Hook, Hook T::* P>
 struct mhtraits;
 
-//typedef void default_tag;
-struct default_tag;
+struct dft_tag;
 struct member_tag;
 
 template<class SupposedValueTraits>
@@ -231,7 +230,7 @@ struct hook_defaults
 {
    typedef void* void_pointer;
    static const link_mode_type link_mode = safe_link;
-   typedef default_tag tag;
+   typedef dft_tag tag;
    static const bool optimize_size = false;
    static const bool store_hash = false;
    static const bool linear = false;
