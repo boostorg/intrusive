@@ -49,6 +49,9 @@ class tree_iterator
    static const bool stateful_value_traits = types_t::stateful_value_traits;
    typedef bstree_algorithms<node_traits>                node_algorithms;
 
+   void unspecified_bool_type_func() const {}
+   typedef void (tree_iterator::*unspecified_bool_type)() const;
+
    public:
    typedef typename types_t::iterator_traits::difference_type    difference_type;
    typedef typename types_t::iterator_traits::value_type         value_type;
@@ -99,6 +102,21 @@ class tree_iterator
       members_.nodeptr_ = node_algorithms::prev_node(members_.nodeptr_);
       return result;
    }
+
+   void go_left()
+   { members_.nodeptr_ = node_traits::get_left(members_.nodeptr_); }
+
+   void go_right()
+   { members_.nodeptr_ = node_traits::get_right(members_.nodeptr_); }
+
+   void go_parent()
+   { members_.nodeptr_ = node_traits::get_parent(members_.nodeptr_); }
+
+   operator unspecified_bool_type() const
+   {  return members_.nodeptr_ ? &tree_iterator::unspecified_bool_type_func : 0;   }
+
+   bool operator! () const
+   {  return !members_.nodeptr_;   }
 
    friend bool operator== (const tree_iterator& l, const tree_iterator& r)
    { return l.pointed_node() == r.pointed_node(); }
