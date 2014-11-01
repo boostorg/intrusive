@@ -26,5 +26,9 @@
 //Macros for documentation purposes. For code, expands to the argument
 #define BOOST_INTRUSIVE_IMPDEF(TYPE) TYPE
 #define BOOST_INTRUSIVE_SEEDOC(TYPE) TYPE
+#define BOOST_INTRUSIVE_DOC1ST(TYPE1, TYPE2) TYPE2
+#define BOOST_INTRUSIVE_I ,
+#define BOOST_INTRUSIVE_DOCIGN(T1) T1
+
 
 #endif   //#ifndef BOOST_INTRUSIVE_DETAIL_WRKRND_HPP
