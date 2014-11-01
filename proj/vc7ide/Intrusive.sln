@@ -127,6 +127,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "null_iterator", "null_itera
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "map_test", "..\..\..\container\proj\vc7ide\map_test.vcproj", "{58CCE183-6092-48FE-A4F7-BA0D3A792606}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -263,6 +267,10 @@ Global
 		{32A79B10-B2A0-C1B8-9458-9456152413B5}.Debug.Build.0 = Debug|Win32
 		{32A79B10-B2A0-C1B8-9458-9456152413B5}.Release.ActiveCfg = Release|Win32
 		{32A79B10-B2A0-C1B8-9458-9456152413B5}.Release.Build.0 = Release|Win32
+		{58CCE183-6092-48FE-A4F7-BA0D3A792606}.Debug.ActiveCfg = Debug|Win32
+		{58CCE183-6092-48FE-A4F7-BA0D3A792606}.Debug.Build.0 = Debug|Win32
+		{58CCE183-6092-48FE-A4F7-BA0D3A792606}.Release.ActiveCfg = Release|Win32
+		{58CCE183-6092-48FE-A4F7-BA0D3A792606}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
