@@ -228,13 +228,13 @@ struct bstbase3
 };
 
 template<class Less, class T>
-struct get_less
+struct get_compare
 {
    typedef Less type;
 };
 
 template<class T>
-struct get_less<void, T>
+struct get_compare<void, T>
 {
    typedef ::std::less<T> type;
 };
@@ -242,7 +242,7 @@ struct get_less<void, T>
 template<class ValueTraits, class VoidOrKeyComp, algo_types AlgoType, typename HeaderHolder>
 struct bstbase2
    //Put the (possibly empty) functor in the first position to get EBO in MSVC
-   : public detail::ebo_functor_holder<typename get_less< VoidOrKeyComp
+   : public detail::ebo_functor_holder<typename get_compare< VoidOrKeyComp
                             , typename ValueTraits::value_type
                             >::type>
    , public bstbase3<ValueTraits, AlgoType, HeaderHolder>
@@ -250,7 +250,7 @@ struct bstbase2
    typedef bstbase3<ValueTraits, AlgoType, HeaderHolder>             treeheader_t;
    typedef typename treeheader_t::value_traits                       value_traits;
    typedef typename treeheader_t::node_algorithms                    node_algorithms;
-   typedef typename get_less
+   typedef typename get_compare
       < VoidOrKeyComp, typename value_traits::value_type>::type      value_compare;
    typedef BOOST_INTRUSIVE_IMPDEF(value_compare)                     key_compare;
    typedef typename treeheader_t::iterator                           iterator;
@@ -268,7 +268,7 @@ struct bstbase2
    value_compare &comp()
    {  return this->get();  }
 
-   typedef BOOST_INTRUSIVE_IMPDEF(typename value_traits::pointer)                          pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename value_traits::pointer)                               pointer;
    typedef BOOST_INTRUSIVE_IMPDEF(typename value_traits::const_pointer)                         const_pointer;
    typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<pointer>::element_type)               value_type;
    typedef BOOST_INTRUSIVE_IMPDEF(value_type)                                                   key_type;
