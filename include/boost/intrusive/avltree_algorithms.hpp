@@ -50,6 +50,13 @@ struct avltree_node_cloner
       NodeTraits::set_balance(n, NodeTraits::get_balance(p));
       return n;
    }
+
+   node_ptr operator()(const node_ptr & p) const
+   {
+      node_ptr n = base_t::get()(p);
+      NodeTraits::set_balance(n, NodeTraits::get_balance(p));
+      return n;
+   }
 };
 
 namespace detail {
