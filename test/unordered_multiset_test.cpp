@@ -12,6 +12,7 @@
 /////////////////////////////////////////////////////////////////////////////
 #include <boost/intrusive/unordered_set.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
+#include <boost/intrusive/detail/iterator.hpp>
 #include "itestvalue.hpp"
 #include "smart_ptr.hpp"
 #include "common_functors.hpp"
@@ -19,6 +20,7 @@
 #include <algorithm> //std::sort std::find
 #include <set>
 #include <boost/detail/lightweight_test.hpp>
+
 #include "test_macros.hpp"
 #include "test_container.hpp"
 
@@ -367,7 +369,7 @@ void test_unordered_multiset<ValueTraits, CacheBegin, CompareHash, Incremental>
             }
 
             //Erase the same values in both the intrusive and original vector
-            std::size_t erased_cnt = std::distance(it_beg_pos, it_end_pos);
+            std::size_t erased_cnt = boost::intrusive::iterator_distance(it_beg_pos, it_end_pos);
 
             //Erase values from the intrusive container
             testset.erase(it_beg_pos, it_end_pos);
@@ -671,7 +673,7 @@ void test_unordered_multiset<ValueTraits, CacheBegin, CompareHash, Incremental>:
 
    BOOST_TEST (range.first->value_ == 2);
    BOOST_TEST (range.second->value_ == 3);
-   BOOST_TEST (std::distance (range.first, range.second) == 2);
+   BOOST_TEST (boost::intrusive::iterator_distance (range.first, range.second) == 2);
 
    cmp_val.value_ = 7;
    BOOST_TEST (testset.find (cmp_val) == testset.end());

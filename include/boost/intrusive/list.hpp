@@ -97,8 +97,8 @@ class list_impl
    typedef SizeType                                                  size_type;
    typedef list_iterator<value_traits, false>                        iterator;
    typedef list_iterator<value_traits, true>                         const_iterator;
-   typedef boost::intrusive::detail::reverse_iterator<iterator>      reverse_iterator;
-   typedef boost::intrusive::detail::reverse_iterator<const_iterator>const_reverse_iterator;
+   typedef boost::intrusive::reverse_iterator<iterator>              reverse_iterator;
+   typedef boost::intrusive::reverse_iterator<const_iterator>        const_reverse_iterator;
    typedef typename value_traits::node_traits                        node_traits;
    typedef typename node_traits::node                                node;
    typedef typename node_traits::node_ptr                            node_ptr;
@@ -187,7 +187,7 @@ class list_impl
    //!
    //! <b>Effects</b>: Constructs a list equal to the range [first,last).
    //!
-   //! <b>Complexity</b>: Linear in std::distance(b, e). No copy constructors are called.
+   //! <b>Complexity</b>: Linear in distance(b, e). No copy constructors are called.
    //!
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks).
@@ -604,7 +604,7 @@ class list_impl
    }
 
    //! <b>Requires</b>: b and e must be valid iterators to elements in *this.
-   //!   n must be std::distance(b, e).
+   //!   n must be distance(b, e).
    //!
    //! <b>Effects</b>: Erases the element range pointed by b and e
    //! No destructors are called.
@@ -915,12 +915,12 @@ class list_impl
       if(constant_time_size)
          this->splice(p, x, f, e, node_algorithms::distance(f.pointed_node(), e.pointed_node()));
       else
-         this->splice(p, x, f, e, 1);//distance is a dummy value
+         this->splice(p, x, f, e, 1);//intrusive::iterator_distance is a dummy value
    }
 
    //! <b>Requires</b>: p must be a valid iterator of *this.
    //!   f and e must point to elements contained in list x.
-   //!   n == std::distance(f, e)
+   //!   n == distance(f, e)
    //!
    //! <b>Effects</b>: Transfers the range pointed by f and e from list x to this list,
    //!   before the element pointed by p. No destructors or copy constructors are called.

@@ -293,6 +293,9 @@
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\is_stateful_value_traits.hpp">
 				</File>
 				<File
+					RelativePath="..\..\..\..\..\boost\intrusive\detail\iterator.hpp">
+				</File>
+				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\key_nodeptr_comp.hpp">
 				</File>
 				<File

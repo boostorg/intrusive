@@ -1660,7 +1660,7 @@ class hashtable_impl
    //!
    //! <b>Effects</b>: Equivalent to this->insert_equal(t) for each element in [b, e).
    //!
-   //! <b>Complexity</b>: Average case O(N), where N is std::distance(b, e).
+   //! <b>Complexity</b>: Average case O(N), where N is distance(b, e).
    //!   Worst case O(N*this->size()).
    //!
    //! <b>Throws</b>: If the internal hasher or the equality functor throws. Basic guarantee.
@@ -1706,7 +1706,7 @@ class hashtable_impl
    //!
    //! <b>Effects</b>: Equivalent to this->insert_unique(t) for each element in [b, e).
    //!
-   //! <b>Complexity</b>: Average case O(N), where N is std::distance(b, e).
+   //! <b>Complexity</b>: Average case O(N), where N is distance(b, e).
    //!   Worst case O(N*this->size()).
    //!
    //! <b>Throws</b>: If the internal hasher or the equality functor throws. Basic guarantee.
@@ -1819,7 +1819,7 @@ class hashtable_impl
 
    //! <b>Effects</b>: Erases the range pointed to by b end e.
    //!
-   //! <b>Complexity</b>: Average case O(std::distance(b, e)),
+   //! <b>Complexity</b>: Average case O(distance(b, e)),
    //!   worst case O(this->size()).
    //!
    //! <b>Throws</b>: Nothing.
@@ -1896,7 +1896,7 @@ class hashtable_impl
    //! <b>Effects</b>: Erases the range pointed to by b end e.
    //!   Disposer::operator()(pointer) is called for the removed elements.
    //!
-   //! <b>Complexity</b>: Average case O(std::distance(b, e)),
+   //! <b>Complexity</b>: Average case O(distance(b, e)),
    //!   worst case O(this->size()).
    //!
    //! <b>Throws</b>: Nothing.

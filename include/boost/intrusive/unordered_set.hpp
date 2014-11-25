@@ -134,7 +134,7 @@ class unordered_set_impl
    //! <b>Effects</b>: Constructs an empty unordered_set and inserts elements from
    //!   [b, e).
    //!
-   //! <b>Complexity</b>: If N is std::distance(b, e): Average case is O(N)
+   //! <b>Complexity</b>: If N is distance(b, e): Average case is O(N)
    //!   (with a good hash function and with buckets_len >= N),worst case O(N2).
    //!
    //! <b>Throws</b>: If value_traits::node_traits::node
@@ -325,7 +325,7 @@ class unordered_set_impl
    //!
    //! <b>Effects</b>: Equivalent to this->insert(t) for each element in [b, e).
    //!
-   //! <b>Complexity</b>: Average case O(N), where N is std::distance(b, e).
+   //! <b>Complexity</b>: Average case O(N), where N is distance(b, e).
    //!   Worst case O(N*this->size()).
    //!
    //! <b>Throws</b>: If the internal hasher or the equality functor throws. Basic guarantee.
@@ -413,7 +413,7 @@ class unordered_set_impl
 
    //! <b>Effects</b>: Erases the range pointed to by b end e.
    //!
-   //! <b>Complexity</b>: Average case O(std::distance(b, e)),
+   //! <b>Complexity</b>: Average case O(distance(b, e)),
    //!   worst case O(this->size()).
    //!
    //! <b>Throws</b>: Nothing.
@@ -485,7 +485,7 @@ class unordered_set_impl
    //! <b>Effects</b>: Erases the range pointed to by b end e.
    //!   Disposer::operator()(pointer) is called for the removed elements.
    //!
-   //! <b>Complexity</b>: Average case O(std::distance(b, e)),
+   //! <b>Complexity</b>: Average case O(distance(b, e)),
    //!   worst case O(this->size()).
    //!
    //! <b>Throws</b>: Nothing.
@@ -1227,7 +1227,7 @@ class unordered_multiset_impl
    //! <b>Effects</b>: Constructs an empty unordered_multiset and inserts elements from
    //!   [b, e).
    //!
-   //! <b>Complexity</b>: If N is std::distance(b, e): Average case is O(N)
+   //! <b>Complexity</b>: If N is distance(b, e): Average case is O(N)
    //!   (with a good hash function and with buckets_len >= N),worst case O(N2).
    //!
    //! <b>Throws</b>: If value_traits::node_traits::node
@@ -1442,7 +1442,7 @@ class unordered_multiset_impl
 
    //! <b>Effects</b>: Erases the range pointed to by b end e.
    //!
-   //! <b>Complexity</b>: Average case O(std::distance(b, e)),
+   //! <b>Complexity</b>: Average case O(distance(b, e)),
    //!   worst case O(this->size()).
    //!
    //! <b>Throws</b>: Nothing.
@@ -1521,7 +1521,7 @@ class unordered_multiset_impl
    //! <b>Effects</b>: Erases the range pointed to by b end e.
    //!   Disposer::operator()(pointer) is called for the removed elements.
    //!
-   //! <b>Complexity</b>: Average case O(std::distance(b, e)),
+   //! <b>Complexity</b>: Average case O(distance(b, e)),
    //!   worst case O(this->size()).
    //!
    //! <b>Throws</b>: Nothing.

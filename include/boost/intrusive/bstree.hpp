@@ -85,8 +85,8 @@ struct bstbase3
    typedef typename node_traits::const_node_ptr                      const_node_ptr;
    typedef tree_iterator<value_traits, false>                                                   iterator;
    typedef tree_iterator<value_traits, true>                                                    const_iterator;
-   typedef boost::intrusive::detail::reverse_iterator<iterator>                                 reverse_iterator;
-   typedef boost::intrusive::detail::reverse_iterator<const_iterator>                           const_reverse_iterator;
+   typedef boost::intrusive::reverse_iterator<iterator>                                         reverse_iterator;
+   typedef boost::intrusive::reverse_iterator<const_iterator>                                   const_reverse_iterator;
    typedef BOOST_INTRUSIVE_IMPDEF(typename value_traits::pointer)                               pointer;
    typedef BOOST_INTRUSIVE_IMPDEF(typename value_traits::const_pointer)                         const_pointer;
    typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<pointer>::element_type)               value_type;
@@ -619,8 +619,8 @@ class bstree_impl
    typedef BOOST_INTRUSIVE_IMPDEF(value_compare)                                                key_compare;
    typedef BOOST_INTRUSIVE_IMPDEF(iterator_type)                                                iterator;
    typedef BOOST_INTRUSIVE_IMPDEF(const_iterator_type)                                          const_iterator;
-   typedef BOOST_INTRUSIVE_IMPDEF(boost::intrusive::detail::reverse_iterator<iterator>)         reverse_iterator;
-   typedef BOOST_INTRUSIVE_IMPDEF(boost::intrusive::detail::reverse_iterator<const_iterator>)   const_reverse_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(boost::intrusive::reverse_iterator<iterator>)                 reverse_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(boost::intrusive::reverse_iterator<const_iterator>)           const_reverse_iterator;
    typedef BOOST_INTRUSIVE_IMPDEF(typename value_traits::node_traits)                           node_traits;
    typedef BOOST_INTRUSIVE_IMPDEF(typename node_traits::node)                                   node;
    typedef BOOST_INTRUSIVE_IMPDEF(typename node_traits::node_ptr)                               node_ptr;

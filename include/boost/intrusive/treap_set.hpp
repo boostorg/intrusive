@@ -101,7 +101,7 @@ class treap_set_impl
    //!   [b, e).
    //!
    //! <b>Complexity</b>: Linear in N if [b, e) is already sorted using
-   //!   comp and otherwise N * log N, where N is std::distance(last, first).
+   //!   comp and otherwise N * log N, where N is distance(last, first).
    //!
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks)
@@ -602,7 +602,7 @@ class treap_multiset_impl
    //!   [b, e).
    //!
    //! <b>Complexity</b>: Linear in N if [b, e) is already sorted using
-   //!   comp and otherwise N * log N, where N is std::distance(last, first).
+   //!   comp and otherwise N * log N, where N is distance(last, first).
    //!
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks)

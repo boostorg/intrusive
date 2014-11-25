@@ -1,4 +1,3 @@
-/*
 /////////////////////////////////////////////////////////////////////////////
 //
 // (C) Copyright Olaf Krzikalla 2004-2006.
@@ -540,12 +539,4 @@ int main()
    test_main_template_bptr< false >()();
 
    return boost::report_errors();
-}
-*/
-
-#include <boost/intrusive/list_hook.hpp>
-
-int main()
-{
-   return 0;
 }

@@ -12,6 +12,7 @@
 /////////////////////////////////////////////////////////////////////////////
 #include <boost/intrusive/unordered_set.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
+#include <boost/intrusive/detail/iterator.hpp>
 #include "itestvalue.hpp"
 #include "smart_ptr.hpp"
 #include "common_functors.hpp"
@@ -180,7 +181,7 @@ void test_unordered_set<ValueTraits, CacheBegin, CompareHash, Incremental>::
    unordered_set_type testset1(values.begin(), values.end(), bucket_traits(
       pointer_traits<typename unordered_set_type::bucket_ptr>::
          pointer_to(buckets[0]), BucketSize));
-   BOOST_TEST (5 == std::distance(testset1.begin(), testset1.end()));
+   BOOST_TEST (5 == boost::intrusive::iterator_distance(testset1.begin(), testset1.end()));
 
    if(Incremental){
       {  int init_values [] = { 4, 5, 1, 2, 3 };
@@ -525,7 +526,7 @@ void test_unordered_set<ValueTraits, CacheBegin, CompareHash, Incremental>::
 
    BOOST_TEST (range.first->value_ == 2);
    BOOST_TEST (range.second->value_ == 3);
-   BOOST_TEST (std::distance (range.first, range.second) == 1);
+   BOOST_TEST (boost::intrusive::iterator_distance (range.first, range.second) == 1);
 
    cmp_val.value_ = 7;
    BOOST_TEST (testset.find (cmp_val) == testset.end());

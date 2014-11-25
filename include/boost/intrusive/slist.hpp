@@ -32,6 +32,7 @@
 #include <boost/intrusive/detail/default_header_holder.hpp>
 #include <boost/intrusive/detail/uncast.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
+#include <boost/intrusive/detail/iterator.hpp>
 #include <boost/intrusive/detail/slist_iterator.hpp>
 #include <boost/intrusive/detail/array_initializer.hpp>
 #include <boost/intrusive/detail/exception_disposer.hpp>
@@ -314,7 +315,7 @@ class slist_impl
    //!
    //! <b>Effects</b>: Constructs a list equal to [b ,e).
    //!
-   //! <b>Complexity</b>: Linear in std::distance(b, e). No copy constructors are called.
+   //! <b>Complexity</b>: Linear in distance(b, e). No copy constructors are called.
    //!
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks).
@@ -908,7 +909,7 @@ class slist_impl
    }
 
    //! <b>Effects</b>: Erases the range (before_f, l) from
-   //!   the list. n must be std::distance(before_f, l) - 1.
+   //!   the list. n must be distance(before_f, l) - 1.
    //!   No destructors are called.
    //!
    //! <b>Returns</b>: the first element remaining beyond the removed elements,
@@ -976,7 +977,7 @@ class slist_impl
    {  return this->erase_after(this->previous(f), l);  }
 
    //! <b>Effects</b>: Erases the range [f, l) from
-   //!   the list. n must be std::distance(f, l).
+   //!   the list. n must be distance(f, l).
    //!   No destructors are called.
    //!
    //! <b>Returns</b>: the first element remaining beyond the removed elements,
@@ -1266,7 +1267,7 @@ class slist_impl
    //! <b>Requires</b>: prev_pos must be a dereferenceable iterator in *this or be
    //!   before_begin(), and before_f and before_l belong to x and
    //!   ++before_f != x.end() && before_l != x.end() and
-   //!   n == std::distance(before_f, before_l).
+   //!   n == distance(before_f, before_l).
    //!
    //! <b>Effects</b>: Transfers the range (before_f, before_l] from list x to this
    //!   list, after the element pointed by p. No destructors or copy constructors are called.
@@ -1351,7 +1352,7 @@ class slist_impl
 
    //! <b>Requires</b>: pos must be a dereferenceable iterator in *this
    //!   and f and l belong to x and f and l a valid range on x.
-   //!   n == std::distance(f, l).
+   //!   n == distance(f, l).
    //!
    //! <b>Effects</b>: Transfers the range [f, l) from list x to this
    //!   list, before the element pointed by pos.
@@ -1829,7 +1830,7 @@ class slist_impl
 
    //! <b>Requires</b>: prev_pos must be a dereferenceable iterator in *this or be
    //!   before_begin(), and f and before_l belong to another slist.
-   //!   n == std::distance(f, before_l) + 1.
+   //!   n == distance(f, before_l) + 1.
    //!
    //! <b>Effects</b>: Transfers the range [f, before_l] to this
    //!   list, after the element pointed by prev_pos.
@@ -1848,7 +1849,7 @@ class slist_impl
       if(n){
          BOOST_INTRUSIVE_INVARIANT_ASSERT(n > 0);
          BOOST_INTRUSIVE_INVARIANT_ASSERT
-            (size_type(std::distance
+            (size_type(boost::intrusive::iterator_distance
                ( iterator(f, this->priv_value_traits_ptr())
                , iterator(before_l, this->priv_value_traits_ptr())))
             +1 == n);

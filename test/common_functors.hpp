@@ -13,7 +13,7 @@
 #ifndef BOOST_INTRUSIVE_TEST_COMMON_FUNCTORS_HPP
 #define BOOST_INTRUSIVE_TEST_COMMON_FUNCTORS_HPP
 
-#include<boost/intrusive/detail/iiterator.hpp>
+#include<boost/intrusive/detail/iterator.hpp>
 #include<boost/intrusive/detail/mpl.hpp>
 #include<boost/static_assert.hpp>
 
