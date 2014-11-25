@@ -84,9 +84,9 @@ namespace detail {
 
    #if defined(BOOST_HAS_LONG_LONG)
    template<>
-   struct builtin_clz_dispatch<unsigned long long>
+   struct builtin_clz_dispatch< ::boost::ulong_long_type >
    {
-      static unsigned long long call(unsigned long long n)
+      static ::boost::ulong_long_type call(::boost::ulong_long_type n)
       {  return __builtin_clzll(n); }
    };
    #endif

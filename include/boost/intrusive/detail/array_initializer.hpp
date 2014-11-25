@@ -17,6 +17,7 @@
 #  pragma once
 #endif
 
+#include <boost/config.hpp>
 #include <boost/core/no_exceptions_support.hpp>
 
 namespace boost {
@@ -31,7 +32,7 @@ union max_align
    int         int_;
    long        long_;
    #ifdef BOOST_HAS_LONG_LONG
-   long long   long_long_;
+   ::boost::long_long_type  long_long_;
    #endif
    float       float_;
    double      double_;
