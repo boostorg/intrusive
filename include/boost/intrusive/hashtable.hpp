@@ -18,15 +18,7 @@
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
-//std C++
-#include <functional>   //std::equal_to
-#include <utility>      //std::pair
-#include <algorithm>    //std::swap, std::lower_bound, std::upper_bound
-#include <cstddef>      //std::size_t
-//boost
-#include <boost/intrusive/detail/assert.hpp>
-#include <boost/static_assert.hpp>
-#include <boost/functional/hash.hpp>
+
 //General intrusive utilities
 #include <boost/intrusive/detail/hashtable_node.hpp>
 #include <boost/intrusive/detail/transform_iterator.hpp>
@@ -44,7 +36,20 @@
 #include <boost/intrusive/slist.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
+
+//boost
+#include <boost/functional/hash.hpp>
+#include <boost/intrusive/detail/assert.hpp>
+#include <boost/static_assert.hpp>
 #include <boost/move/utility_core.hpp>
+#include <boost/move/adl_move_swap.hpp>
+
+//std C++
+#include <functional>   //std::equal_to
+#include <utility>      //std::pair
+#include <algorithm>    //std::lower_bound, std::upper_bound
+#include <cstddef>      //std::size_t
+
 
 namespace boost {
 namespace intrusive {
@@ -973,7 +978,7 @@ struct bucket_hash_equal_t<VoidOrKeyHash, VoidOrKeyEqual, ValueTraits, BucketTra
 
    void priv_swap_cache(bucket_hash_equal_t &other)
    {
-      std::swap(this->cached_begin_, other.cached_begin_);
+      ::boost::adl_move_swap(this->cached_begin_, other.cached_begin_);
    }
 
    siterator priv_begin() const
@@ -1510,13 +1515,12 @@ class hashtable_impl
    //!   found using ADL throw. Basic guarantee.
    void swap(hashtable_impl& other)
    {
-      using std::swap;
       //These can throw
-      swap(this->priv_equal(),  other.priv_equal());
-      swap(this->priv_hasher(), other.priv_hasher());
+      ::boost::adl_move_swap(this->priv_equal(),  other.priv_equal());
+      ::boost::adl_move_swap(this->priv_hasher(), other.priv_hasher());
       //These can't throw
-      swap(this->priv_bucket_traits(), other.priv_bucket_traits());
-      swap(this->priv_value_traits(), other.priv_value_traits());
+      ::boost::adl_move_swap(this->priv_bucket_traits(), other.priv_bucket_traits());
+      ::boost::adl_move_swap(this->priv_value_traits(), other.priv_value_traits());
       this->priv_swap_cache(other);
       if(constant_time_size){
          size_type backup = this->priv_size_traits().get_size();

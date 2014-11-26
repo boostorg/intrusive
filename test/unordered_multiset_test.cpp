@@ -17,7 +17,7 @@
 #include "smart_ptr.hpp"
 #include "common_functors.hpp"
 #include <vector>
-#include <algorithm> //std::sort std::find
+#include <algorithm> //std::sort
 #include <set>
 #include <boost/detail/lightweight_test.hpp>
 

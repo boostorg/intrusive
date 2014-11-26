@@ -24,12 +24,6 @@
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
-#include <algorithm>
-#include <cstddef>
-#include <functional>
-#include <utility>
-#include <cmath>
-#include <cstddef>
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/intrusive/bs_set_hook.hpp>
@@ -42,7 +36,16 @@
 #include <boost/intrusive/sgtree_algorithms.hpp>
 #include <boost/intrusive/detail/key_nodeptr_comp.hpp>
 #include <boost/intrusive/link_mode.hpp>
+
 #include <boost/move/utility_core.hpp>
+#include <boost/move/adl_move_swap.hpp>
+
+#include <cstddef>
+#include <functional>
+#include <utility>
+#include <cmath>
+#include <cstddef>
+
 
 namespace boost {
 namespace intrusive {
@@ -304,7 +307,7 @@ class sgtree_impl
    //! @copydoc ::boost::intrusive::bstree::bstree(bstree &&)
    sgtree_impl(BOOST_RV_REF(sgtree_impl) x)
       :  tree_type(BOOST_MOVE_BASE(tree_type, x)), alpha_traits(x.get_alpha_traits())
-   {  std::swap(this->get_alpha_traits(), x.get_alpha_traits());   }
+   {  ::boost::adl_move_swap(this->get_alpha_traits(), x.get_alpha_traits());   }
 
    //! @copydoc ::boost::intrusive::bstree::operator=(bstree &&)
    sgtree_impl& operator=(BOOST_RV_REF(sgtree_impl) x)
@@ -402,9 +405,8 @@ class sgtree_impl
    void swap(sgtree_impl& other)
    {
       //This can throw
-      using std::swap;
       this->tree_type::swap(static_cast<tree_type&>(other));
-      swap(this->get_alpha_traits(), other.get_alpha_traits());
+      ::boost::adl_move_swap(this->get_alpha_traits(), other.get_alpha_traits());
    }
 
    //! @copydoc ::boost::intrusive::bstree::clone_from

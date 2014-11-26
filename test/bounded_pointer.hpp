@@ -20,6 +20,7 @@
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/core/no_exceptions_support.hpp>
+#include <boost/move/adl_move_swap.hpp>
 
 template < typename T >
 class bounded_pointer;
@@ -190,7 +191,7 @@ class bounded_reference
 
    // the copy asop is shallow; we need swap overload to shuffle a vector of references
    friend void swap(bounded_reference& lhs, bounded_reference& rhs)
-   {  std::swap(lhs.m_offset, rhs.m_offset); }
+   {  ::boost::adl_move_swap(lhs.m_offset, rhs.m_offset); }
 
    private:
    template <typename> friend class bounded_reference;

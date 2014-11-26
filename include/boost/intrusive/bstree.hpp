@@ -38,15 +38,16 @@
 #include <boost/intrusive/detail/simple_disposers.hpp>
 #include <boost/intrusive/detail/size_holder.hpp>
 #include <boost/intrusive/detail/algo_type.hpp>
+#include <boost/intrusive/detail/algorithm.hpp>
 
 #include <boost/intrusive/detail/get_value_traits.hpp>
 #include <boost/intrusive/bstree_algorithms.hpp>
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/intrusive/parent_from_member.hpp>
 #include <boost/move/utility_core.hpp>
+#include <boost/move/adl_move_swap.hpp>
 
-#include <utility>   //pair,lexicographical_compare
-#include <algorithm> //swap
+#include <utility>   //pair
 #include <cstddef>   //size_t...
 #include <functional>//less, equal_to
 
@@ -912,8 +913,7 @@ class bstree_impl
    void swap(bstree_impl& other)
    {
       //This can throw
-      using std::swap;
-      swap(this->comp(), this->comp());
+      ::boost::adl_move_swap(this->comp(), this->comp());
       //These can't throw
       node_algorithms::swap_tree(this->header_ptr(), node_ptr(other.header_ptr()));
       if(constant_time_size){
@@ -1952,7 +1952,7 @@ inline bool operator<
 ( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> &x
 , const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> &y)
 #endif
-{  return std::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
+{  return ::boost::intrusive::algo_lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
@@ -1968,29 +1968,11 @@ bool operator==
 #endif
 {
    typedef bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> tree_type;
-   typedef typename tree_type::const_iterator const_iterator;
 
    if(tree_type::constant_time_size && x.size() != y.size()){
       return false;
    }
-   const_iterator end1 = x.end();
-   const_iterator i1 = x.begin();
-   const_iterator i2 = y.begin();
-   if(tree_type::constant_time_size){
-      while (i1 != end1 && *i1 == *i2) {
-         ++i1;
-         ++i2;
-      }
-      return i1 == end1;
-   }
-   else{
-      const_iterator end2 = y.end();
-      while (i1 != end1 && i2 != end2 && *i1 == *i2) {
-         ++i1;
-         ++i2;
-      }
-      return i1 == end1 && i2 == end2;
-   }
+   return boost::intrusive::algo_equal(x.cbegin(), x.cend(), y.cbegin(), y.cend());
 }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)

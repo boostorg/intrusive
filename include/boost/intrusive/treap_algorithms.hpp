@@ -25,7 +25,6 @@
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/intrusive/detail/algo_type.hpp>
 #include <boost/intrusive/bstree_algorithms.hpp>
-#include <algorithm>
 
 
 namespace boost {

@@ -233,6 +233,9 @@
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\algo_type.hpp">
 				</File>
 				<File
+					RelativePath="..\..\..\..\..\boost\intrusive\detail\algorithm.hpp">
+				</File>
+				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\any_node_and_algorithms.hpp">
 				</File>
 				<File

@@ -18,13 +18,8 @@
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
-#include <algorithm>
-#include <cstddef>
-#include <functional>
-#include <utility>
 
 #include <boost/intrusive/detail/assert.hpp>
-#include <boost/static_assert.hpp>
 #include <boost/intrusive/bs_set_hook.hpp>
 #include <boost/intrusive/bstree.hpp>
 #include <boost/intrusive/detail/tree_node.hpp>
@@ -34,10 +29,18 @@
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/treap_algorithms.hpp>
 #include <boost/intrusive/link_mode.hpp>
-#include <boost/move/utility_core.hpp>
 #include <boost/intrusive/priority_compare.hpp>
 #include <boost/intrusive/detail/node_cloner_disposer.hpp>
 #include <boost/intrusive/detail/key_nodeptr_comp.hpp>
+
+#include <boost/static_assert.hpp>
+#include <boost/move/utility_core.hpp>
+#include <boost/move/adl_move_swap.hpp>
+
+#include <cstddef>
+#include <functional>
+#include <utility>
+
 
 namespace boost {
 namespace intrusive {
@@ -329,8 +332,7 @@ class treap_impl
    {
       tree_type::swap(other);
       //This can throw
-      using std::swap;
-      swap(this->priv_pcomp(), other.priv_pcomp());
+      ::boost::adl_move_swap(this->priv_pcomp(), other.priv_pcomp());
    }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.

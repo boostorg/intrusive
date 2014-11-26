@@ -38,13 +38,13 @@
 #include <boost/intrusive/detail/key_nodeptr_comp.hpp>
 #include <boost/intrusive/detail/simple_disposers.hpp>
 #include <boost/intrusive/detail/size_holder.hpp>
+#include <boost/intrusive/detail/algorithm.hpp>
 
 #include <boost/move/utility_core.hpp>
 #include <boost/static_assert.hpp>
 
-#include <algorithm>
-#include <functional>
-#include <cstddef>
+#include <functional>//std::less
+#include <cstddef>   //std::size_t, etc.
 
 namespace boost {
 namespace intrusive {
@@ -1349,7 +1349,7 @@ inline bool operator<
 #else
 (const list_impl<ValueTraits, SizeType, ConstantTimeSize, HeaderHolder> &x, const list_impl<ValueTraits, SizeType, ConstantTimeSize, HeaderHolder> &y)
 #endif
-{  return std::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
+{  return ::boost::intrusive::algo_lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
@@ -1364,30 +1364,11 @@ bool operator==
 #endif
 {
    typedef list_impl<ValueTraits, SizeType, ConstantTimeSize, HeaderHolder> list_type;
-   typedef typename list_type::const_iterator const_iterator;
    const bool C = list_type::constant_time_size;
    if(C && x.size() != y.size()){
       return false;
    }
-   const_iterator end1 = x.end();
-
-   const_iterator i1 = x.begin();
-   const_iterator i2 = y.begin();
-   if(C){
-      while (i1 != end1 && *i1 == *i2) {
-         ++i1;
-         ++i2;
-      }
-      return i1 == end1;
-   }
-   else{
-      const_iterator end2 = y.end();
-      while (i1 != end1 && i2 != end2 && *i1 == *i2) {
-         ++i1;
-         ++i2;
-      }
-      return i1 == end1 && i2 == end2;
-   }
+   return ::boost::intrusive::algo_equal(x.cbegin(), x.cend(), y.cbegin(), y.cend());
 }
 
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
