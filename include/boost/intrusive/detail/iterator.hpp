@@ -114,14 +114,16 @@ void distance_impl(InputIt first, InputIt last, Distance& off, const std::random
 template<class InputIt, class Distance>
 inline void iterator_advance(InputIt& it, Distance n)
 {	// increment iterator by offset, arbitrary iterators
-   boost::intrusive::detail::advance_impl(it, n, typename boost::intrusive::iterator_traits<InputIt>::iterator_category());
+   typedef typename boost::intrusive::iterator_traits<InputIt>::iterator_category category_t;
+   boost::intrusive::detail::advance_impl(it, n, category_t());
 }
 
 template<class InputIt> inline
 typename iterator_traits<InputIt>::difference_type iterator_distance(InputIt first, InputIt last)
 {
    typename iterator_traits<InputIt>::difference_type off = 0;
-   boost::intrusive::detail::distance_impl(first, last, off, typename boost::intrusive::iterator_traits<InputIt>::iterator_category());
+   typedef typename boost::intrusive::iterator_traits<InputIt>::iterator_category category_t;
+   boost::intrusive::detail::distance_impl(first, last, off, category_t());
    return off;
 }
 
