@@ -20,7 +20,7 @@
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/detail/std_fwd.hpp>
 #include <boost/intrusive/detail/iiterator.hpp>
-#include <boost/intrusive/bstree_algorithms.hpp>
+#include <boost/intrusive/detail/bstree_algorithms_base.hpp>
 
 namespace boost {
 namespace intrusive {
@@ -46,8 +46,9 @@ class tree_iterator
    typedef typename types_t::node                        node;
    typedef typename types_t::node_ptr                    node_ptr;
    typedef typename types_t::const_value_traits_ptr      const_value_traits_ptr;
+   typedef bstree_algorithms_base<node_traits>           node_algorithms;
+
    static const bool stateful_value_traits = types_t::stateful_value_traits;
-   typedef bstree_algorithms<node_traits>                node_algorithms;
 
    void unspecified_bool_type_func() const {}
    typedef void (tree_iterator::*unspecified_bool_type)() const;

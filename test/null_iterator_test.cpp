@@ -16,7 +16,7 @@
 #include <boost/intrusive/sg_set.hpp>
 #include <boost/intrusive/treap_set.hpp>
 #include <boost/intrusive/splay_set.hpp>
-#include <boost/intrusive/detail/memory_util.hpp>
+#include <boost/intrusive/detail/mpl.hpp>
 
 #include <boost/core/lightweight_test.hpp>
 #include <boost/aligned_storage.hpp>

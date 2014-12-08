@@ -233,21 +233,21 @@ class splaytree_algorithms
       if(NodeTraits::get_left(z)){
          splay_up(bstree_algo::prev_node(z), header);
       }
-      /*
+      
       //possibility 2
-      if(NodeTraits::get_left(z)){
-         node_ptr l = NodeTraits::get_left(z);
-         splay_up(l, header);
-      }*/
-      /*
-      if(NodeTraits::get_left(z)){
-         node_ptr l = bstree_algo::prev_node(z);
-         splay_up_impl(l, z);
-      }*/
-      /*
+      //if(NodeTraits::get_left(z)){
+      //   node_ptr l = NodeTraits::get_left(z);
+      //   splay_up(l, header);
+      //}
+
+      //if(NodeTraits::get_left(z)){
+      //   node_ptr l = bstree_algo::prev_node(z);
+      //   splay_up_impl(l, z);
+      //}
+
       //possibility 4
-      splay_up(z, header);
-      */
+      //splay_up(z, header);
+
       bstree_algo::erase(header, z);
    }
 

@@ -367,6 +367,59 @@ struct TRAITS_PREFIX##_bool_is_true\
 };\
 //
 
+template<typename T, T> struct helper;
+
+#define BOOST_INTRUSIVE_HAS_STATIC_MEMBER_FUNC_SIGNATURE(TRAITS_NAME, FUNC_NAME) \
+  template <typename U, typename Signature> \
+  class TRAITS_NAME \
+  { \
+  private: \
+  template<typename T> \
+  static yes_type check(helper<Signature, &T::FUNC_NAME>*); \
+  template<typename T> static no_type check(...); \
+  public: \
+  static const bool value = sizeof(check<U>(0)) == sizeof(yes_type); \
+  }; \
+//
+
+#define BOOST_INTRUSIVE_HAS_MEMBER_FUNC_CALLED(TRAITS_NAME, FUNC_NAME) \
+template <typename Type> \
+struct TRAITS_NAME \
+{ \
+   struct BaseMixin \
+   { \
+      void FUNC_NAME(); \
+   }; \
+   struct Base : public Type, public BaseMixin { Base(); }; \
+   template <typename T, T t> class Helper{}; \
+   template <typename U> \
+   static no_type  check(U*, Helper<void (BaseMixin::*)(), &U::FUNC_NAME>* = 0); \
+   static yes_type check(...); \
+   static const bool value = sizeof(yes_type) == sizeof(check((Base*)(0))); \
+};\
+//
+
+#define BOOST_INTRUSIVE_HAS_MEMBER_FUNC_CALLED_IGNORE_SIGNATURE(TRAITS_NAME, FUNC_NAME) \
+BOOST_INTRUSIVE_HAS_MEMBER_FUNC_CALLED(TRAITS_NAME##_ignore_signature, FUNC_NAME) \
+\
+template <typename Type, class> \
+struct TRAITS_NAME \
+   : public TRAITS_NAME##_ignore_signature<Type> \
+{};\
+//
+
+
+template <typename T>
+inline T* addressof(T& obj)
+{
+   return static_cast<T*>
+      (static_cast<void*>
+         (const_cast<char*>
+            (&reinterpret_cast<const char&>(obj))
+         )
+      );
+}
+
 } //namespace detail
 } //namespace intrusive
 } //namespace boost

@@ -353,7 +353,7 @@ class list_impl
    //!
    //! <b>Complexity</b>: Constant.
    const_reference front() const
-   { return *priv_value_traits().to_value_ptr(detail::uncast(node_traits::get_next(this->get_root_node()))); }
+   { return *priv_value_traits().to_value_ptr(node_traits::get_next(this->get_root_node())); }
 
    //! <b>Effects</b>: Returns a reference to the last element of the list.
    //!
@@ -1248,7 +1248,7 @@ class list_impl
    static const_iterator s_iterator_to(const_reference value)
    {
       BOOST_STATIC_ASSERT((!stateful_value_traits));
-      reference r =*pointer_traits<pointer>::const_cast_from(pointer_traits<const_pointer>::pointer_to(value));
+      reference r =*detail::uncast(pointer_traits<const_pointer>::pointer_to(value));
       BOOST_INTRUSIVE_INVARIANT_ASSERT(!node_algorithms::inited(value_traits::to_node_ptr(r)));
       return const_iterator(value_traits::to_node_ptr(r), const_value_traits_ptr());
    }
@@ -1279,7 +1279,7 @@ class list_impl
    //! <b>Note</b>: Iterators and references are not invalidated.
    const_iterator iterator_to(const_reference value) const
    {
-      reference r = *pointer_traits<pointer>::const_cast_from(pointer_traits<const_pointer>::pointer_to(value));
+      reference r = *detail::uncast(pointer_traits<const_pointer>::pointer_to(value));
       BOOST_INTRUSIVE_INVARIANT_ASSERT(!node_algorithms::inited(this->priv_value_traits().to_node_ptr(r)));
       return const_iterator(this->priv_value_traits().to_node_ptr(r), this->priv_value_traits_ptr());
    }

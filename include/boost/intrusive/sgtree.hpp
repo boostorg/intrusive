@@ -152,7 +152,7 @@ struct alpha_holder
    }
 
    h_alpha_t get_h_alpha_t() const
-   {  return h_alpha_t(/*alpha_, */inv_minus_logalpha_);  }
+   {  return h_alpha_t(inv_minus_logalpha_);  }
 
    multiply_by_alpha_t get_multiply_by_alpha_t() const
    {  return multiply_by_alpha_t(alpha_);  }

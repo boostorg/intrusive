@@ -248,6 +248,9 @@
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\avltree_node.hpp">
 				</File>
 				<File
+					RelativePath="..\..\..\..\..\boost\intrusive\detail\bstree_algorithms_base.hpp">
+				</File>
+				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\common_slist_algorithms.hpp">
 				</File>
 				<File
@@ -309,9 +312,6 @@
 				</File>
 				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\math.hpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\..\boost\intrusive\detail\memory_util.hpp">
 				</File>
 				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\mpl.hpp">

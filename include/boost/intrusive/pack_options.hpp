@@ -308,7 +308,7 @@ struct pack_options
 //!
 //! \code
 //! struct OPTION_NAME<class TYPE>
-//! { /*unspecified_content*/ };
+//! {  unspecified_content  };
 //! \endcode
 //!
 //! ...that after being combined with
@@ -338,7 +338,7 @@ struct pack_options
 //!
 //! \code
 //! struct OPTION_NAME<TYPE VALUE>
-//! { /*unspecified_content*/ };
+//! {  unspecified_content  };
 //! \endcode
 //!
 //! ...that after being combined with

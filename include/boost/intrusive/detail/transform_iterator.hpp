@@ -90,16 +90,6 @@ class transform_iterator
    friend bool operator!= (const transform_iterator& i, const transform_iterator& i2)
    { return !(i == i2); }
 
-/*
-   friend bool operator> (const transform_iterator& i, const transform_iterator& i2)
-   { return i2 < i; }
-
-   friend bool operator<= (const transform_iterator& i, const transform_iterator& i2)
-   { return !(i > i2); }
-
-   friend bool operator>= (const transform_iterator& i, const transform_iterator& i2)
-   { return !(i < i2); }
-*/
    friend typename Iterator::difference_type operator- (const transform_iterator& i, const transform_iterator& i2)
    { return i2.distance_to(i); }
 

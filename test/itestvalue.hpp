@@ -197,32 +197,6 @@ class pointer_holder
    T* const _ptr;
 };
 
-/*
-struct int_testvalue_comp
-{
-   template<class Hooks, bool constant_time_size>
-   bool operator()
-      (const testvalue<Hooks, constant_time_size>& v1, const int &i) const
-   {  return v1.value_ < i; }
-   template<class Hooks, bool constant_time_size>
-   bool operator()
-      (const int &i, const testvalue<Hooks, constant_time_size>& v1) const
-   {  return i < v1.value_; }
-};
-
-struct int_testvalue_pcomp
-{
-   template<class Hooks, bool constant_time_size>
-   bool operator()
-      (const testvalue<Hooks, constant_time_size>& v1, const int &i) const
-   {  return v1.value_ < i; }
-   template<class Hooks, bool constant_time_size>
-   bool operator()
-      (const int &i, const testvalue<Hooks, constant_time_size>& v1) const
-   {  return i < v1.value_; }
-};
-*/
-
 }  //namespace boost{
 }  //namespace intrusive{
 
