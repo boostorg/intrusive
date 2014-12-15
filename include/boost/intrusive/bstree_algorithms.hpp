@@ -758,7 +758,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!   ordering compatible with the strict weak ordering used to create the
    //!   the tree. KeyNodePtrCompare can compare KeyType with tree's node_ptrs.
    //!   'lower_key' must not be greater than 'upper_key' according to 'comp'. If
-   //!   'lower_key' == 'upper_key', ('left_closed' || 'right_closed') must be false.
+   //!   'lower_key' == 'upper_key', ('left_closed' || 'right_closed') must be true.
    //!
    //! <b>Effects</b>: Returns an a pair with the following criteria:
    //!
@@ -801,7 +801,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
             x = NodeTraits::get_left(x);
          }
          else{
-            //x is inside the bounded range( x >= lower_key && x <= upper_key),
+            //x is inside the bounded range(lower_key <= x <= upper_key),
             //so we must split lower and upper searches
             //
             //Sanity check: if lower_key and upper_key are equal, then both left_closed and right_closed can't be false
