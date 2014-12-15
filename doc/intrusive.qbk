@@ -3763,7 +3763,9 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 [section:release_notes_boost_1_58_00 Boost 1.58 Release]
 
-* Reduced compile-time dependencies, headers, and the use of Boost.Preprocessor, specially for hooks and iterators.
+*  Reduced compile-time dependencies, headers, and the use of Boost.Preprocessor, specially for hooks and iterators.
+*  Fixed bugs:
+   *  [@https://svn.boost.org/trac/boost/ticket/10853 Boost Trac #10853: ['problem with detection of const_cast_from]]
 
 [endsect]
 

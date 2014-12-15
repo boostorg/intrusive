@@ -57,6 +57,14 @@ BOOST_INTRUSIVE_INSTANTIATE_DEFAULT_TYPE_TMPLT(value_traits_ptr)
 //! extensions like castings.
 //!
 //! pointer_traits supplies a uniform interface to certain attributes of pointer-like types.
+//!
+//! <b>Note</b>: When defining a custom family of pointers or references to be used with BI
+//! library, make sure the public static conversion functions accessed through
+//! the `pointer_traits` interface (`*_cast_from` and `pointer_to`) can
+//! properly convert between const and nonconst referred member types
+//! <b>without the use of implicit constructor calls</b>. It is suggested these
+//! conversions be implemented as function templates, where the template
+//! argument is the type of the object being converted from.
 template <typename Ptr>
 struct pointer_traits
 {
