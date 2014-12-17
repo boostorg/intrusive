@@ -26,7 +26,8 @@ namespace detail {
 
 template<class KeyValueCompare, class ValueTraits>
 struct key_nodeptr_comp
-   :  private ebo_functor_holder<KeyValueCompare>
+   //Use public inheritance to avoid MSVC bugs with closures
+   :  public ebo_functor_holder<KeyValueCompare>
 {
    typedef ValueTraits                             value_traits;
    typedef typename value_traits::value_type       value_type;

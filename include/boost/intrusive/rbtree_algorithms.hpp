@@ -44,7 +44,8 @@ namespace intrusive {
 
 template<class NodeTraits, class F>
 struct rbtree_node_cloner
-   :  private detail::ebo_functor_holder<F>
+   //Use public inheritance to avoid MSVC bugs with closures
+   :  public detail::ebo_functor_holder<F>
 {
    typedef typename NodeTraits::node_ptr  node_ptr;
    typedef detail::ebo_functor_holder<F>  base_t;

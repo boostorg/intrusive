@@ -80,6 +80,7 @@ template<class ValueTraits, class VoidOrKeyComp, class VoidOrPrioComp, class Siz
 class treap_impl
    /// @cond
    : public bstree_impl<ValueTraits, VoidOrKeyComp, SizeType, ConstantTimeSize, BsTreeAlgorithms, HeaderHolder>
+   //Use public inheritance to avoid MSVC bugs with closures
    , public detail::ebo_functor_holder
          < typename get_prio
             < VoidOrPrioComp

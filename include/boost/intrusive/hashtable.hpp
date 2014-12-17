@@ -555,7 +555,8 @@ struct downcast_node_to_value_t
 
 template<class F, class SlistNodePtr, class NodePtr>
 struct node_cast_adaptor
-   :  private detail::ebo_functor_holder<F>
+   //Use public inheritance to avoid MSVC bugs with closures
+   :  public detail::ebo_functor_holder<F>
 {
    typedef detail::ebo_functor_holder<F> base_t;
 
@@ -805,6 +806,7 @@ struct get_hash<void, T>
 //Stores bucket_plus_vtraits plust the hash function
 template<class VoidOrKeyHash, class ValueTraits, class BucketTraits>
 struct bucket_hash_t
+   //Use public inheritance to avoid MSVC bugs with closures
    : public detail::ebo_functor_holder
    <typename get_hash< VoidOrKeyHash
                       , typename bucket_plus_vtraits<ValueTraits,BucketTraits>::value_traits::value_type
@@ -857,6 +859,7 @@ struct get_equal_to<void, T>
 //non-empty bucket shall not be cached.
 template<class VoidOrKeyHash, class VoidOrKeyEqual, class ValueTraits, class BucketTraits, bool>
 struct bucket_hash_equal_t
+   //Use public inheritance to avoid MSVC bugs with closures
    : public detail::ebo_functor_holder //equal
    <typename get_equal_to< VoidOrKeyEqual
                          , typename bucket_plus_vtraits<ValueTraits,BucketTraits>::value_traits::value_type
@@ -934,6 +937,7 @@ struct bucket_hash_equal_t
 //non-empty bucket shall be cached.
 template<class VoidOrKeyHash, class VoidOrKeyEqual, class ValueTraits, class BucketTraits>  //cache_begin == true version
 struct bucket_hash_equal_t<VoidOrKeyHash, VoidOrKeyEqual, ValueTraits, BucketTraits, true>
+   //Use public inheritance to avoid MSVC bugs with closures
    : public detail::ebo_functor_holder //equal
                <typename get_equal_to< VoidOrKeyEqual
                          , typename bucket_plus_vtraits<ValueTraits,BucketTraits>::value_traits::value_type

@@ -3765,6 +3765,8 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 *  Reduced compile-time dependencies, headers, and the use of Boost.Preprocessor, specially for hooks and iterators.
 *  Fixed bugs:
+   *  [@https://svn.boost.org/trac/boost/ticket/6720  Boost Trac #6720: ['intrusive::unordered_set::clear_and_dispose does not compile on VC11 Beta when passed a stateless lambda]]
+   *  [@https://svn.boost.org/trac/boost/ticket/10771 Boost Trac #10771: ['remove_if is broken for slist]]
    *  [@https://svn.boost.org/trac/boost/ticket/10853 Boost Trac #10853: ['problem with detection of const_cast_from]]
 
 [endsect]

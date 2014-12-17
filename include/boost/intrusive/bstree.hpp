@@ -243,6 +243,7 @@ struct get_compare<void, T>
 template<class ValueTraits, class VoidOrKeyComp, algo_types AlgoType, typename HeaderHolder>
 struct bstbase2
    //Put the (possibly empty) functor in the first position to get EBO in MSVC
+   //Use public inheritance to avoid MSVC bugs with closures
    : public detail::ebo_functor_holder<typename get_compare< VoidOrKeyComp
                             , typename ValueTraits::value_type
                             >::type>

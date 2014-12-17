@@ -28,7 +28,8 @@ namespace detail {
 
 template<class F, class ValueTraits, algo_types AlgoType>
 struct node_cloner
-   :  private ebo_functor_holder<F>
+   //Use public inheritance to avoid MSVC bugs with closures
+   :  public ebo_functor_holder<F>
 {
    typedef ValueTraits                             value_traits;
    typedef typename value_traits::node_traits      node_traits;
@@ -78,7 +79,8 @@ struct node_cloner
 
 template<class F, class ValueTraits, algo_types AlgoType>
 struct node_disposer
-   :  private ebo_functor_holder<F>
+   //Use public inheritance to avoid MSVC bugs with closures
+   :  public ebo_functor_holder<F>
 {
    typedef ValueTraits                          value_traits;
    typedef typename value_traits::node_traits   node_traits;
