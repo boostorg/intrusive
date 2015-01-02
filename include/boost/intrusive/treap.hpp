@@ -38,8 +38,8 @@
 #include <boost/move/adl_move_swap.hpp>
 
 #include <cstddef>
-#include <functional>
-#include <utility>
+#include <boost/intrusive/detail/minimal_less_equal_header.hpp>
+#include <boost/intrusive/detail/minimal_pair_header.hpp>   //std::pair
 
 
 namespace boost {
@@ -104,7 +104,7 @@ class treap_impl
       <typename get_prio_type::type>                                 prio_base;
 
    /// @endcond
-   
+
    typedef typename implementation_defined::pointer                  pointer;
    typedef typename implementation_defined::const_pointer            const_pointer;
    typedef typename implementation_defined::value_type               value_type;
@@ -933,7 +933,7 @@ class treap_impl
 
    //! @copydoc ::boost::intrusive::bstree::lower_bound(const_reference)
    iterator lower_bound(const_reference value);
-   
+
    //! @copydoc ::boost::intrusive::bstree::lower_bound(const KeyType&,KeyValueCompare)
    template<class KeyType, class KeyValueCompare>
    iterator lower_bound(const KeyType& key, KeyValueCompare comp);

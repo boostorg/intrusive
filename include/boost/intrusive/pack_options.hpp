@@ -257,7 +257,7 @@ struct OPTION_NAME \
 //!   - a default options class defining initial static constant
 //!   and typedefs
 //!   - several options defined with BOOST_INTRUSIVE_OPTION_CONSTANT and
-//! BOOST_INTRUSIVE_OPTION_TYPE 
+//! BOOST_INTRUSIVE_OPTION_TYPE
 //!
 //! and packs them together in a new type that defines all options as
 //! member typedefs or static constant values. Given options of form:

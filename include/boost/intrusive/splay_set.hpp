@@ -172,7 +172,7 @@ class splay_set_impl
    //! @copydoc ::boost::intrusive::splaytree::clone_from
    template <class Cloner, class Disposer>
    void clone_from(const splay_set_impl &src, Cloner cloner, Disposer disposer);
-   
+
    #endif   //#ifdef BOOST_iNTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::splaytree::insert_unique(reference)
@@ -273,7 +273,7 @@ class splay_set_impl
 
    //! @copydoc ::boost::intrusive::splaytree::lower_bound(const_reference)
    iterator lower_bound(const_reference value);
-   
+
    //! @copydoc ::boost::intrusive::splaytree::lower_bound(const KeyType&,KeyValueCompare)
    template<class KeyType, class KeyValueCompare>
    iterator lower_bound(const KeyType& key, KeyValueCompare comp);
@@ -388,7 +388,7 @@ class splay_set_impl
 
    //! @copydoc ::boost::intrusive::splaytree::splay_down(const_reference)
    iterator splay_down(const_reference value);
-   
+
    //! @copydoc ::boost::intrusive::splaytree::rebalance
    void rebalance();
 
@@ -736,7 +736,7 @@ class splay_multiset_impl
 
    //! @copydoc ::boost::intrusive::splaytree::lower_bound(const_reference)
    iterator lower_bound(const_reference value);
-   
+
    //! @copydoc ::boost::intrusive::splaytree::lower_bound(const KeyType&,KeyValueCompare)
    template<class KeyType, class KeyValueCompare>
    iterator lower_bound(const KeyType& key, KeyValueCompare comp);
@@ -843,7 +843,7 @@ class splay_multiset_impl
 
    //! @copydoc ::boost::intrusive::splaytree::splay_down(const_reference)
    iterator splay_down(const_reference value);
-   
+
    //! @copydoc ::boost::intrusive::splaytree::rebalance
    void rebalance();
 

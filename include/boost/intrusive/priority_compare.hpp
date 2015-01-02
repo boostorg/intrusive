@@ -20,7 +20,7 @@
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 
-#include <functional>
+#include <boost/intrusive/detail/minimal_less_equal_header.hpp>
 
 namespace boost {
 namespace intrusive {
@@ -56,8 +56,8 @@ struct get_prio<void, T>
 
 /// @endcond
 
-} //namespace intrusive 
-} //namespace boost 
+} //namespace intrusive
+} //namespace boost
 
 #include <boost/intrusive/detail/config_end.hpp>
 

@@ -154,7 +154,7 @@ void test_generic_assoc<ValueTraits, ContainerDefiner>::test_insert_erase_burst(
       }
       BOOST_TEST(testset.empty());
    }
-  
+
    {  //Now random insertions + erasure
       assoc_type testset;
       typedef typename value_cont_type::iterator vec_iterator;

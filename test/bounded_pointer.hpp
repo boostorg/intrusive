@@ -68,10 +68,10 @@ class bounded_pointer
       operator= (const bounded_pointer<T2> & other)
    {  m_offset = other.m_offset;  return *this;  }
 
-   const bounded_pointer< typename boost::intrusive::detail::remove_const< T >::type >& unconst() const 
-   { return *reinterpret_cast< const bounded_pointer< typename boost::intrusive::detail::remove_const< T >::type >* >(this); } 
+   const bounded_pointer< typename boost::intrusive::detail::remove_const< T >::type >& unconst() const
+   { return *reinterpret_cast< const bounded_pointer< typename boost::intrusive::detail::remove_const< T >::type >* >(this); }
 
-   bounded_pointer< typename boost::intrusive::detail::remove_const< T >::type >& unconst() 
+   bounded_pointer< typename boost::intrusive::detail::remove_const< T >::type >& unconst()
    { return *reinterpret_cast< bounded_pointer< typename boost::intrusive::detail::remove_const< T >::type >* >(this); }
 
    static mut_val_t* base()
@@ -151,7 +151,7 @@ class bounded_reference
    bounded_reference()
       : m_offset(max_offset)
    {}
-   
+
    bounded_reference(const bounded_reference& other)
       : m_offset(other.m_offset)
    {}
@@ -222,7 +222,7 @@ class bounded_allocator
       m_in_use[p.m_offset] = true;
       return p;
    }
-   
+
    void deallocate(pointer p, size_t n)
    {
       assert(inited());
@@ -239,12 +239,12 @@ class bounded_allocator
       // allocate non-constructed storage
       m_base = static_cast< T* >(::operator new [] (max_offset * sizeof(T)));
    }
-   
+
    static bool inited()
    {
       return m_in_use.size() == max_offset;
    }
-   
+
    static bool is_clear()
    {
       assert(inited());
@@ -257,7 +257,7 @@ class bounded_allocator
       }
       return true;
    }
-   
+
    static void destroy()
    {
       // deallocate storage without destructors

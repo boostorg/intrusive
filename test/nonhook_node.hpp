@@ -97,7 +97,7 @@ struct nonhook_node_member_value_traits
    {
       return pointer_traits<const_node_ptr>::pointer_to(static_cast<const node&>(value.*P));
    }
-   
+
    static pointer to_value_ptr(node_ptr n)
    {
       return pointer_traits<pointer>::pointer_to

@@ -86,7 +86,7 @@ struct splaydown_assemble_and_fix_header
       //    left(t), right(t) := right(null), left(null);
       //end assemble;
       {  //    left(r), right(l) := right(t), left(t);
-         
+
          node_ptr const old_t_left  = NodeTraits::get_left(t_);
          node_ptr const old_t_right = NodeTraits::get_right(t_);
          NodeTraits::set_right(l_, old_t_left);
@@ -222,7 +222,7 @@ class splaytree_algorithms
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::init_header(const node_ptr&)
    static void init_header(const node_ptr & header);
-   
+
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::erase(const node_ptr&,const node_ptr&)
@@ -233,7 +233,7 @@ class splaytree_algorithms
       if(NodeTraits::get_left(z)){
          splay_up(bstree_algo::prev_node(z), header);
       }
-      
+
       //possibility 2
       //if(NodeTraits::get_left(z)){
       //   node_ptr l = NodeTraits::get_left(z);

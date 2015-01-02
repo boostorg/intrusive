@@ -126,7 +126,7 @@ struct member_hook
 //      //always single inheritance, the offset of the node is exactly the offset of
 //      //the hook. Since the node type is shared between all member hooks, this saves
 //      //quite a lot of symbol stuff.
-//      , (Ptr2MemNode)PtrToMember 
+//      , (Ptr2MemNode)PtrToMember
 //      , MemberHook::hooktags::link_mode> member_value_traits;
    typedef mhtraits <Parent, MemberHook, PtrToMember> member_value_traits;
    template<class Base>

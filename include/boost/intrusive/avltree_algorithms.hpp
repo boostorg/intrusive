@@ -176,7 +176,7 @@ class avltree_algorithms
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::swap_tree
    static void swap_tree(const node_ptr & header1, const node_ptr & header2);
-   
+
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::swap_nodes(const node_ptr&,const node_ptr&)
@@ -612,7 +612,7 @@ class avltree_algorithms
       const node_ptr c = NodeTraits::get_right(a_oldleft);
       bstree_algo::rotate_left_no_parent_fix(a_oldleft, c);
       //No need to link c with a [NodeTraits::set_parent(c, a) + NodeTraits::set_left(a, c)]
-      //as c is not root and another rotation is coming 
+      //as c is not root and another rotation is coming
       bstree_algo::rotate_right(a, c, NodeTraits::get_parent(a), hdr);
       left_right_balancing(a, a_oldleft, c);
       return c;

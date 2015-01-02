@@ -50,7 +50,7 @@ enum link_mode_type{
 template <link_mode_type link_mode>
 struct is_safe_autounlink
 {
-   static const bool value = 
+   static const bool value =
       (int)link_mode == (int)auto_unlink   ||
       (int)link_mode == (int)safe_link;
 };

@@ -174,7 +174,7 @@ class set_impl
    //! @copydoc ::boost::intrusive::rbtree::clone_from
    template <class Cloner, class Disposer>
    void clone_from(const set_impl &src, Cloner cloner, Disposer disposer);
-   
+
    #endif   //#ifdef BOOST_iNTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::rbtree::insert_unique(reference)
@@ -268,7 +268,7 @@ class set_impl
 
    //! @copydoc ::boost::intrusive::rbtree::lower_bound(const_reference)
    iterator lower_bound(const_reference value);
-   
+
    //! @copydoc ::boost::intrusive::rbtree::lower_bound(const KeyType&,KeyValueCompare)
    template<class KeyType, class KeyValueCompare>
    iterator lower_bound(const KeyType& key, KeyValueCompare comp);
@@ -715,7 +715,7 @@ class multiset_impl
 
    //! @copydoc ::boost::intrusive::rbtree::lower_bound(const_reference)
    iterator lower_bound(const_reference value);
-   
+
    //! @copydoc ::boost::intrusive::rbtree::lower_bound(const KeyType&,KeyValueCompare)
    template<class KeyType, class KeyValueCompare>
    iterator lower_bound(const KeyType& key, KeyValueCompare comp);

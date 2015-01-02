@@ -187,7 +187,7 @@ class rbtree_algorithms
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::swap_tree
    static void swap_tree(const node_ptr & header1, const node_ptr & header2);
-   
+
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::swap_nodes(const node_ptr&,const node_ptr&)

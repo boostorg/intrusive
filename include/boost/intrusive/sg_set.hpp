@@ -172,7 +172,7 @@ class sg_set_impl
    //! @copydoc ::boost::intrusive::sgtree::clone_from
    template <class Cloner, class Disposer>
    void clone_from(const sg_set_impl &src, Cloner cloner, Disposer disposer);
-   
+
    #endif   //#ifdef BOOST_iNTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::sgtree::insert_unique(reference)
@@ -266,7 +266,7 @@ class sg_set_impl
 
    //! @copydoc ::boost::intrusive::sgtree::lower_bound(const_reference)
    iterator lower_bound(const_reference value);
-   
+
    //! @copydoc ::boost::intrusive::sgtree::lower_bound(const KeyType&,KeyValueCompare)
    template<class KeyType, class KeyValueCompare>
    iterator lower_bound(const KeyType& key, KeyValueCompare comp);
@@ -723,10 +723,10 @@ class sg_multiset_impl
    //! @copydoc ::boost::intrusive::sgtree::count(const KeyType&,KeyValueCompare)const
    template<class KeyType, class KeyValueCompare>
    size_type count(const KeyType& key, KeyValueCompare comp) const;
-   
+
    //! @copydoc ::boost::intrusive::sgtree::lower_bound(const_reference)
    iterator lower_bound(const_reference value);
-   
+
    //! @copydoc ::boost::intrusive::sgtree::lower_bound(const KeyType&,KeyValueCompare)
    template<class KeyType, class KeyValueCompare>
    iterator lower_bound(const KeyType& key, KeyValueCompare comp);

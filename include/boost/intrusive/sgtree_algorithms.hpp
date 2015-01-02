@@ -320,12 +320,12 @@ class sgtree_algorithms
       if(tree_size > max_tree_size)
          max_tree_size = tree_size;
 
-      if(tree_size > 2 && //Nothing to do with only the root 
+      if(tree_size > 2 && //Nothing to do with only the root
          //Check if the root node is unbalanced
          //Scapegoat paper depth counts root depth as zero and "depth" counts root as 1,
          //but since "depth" is the depth of the ancestor of x, i == depth
          depth > h_alpha(tree_size)){
-                                          
+
          //Find the first non height-balanced node
          //as described in the section 4.2 of the paper.
          //This method is the alternative method described
