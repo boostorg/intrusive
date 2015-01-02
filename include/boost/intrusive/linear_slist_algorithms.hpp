@@ -23,7 +23,7 @@
 #include <boost/intrusive/detail/common_slist_algorithms.hpp>
 #include <boost/intrusive/detail/algo_type.hpp>
 #include <cstddef>
-#include <utility>
+#include <boost/intrusive/detail/minimal_pair_header.hpp>   //std::pair
 
 namespace boost {
 namespace intrusive {

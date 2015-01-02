@@ -134,7 +134,7 @@ class generic_hook
       , typename NodeAlgorithms::node
       , node_holder<typename NodeAlgorithms::node, Tag, BaseHookType>
       >::type
-   //If this is the a default-tagged base hook derive from a class that 
+   //If this is the a default-tagged base hook derive from a class that
    //will define an special internal typedef. Containers will be able to detect this
    //special typedef and obtain generic_hook's internal types in order to deduce
    //value_traits for this hook.

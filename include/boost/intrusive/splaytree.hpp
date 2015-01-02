@@ -19,8 +19,8 @@
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <cstddef>
-#include <functional>
-#include <utility>
+#include <boost/intrusive/detail/minimal_less_equal_header.hpp>
+#include <boost/intrusive/detail/minimal_pair_header.hpp>   //std::pair
 
 #include <boost/static_assert.hpp>
 #include <boost/intrusive/bstree.hpp>

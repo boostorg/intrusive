@@ -41,8 +41,8 @@
 #include <boost/move/adl_move_swap.hpp>
 
 #include <cstddef>
-#include <functional>
-#include <utility>
+#include <boost/intrusive/detail/minimal_less_equal_header.hpp>
+#include <boost/intrusive/detail/minimal_pair_header.hpp>   //std::pair
 #include <cmath>
 #include <cstddef>
 
@@ -693,7 +693,7 @@ class sgtree_impl
 
    //! @copydoc ::boost::intrusive::bstree::lower_bound(const_reference)
    iterator lower_bound(const_reference value);
-   
+
    //! @copydoc ::boost::intrusive::bstree::lower_bound(const KeyType&,KeyValueCompare)
    template<class KeyType, class KeyValueCompare>
    iterator lower_bound(const KeyType& key, KeyValueCompare comp);

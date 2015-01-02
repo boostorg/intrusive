@@ -314,6 +314,12 @@
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\math.hpp">
 				</File>
 				<File
+					RelativePath="..\..\..\..\..\boost\intrusive\detail\minimal_less_equal_header.hpp">
+				</File>
+				<File
+					RelativePath="..\..\..\..\..\boost\intrusive\detail\minimal_pair_header.hpp">
+				</File>
+				<File
 					RelativePath="..\..\..\..\..\boost\intrusive\detail\mpl.hpp">
 				</File>
 				<File

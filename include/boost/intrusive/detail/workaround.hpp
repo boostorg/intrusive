@@ -8,8 +8,8 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef BOOST_INTRUSIVE_DETAIL_WRKRND_HPP
-#define BOOST_INTRUSIVE_DETAIL_WRKRND_HPP
+#ifndef BOOST_INTRUSIVE_DETAIL_WORKAROUND_HPP
+#define BOOST_INTRUSIVE_DETAIL_WORKAROUND_HPP
 
 #if defined(_MSC_VER)
 #  pragma once
@@ -31,4 +31,4 @@
 #define BOOST_INTRUSIVE_DOCIGN(T1) T1
 
 
-#endif   //#ifndef BOOST_INTRUSIVE_DETAIL_WRKRND_HPP
+#endif   //#ifndef BOOST_INTRUSIVE_DETAIL_WORKAROUND_HPP

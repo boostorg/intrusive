@@ -25,7 +25,8 @@
 #include <boost/intrusive/detail/uncast.hpp>
 #include <boost/intrusive/detail/math.hpp>
 #include <boost/intrusive/detail/algo_type.hpp>
-#include <utility>
+
+#include <boost/intrusive/detail/minimal_pair_header.hpp>
 
 namespace boost {
 namespace intrusive {
@@ -996,7 +997,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       (const const_node_ptr & header, const KeyType &key
       ,KeyNodePtrCompare comp, insert_commit_data &commit_data
          #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-         , std::size_t *pdepth = 0  
+         , std::size_t *pdepth = 0
          #endif
       )
    {
@@ -1073,7 +1074,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       (const const_node_ptr & header, const node_ptr &hint, const KeyType &key
       ,KeyNodePtrCompare comp, insert_commit_data &commit_data
          #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-         , std::size_t *pdepth = 0  
+         , std::size_t *pdepth = 0
          #endif
       )
    {
@@ -1112,7 +1113,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    static node_ptr insert_equal
       (const node_ptr & h, const node_ptr & hint, const node_ptr & new_node, NodePtrCompare comp
          #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-         , std::size_t *pdepth = 0  
+         , std::size_t *pdepth = 0
          #endif
       )
    {
@@ -1138,7 +1139,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    static node_ptr insert_equal_upper_bound
       (const node_ptr & h, const node_ptr & new_node, NodePtrCompare comp
          #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-         , std::size_t *pdepth = 0  
+         , std::size_t *pdepth = 0
          #endif
       )
    {
@@ -1164,7 +1165,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    static node_ptr insert_equal_lower_bound
       (const node_ptr & h, const node_ptr & new_node, NodePtrCompare comp
          #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-         , std::size_t *pdepth = 0  
+         , std::size_t *pdepth = 0
          #endif
       )
    {
@@ -1191,7 +1192,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    static node_ptr insert_before
       (const node_ptr & header, const node_ptr & pos, const node_ptr & new_node
          #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-         , std::size_t *pdepth = 0  
+         , std::size_t *pdepth = 0
          #endif
       )
    {
@@ -1217,7 +1218,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    static void push_back
       (const node_ptr & header, const node_ptr & new_node
          #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-         , std::size_t *pdepth = 0  
+         , std::size_t *pdepth = 0
          #endif
       )
    {
@@ -1242,7 +1243,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    static void push_front
       (const node_ptr & header, const node_ptr & new_node
          #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-         , std::size_t *pdepth = 0  
+         , std::size_t *pdepth = 0
          #endif
       )
    {
@@ -1585,7 +1586,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       (const node_ptr &header, const node_ptr & pos
       , insert_commit_data &commit_data
          #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-         , std::size_t *pdepth = 0  
+         , std::size_t *pdepth = 0
          #endif
       )
    {
@@ -1603,7 +1604,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    static void push_back_check
       (const node_ptr & header, insert_commit_data &commit_data
          #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-         , std::size_t *pdepth = 0  
+         , std::size_t *pdepth = 0
          #endif
       )
    {
@@ -1618,7 +1619,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    static void push_front_check
       (const node_ptr & header, insert_commit_data &commit_data
          #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-         , std::size_t *pdepth = 0  
+         , std::size_t *pdepth = 0
          #endif
       )
    {
@@ -1803,7 +1804,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
          }
       }
       size = len;
-   }      
+   }
 
    static void compress_subtree(node_ptr scanner, std::size_t count)
    {

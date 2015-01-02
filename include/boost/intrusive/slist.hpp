@@ -45,9 +45,9 @@
 #include <boost/move/utility_core.hpp>
 #include <boost/static_assert.hpp>
 
-#include <functional>//std::less
+#include <boost/intrusive/detail/minimal_less_equal_header.hpp>//std::less
 #include <cstddef>   //std::size_t
-#include <utility>   //std::pair
+#include <boost/intrusive/detail/minimal_pair_header.hpp>   //std::pair
 
 namespace boost {
 namespace intrusive {

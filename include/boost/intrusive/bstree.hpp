@@ -47,9 +47,9 @@
 #include <boost/move/utility_core.hpp>
 #include <boost/move/adl_move_swap.hpp>
 
-#include <utility>   //pair
+#include <boost/intrusive/detail/minimal_pair_header.hpp>
 #include <cstddef>   //size_t...
-#include <functional>//less, equal_to
+#include <boost/intrusive/detail/minimal_less_equal_header.hpp>//less, equal_to
 
 
 namespace boost {

@@ -43,7 +43,7 @@
 #include <boost/move/utility_core.hpp>
 #include <boost/static_assert.hpp>
 
-#include <functional>//std::less
+#include <boost/intrusive/detail/minimal_less_equal_header.hpp>//std::less
 #include <cstddef>   //std::size_t, etc.
 
 namespace boost {

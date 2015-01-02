@@ -48,7 +48,7 @@ inline std::ptrdiff_t offset_from_pointer_to_member(const Member Parent::* ptr_t
 
    caster.ptr_to_member = ptr_to_member;
    return std::ptrdiff_t(caster.offset);
-   //Additional info on MSVC behaviour for the future. For 2/3 int ptr-to-member 
+   //Additional info on MSVC behaviour for the future. For 2/3 int ptr-to-member
    //types dereference seems to be:
    //
    // vboffset = [compile_time_offset if 2-int ptr2memb] /

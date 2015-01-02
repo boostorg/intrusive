@@ -45,8 +45,8 @@
 #include <boost/move/adl_move_swap.hpp>
 
 //std C++
-#include <functional>   //std::equal_to
-#include <utility>      //std::pair
+#include <boost/intrusive/detail/minimal_less_equal_header.hpp>   //std::equal_to
+#include <boost/intrusive/detail/minimal_pair_header.hpp>   //std::pair
 #include <algorithm>    //std::lower_bound, std::upper_bound
 #include <cstddef>      //std::size_t
 
@@ -1317,7 +1317,7 @@ class hashtable_impl
 
    typedef detail::transform_iterator
       < typename slist_impl::iterator
-      , downcast_node_to_value_t 
+      , downcast_node_to_value_t
          < value_traits
          , true> >    const_local_iterator;
 
@@ -1576,7 +1576,7 @@ class hashtable_impl
             const bucket_ptr src_buckets = src.priv_bucket_pointer();
             const bucket_ptr dst_buckets = this->priv_bucket_pointer();
             size_type constructed;
-                                      
+
             typedef node_cast_adaptor< detail::node_disposer<Disposer, value_traits, CircularSListAlgorithms>
                                      , slist_node_ptr, node_ptr > NodeDisposer;
             typedef node_cast_adaptor< detail::node_cloner  <Cloner,   value_traits, CircularSListAlgorithms>
@@ -2813,7 +2813,7 @@ class hashtable_impl
 
    siterator priv_invalid_local_it() const
    {  return this->data_type::internal.internal.internal.internal.priv_invalid_local_it(); }
-   
+
    split_traits &priv_split_traits()
    {  return this->data_type::internal.priv_split_traits();  }
 

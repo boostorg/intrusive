@@ -15,7 +15,9 @@
 #  pragma once
 #endif
 
+#ifndef BOOST_INTRUSIVE_DETAIL_WORKAROUND_HPP
 #include <boost/intrusive/detail/workaround.hpp>
+#endif   //BOOST_INTRUSIVE_DETAIL_WORKAROUND_HPP
 
 namespace boost {
 namespace intrusive {
@@ -164,12 +166,6 @@ template <template <class, class, class, class, class, class, class, class, clas
          , class U>
 struct pointer_rebinder<Ptr<A, P0, P1, P2, P3, P4, P5, P6, P7, P8>, U, 0u>
 {  typedef Ptr<U, P0, P1, P2, P3, P4, P5, P6, P7, P8> type;   };
-
-template <template <class, class, class, class, class, class, class, class, class, class, class> class Ptr  //10arg
-         , typename A, class P0, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8, class P9
-         , class U>
-struct pointer_rebinder<Ptr<A, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9>, U, 0u>
-{  typedef Ptr<U, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9> type;   };
 
 #endif   //!defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
 

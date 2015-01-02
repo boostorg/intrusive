@@ -268,7 +268,7 @@ class avl_set_impl
 
    //! @copydoc ::boost::intrusive::avltree::lower_bound(const_reference)
    iterator lower_bound(const_reference value);
-   
+
    //! @copydoc ::boost::intrusive::avltree::lower_bound(const KeyType&,KeyValueCompare)
    template<class KeyType, class KeyValueCompare>
    iterator lower_bound(const KeyType& key, KeyValueCompare comp);
@@ -644,7 +644,7 @@ class avl_multiset_impl
    //! @copydoc ::boost::intrusive::avltree::clone_from
    template <class Cloner, class Disposer>
    void clone_from(const avl_multiset_impl &src, Cloner cloner, Disposer disposer);
-   
+
    #endif   //#ifdef BOOST_iNTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::avltree::insert_equal(reference)
@@ -715,7 +715,7 @@ class avl_multiset_impl
 
    //! @copydoc ::boost::intrusive::avltree::lower_bound(const_reference)
    iterator lower_bound(const_reference value);
-   
+
    //! @copydoc ::boost::intrusive::avltree::lower_bound(const KeyType&,KeyValueCompare)
    template<class KeyType, class KeyValueCompare>
    iterator lower_bound(const KeyType& key, KeyValueCompare comp);

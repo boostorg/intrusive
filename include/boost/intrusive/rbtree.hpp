@@ -19,8 +19,8 @@
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <cstddef>
-#include <functional>
-#include <utility>
+#include <boost/intrusive/detail/minimal_less_equal_header.hpp>
+#include <boost/intrusive/detail/minimal_pair_header.hpp>   //std::pair
 
 #include <boost/intrusive/set_hook.hpp>
 #include <boost/intrusive/detail/rbtree_node.hpp>
@@ -305,7 +305,7 @@ class rbtree_impl
 
    //! @copydoc ::boost::intrusive::bstree::lower_bound(const_reference)
    iterator lower_bound(const_reference value);
-   
+
    //! @copydoc ::boost::intrusive::bstree::lower_bound(const KeyType&,KeyValueCompare)
    template<class KeyType, class KeyValueCompare>
    iterator lower_bound(const KeyType& key, KeyValueCompare comp);
