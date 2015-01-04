@@ -20,12 +20,16 @@
 #include <cstddef>
 #include <boost/intrusive/detail/std_fwd.hpp>
 #include <boost/move/detail/iterator_traits.hpp>
+#include <boost/move/detail/meta_utils_core.hpp>
 
 namespace boost {
 namespace intrusive {
 
 using boost::movelib::iterator_traits;
 
+////////////////////
+//    iterator
+////////////////////
 template<class Category, class T, class Distance, class Pointer = T*, class Reference = T&>
 struct iterator
 {
@@ -36,24 +40,64 @@ struct iterator
    typedef Reference reference;
 };
 
-namespace detail {
+////////////////////////////////////////
+//    iterator_[dis|en]able_if_tag
+////////////////////////////////////////
+template<class I, class Tag, class R = void>
+struct iterator_enable_if_tag
+   : ::boost::move_detail::enable_if_c
+      < ::boost::move_detail::is_same
+         < typename boost::intrusive::iterator_traits<I>::iterator_category 
+         , Tag
+         >::value
+         , R>
+{};
 
+template<class I, class Tag, class R = void>
+struct iterator_disable_if_tag
+   : ::boost::move_detail::enable_if_c
+      < !::boost::move_detail::is_same
+         < typename boost::intrusive::iterator_traits<I>::iterator_category 
+         , Tag
+         >::value
+         , R>
+{};
+
+////////////////////////////////////////
+//    iterator_[dis|en]able_if_tag_difference_type
+////////////////////////////////////////
+template<class I, class Tag>
+struct iterator_enable_if_tag_difference_type
+   : iterator_enable_if_tag<I, Tag, typename boost::intrusive::iterator_traits<I>::difference_type>
+{};
+
+template<class I, class Tag>
+struct iterator_disable_if_tag_difference_type
+   : iterator_disable_if_tag<I, Tag, typename boost::intrusive::iterator_traits<I>::difference_type>
+{};
+
+////////////////////
+//    advance
+////////////////////
 template<class InputIt, class Distance> inline
-void advance_impl(InputIt& it, Distance n, const std::input_iterator_tag&)
+typename iterator_enable_if_tag<InputIt, std::input_iterator_tag>::type
+   iterator_advance(InputIt& it, Distance n)
 {
    while(n--)
 	   ++it;
 }
 
 template<class InputIt, class Distance> inline
-void advance_impl(InputIt& it, Distance n, std::forward_iterator_tag &)
+typename iterator_enable_if_tag<InputIt, std::forward_iterator_tag>::type
+   iterator_advance(InputIt& it, Distance n)
 {
    while(n--)
 	   ++it;
 }
 
 template<class InputIt, class Distance> inline
-void advance_impl(InputIt& it, Distance n, std::bidirectional_iterator_tag &)
+typename iterator_enable_if_tag<InputIt, std::bidirectional_iterator_tag>::type
+   iterator_advance(InputIt& it, Distance n)
 {
    for (; 0 < n; --n)
 	   ++it;
@@ -61,42 +105,35 @@ void advance_impl(InputIt& it, Distance n, std::bidirectional_iterator_tag &)
 	   --it;
 }
 
-template<class InputIt, class Distance>
-inline void advance_impl(InputIt& it, Distance n, const std::random_access_iterator_tag &)
+template<class InputIt, class Distance> inline
+typename iterator_enable_if_tag<InputIt, std::random_access_iterator_tag>::type
+   iterator_advance(InputIt& it, Distance n)
 {
    it += n;
 }
 
-template<class InputIt, class Distance, class Category>
-inline void distance_impl(InputIt first, InputIt last, Distance& off, const Category &)
+////////////////////
+//    distance
+////////////////////
+template<class InputIt> inline
+typename iterator_disable_if_tag_difference_type
+   <InputIt, std::random_access_iterator_tag>::type
+      iterator_distance(InputIt first, InputIt last)
 {
+   typename iterator_traits<InputIt>::difference_type off = 0;
    while(first != last){
 	   ++off;
       ++first;
    }
-}
-
-template<class InputIt, class Distance> inline
-void distance_impl(InputIt first, InputIt last, Distance& off, const std::random_access_iterator_tag&)
-{
-   off += last - first;
-}
-
-}  //namespace detail
-
-template<class InputIt, class Distance>
-inline void iterator_advance(InputIt& it, Distance n)
-{	// increment iterator by offset, arbitrary iterators
-   typedef typename boost::intrusive::iterator_traits<InputIt>::iterator_category category_t;
-   boost::intrusive::detail::advance_impl(it, n, category_t());
+   return off;
 }
 
 template<class InputIt> inline
-typename iterator_traits<InputIt>::difference_type iterator_distance(InputIt first, InputIt last)
+typename iterator_enable_if_tag_difference_type
+   <InputIt, std::random_access_iterator_tag>::type
+      iterator_distance(InputIt first, InputIt last)
 {
-   typename iterator_traits<InputIt>::difference_type off = 0;
-   typedef typename boost::intrusive::iterator_traits<InputIt>::iterator_category category_t;
-   boost::intrusive::detail::distance_impl(first, last, off, category_t());
+   typename iterator_traits<InputIt>::difference_type off = last - first;
    return off;
 }
 
