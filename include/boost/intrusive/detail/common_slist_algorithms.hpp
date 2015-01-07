@@ -143,7 +143,7 @@ class common_slist_algorithms
             }
             BOOST_CATCH(...){
                node_traits::set_next(last_to_remove, new_f);
-               throw;
+               BOOST_RETHROW;
             }
             BOOST_CATCH_END
             node_traits::set_next(last_to_remove, new_f);
