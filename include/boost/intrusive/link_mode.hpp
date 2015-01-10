@@ -13,7 +13,7 @@
 #ifndef BOOST_INTRUSIVE_LINK_MODE_HPP
 #define BOOST_INTRUSIVE_LINK_MODE_HPP
 
-#if defined(_MSC_VER)
+#if defined(BOOST_HAS_PRAGMA_ONCE)
 #  pragma once
 #endif
 

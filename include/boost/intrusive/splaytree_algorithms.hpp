@@ -30,7 +30,7 @@
 #ifndef BOOST_INTRUSIVE_SPLAYTREE_ALGORITHMS_HPP
 #define BOOST_INTRUSIVE_SPLAYTREE_ALGORITHMS_HPP
 
-#if defined(_MSC_VER)
+#if defined(BOOST_HAS_PRAGMA_ONCE)
 #  pragma once
 #endif
 

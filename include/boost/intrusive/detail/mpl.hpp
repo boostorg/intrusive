@@ -14,7 +14,7 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_MPL_HPP
 #define BOOST_INTRUSIVE_DETAIL_MPL_HPP
 
-#if defined(_MSC_VER)
+#if defined(BOOST_HAS_PRAGMA_ONCE)
 #  pragma once
 #endif
 
