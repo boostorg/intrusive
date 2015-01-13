@@ -421,7 +421,7 @@ class circular_list_algorithms
             BOOST_CATCH(...){
                node_traits::set_next    (last_to_remove, new_f);
                node_traits::set_previous(new_f, last_to_remove);
-               throw;
+               BOOST_RETHROW
             }
             BOOST_CATCH_END
             node_traits::set_next(last_to_remove, new_f);
