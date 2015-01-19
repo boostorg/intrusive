@@ -1273,7 +1273,7 @@ class bstree_impl
       node_algorithms::push_front(this->header_ptr(), to_insert);
    }
 
-   //! <b>Effects</b>: Erases the element pointed to by pos.
+   //! <b>Effects</b>: Erases the element pointed to by i.
    //!
    //! <b>Complexity</b>: Average complexity for erase element is constant time.
    //!
@@ -1346,7 +1346,7 @@ class bstree_impl
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!
-   //! <b>Effects</b>: Erases the element pointed to by pos.
+   //! <b>Effects</b>: Erases the element pointed to by i.
    //!   Disposer::operator()(pointer) is called for the removed element.
    //!
    //! <b>Complexity</b>: Average complexity for erase element is constant time.

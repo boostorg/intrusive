@@ -713,7 +713,7 @@ class treap_impl
       this->tree_type::sz_traits().increment();
    }
 
-   //! <b>Effects</b>: Erases the element pointed to by pos.
+   //! <b>Effects</b>: Erases the element pointed to by i.
    //!
    //! <b>Complexity</b>: Average complexity for erase element is constant time.
    //!
@@ -789,7 +789,7 @@ class treap_impl
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!
-   //! <b>Effects</b>: Erases the element pointed to by pos.
+   //! <b>Effects</b>: Erases the element pointed to by i.
    //!   Disposer::operator()(pointer) is called for the removed element.
    //!
    //! <b>Complexity</b>: Average complexity for erase element is constant time.
