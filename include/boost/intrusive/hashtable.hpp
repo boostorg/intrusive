@@ -12,10 +12,6 @@
 #ifndef BOOST_INTRUSIVE_HASHTABLE_HPP
 #define BOOST_INTRUSIVE_HASHTABLE_HPP
 
-#if defined(BOOST_HAS_PRAGMA_ONCE)
-#  pragma once
-#endif
-
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 
@@ -50,6 +46,9 @@
 #include <algorithm>    //std::lower_bound, std::upper_bound
 #include <cstddef>      //std::size_t
 
+#if defined(BOOST_HAS_PRAGMA_ONCE)
+#  pragma once
+#endif
 
 namespace boost {
 namespace intrusive {

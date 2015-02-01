@@ -13,6 +13,10 @@
 #ifndef BOOST_INTRUSIVE_BSTREE_ALGORITHMS_BASE_HPP
 #define BOOST_INTRUSIVE_BSTREE_ALGORITHMS_BASE_HPP
 
+#ifndef BOOST_CONFIG_HPP
+#  include <boost/config.hpp>
+#endif
+
 #if defined(BOOST_HAS_PRAGMA_ONCE)
 #  pragma once
 #endif

@@ -12,10 +12,6 @@
 #ifndef BOOST_INTRUSIVE_SPLAYTREE_HPP
 #define BOOST_INTRUSIVE_SPLAYTREE_HPP
 
-#if defined(BOOST_HAS_PRAGMA_ONCE)
-#  pragma once
-#endif
-
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <cstddef>
@@ -33,6 +29,10 @@
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/intrusive/detail/key_nodeptr_comp.hpp>
 #include <boost/move/utility_core.hpp>
+
+#if defined(BOOST_HAS_PRAGMA_ONCE)
+#  pragma once
+#endif
 
 namespace boost {
 namespace intrusive {

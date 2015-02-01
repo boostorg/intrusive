@@ -17,16 +17,16 @@
 #ifndef BOOST_INTRUSIVE_POINTER_TRAITS_HPP
 #define BOOST_INTRUSIVE_POINTER_TRAITS_HPP
 
-#if defined(BOOST_HAS_PRAGMA_ONCE)
-#  pragma once
-#endif
-
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/detail/workaround.hpp>
 #include <boost/intrusive/pointer_rebind.hpp>
 #include <boost/intrusive/detail/pointer_element.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <cstddef>
+
+#if defined(BOOST_HAS_PRAGMA_ONCE)
+#  pragma once
+#endif
 
 namespace boost {
 namespace intrusive {

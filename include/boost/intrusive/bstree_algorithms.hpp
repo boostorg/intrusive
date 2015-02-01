@@ -13,10 +13,6 @@
 #ifndef BOOST_INTRUSIVE_BSTREE_ALGORITHMS_HPP
 #define BOOST_INTRUSIVE_BSTREE_ALGORITHMS_HPP
 
-#if defined(BOOST_HAS_PRAGMA_ONCE)
-#  pragma once
-#endif
-
 #include <cstddef>
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
@@ -27,6 +23,10 @@
 #include <boost/intrusive/detail/algo_type.hpp>
 
 #include <boost/intrusive/detail/minimal_pair_header.hpp>
+
+#if defined(BOOST_HAS_PRAGMA_ONCE)
+#  pragma once
+#endif
 
 namespace boost {
 namespace intrusive {
@@ -1413,27 +1413,25 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    template<class Checker>
    static void check(const const_node_ptr& header, Checker checker, typename Checker::return_type& checker_return)
    {
-       const_node_ptr root_node_ptr = NodeTraits::get_parent(header);
-       if (!root_node_ptr)
-       {
-           // check left&right header pointers
-           BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_left(header) == header);
-           BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_right(header) == header);
-       }
-       else
-       {
-           // check parent pointer of root node
-           BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_parent(root_node_ptr) == header);
-           // check subtree from root
-           check_subtree(root_node_ptr, checker, checker_return);
-           // check left&right header pointers
-           const_node_ptr p = root_node_ptr;
-           while (NodeTraits::get_left(p)) { p = NodeTraits::get_left(p); }
-           BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_left(header) == p);
-           p = root_node_ptr;
-           while (NodeTraits::get_right(p)) { p = NodeTraits::get_right(p); }
-           BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_right(header) == p);
-       }
+      const_node_ptr root_node_ptr = NodeTraits::get_parent(header);
+      if (!root_node_ptr){
+         // check left&right header pointers
+         BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_left(header) == header);
+         BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_right(header) == header);
+      }
+      else{
+         // check parent pointer of root node
+         BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_parent(root_node_ptr) == header);
+         // check subtree from root
+         check_subtree(root_node_ptr, checker, checker_return);
+         // check left&right header pointers
+         const_node_ptr p = root_node_ptr;
+         while (NodeTraits::get_left(p)) { p = NodeTraits::get_left(p); }
+         BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_left(header) == p);
+         p = root_node_ptr;
+         while (NodeTraits::get_right(p)) { p = NodeTraits::get_right(p); }
+         BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_right(header) == p);
+      }
    }
 
    protected:

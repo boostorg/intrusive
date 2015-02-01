@@ -12,10 +12,6 @@
 #ifndef BOOST_INTRUSIVE_BSTREE_HPP
 #define BOOST_INTRUSIVE_BSTREE_HPP
 
-#if defined(BOOST_HAS_PRAGMA_ONCE)
-#  pragma once
-#endif
-
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 
@@ -51,6 +47,9 @@
 #include <cstddef>   //size_t...
 #include <boost/intrusive/detail/minimal_less_equal_header.hpp>//less, equal_to
 
+#if defined(BOOST_HAS_PRAGMA_ONCE)
+#  pragma once
+#endif
 
 namespace boost {
 namespace intrusive {

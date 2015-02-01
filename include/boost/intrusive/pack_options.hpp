@@ -13,11 +13,11 @@
 #ifndef BOOST_INTRUSIVE_PACK_OPTIONS_HPP
 #define BOOST_INTRUSIVE_PACK_OPTIONS_HPP
 
+#include <boost/intrusive/detail/config_begin.hpp>
+
 #if defined(BOOST_HAS_PRAGMA_ONCE)
 #  pragma once
 #endif
-
-#include <boost/intrusive/detail/config_begin.hpp>
 
 namespace boost {
 namespace intrusive {

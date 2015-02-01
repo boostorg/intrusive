@@ -13,15 +13,15 @@
 #ifndef BOOST_INTRUSIVE_OPTIONS_HPP
 #define BOOST_INTRUSIVE_OPTIONS_HPP
 
-#if defined(BOOST_HAS_PRAGMA_ONCE)
-#  pragma once
-#endif
-
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/intrusive/pack_options.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
+
+#if defined(BOOST_HAS_PRAGMA_ONCE)
+#  pragma once
+#endif
 
 namespace boost {
 namespace intrusive {

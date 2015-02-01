@@ -18,10 +18,6 @@
 #ifndef BOOST_INTRUSIVE_SGTREE_HPP
 #define BOOST_INTRUSIVE_SGTREE_HPP
 
-#if defined(BOOST_HAS_PRAGMA_ONCE)
-#  pragma once
-#endif
-
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/detail/assert.hpp>
@@ -46,6 +42,9 @@
 #include <cmath>
 #include <cstddef>
 
+#if defined(BOOST_HAS_PRAGMA_ONCE)
+#  pragma once
+#endif
 
 namespace boost {
 namespace intrusive {

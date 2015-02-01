@@ -12,16 +12,16 @@
 #ifndef BOOST_INTRUSIVE_TREAP_SET_HPP
 #define BOOST_INTRUSIVE_TREAP_SET_HPP
 
-#if defined(BOOST_HAS_PRAGMA_ONCE)
-#  pragma once
-#endif
-
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/treap.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/move/utility_core.hpp>
 #include <boost/static_assert.hpp>
+
+#if defined(BOOST_HAS_PRAGMA_ONCE)
+#  pragma once
+#endif
 
 namespace boost {
 namespace intrusive {

@@ -12,16 +12,11 @@
 #ifndef BOOST_INTRUSIVE_AVLTREE_HPP
 #define BOOST_INTRUSIVE_AVLTREE_HPP
 
-#if defined(BOOST_HAS_PRAGMA_ONCE)
-#  pragma once
-#endif
-
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <cstddef>
 #include <boost/intrusive/detail/minimal_less_equal_header.hpp>
 #include <boost/intrusive/detail/minimal_pair_header.hpp>
-
 
 #include <boost/static_assert.hpp>
 #include <boost/intrusive/avl_set_hook.hpp>
@@ -35,6 +30,10 @@
 #include <boost/intrusive/avltree_algorithms.hpp>
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/move/utility_core.hpp>
+
+#if defined(BOOST_HAS_PRAGMA_ONCE)
+#  pragma once
+#endif
 
 namespace boost {
 namespace intrusive {

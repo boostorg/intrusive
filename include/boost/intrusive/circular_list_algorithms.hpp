@@ -14,15 +14,15 @@
 #ifndef BOOST_INTRUSIVE_CIRCULAR_LIST_ALGORITHMS_HPP
 #define BOOST_INTRUSIVE_CIRCULAR_LIST_ALGORITHMS_HPP
 
-#if defined(BOOST_HAS_PRAGMA_ONCE)
-#  pragma once
-#endif
-
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/detail/algo_type.hpp>
 #include <boost/core/no_exceptions_support.hpp>
 #include <cstddef>
+
+#if defined(BOOST_HAS_PRAGMA_ONCE)
+#  pragma once
+#endif
 
 namespace boost {
 namespace intrusive {

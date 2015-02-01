@@ -13,15 +13,15 @@
 #ifndef BOOST_INTRUSIVE_UNORDERED_SET_HPP
 #define BOOST_INTRUSIVE_UNORDERED_SET_HPP
 
-#if defined(BOOST_HAS_PRAGMA_ONCE)
-#  pragma once
-#endif
-
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/hashtable.hpp>
 #include <boost/move/utility_core.hpp>
 #include <boost/static_assert.hpp>
+
+#if defined(BOOST_HAS_PRAGMA_ONCE)
+#  pragma once
+#endif
 
 namespace boost {
 namespace intrusive {
