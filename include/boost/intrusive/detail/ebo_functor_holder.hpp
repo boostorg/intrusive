@@ -183,7 +183,7 @@ class ebo_functor_holder_impl<T, false>
    public:
    ebo_functor_holder_impl()
    {}
-   ebo_functor_holder_impl(const T& t)
+   explicit ebo_functor_holder_impl(const T& t)
       :  T(t)
    {}
    template<class Arg1, class Arg2>
@@ -204,7 +204,7 @@ class ebo_functor_holder
 
    public:
    ebo_functor_holder(){}
-   ebo_functor_holder(const T& t)
+   explicit ebo_functor_holder(const T& t)
       :  super(t)
    {}
 

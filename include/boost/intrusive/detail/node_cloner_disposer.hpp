@@ -22,6 +22,7 @@
 #endif
 
 #include <boost/intrusive/link_mode.hpp>
+#include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/ebo_functor_holder.hpp>
 #include <boost/intrusive/detail/algo_type.hpp>
 #include <boost/intrusive/detail/assert.hpp>
@@ -30,7 +31,7 @@ namespace boost {
 namespace intrusive {
 namespace detail {
 
-template<class F, class ValueTraits, algo_types AlgoType>
+template<class F, class ValueTraits, algo_types AlgoType, bool IsConst = true>
 struct node_cloner
    //Use public inheritance to avoid MSVC bugs with closures
    :  public ebo_functor_holder<F>
@@ -50,6 +51,8 @@ struct node_cloner
    typedef typename value_traits::reference        reference;
    typedef typename value_traits::const_reference  const_reference;
 
+   typedef typename if_c<IsConst, const_reference, reference>::type reference_type;
+
    node_cloner(F f, const ValueTraits *traits)
       :  base_t(f), traits_(traits)
    {}
@@ -57,7 +60,7 @@ struct node_cloner
    // tree-based containers use this method, which is proxy-reference friendly
    node_ptr operator()(const node_ptr & p)
    {
-      const_reference v = *traits_->to_value_ptr(p);
+      reference_type v = *traits_->to_value_ptr(p);
       node_ptr n = traits_->to_node_ptr(*base_t::get()(v));
       //Cloned node must be in default mode if the linking mode requires it
       if(safemode_or_autounlink)
@@ -68,7 +71,7 @@ struct node_cloner
    // hashtables use this method, which is proxy-reference unfriendly
    node_ptr operator()(const node &to_clone)
    {
-      const value_type &v =
+      reference_type v =
          *traits_->to_value_ptr
             (pointer_traits<const_node_ptr>::pointer_to(to_clone));
       node_ptr n = traits_->to_node_ptr(*base_t::get()(v));

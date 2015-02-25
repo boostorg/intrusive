@@ -213,9 +213,13 @@ class rbtree_impl
    //! @copydoc ::boost::intrusive::bstree::swap
    void swap(rbtree_impl& other);
 
-   //! @copydoc ::boost::intrusive::bstree::clone_from
+   //! @copydoc ::boost::intrusive::bstree::clone_from(const bstree &src, cloner, Disposer)
    template <class Cloner, class Disposer>
    void clone_from(const rbtree_impl &src, Cloner cloner, Disposer disposer);
+
+   //! @copydoc ::boost::intrusive::bstree::clone_from(bstree &src, cloner, Disposer)
+   template <class Cloner, class Disposer>
+   void clone_from(rbtree_impl &src, Cloner cloner, Disposer disposer);
 
    //! @copydoc ::boost::intrusive::bstree::insert_equal(reference)
    iterator insert_equal(reference value);

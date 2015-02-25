@@ -50,7 +50,7 @@ struct rbtree_node_cloner
    typedef typename NodeTraits::node_ptr  node_ptr;
    typedef detail::ebo_functor_holder<F>  base_t;
 
-   rbtree_node_cloner(F f)
+   explicit rbtree_node_cloner(F f)
       :  base_t(f)
    {}
 

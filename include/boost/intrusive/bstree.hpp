@@ -945,9 +945,44 @@ class bstree_impl
          detail::exception_disposer<bstree_impl, Disposer>
             rollback(*this, disposer);
          node_algorithms::clone
-            (const_node_ptr(src.header_ptr())
-            ,node_ptr(this->header_ptr())
+            (src.header_ptr()
+            ,this->header_ptr()
             ,detail::node_cloner <Cloner,    value_traits, AlgoType>(cloner,   &this->get_value_traits())
+            ,detail::node_disposer<Disposer, value_traits, AlgoType>(disposer, &this->get_value_traits()));
+         this->sz_traits().set_size(src.sz_traits().get_size());
+         this->comp() = src.comp();
+         rollback.release();
+      }
+   }
+
+   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //!   Cloner should yield to nodes equivalent to the original nodes.
+   //!
+   //! <b>Effects</b>: Erases all the elements from *this
+   //!   calling Disposer::operator()(pointer), clones all the
+   //!   elements from src calling Cloner::operator()(const_reference )
+   //!   and inserts them on *this. Copies the predicate from the source container.
+   //!
+   //!   If cloner throws, all cloned elements are unlinked and disposed
+   //!   calling Disposer::operator()(pointer).
+   //!
+   //! <b>Complexity</b>: Linear to erased plus inserted elements.
+   //!
+   //! <b>Throws</b>: If cloner throws or predicate copy assignment throws. Basic guarantee.
+   //!
+   //! <b>Note</b>: This version can modify the source container, useful to implement
+   //!    move semantics.
+   template <class Cloner, class Disposer>
+   void clone_from(bstree_impl &src, Cloner cloner, Disposer disposer)
+   {
+      this->clear_and_dispose(disposer);
+      if(!src.empty()){
+         detail::exception_disposer<bstree_impl, Disposer>
+            rollback(*this, disposer);
+         node_algorithms::clone
+            (src.header_ptr()
+            ,this->header_ptr()
+            ,detail::node_cloner <Cloner,    value_traits, AlgoType, false>(cloner,   &this->get_value_traits())
             ,detail::node_disposer<Disposer, value_traits, AlgoType>(disposer, &this->get_value_traits()));
          this->sz_traits().set_size(src.sz_traits().get_size());
          this->comp() = src.comp();

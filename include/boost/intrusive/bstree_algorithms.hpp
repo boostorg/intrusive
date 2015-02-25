@@ -1285,7 +1285,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!   the nodes of the target tree. If "cloner" throws, the cloned target nodes
    //!   are disposed using <tt>void disposer(const node_ptr &)</tt>.
    //!
-   //! <b>Complexity</b>: Linear to the number of element of the source tree plus the.
+   //! <b>Complexity</b>: Linear to the number of element of the source tree plus the
    //!   number of elements of tree target tree when calling this function.
    //!
    //! <b>Throws</b>: If cloner functor throws. If this happens target nodes are disposed.
