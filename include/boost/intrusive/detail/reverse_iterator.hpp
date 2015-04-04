@@ -63,7 +63,7 @@ class reverse_iterator
    {  It temp(m_current);   --temp; return temp.operator->(); }
 
    reference operator[](difference_type off) const
-   {  return this->m_current[-off];  }
+   {  return this->m_current[-off-1];  }
 
    reverse_iterator& operator++()
    {  --m_current;   return *this;   }
