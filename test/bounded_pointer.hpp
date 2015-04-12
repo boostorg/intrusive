@@ -54,8 +54,8 @@ class bounded_pointer
    {}
 
    template<class T2>
-   bounded_pointer(const bounded_pointer<T2> &other, typename boost::intrusive::detail::enable_if_c
-      <boost::intrusive::detail::is_convertible<T2*, T*>::value>::type* = 0)
+   bounded_pointer( const bounded_pointer<T2> &other
+                  , typename boost::intrusive::detail::enable_if_convertible<T2*, T*>::type* = 0)
       :  m_offset(other.m_offset)
    {}
 
@@ -63,8 +63,7 @@ class bounded_pointer
    { m_offset = other.m_offset; return *this; }
 
    template <class T2>
-   typename boost::intrusive::detail::enable_if_c
-      <boost::intrusive::detail::is_convertible<T2*, T*>::value, bounded_pointer&>::type
+   typename boost::intrusive::detail::enable_if_convertible<T2*, T*, bounded_pointer&>::type
       operator= (const bounded_pointer<T2> & other)
    {  m_offset = other.m_offset;  return *this;  }
 
@@ -172,15 +171,14 @@ class bounded_reference
    { assert(m_offset != max_offset); raw() = rhs.raw(); return *this; }
 
    template<class T2>
-   bounded_reference(const bounded_reference<T2> &other, typename boost::intrusive::detail::enable_if_c
-      <boost::intrusive::detail::is_convertible<T2&, T&>::value>::type* = 0)
+   bounded_reference( const bounded_reference<T2> &other
+                    , typename boost::intrusive::detail::enable_if_convertible<T2*, T*>::type* = 0)
       :  m_offset(other.m_offset)
    {}
 
    template <class T2>
-   typename boost::intrusive::detail::enable_if_c
-      <boost::intrusive::detail::is_convertible<T2&, T&>::value, bounded_reference&>::type
-   operator= (const bounded_reference<T2> & other)
+   typename boost::intrusive::detail::enable_if_convertible<T2*, T*, bounded_reference&>::type
+      operator= (const bounded_reference<T2> & other)
    {  m_offset = other.m_offset;  return *this;  }
 
    friend std::ostream& operator << (std::ostream& os, const bounded_reference< T >& ref)

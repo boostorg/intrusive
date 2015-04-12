@@ -76,6 +76,15 @@ void test_container( Container & c )
       BOOST_TEST( c.size() == i );
    }
    static_cast<const Container&>(c).check();
+   //Very basic test for comparisons
+   {
+      BOOST_TEST(c == c);
+      BOOST_TEST(!(c != c));
+      BOOST_TEST(!(c < c));
+      BOOST_TEST(c <= c);
+      BOOST_TEST(!(c > c));
+      BOOST_TEST(c >= c);
+   }
 }
 
 

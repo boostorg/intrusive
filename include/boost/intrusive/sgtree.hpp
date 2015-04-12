@@ -610,11 +610,9 @@ class sgtree_impl
 
    //! @copydoc ::boost::intrusive::bstree::erase(const KeyType&,KeyValueCompare)
    template<class KeyType, class KeyValueCompare>
-   size_type erase(const KeyType& key, KeyValueCompare comp
-                  /// @cond
-                  , typename detail::enable_if_c<!detail::is_convertible<KeyValueCompare, const_iterator>::value >::type * = 0
-                  /// @endcond
-                  )
+   BOOST_INTRUSIVE_DOC1ST(size_type
+      , typename detail::disable_if_convertible<KeyValueCompare BOOST_INTRUSIVE_I const_iterator BOOST_INTRUSIVE_I size_type>::type)
+      erase(const KeyType& key, KeyValueCompare comp)
    {
       std::pair<iterator,iterator> p = this->equal_range(key, comp);
       size_type n;
@@ -655,11 +653,9 @@ class sgtree_impl
 
    //! @copydoc ::boost::intrusive::bstree::erase_and_dispose(const KeyType&,KeyValueCompare,Disposer)
    template<class KeyType, class KeyValueCompare, class Disposer>
-   size_type erase_and_dispose(const KeyType& key, KeyValueCompare comp, Disposer disposer
-                  /// @cond
-                  , typename detail::enable_if_c<!detail::is_convertible<KeyValueCompare, const_iterator>::value >::type * = 0
-                  /// @endcond
-                  )
+   BOOST_INTRUSIVE_DOC1ST(size_type
+      , typename detail::disable_if_convertible<KeyValueCompare BOOST_INTRUSIVE_I const_iterator BOOST_INTRUSIVE_I size_type>::type)
+      erase_and_dispose(const KeyType& key, KeyValueCompare comp, Disposer disposer)
    {
       std::pair<iterator,iterator> p = this->equal_range(key, comp);
       size_type n;
@@ -796,6 +792,20 @@ class sgtree_impl
    //! @copydoc ::boost::intrusive::bstree::rebalance_subtree
    iterator rebalance_subtree(iterator root);
 
+   friend bool operator< (const sgtree_impl &x, const sgtree_impl &y);
+
+   friend bool operator==(const sgtree_impl &x, const sgtree_impl &y);
+
+   friend bool operator!= (const sgtree_impl &x, const sgtree_impl &y);
+
+   friend bool operator>(const sgtree_impl &x, const sgtree_impl &y);
+
+   friend bool operator<=(const sgtree_impl &x, const sgtree_impl &y);
+
+   friend bool operator>=(const sgtree_impl &x, const sgtree_impl &y);
+
+   friend void swap(sgtree_impl &x, sgtree_impl &y);
+
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! <b>Returns</b>: The balance factor (alpha) used in this tree
@@ -850,30 +860,6 @@ class sgtree_impl
    /// @endcond
 };
 
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-
-template<class T, class ...Options>
-bool operator< (const sgtree_impl<T, Options...> &x, const sgtree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator==(const sgtree_impl<T, Options...> &x, const sgtree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator!= (const sgtree_impl<T, Options...> &x, const sgtree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator>(const sgtree_impl<T, Options...> &x, const sgtree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator<=(const sgtree_impl<T, Options...> &x, const sgtree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator>=(const sgtree_impl<T, Options...> &x, const sgtree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-void swap(sgtree_impl<T, Options...> &x, sgtree_impl<T, Options...> &y);
-
-#endif   //#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
 //! Helper metafunction to define a \c sgtree that yields to the same type when the
 //! same options (either explicitly or implicitly) are used.

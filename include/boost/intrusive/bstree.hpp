@@ -1366,11 +1366,9 @@ class bstree_impl
    //! <b>Note</b>: Invalidates the iterators (but not the references)
    //!    to the erased elements. No destructors are called.
    template<class KeyType, class KeyValueCompare>
-   size_type erase(const KeyType& key, KeyValueCompare comp
-                  /// @cond
-                  , typename detail::enable_if_c<!detail::is_convertible<KeyValueCompare, const_iterator>::value >::type * = 0
-                  /// @endcond
-                  )
+   BOOST_INTRUSIVE_DOC1ST(size_type
+      , typename detail::disable_if_convertible<KeyValueCompare BOOST_INTRUSIVE_I const_iterator BOOST_INTRUSIVE_I size_type>::type)
+      erase(const KeyType& key, KeyValueCompare comp)
    {
       std::pair<iterator,iterator> p = this->equal_range(key, comp);
       size_type n;
@@ -1397,12 +1395,6 @@ class bstree_impl
       disposer(this->get_value_traits().to_value_ptr(to_erase));
       return ret;
    }
-
-   #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-   template<class Disposer>
-   iterator erase_and_dispose(iterator i, Disposer disposer)
-   {  return this->erase_and_dispose(const_iterator(i), disposer);   }
-   #endif
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!
@@ -1457,11 +1449,9 @@ class bstree_impl
    //! <b>Note</b>: Invalidates the iterators
    //!    to the erased elements.
    template<class KeyType, class KeyValueCompare, class Disposer>
-   size_type erase_and_dispose(const KeyType& key, KeyValueCompare comp, Disposer disposer
-                  /// @cond
-                  , typename detail::enable_if_c<!detail::is_convertible<KeyValueCompare, const_iterator>::value >::type * = 0
-                  /// @endcond
-                  )
+   BOOST_INTRUSIVE_DOC1ST(size_type
+      , typename detail::disable_if_convertible<KeyValueCompare BOOST_INTRUSIVE_I const_iterator BOOST_INTRUSIVE_I size_type>::type)
+      erase_and_dispose(const KeyType& key, KeyValueCompare comp, Disposer disposer)
    {
       std::pair<iterator,iterator> p = this->equal_range(key, comp);
       size_type n;
@@ -1956,6 +1946,32 @@ class bstree_impl
       check(detail::empty_node_checker<ValueTraits>());
    }
 
+   friend bool operator==(const bstree_impl &x, const bstree_impl &y)
+   {
+      if(constant_time_size && x.size() != y.size()){
+         return false;
+      }
+      return boost::intrusive::algo_equal(x.cbegin(), x.cend(), y.cbegin(), y.cend());
+   }
+
+   friend bool operator!=(const bstree_impl &x, const bstree_impl &y)
+   {  return !(x == y); }
+
+   friend bool operator<(const bstree_impl &x, const bstree_impl &y)
+   {  return ::boost::intrusive::algo_lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
+
+   friend bool operator>(const bstree_impl &x, const bstree_impl &y)
+   {  return y < x;  }
+
+   friend bool operator<=(const bstree_impl &x, const bstree_impl &y)
+   {  return !(x > y);  }
+
+   friend bool operator>=(const bstree_impl &x, const bstree_impl &y)
+   {  return !(x < y);  }
+
+   friend void swap(bstree_impl &x, bstree_impl &y)
+   {  x.swap(y);  }
+
    /// @cond
    private:
    template<class Disposer>
@@ -1974,111 +1990,6 @@ class bstree_impl
    }
    /// @endcond
 };
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename HeaderHolder>
-#endif
-inline bool operator<
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(const bstree_impl<T, Options...> &x, const bstree_impl<T, Options...> &y)
-#else
-( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> &x
-, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> &y)
-#endif
-{  return ::boost::intrusive::algo_lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename HeaderHolder>
-#endif
-bool operator==
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(const bstree_impl<T, Options...> &x, const bstree_impl<T, Options...> &y)
-#else
-( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> &x
-, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> &y)
-#endif
-{
-   typedef bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> tree_type;
-
-   if(tree_type::constant_time_size && x.size() != y.size()){
-      return false;
-   }
-   return boost::intrusive::algo_equal(x.cbegin(), x.cend(), y.cbegin(), y.cend());
-}
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename HeaderHolder>
-#endif
-inline bool operator!=
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(const bstree_impl<T, Options...> &x, const bstree_impl<T, Options...> &y)
-#else
-( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> &x
-, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> &y)
-#endif
-{  return !(x == y); }
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename HeaderHolder>
-#endif
-inline bool operator>
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(const bstree_impl<T, Options...> &x, const bstree_impl<T, Options...> &y)
-#else
-( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> &x
-, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> &y)
-#endif
-{  return y < x;  }
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename HeaderHolder>
-#endif
-inline bool operator<=
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(const bstree_impl<T, Options...> &x, const bstree_impl<T, Options...> &y)
-#else
-( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> &x
-, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> &y)
-#endif
-{  return !(y < x);  }
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename HeaderHolder>
-#endif
-inline bool operator>=
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(const bstree_impl<T, Options...> &x, const bstree_impl<T, Options...> &y)
-#else
-( const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> &x
-, const bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> &y)
-#endif
-{  return !(x < y);  }
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template<class ValueTraits, class VoidKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename HeaderHolder>
-#endif
-inline void swap
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(bstree_impl<T, Options...> &x, bstree_impl<T, Options...> &y)
-#else
-( bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> &x
-, bstree_impl<ValueTraits, VoidKeyComp, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> &y)
-#endif
-{  x.swap(y);  }
 
 //! Helper metafunction to define a \c bstree that yields to the same type when the
 //! same options (either explicitly or implicitly) are used.

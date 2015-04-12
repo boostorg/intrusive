@@ -113,9 +113,9 @@ struct bucket_traits_impl
 template <class NodeTraits>
 struct hash_reduced_slist_node_traits
 {
-   template <class U> static detail::one test(...);
-   template <class U> static detail::two test(typename U::reduced_slist_node_traits* = 0);
-   static const bool value = sizeof(test<NodeTraits>(0)) == sizeof(detail::two);
+   template <class U> static detail::no_type test(...);
+   template <class U> static detail::yes_type test(typename U::reduced_slist_node_traits*);
+   static const bool value = sizeof(test<NodeTraits>(0)) == sizeof(detail::yes_type);
 };
 
 template <class NodeTraits>

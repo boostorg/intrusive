@@ -473,11 +473,9 @@ class unordered_set_impl
    //! <b>Note</b>: Invalidates the iterators
    //!    to the erased elements.
    template<class Disposer>
-   void erase_and_dispose(const_iterator i, Disposer disposer
-                              /// @cond
-                              , typename detail::enable_if_c<!detail::is_convertible<Disposer, const_iterator>::value >::type * = 0
-                              /// @endcond
-                              )
+   BOOST_INTRUSIVE_DOC1ST(void
+      , typename detail::disable_if_convertible<Disposer BOOST_INTRUSIVE_I const_iterator>::type)
+      erase_and_dispose(const_iterator i, Disposer disposer)
    {  table_type::erase_and_dispose(i, disposer);  }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
@@ -1503,18 +1501,10 @@ class unordered_multiset_impl
    //! <b>Note</b>: Invalidates the iterators
    //!    to the erased elements.
    template<class Disposer>
-   void erase_and_dispose(const_iterator i, Disposer disposer
-                              /// @cond
-                              , typename detail::enable_if_c<!detail::is_convertible<Disposer, const_iterator>::value >::type * = 0
-                              /// @endcond
-                              )
+   BOOST_INTRUSIVE_DOC1ST(void
+      , typename detail::disable_if_convertible<Disposer BOOST_INTRUSIVE_I const_iterator>::type)
+      erase_and_dispose(const_iterator i, Disposer disposer)
    {  table_type::erase_and_dispose(i, disposer);  }
-
-   #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-   template<class Disposer>
-   void erase_and_dispose(const_iterator i, Disposer disposer)
-   {  this->erase_and_dispose(const_iterator(i), disposer);   }
-   #endif
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!

@@ -774,11 +774,9 @@ class treap_impl
    //! <b>Note</b>: Invalidates the iterators (but not the references)
    //!    to the erased elements. No destructors are called.
    template<class KeyType, class KeyValueCompare>
-   size_type erase(const KeyType& key, KeyValueCompare comp
-                  /// @cond
-                  , typename detail::enable_if_c<!detail::is_convertible<KeyValueCompare, const_iterator>::value >::type * = 0
-                  /// @endcond
-                  )
+   BOOST_INTRUSIVE_DOC1ST(size_type
+      , typename detail::disable_if_convertible<KeyValueCompare BOOST_INTRUSIVE_I const_iterator BOOST_INTRUSIVE_I size_type>::type)
+      erase(const KeyType& key, KeyValueCompare comp)
    {
       std::pair<iterator,iterator> p = this->equal_range(key, comp);
       size_type n;
@@ -867,11 +865,9 @@ class treap_impl
    //! <b>Note</b>: Invalidates the iterators
    //!    to the erased elements.
    template<class KeyType, class KeyValueCompare, class Disposer>
-   size_type erase_and_dispose(const KeyType& key, KeyValueCompare comp, Disposer disposer
-                  /// @cond
-                  , typename detail::enable_if_c<!detail::is_convertible<KeyValueCompare, const_iterator>::value >::type * = 0
-                  /// @endcond
-                  )
+   BOOST_INTRUSIVE_DOC1ST(size_type
+      , typename detail::disable_if_convertible<KeyValueCompare BOOST_INTRUSIVE_I const_iterator BOOST_INTRUSIVE_I size_type>::type)
+      erase_and_dispose(const KeyType& key, KeyValueCompare comp, Disposer disposer)
    {
       std::pair<iterator,iterator> p = this->equal_range(key, comp);
       size_type n;
@@ -1030,6 +1026,20 @@ class treap_impl
    //! @copydoc ::boost::intrusive::bstree::remove_node
    void remove_node(reference value);
 
+   friend bool operator< (const treap_impl &x, const treap_impl &y);
+
+   friend bool operator==(const treap_impl &x, const treap_impl &y);
+
+   friend bool operator!= (const treap_impl &x, const treap_impl &y);
+
+   friend bool operator>(const treap_impl &x, const treap_impl &y);
+
+   friend bool operator<=(const treap_impl &x, const treap_impl &y);
+
+   friend bool operator>=(const treap_impl &x, const treap_impl &y);
+
+   friend void swap(treap_impl &x, treap_impl &y);
+
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    /// @cond
@@ -1051,30 +1061,6 @@ class treap_impl
    /// @endcond
 };
 
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-
-template<class T, class ...Options>
-bool operator< (const treap_impl<T, Options...> &x, const treap_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator==(const treap_impl<T, Options...> &x, const treap_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator!= (const treap_impl<T, Options...> &x, const treap_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator>(const treap_impl<T, Options...> &x, const treap_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator<=(const treap_impl<T, Options...> &x, const treap_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator>=(const treap_impl<T, Options...> &x, const treap_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-void swap(treap_impl<T, Options...> &x, treap_impl<T, Options...> &y);
-
-#endif   //#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
 //! Helper metafunction to define a \c treap that yields to the same type when the
 //! same options (either explicitly or implicitly) are used.

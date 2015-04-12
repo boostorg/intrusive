@@ -406,33 +406,23 @@ class rbtree_impl
 
    //! @copydoc ::boost::intrusive::bstree::remove_node
    void remove_node(reference value);
+
+   friend bool operator< (const rbtree_impl &x, const rbtree_impl &y);
+
+   friend bool operator==(const rbtree_impl &x, const rbtree_impl &y);
+
+   friend bool operator!= (const rbtree_impl &x, const rbtree_impl &y);
+
+   friend bool operator>(const rbtree_impl &x, const rbtree_impl &y);
+
+   friend bool operator<=(const rbtree_impl &x, const rbtree_impl &y);
+
+   friend bool operator>=(const rbtree_impl &x, const rbtree_impl &y);
+
+   friend void swap(rbtree_impl &x, rbtree_impl &y);
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 };
 
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-
-template<class T, class ...Options>
-bool operator< (const rbtree_impl<T, Options...> &x, const rbtree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator==(const rbtree_impl<T, Options...> &x, const rbtree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator!= (const rbtree_impl<T, Options...> &x, const rbtree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator>(const rbtree_impl<T, Options...> &x, const rbtree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator<=(const rbtree_impl<T, Options...> &x, const rbtree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator>=(const rbtree_impl<T, Options...> &x, const rbtree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-void swap(rbtree_impl<T, Options...> &x, rbtree_impl<T, Options...> &y);
-
-#endif   //#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
 //! Helper metafunction to define a \c rbtree that yields to the same type when the
 //! same options (either explicitly or implicitly) are used.

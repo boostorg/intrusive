@@ -404,33 +404,23 @@ class avltree_impl
 
    //! @copydoc ::boost::intrusive::bstree::remove_node
    void remove_node(reference value);
+
+   friend bool operator< (const avltree_impl &x, const avltree_impl &y);
+
+   friend bool operator==(const avltree_impl &x, const avltree_impl &y);
+
+   friend bool operator!= (const avltree_impl &x, const avltree_impl &y);
+
+   friend bool operator>(const avltree_impl &x, const avltree_impl &y);
+
+   friend bool operator<=(const avltree_impl &x, const avltree_impl &y);
+
+   friend bool operator>=(const avltree_impl &x, const avltree_impl &y);
+
+   friend void swap(avltree_impl &x, avltree_impl &y);
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 };
 
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-
-template<class T, class ...Options>
-bool operator< (const avltree_impl<T, Options...> &x, const avltree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator==(const avltree_impl<T, Options...> &x, const avltree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator!= (const avltree_impl<T, Options...> &x, const avltree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator>(const avltree_impl<T, Options...> &x, const avltree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator<=(const avltree_impl<T, Options...> &x, const avltree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator>=(const avltree_impl<T, Options...> &x, const avltree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-void swap(avltree_impl<T, Options...> &x, avltree_impl<T, Options...> &y);
-
-#endif   //#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
 //! Helper metafunction to define a \c avltree that yields to the same type when the
 //! same options (either explicitly or implicitly) are used.

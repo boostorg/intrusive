@@ -482,33 +482,23 @@ class splaytree_impl
 
    //! @copydoc ::boost::intrusive::bstree::rebalance_subtree
    iterator rebalance_subtree(iterator root);
+
+   friend bool operator< (const splaytree_impl &x, const splaytree_impl &y);
+
+   friend bool operator==(const splaytree_impl &x, const splaytree_impl &y);
+
+   friend bool operator!= (const splaytree_impl &x, const splaytree_impl &y);
+
+   friend bool operator>(const splaytree_impl &x, const splaytree_impl &y);
+
+   friend bool operator<=(const splaytree_impl &x, const splaytree_impl &y);
+
+   friend bool operator>=(const splaytree_impl &x, const splaytree_impl &y);
+
+   friend void swap(splaytree_impl &x, splaytree_impl &y);
+
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 };
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-
-template<class T, class ...Options>
-bool operator< (const splaytree_impl<T, Options...> &x, const splaytree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator==(const splaytree_impl<T, Options...> &x, const splaytree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator!= (const splaytree_impl<T, Options...> &x, const splaytree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator>(const splaytree_impl<T, Options...> &x, const splaytree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator<=(const splaytree_impl<T, Options...> &x, const splaytree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-bool operator>=(const splaytree_impl<T, Options...> &x, const splaytree_impl<T, Options...> &y);
-
-template<class T, class ...Options>
-void swap(splaytree_impl<T, Options...> &x, splaytree_impl<T, Options...> &y);
-
-#endif   //#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
 //! Helper metafunction to define a \c splaytree that yields to the same type when the
 //! same options (either explicitly or implicitly) are used.

@@ -51,12 +51,13 @@ struct key_nodeptr_comp
 
    //key_forward
    template<class T>
-   const value_type & key_forward
-      (const T &node, typename enable_if_c<is_node_ptr<T>::value>::type * = 0) const
+   typename enable_if<is_node_ptr<T>, const value_type &>::type
+      key_forward(const T &node) const
    {  return *traits_->to_value_ptr(node);  }
 
    template<class T>
-   const T & key_forward(const T &key, typename enable_if_c<!is_node_ptr<T>::value>::type* = 0) const
+   typename disable_if<is_node_ptr<T>, const T &>::type
+   const  key_forward(const T &key) const
    {  return key;  }
 
    //operator() 1 arg

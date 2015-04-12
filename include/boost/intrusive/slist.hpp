@@ -1905,6 +1905,33 @@ class slist_impl
          BOOST_INTRUSIVE_INVARIANT_ASSERT(this->priv_size_traits().get_size() == node_count);
    }
 
+
+   friend bool operator==(const slist_impl &x, const slist_impl &y)
+   {
+      if(constant_time_size && x.size() != y.size()){
+         return false;
+      }
+      return ::boost::intrusive::algo_equal(x.cbegin(), x.cend(), y.cbegin(), y.cend());
+   }
+
+   friend bool operator!=(const slist_impl &x, const slist_impl &y)
+   {  return !(x == y); }
+
+   friend bool operator<(const slist_impl &x, const slist_impl &y)
+   {  return ::boost::intrusive::algo_lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
+
+   friend bool operator>(const slist_impl &x, const slist_impl &y)
+   {  return y < x;  }
+
+   friend bool operator<=(const slist_impl &x, const slist_impl &y)
+   {  return !(y < x);  }
+
+   friend bool operator>=(const slist_impl &x, const slist_impl &y)
+   {  return !(x < y);  }
+
+   friend void swap(slist_impl &x, slist_impl &y)
+   {  x.swap(y);  }
+
    private:
    void priv_splice_after(const node_ptr & prev_pos_n, slist_impl &x, const node_ptr & before_f_n, const node_ptr & before_l_n)
    {
@@ -2043,111 +2070,6 @@ class slist_impl
       return *s;
    }
 };
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename HeaderHolder>
-#endif
-inline bool operator<
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(const slist_impl<T, Options...> &x, const slist_impl<T, Options...> &y)
-#else
-( const slist_impl<ValueTraits, SizeType, BoolFlags, HeaderHolder> &x
-, const slist_impl<ValueTraits, SizeType, BoolFlags, HeaderHolder> &y)
-#endif
-{  return ::boost::intrusive::algo_lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename HeaderHolder>
-#endif
-bool operator==
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(const slist_impl<T, Options...> &x, const slist_impl<T, Options...> &y)
-#else
-( const slist_impl<ValueTraits, SizeType, BoolFlags, HeaderHolder> &x
-, const slist_impl<ValueTraits, SizeType, BoolFlags, HeaderHolder> &y)
-#endif
-{
-   typedef slist_impl<ValueTraits, SizeType, BoolFlags, HeaderHolder> slist_type;
-   const bool C = slist_type::constant_time_size;
-   if(C && x.size() != y.size()){
-      return false;
-   }
-   return ::boost::intrusive::algo_equal(x.cbegin(), x.cend(), y.cbegin(), y.cend());
-}
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename HeaderHolder>
-#endif
-inline bool operator!=
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(const slist_impl<T, Options...> &x, const slist_impl<T, Options...> &y)
-#else
-( const slist_impl<ValueTraits, SizeType, BoolFlags, HeaderHolder> &x
-, const slist_impl<ValueTraits, SizeType, BoolFlags, HeaderHolder> &y)
-#endif
-{  return !(x == y); }
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename HeaderHolder>
-#endif
-inline bool operator>
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(const slist_impl<T, Options...> &x, const slist_impl<T, Options...> &y)
-#else
-( const slist_impl<ValueTraits, SizeType, BoolFlags, HeaderHolder> &x
-, const slist_impl<ValueTraits, SizeType, BoolFlags, HeaderHolder> &y)
-#endif
-{  return y < x;  }
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename HeaderHolder>
-#endif
-inline bool operator<=
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(const slist_impl<T, Options...> &x, const slist_impl<T, Options...> &y)
-#else
-( const slist_impl<ValueTraits, SizeType, BoolFlags, HeaderHolder> &x
-, const slist_impl<ValueTraits, SizeType, BoolFlags, HeaderHolder> &y)
-#endif
-{  return !(y < x);  }
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename HeaderHolder>
-#endif
-inline bool operator>=
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(const slist_impl<T, Options...> &x, const slist_impl<T, Options...> &y)
-#else
-( const slist_impl<ValueTraits, SizeType, BoolFlags, HeaderHolder> &x
-, const slist_impl<ValueTraits, SizeType, BoolFlags, HeaderHolder> &y)
-#endif
-{  return !(x < y);  }
-
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-template<class T, class ...Options>
-#else
-template<class ValueTraits, class SizeType, std::size_t BoolFlags, typename HeaderHolder>
-#endif
-inline void swap
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-(slist_impl<T, Options...> &x, slist_impl<T, Options...> &y)
-#else
-( slist_impl<ValueTraits, SizeType, BoolFlags, HeaderHolder> &x
-, slist_impl<ValueTraits, SizeType, BoolFlags, HeaderHolder> &y)
-#endif
-{  x.swap(y);  }
 
 //! Helper metafunction to define a \c slist that yields to the same type when the
 //! same options (either explicitly or implicitly) are used.

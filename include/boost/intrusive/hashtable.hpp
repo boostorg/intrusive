@@ -172,8 +172,8 @@ template <class T>
 struct store_hash_bool
 {
    template<bool Add>
-   struct two_or_three {one _[2 + Add];};
-   template <class U> static one test(...);
+   struct two_or_three {yes_type _[2 + Add];};
+   template <class U> static yes_type test(...);
    template <class U> static two_or_three<U::store_hash> test (int);
    static const std::size_t value = sizeof(test<T>(0));
 };
@@ -181,15 +181,15 @@ struct store_hash_bool
 template <class T>
 struct store_hash_is_true
 {
-   static const bool value = store_hash_bool<T>::value > sizeof(one)*2;
+   static const bool value = store_hash_bool<T>::value > sizeof(yes_type)*2;
 };
 
 template <class T>
 struct optimize_multikey_bool
 {
    template<bool Add>
-   struct two_or_three {one _[2 + Add];};
-   template <class U> static one test(...);
+   struct two_or_three {yes_type _[2 + Add];};
+   template <class U> static yes_type test(...);
    template <class U> static two_or_three<U::optimize_multikey> test (int);
    static const std::size_t value = sizeof(test<T>(0));
 };
@@ -197,7 +197,7 @@ struct optimize_multikey_bool
 template <class T>
 struct optimize_multikey_is_true
 {
-   static const bool value = optimize_multikey_bool<T>::value > sizeof(one)*2;
+   static const bool value = optimize_multikey_bool<T>::value > sizeof(yes_type)*2;
 };
 
 struct insert_commit_data_impl
@@ -1887,11 +1887,9 @@ class hashtable_impl
    //! <b>Note</b>: Invalidates the iterators
    //!    to the erased elements.
    template<class Disposer>
-   void erase_and_dispose(const_iterator i, Disposer disposer
-                              /// @cond
-                              , typename detail::enable_if_c<!detail::is_convertible<Disposer, const_iterator>::value >::type * = 0
-                              /// @endcond
-                              )
+   BOOST_INTRUSIVE_DOC1ST(void
+      , typename detail::disable_if_convertible<Disposer BOOST_INTRUSIVE_I const_iterator>::type)
+    erase_and_dispose(const_iterator i, Disposer disposer)
    {
       this->priv_erase(i, disposer, optimize_multikey_t());
       this->priv_size_traits().decrement();
@@ -2774,6 +2772,37 @@ class hashtable_impl
       bound -= (bound != primes);
       return size_type(*bound);
    }
+
+   friend bool operator==(const hashtable_impl &x, const hashtable_impl &y)
+   {
+      if(constant_time_size && x.size() != y.size()){
+         return false;
+      }
+      //Find each element of x in y
+      for (const_iterator ix = x.cbegin(), ex = x.cend(), ey = y.cend(); ix != ex; ++ix)
+      {
+         const_iterator iy = y.find(*ix);
+         if (iy == ey || !(*ix == *iy))
+            return false;
+      }
+      return true;
+   }
+
+   friend bool operator!=(const hashtable_impl &x, const hashtable_impl &y)
+   {  return !(x == y); }
+
+   friend bool operator<(const hashtable_impl &x, const hashtable_impl &y)
+   {  return ::boost::intrusive::algo_lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
+
+   friend bool operator>(const hashtable_impl &x, const hashtable_impl &y)
+   {  return y < x;  }
+
+   friend bool operator<=(const hashtable_impl &x, const hashtable_impl &y)
+   {  return !(y < x);  }
+
+   friend bool operator>=(const hashtable_impl &x, const hashtable_impl &y)
+   {  return !(x < y);  }
+
    /// @cond
    void check() const {}
    private:
