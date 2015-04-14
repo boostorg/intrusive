@@ -99,7 +99,7 @@ void test_iterator_operations(I b, I e)
    reference r = *b;
    (void)r;
    typedef typename iterator_traits<I>::pointer pointer;
-   pointer p = b.operator->();
+   pointer p = (iterator_arrow_result)(b);
    (void)p;
    I &ri= ++b;
    (void)ri;
@@ -270,8 +270,10 @@ void test_iterator_random_functions(C const &c, I const b, I const e)
          BOOST_TEST((b + i) == it);
          BOOST_TEST((i + b) == it);
          BOOST_TEST(b == (it - i));
-         BOOST_TEST((I(b)+=i) == it);
-         BOOST_TEST(b == (I(it)-=i));
+         I tmp(b);
+         BOOST_TEST((tmp+=i) == it);
+         tmp = it;
+         BOOST_TEST(b == (tmp-=i));
       }
       BOOST_TEST(c.size() == size_type(e - b));
    }
@@ -312,8 +314,8 @@ void test_iterator_forward(C &c)
 {
    typedef typename C::iterator                 iterator;
    typedef typename C::const_iterator           const_iterator;
-   typedef typename C::reverse_iterator         reverse_iterator;
-   typedef typename C::const_reverse_iterator   const_reverse_iterator;
+   typedef typename get_reverse_iterator<C>::type        reverse_iterator;
+   typedef typename get_const_reverse_iterator<C>::type  const_reverse_iterator;
    typedef iterator_traits<iterator>         nit_traits;
    typedef iterator_traits<const_iterator>   cit_traits;
    typedef iterator_traits<reverse_iterator>         rnit_traits;
