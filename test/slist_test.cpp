@@ -76,6 +76,10 @@ void test_slist< List_Type, Value_Container >
       list.insert(list.end(), values.begin(), values.end());
       test::test_sequence_container(list, values);
    }
+   {
+      list_type list(values.begin(), values.end());
+      test::test_iterator_forward(list);
+   }
    test_front(values);
    test_back(values, detail::bool_< list_type::cache_last >());
    test_sort(values);

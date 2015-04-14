@@ -53,11 +53,6 @@ template<class ValueTraits, template <class = void, class = void, class = void, 
 void test_generic_set<ValueTraits, ContainerDefiner>::test_all()
 {
    typedef typename ValueTraits::value_type value_type;
-   static const int random_init[6] = { 3, 2, 4, 1, 5, 2 };
-   value_cont_type values(6);
-   for (int i = 0; i < 6; ++i)
-      (&values[i])->value_ = random_init[i];
-
    typedef ContainerDefiner
       < value_type
       , value_traits<ValueTraits>
@@ -65,25 +60,40 @@ void test_generic_set<ValueTraits, ContainerDefiner>::test_all()
       > definer_function;
    typedef typename definer_function::type set_type;
    {
-      set_type testset(values.begin(), values.end());
-      test::test_container(testset);
-      testset.clear();
-      testset.insert(values.begin(), values.end());
-      test::test_common_unordered_and_associative_container(testset, values);
-      testset.clear();
-      testset.insert(values.begin(), values.end());
-      test::test_associative_container(testset, values);
-      testset.clear();
-      testset.insert(values.begin(), values.end());
-      test::test_unique_container(testset, values);
+      static const int random_init[6] = { 3, 2, 4, 1, 5, 2 };
+      value_cont_type values(6);
+      for (int i = 0; i < 6; ++i)
+         (&values[i])->value_ = random_init[i];
+
+      {
+         set_type testset(values.begin(), values.end());
+         test::test_container(testset);
+         testset.clear();
+         testset.insert(values.begin(), values.end());
+         test::test_common_unordered_and_associative_container(testset, values);
+         testset.clear();
+         testset.insert(values.begin(), values.end());
+         test::test_associative_container(testset, values);
+         testset.clear();
+         testset.insert(values.begin(), values.end());
+         test::test_unique_container(testset, values);
+      }
+
+      test_sort(values);
+      test_insert(values);
+      test_insert_advanced(values, detail::bool_< is_treap< set_type >::value >());
+      test_swap(values);
+      test_find(values);
+      test_impl();
+      test_generic_assoc<ValueTraits, ContainerDefiner>::test_all(values);
    }
-   test_sort(values);
-   test_insert(values);
-   test_insert_advanced(values, detail::bool_< is_treap< set_type >::value >());
-   test_swap(values);
-   test_find(values);
-   test_impl();
-   test_generic_assoc<ValueTraits, ContainerDefiner>::test_all(values);
+   {
+      value_cont_type values(6);
+      for (int i = 0; i < 6; ++i)
+         (&values[i])->value_ = i+1;
+      set_type testset(values.begin(), values.end());
+      test::test_iterator_bidirectional(testset);
+   }
 }
 
 //test case due to an error in tree implementation:

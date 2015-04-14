@@ -18,6 +18,7 @@
 #include <boost/intrusive/detail/simple_disposers.hpp>
 #include <boost/intrusive/detail/iterator.hpp>
 #include <boost/move/utility_core.hpp>
+#include "iterator_test.hpp"
 
 namespace boost {
 namespace intrusive {

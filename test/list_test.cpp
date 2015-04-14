@@ -71,6 +71,10 @@ void test_list< List_Type, Value_Container >::test_all(Value_Container& values)
       list.insert(list.end(), values.begin(), values.end());
       test::test_sequence_container(list, values);
    }
+   {
+      list_type list(values.begin(), values.end());
+      test::test_iterator_bidirectional(list);
+   }
 
    test_front_back(values);
    test_sort(values);

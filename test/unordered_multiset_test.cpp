@@ -103,8 +103,8 @@ void test_unordered_multiset<ValueTraits, CacheBegin, CompareHash, Incremental>:
       , compare_hash<CompareHash>
       , incremental<Incremental>
       > unordered_multiset_type;
+   typedef typename unordered_multiset_type::bucket_traits bucket_traits;
    {
-      typedef typename unordered_multiset_type::bucket_traits bucket_traits;
       typename unordered_multiset_type::bucket_type buckets [BucketSize];
       unordered_multiset_type testset
          (bucket_traits(pointer_traits<typename unordered_multiset_type::bucket_ptr>::
@@ -120,6 +120,17 @@ void test_unordered_multiset<ValueTraits, CacheBegin, CompareHash, Incremental>:
       testset.clear();
       testset.insert(values.begin(), values.end());
       test::test_non_unique_container(testset, values);
+   }
+   {
+      std::vector<typename ValueTraits::value_type> values(BucketSize);
+      for (int i = 0; i < (int)BucketSize; ++i)
+         (&values[i])->value_ = i;
+      typename unordered_multiset_type::bucket_type buckets [BucketSize];
+      unordered_multiset_type testset(bucket_traits(
+         pointer_traits<typename unordered_multiset_type::bucket_ptr>::
+            pointer_to(buckets[0]), BucketSize));
+      testset.insert(values.begin(), values.end());
+      test::test_iterator_forward(testset);
    }
    test_sort(values);
    test_insert(values);

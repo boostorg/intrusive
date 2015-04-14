@@ -119,6 +119,17 @@ void test_unordered_set<ValueTraits, CacheBegin, CompareHash, Incremental>::
       testset.insert(values.begin(), values.end());
       test::test_unique_container(testset, values);
    }
+   {
+      std::vector<typename ValueTraits::value_type> values(BucketSize);
+      for (int i = 0; i < (int)BucketSize; ++i)
+         (&values[i])->value_ = i;
+      typename unordered_set_type::bucket_type buckets [BucketSize];
+      unordered_set_type testset(bucket_traits(
+         pointer_traits<typename unordered_set_type::bucket_ptr>::
+            pointer_to(buckets[0]), BucketSize));
+      testset.insert(values.begin(), values.end());
+      test::test_iterator_forward(testset);
+   }
    test_sort(values);
    test_insert(values);
    test_swap(values);
