@@ -47,6 +47,7 @@ using boost::move_detail::disable_if;
 using boost::move_detail::is_convertible;
 using boost::move_detail::if_c;
 using boost::move_detail::if_;
+using boost::move_detail::is_const;
 using boost::move_detail::identity;
 using boost::move_detail::alignment_of;
 using boost::move_detail::is_empty;
@@ -163,10 +164,10 @@ struct TRAITS_PREFIX##_bool_is_true\
   private: \
   template<Signature> struct helper;\
   template<typename T> \
-  static ::boost::intrusive::detail::yes_type check(helper<&T::FUNC_NAME>*); \
-  template<typename T> static ::boost::intrusive::detail::no_type check(...); \
+  static ::boost::intrusive::detail::yes_type test(helper<&T::FUNC_NAME>*); \
+  template<typename T> static ::boost::intrusive::detail::no_type test(...); \
   public: \
-  static const bool value = sizeof(check<U>(0)) == sizeof(::boost::intrusive::detail::yes_type); \
+  static const bool value = sizeof(test<U>(0)) == sizeof(::boost::intrusive::detail::yes_type); \
   }; \
 //
 
@@ -181,9 +182,9 @@ struct TRAITS_NAME \
    struct Base : public Type, public BaseMixin { Base(); }; \
    template <typename T, T t> class Helper{}; \
    template <typename U> \
-   static ::boost::intrusive::detail::no_type  check(U*, Helper<void (BaseMixin::*)(), &U::FUNC_NAME>* = 0); \
-   static ::boost::intrusive::detail::yes_type check(...); \
-   static const bool value = sizeof(::boost::intrusive::detail::yes_type) == sizeof(check((Base*)(0))); \
+   static ::boost::intrusive::detail::no_type  test(U*, Helper<void (BaseMixin::*)(), &U::FUNC_NAME>* = 0); \
+   static ::boost::intrusive::detail::yes_type test(...); \
+   static const bool value = sizeof(::boost::intrusive::detail::yes_type) == sizeof(test((Base*)(0))); \
 };\
 //
 

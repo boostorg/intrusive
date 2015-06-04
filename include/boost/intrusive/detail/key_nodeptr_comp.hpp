@@ -28,18 +28,27 @@ namespace boost {
 namespace intrusive {
 namespace detail {
 
-template<class KeyValueCompare, class ValueTraits>
+template < class KeyTypeKeyCompare
+         , class ValueTraits
+         , class KeyOfValue = void
+         >
 struct key_nodeptr_comp
    //Use public inheritance to avoid MSVC bugs with closures
-   :  public ebo_functor_holder<KeyValueCompare>
+   :  public ebo_functor_holder<KeyTypeKeyCompare>
 {
    typedef ValueTraits                             value_traits;
    typedef typename value_traits::value_type       value_type;
    typedef typename value_traits::node_ptr         node_ptr;
    typedef typename value_traits::const_node_ptr   const_node_ptr;
-   typedef ebo_functor_holder<KeyValueCompare>     base_t;
+   typedef ebo_functor_holder<KeyTypeKeyCompare>   base_t;
+   typedef typename detail::if_c
+            < detail::is_same<KeyOfValue, void>::value
+            , detail::identity<value_type>
+            , KeyOfValue
+            >::type                                key_of_value;
+   typedef typename key_of_value::type         key_type;
 
-   key_nodeptr_comp(KeyValueCompare kcomp, const ValueTraits *traits)
+   key_nodeptr_comp(KeyTypeKeyCompare kcomp, const ValueTraits *traits)
       :  base_t(kcomp), traits_(traits)
    {}
 
@@ -51,9 +60,9 @@ struct key_nodeptr_comp
 
    //key_forward
    template<class T>
-   typename enable_if<is_node_ptr<T>, const value_type &>::type
+   typename enable_if<is_node_ptr<T>, const key_type &>::type
       key_forward(const T &node) const
-   {  return *traits_->to_value_ptr(node);  }
+   {  return key_of_value()(*traits_->to_value_ptr(node));  }
 
    template<class T>
    typename disable_if<is_node_ptr<T>, const T &>::type

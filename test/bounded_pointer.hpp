@@ -218,6 +218,7 @@ class bounded_allocator
       assert(i < max_offset);
       p.m_offset = i;
       m_in_use[p.m_offset] = true;
+      ++m_in_use_count;
       return p;
    }
 
@@ -227,6 +228,7 @@ class bounded_allocator
       assert(n == 1);(void)n;
       assert(m_in_use[p.m_offset]);
       m_in_use[p.m_offset] = false;
+      --m_in_use_count;
    }
 
    // static methods
@@ -268,7 +270,22 @@ class bounded_allocator
    friend class bounded_pointer< const T >;
    static T* m_base;
    static boost::container::vector< bool > m_in_use;
+   static std::size_t m_in_use_count;
 }; // class bounded_allocator
+
+template <class BoundedAllocator>
+class bounded_allocator_scope
+{
+   public:
+   bounded_allocator_scope()
+   {  BoundedAllocator::init();  }
+
+   ~bounded_allocator_scope()
+   {
+      assert(BoundedAllocator::is_clear());
+      BoundedAllocator::destroy();
+   }
+};
 
 template < typename T >
 T* bounded_allocator< T >::m_base = 0;
@@ -276,6 +293,8 @@ T* bounded_allocator< T >::m_base = 0;
 template < typename T >
 boost::container::vector< bool > bounded_allocator< T >::m_in_use;
 
+template < typename T >
+std::size_t bounded_allocator< T >::m_in_use_count;
 
 template < typename T >
 class bounded_reference_cont
@@ -306,7 +325,7 @@ class bounded_reference_cont
    using Base::operator[];
    using Base::push_back;
 
-   bounded_reference_cont(size_t n = 0)
+   explicit bounded_reference_cont(size_t n = 0)
       : Base(), m_allocator()
    {
       for (size_t i = 0; i < n; ++i){
@@ -334,6 +353,17 @@ class bounded_reference_cont
       for (InputIterator it = it_start; it != it_end; ++it){
          pointer p = m_allocator.allocate(1);
          new (p.raw()) val_type(*it);
+         Base::push_back(*p);
+      }
+   }
+
+   template <typename InputIterator>   
+   void assign(InputIterator it_start, InputIterator it_end)
+   {
+      this->clear();
+      for (InputIterator it = it_start; it != it_end;){
+         pointer p = m_allocator.allocate(1);
+         new (p.raw()) val_type(*it++);
          Base::push_back(*p);
       }
    }

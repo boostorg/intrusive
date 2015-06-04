@@ -248,8 +248,7 @@ class list_impl
    void push_back(reference value)
    {
       node_ptr to_insert = priv_value_traits().to_node_ptr(value);
-      if(safemode_or_autounlink)
-         BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::inited(to_insert));
+      BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::inited(to_insert));
       node_algorithms::link_before(this->get_root_node(), to_insert);
       this->priv_size_traits().increment();
    }
@@ -267,8 +266,7 @@ class list_impl
    void push_front(reference value)
    {
       node_ptr to_insert = priv_value_traits().to_node_ptr(value);
-      if(safemode_or_autounlink)
-         BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::inited(to_insert));
+      BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::inited(to_insert));
       node_algorithms::link_before(node_traits::get_next(this->get_root_node()), to_insert);
       this->priv_size_traits().increment();
    }
@@ -770,6 +768,33 @@ class list_impl
       rollback.release();
    }
 
+   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //!   Cloner should yield to nodes equivalent to the original nodes.
+   //!
+   //! <b>Effects</b>: Erases all the elements from *this
+   //!   calling Disposer::operator()(pointer), clones all the
+   //!   elements from src calling Cloner::operator()(reference)
+   //!   and inserts them on *this.
+   //!
+   //!   If cloner throws, all cloned elements are unlinked and disposed
+   //!   calling Disposer::operator()(pointer).
+   //!
+   //! <b>Complexity</b>: Linear to erased plus inserted elements.
+   //!
+   //! <b>Throws</b>: If cloner throws. Basic guarantee.
+   template <class Cloner, class Disposer>
+   void clone_from(BOOST_RV_REF(list_impl) src, Cloner cloner, Disposer disposer)
+   {
+      this->clear_and_dispose(disposer);
+      detail::exception_disposer<list_impl, Disposer>
+         rollback(*this, disposer);
+      iterator b(src.begin()), e(src.end());
+      for(; b != e; ++b){
+         this->push_back(*cloner(*b));
+      }
+      rollback.release();
+   }
+
    //! <b>Requires</b>: value must be an lvalue and p must be a valid iterator of *this.
    //!
    //! <b>Effects</b>: Inserts the value before the position pointed by p.
@@ -784,8 +809,7 @@ class list_impl
    iterator insert(const_iterator p, reference value)
    {
       node_ptr to_insert = this->priv_value_traits().to_node_ptr(value);
-      if(safemode_or_autounlink)
-         BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::inited(to_insert));
+      BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::inited(to_insert));
       node_algorithms::link_before(p.pointed_node(), to_insert);
       this->priv_size_traits().increment();
       return iterator(to_insert, this->priv_value_traits_ptr());
@@ -1446,6 +1470,14 @@ class list
 
    list& operator=(BOOST_RV_REF(list) x)
    {  return static_cast<list &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
+
+   template <class Cloner, class Disposer>
+   void clone_from(const list &src, Cloner cloner, Disposer disposer)
+   {  Base::clone_from(src, cloner, disposer);  }
+
+   template <class Cloner, class Disposer>
+   void clone_from(BOOST_RV_REF(list) src, Cloner cloner, Disposer disposer)
+   {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
 
    static list &container_from_end_iterator(iterator end_iterator)
    {  return static_cast<list &>(Base::container_from_end_iterator(end_iterator));   }

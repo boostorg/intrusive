@@ -6,9 +6,9 @@
  /]
 
 [library Boost.Intrusive
-    [quickbook 1.5]
+    [quickbook 1.6]
     [authors [Krzikalla, Olaf], [Gaztanaga, Ion]]
-    [copyright 2005 Olaf Krzikalla, 2006-2013 Ion Gaztanaga]
+    [copyright 2005 Olaf Krzikalla, 2006-2015 Ion Gaztanaga]
     [id intrusive]
     [dirname intrusive]
     [purpose Intrusive containers]
@@ -1098,6 +1098,11 @@ And they also can receive an additional option:
    in containers. The comparison functor must induce a strict weak ordering.
    Default: `compare< std::less<T> >`
 
+*  [*`key_of_value<class KeyOfValueFunctionObject>`]: A function object that will
+   define the `key_type` of the value type to be stored. This type will allow a map-like interface. See
+   [link intrusive.map_multimap Map and multimap-like interface with set and multiset]
+   for details. Default: `key_type` is equal to `value_type` (set-like interface).
+
 [endsect]
 
 [section:set_multiset_example Example]
@@ -1323,6 +1328,11 @@ And they also can receive additional options:
    [@http://en.wikipedia.org/wiki/Linear_hashing `Linear hash` on Wikipedia]
    Default: `incremental<false>`
 
+*  [*`key_of_value<class KeyOfValueFunctionObject>`]: A function object that will
+   define the `key_type` of the value type to be stored. This type will allow a map-like interface. See
+   [link intrusive.map_multimap Map and multimap-like interface with set and multiset]
+   for details. Default: `key_type` is equal to `value_type` (set-like interface).
+
 [endsect]
 
 [section:unordered_set_unordered_multiset_example Example]
@@ -1361,6 +1371,34 @@ the unordered container:
 [doc_bucket_traits]
 
 [endsect]
+
+[endsect]
+
+[section:map_multimap Map and multimap-like interface for associative containers]
+
+Implementing map-like intrusive containers is not a trivial task as
+STL's `std::map` and `std::multimap` containers store copies of a `value_type` which is defined
+as `std::pair<const key_type, mapped_type>`. To really mimick this interface in [*Boost.Intrusive]
+it shall require that objects stored in the intrusive containers contain that `std::pair` member with
+`pair.first` hardcoded as the key part and `pair.second` hardcoded as the `mapped_type`, which
+is limiting and also not very useful in practice. Any intrusive associative container can be used like
+a map using [link intrusive.advanced_lookups_insertions advanced lookup and insertions] and the user
+can change the key type in each lookup/insertion check call.
+
+On the other hand, in many cases containers are indexed by a well-known key type, and the user is forced
+to write some repetitive code using advanced lookup and insertions. [*Boost.Intrusive]
+associative containers offer an alternative to build a useful map-like lookup interfaces
+without forcing users to define `value_type`s containing `std::pair`-like classes.
+The option is called [classref boost::intrusive::key_of_value].
+
+If a user specifies that option when defining a `set/multiset` intrusive container, it specifies a function object
+that will tell the container which is the type of the ['key] that `value_type` holds and how to obtain it. This
+function object must be lightweight, `DefaultConstructible`, it shall define a `type` member that defines the type
+of the key and a member function to obtain a const reference to the key stored inside a `value_type`. Let's
+see an example of how a set can be configured as a map indexed by an integer stored in the `value_type`.
+ 
+[import ../example/doc_map.cpp]
+[doc_map_code]
 
 [endsect]
 
@@ -1476,6 +1514,11 @@ And they also can receive an additional option:
    in containers. The comparison functor must induce a strict weak ordering.
    Default: `compare< std::less<T> >`
 
+*  [*`key_of_value<class KeyOfValueFunctionObject>`]: A function object that will
+   define the `key_type` of the value type to be stored. This type will allow a map-like interface. See
+   [link intrusive.map_multimap Map and multimap-like interface with set and multiset]
+   for details. Default: `key_type` is equal to `value_type` (set-like interface).
+
 [endsect]
 
 [section:avl_set_multiset_example Example]
@@ -1572,6 +1615,11 @@ And they also can receive an additional option:
 *  [*`compare<class Compare>`]: Comparison function for the objects to be inserted
    in containers. The comparison functor must induce a strict weak ordering.
    Default: `compare< std::less<T> >`
+
+*  [*`key_of_value<class KeyOfValueFunctionObject>`]: A function object that will
+   define the `key_type` of the value type to be stored. This type will allow a map-like interface. See
+   [link intrusive.map_multimap Map and multimap-like interface with set and multiset]
+   for details. Default: `key_type` is equal to `value_type` (set-like interface).
 
 [endsect]
 
@@ -1686,6 +1734,11 @@ And they also can receive additional options:
    performance. The fixed a factor that is used when this option is activated
    is ['1/sqrt(2) ~ 0,70711]. Default: `floating_point<true>`
 
+*  [*`key_of_value<class KeyOfValueFunctionObject>`]: A function object that will
+   define the `key_type` of the value type to be stored. This type will allow a map-like interface. See
+   [link intrusive.map_multimap Map and multimap-like interface with set and multiset]
+   for details. Default: `key_type` is equal to `value_type` (set-like interface).
+
 [endsect]
 
 [section:sg_set_multiset_example Example]
@@ -1781,11 +1834,16 @@ And they also can receive additional options:
    in containers. The comparison functor must induce a strict weak ordering.
    Default: `priority< priority_compare<T> >`
 
+*  [*`key_of_value<class KeyOfValueFunctionObject>`]: A function object that will
+   define the `key_type` of the value type to be stored. This type will allow a map-like interface. See
+   [link intrusive.map_multimap Map and multimap-like interface with set and multiset]
+   for details. Default: `key_type` is equal to `value_type` (set-like interface).
+
 The default `priority_compare<T>` object function will call an unqualified function `priority_order`
 passing two constant `T` references as arguments and should return true if the first argument has
 higher priority (it will be searched faster), inducing strict weak ordering.
 The function will be found using ADL lookup so that
-the user just needs to define a `priority_order` function in the same namespace as his class:
+the user just needs to define a `priority_order` function in the same namespace as the class:
 
 [c++]
 
@@ -3760,6 +3818,13 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 [endsect]
 
 [section:release_notes Release Notes]
+
+[section:release_notes_boost_1_59_00 Boost 1.59 Release]
+
+*  Implemented [link intrusive.map_multimap map and multimap-like interfaces].
+*  Refactored hashtable containers to reduce template instantiations.
+
+[endsect]
 
 [section:release_notes_boost_1_58_00 Boost 1.58 Release]
 
