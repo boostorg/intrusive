@@ -3054,7 +3054,7 @@ class hashtable_impl
       if(constant_time_size && x.size() != y.size()){
          return false;
       }
-      for (const_iterator ix = x.cbegin(), ex = x.cend(), ey = y.cend(); ix != ex; ++ix){
+      for (const_iterator ix = x.cbegin(), ex = x.cend(); ix != ex; ++ix){
          std::pair<const_iterator, const_iterator> eqx(x.equal_range(key_of_value()(*ix))),
                                                    eqy(y.equal_range(key_of_value()(*ix)));
          if (boost::intrusive::iterator_distance(eqx.first, eqx.second) !=
@@ -3142,7 +3142,7 @@ class hashtable_impl
       //Just check if the cloned node is equal to the first inserted value in the new bucket
       //as equal src values were contiguous and they should be already inserted in the
       //destination bucket.
-      bool const next_is_in_group = optimize_multikey && !cur_bucket.empty() &
+      bool const next_is_in_group = optimize_multikey && !cur_bucket.empty() &&
          this->priv_equal()( key_of_value()(src_ref)
                            , key_of_value()(this->priv_value_from_slist_node((++siterator(prev)).pointed_node())));
       this->priv_insert_equal_after_find(*cloner(src_ref), bucket_number, hash_to_store, prev, next_is_in_group);
