@@ -46,8 +46,8 @@ typedef unordered_set< MyClass, key_of_value<first_int_is_key> > UnorderedMap;
 
 int main()
 {
-   BOOST_STATIC_ASSERT((boost::is_same<typename OrderedMap::key_type, int>::value));
-   BOOST_STATIC_ASSERT((boost::is_same<typename UnorderedMap::key_type, int>::value));
+   BOOST_STATIC_ASSERT((boost::is_same<  OrderedMap::key_type, int>::value));
+   BOOST_STATIC_ASSERT((boost::is_same<UnorderedMap::key_type, int>::value));
 
    //Create several MyClass objects, each one with a different value
    //and insert them into the omap
