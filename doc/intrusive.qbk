@@ -3823,6 +3823,8 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 *  Implemented [link intrusive.map_multimap map and multimap-like interfaces].
 *  Refactored hashtable containers to reduce template instantiations.
+*  Fixed bugs:
+   *  [@https://svn.boost.org/trac/boost/ticket/11222 Boost Trac #11222: ['intrusive/pointer_traits.hpp fails to compile with C++98]]
 
 [endsect]
 
