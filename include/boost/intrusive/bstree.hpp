@@ -360,7 +360,11 @@ struct bstbase2
    }
 
    template<class KeyTypeKeyCompare>
-   detail::key_nodeptr_comp<KeyTypeKeyCompare, value_traits, key_of_value> key_node_comp(KeyTypeKeyCompare comp) const
+   struct key_node_comp_ret
+   {  typedef detail::key_nodeptr_comp<KeyTypeKeyCompare, value_traits, key_of_value> type;  };
+
+   template<class KeyTypeKeyCompare>
+   typename key_node_comp_ret<KeyTypeKeyCompare>::type key_node_comp(KeyTypeKeyCompare comp) const
    {
       return detail::key_nodeptr_comp<KeyTypeKeyCompare, value_traits, key_of_value>(comp, &this->get_value_traits());
    }
@@ -1245,6 +1249,19 @@ class bstree_impl
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
       if(safemode_or_autounlink)
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(node_algorithms::unique(to_insert));
+
+      #if !(defined(BOOST_DISABLE_ASSERTS) || ( defined(BOOST_ENABLE_ASSERT_DEBUG_HANDLER) && defined(NDEBUG) ))
+      //Test insertion position is correct
+      iterator p(commit_data.node, this->priv_value_traits_ptr());
+      if(!commit_data.link_left){
+         ++p;
+      }
+      //Check if the insertion point is correct to detect wrong
+      //uses insert_unique_check
+      BOOST_ASSERT(( p == this->end()   || !this->comp()(*p, value)   ));
+      BOOST_ASSERT(( p == this->begin() || !this->comp()(value, *--p) ));
+      #endif
+
       node_algorithms::insert_unique_commit
                (this->header_ptr(), to_insert, commit_data);
       this->sz_traits().increment();
