@@ -1378,7 +1378,7 @@ the unordered container:
 
 Implementing map-like intrusive containers is not a trivial task as
 STL's `std::map` and `std::multimap` containers store copies of a `value_type` which is defined
-as `std::pair<const key_type, mapped_type>`. To really mimick this interface in [*Boost.Intrusive]
+as `std::pair<const key_type, mapped_type>`. In order to reproduce this interface in [*Boost.Intrusive]
 it shall require that objects stored in the intrusive containers contain that `std::pair` member with
 `pair.first` hardcoded as the key part and `pair.second` hardcoded as the `mapped_type`, which
 is limiting and also not very useful in practice. Any intrusive associative container can be used like
