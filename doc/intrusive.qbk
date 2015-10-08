@@ -1945,75 +1945,109 @@ the same options explained in the section
 [*Boost.Intrusive] associative containers offer an interface similar to STL associative
 containers. However, STL's ordered and unordered simple associative containers
 (`std::set`, `std::multiset`, `std::unordered_set` and `std::unordered_multiset`)
-have some inefficiencies caused by the interface in several search functions
-(`equal_range`, `lower_bound`, `upper_bound`, ...): the user can only operate with
-`value_type` objects or (starting from C++11),
+have some inefficiencies caused by the interface in several search, insertion or erasure functions
+(`equal_range`, `lower_bound`, `upper_bound`, `find`, `insert`, `erase`...): the user can only operate
+with `value_type` objects or (starting from C++11),
 [@http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3657.htm heterogeneous comparison lookups]
 which are not flexible enough as `key_compare` shall support the comparison between the provided 
-key and `value_type`, avoiding the use of user-defined comparison objects that can partition the
-search in advanced ways.
+key and `value_type`, which precludes the use of user-defined comparison objects that can partition the
+search in a compatible but advanced way.
 
-Imagine that the object to be searched is quite expensive to construct:
+To solve these problems, [*Boost.Intrusive] containers offers functions where a key type different
+from `key_type` and a comparison object are provided by the user. This applies to:
+   *  equal_range
+   *  lower_bound
+   *  upper_bound
+   *  count
+   *  find
+   *  erase
+
+Requirements for such functions are:
+
+* For unordered container the provided comparison and hashing
+  function with the given key shall induce the same hash and equivalence as `key_compare` and `hasher`.
+
+* For ordered associative containers, lookup and erasure functions, the container to be searched shall
+  be partitioned in regards to the supplied comparison object and key. 
+
+For more details, see  [*Requires] clauses of such functions in the reference.
+
+[section:advanced_lookups_example Example]
+
+Imagine that the object to be searched is quite expensive to construct (called `Expensive` in the example):
 
 [import ../example/doc_assoc_optimized_code.cpp]
 [doc_assoc_optimized_code_normal_find]
 
-`Expensive` is an expensive object to construct. If "key" c-string is quite long
+If "key" c-string is quite long
 `Expensive` has to construct a `std::string` using heap memory. Like
 `Expensive`, many times the only member taking part in ordering issues is just
-a small part of the class. For example, with `Expensive`, only the internal
+a small part of the class. E.g.: with `Expensive`, only the internal
 `std::string` is needed to compare the object.
 
 In both containers, if we call `get_from_set/get_from_unordered_set` in a loop, we might get a performance penalty,
 because we are forced to create a whole `Expensive` object to be able to find an
 equivalent one.
 
-Sometimes this interface limitation is severe, because
+Sometimes the problem is not only performance-related, as
 we [*might not have enough information to construct the object] but we might
 [*have enough information to find the object]. In this case, a name is enough
-to search `Expensive` in the container but constructing an `Expensive` object
-might requires more information that the user might not have.
+to search `Expensive` objects in the container but constructing an `Expensive`
+object might require more information that the searcher might not have.
 
-To solve this, [*Boost.Intrusive] associative containers
-offer alternative functions, which take any type comparable with the value and a
-functor that should be `compatible` 
-(the associative container must be also partitioned in regards to the supplied comparison type)
-with container's predicate function (`key_compare`). 
-[classref boost::intrusive::unordered_set unordered_set]/[classref boost::intrusive::unordered_multiset unordered_multiset]
-offer similar functions that take any key type, a compatible hash (the hash of the key) and a equality function. Now, let's see
-optimized search function:
+To solve this, we can use the functions that take any type comparable with the value and a
+the 'compatible' comparison object (and hash, when the associative container is unordered)
+Let's see optimized search function:
 
 [doc_assoc_optimized_code_optimized_find]
 
-This new arbitrary key overload is also available for other functions taking
-values as arguments:
-
-*  equal_range
-*  lower_bound
-*  upper_bound
-*  count
-*  find
-*  erase
-
-Check [classref boost::intrusive::set set],
-[classref boost::intrusive::multiset multiset],
-[classref boost::intrusive::unordered_set unordered_set],
-[classref boost::intrusive::unordered_multiset unordered_multiset]
-references to know more about those functions.
+[endsect]
 
 [endsect]
 
 [section:advanced_insertions Advanced insertions]
 
 A similar issue happens with insertions in simple ordered and unordered associative
-containers with unique keys (`std::set` and `std::tr1::unordered_set`). In these containers,
+containers with unique keys (`std::set` and `std::unordered_set`). In these containers,
 if a value is already present, the value to be inserted is discarded. With expensive
 values, if the value is already present, we can suffer efficiency problems.
 
-[classref boost::intrusive::set set] and [classref boost::intrusive::unordered_set unordered_set]
-have insertion functions to check efficiently, without
+[classref boost::intrusive::set set] and [classref boost::intrusive::unordered_set unordered_set]-like
+containers have insertion functions (`insert_check`, `insert_unique_check`,...) to check efficiently, without
 constructing the value, if a value is present or not and if it's not present, a
-function to insert it immediately without any further lookup.
+function to insert it immediately (`insert_commit`) without any further lookup. Requirements for functions
+that check the existence of such value are:
+
+* For unordered container the provided comparison and hashing
+  function with the given key shall induce the same hash and equivalence as `key_compare` and `hasher`.
+
+* For ordered associative containers, the provided comparison function with the given key, shall induce the same
+strict weak order as `key_compare`.
+
+To sum up, `insert_check` is similar to a normal `insert` but:
+
+*  `insert_check` can be used with arbitrary keys
+*  if the insertion is possible (there is no equivalent value) `insert_check` collects all the needed information
+in an `insert_commit_data` structure, so that `insert_commit`:
+   *   [*does not execute] further comparisons
+   *   can be executed with [*constant-time complexity]
+   *   has [*no-throw guarantee].
+
+These functions must be used with care, 
+no other insertion or erasure must be executed between an `insert_check` and an `insert_commit`
+pair. Otherwise, the behaviour is undefined.
+
+See [classref boost::intrusive::set set]
+and [classref boost::intrusive::unordered_set unordered_set]-like containers' reference
+for more information about `insert_check` and `insert_commit`.
+
+With multiple ordered and unordered associative containers
+([classref boost::intrusive::multiset multiset] and
+[classref boost::intrusive::unordered_multiset unordered_multiset]) there  is
+no need for these advanced insertion functions, since insertions are always successful.
+
+[section:advanced_insertions_example Example]
+
 For example, using the same `Expensive` class,
 this function can be inefficient:
 
@@ -2025,28 +2059,7 @@ will be discarded, and this is a waste of resources. Instead of that, let's use
 
 [doc_assoc_optimized_code_optimized_insert]
 
-`insert_check` is similar to a normal `insert` but:
-
-*  `insert_check` can be used with arbitrary keys
-*  if the insertion is possible (there is no equivalent value) `insert_check` collects all the needed information
-in an `insert_commit_data` structure, so that `insert_commit`:
-   *   [*does not execute] further comparisons
-   *   can be executed with [*constant-time complexity]
-   *   has [*no-throw guarantee].
-
-These functions must be used with care, since
-no other insertion or erasure must be executed between an `insert_check` and an `insert_commit`
-pair. Otherwise, the behaviour is undefined.
-`insert_check` and `insert_commit` will come in handy
-for developers programming efficient non-intrusive associative containers.
-See [classref boost::intrusive::set set]
-and [classref boost::intrusive::unordered_set unordered_set] reference for more information about
-`insert_check` and `insert_commit`.
-
-With multiple ordered and unordered associative containers
-([classref boost::intrusive::multiset multiset] and
-[classref boost::intrusive::unordered_multiset unordered_multiset]) there  is
-no need for these advanced insertion functions, since insertions are always successful.
+[endsect]
 
 [endsect]
 
@@ -2062,15 +2075,14 @@ from other associative containers: if the ordering and uniqueness properties are
 there is no need to waste time checking the position of each source value, because values
 are already ordered: back insertions will be much more efficient.
 
-[*Note:] These functions [*don't check preconditions] so they must used with care. These
-are functions are low-level operations [*will break container invariants if
+[*Note:] These functions [*don't check preconditions] so they must used with care. They
+are low-level operations that [*will break container invariants if
 ordering and uniqueness preconditions are not assured by the caller.]
 
 Let's see an example:
 
 [import ../example/doc_positional_insertion.cpp]
 [doc_positional_insertion]
-
 
 [endsect]
 

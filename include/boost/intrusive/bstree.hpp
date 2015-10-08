@@ -1386,7 +1386,7 @@ class bstree_impl
    {  return this->erase(key, this->key_comp());   }
 
    //! <b>Requires</b>: key is a value such that `*this` is partitioned with respect to
-   //!   comp(nk, key) and !c(key, nk), with c(nk, key) implying !c(key, nk),
+   //!   comp(nk, key) and !comp(key, nk), with comp(nk, key) implying !comp(key, nk),
    //!   with nk the key_type of a value_type inserted into `*this`.
    //!
    //! <b>Effects</b>: Erases all the elements with the given key.
@@ -1470,7 +1470,7 @@ class bstree_impl
    {  size_type n;   return this->private_erase(b, e, n, disposer);   }
 
    //! <b>Requires</b>: key is a value such that `*this` is partitioned with respect to
-   //!   comp(nk, key) and !c(key, nk), with c(nk, key) implying !c(key, nk)
+   //!   comp(nk, key) and !comp(key, nk), with comp(nk, key) implying !comp(key, nk)
    //!   and nk the key_type of a value_type inserted into `*this`.
    //!
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
@@ -1546,7 +1546,7 @@ class bstree_impl
    {  return size_type(this->count(key, this->key_comp()));   }
 
    //! <b>Requires</b>: key is a value such that `*this` is partitioned with respect to
-   //!   comp(nk, key) and !c(key, nk), with c(nk, key) implying !c(key, nk),
+   //!   comp(nk, key) and !comp(key, nk), with comp(nk, key) implying !comp(key, nk),
    //!   and nk the key_type of a value_type inserted into `*this`.
    //!
    //! <b>Effects</b>: Returns the number of contained elements with the given key
@@ -1643,7 +1643,7 @@ class bstree_impl
    iterator find(const key_type &key);
 
    //! <b>Requires</b>: key is a value such that `*this` is partitioned with respect to
-   //!   comp(nk, key) and !c(key, nk), with c(nk, key) implying !c(key, nk),
+   //!   comp(nk, key) and !comp(key, nk), with comp(nk, key) implying !comp(key, nk),
    //!   and nk the key_type of a value_type inserted into `*this`.
    //!
    //! <b>Effects</b>: Finds an iterator to the first element whose key is
@@ -1672,7 +1672,7 @@ class bstree_impl
    std::pair<iterator,iterator> equal_range(const key_type &key);
 
    //! <b>Requires</b>: key is a value such that `*this` is partitioned with respect to
-   //!   comp(nk, key) and !c(key, nk), with c(nk, key) implying !c(key, nk),
+   //!   comp(nk, key) and !comp(key, nk), with comp(nk, key) implying !comp(key, nk),
    //!   with nk the key_type of a value_type inserted into `*this`.
    //!
    //! <b>Effects</b>: Finds a range containing all elements whose key is k or
