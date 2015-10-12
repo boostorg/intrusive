@@ -65,13 +65,13 @@ struct tree_value_compare
    {};
 
    template<class U>
-   typename boost::intrusive::detail::enable_if<is_key<U>, const key_type &>::type
-      key_forward(const U &key) const
+   const key_type & key_forward
+      (const U &key, typename boost::intrusive::detail::enable_if<is_key<U> >::type* = 0) const
    {  return key; }
 
    template<class U>
-   typename boost::intrusive::detail::disable_if<is_key<U>, const key_type &>::type
-      key_forward(const U &key) const
+   const key_type & key_forward
+      (const U &key, typename boost::intrusive::detail::disable_if<is_key<U> >::type* = 0) const
    {  return KeyOfValue()(key);  }
 
    template<class KeyType, class KeyType2>
