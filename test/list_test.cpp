@@ -445,28 +445,6 @@ class test_main_template< VoidPointer, false, Default_Holder >
 
       make_and_test_list < typename detail::get_base_value_traits <
                               value_type,
-                              typename hooks<VoidPointer>::base_hook_type
-                           >::type,
-                           false,
-                           Default_Holder,
-                           std::vector< value_type >
-                         >::test_all(data);
-      make_and_test_list < typename detail::get_member_value_traits <
-                              member_hook< value_type, typename hooks<VoidPointer>::member_hook_type, &value_type::node_>
-                           >::type,
-                           false,
-                           Default_Holder,
-                           std::vector< value_type >
-                         >::test_all(data);
-
-//      test_list<stateful_value_traits
-//                  < value_type
-//                  , list_node_traits<VoidPointer>
-//                  , safe_link>
-//               >::test_all(data);
-
-      make_and_test_list < typename detail::get_base_value_traits <
-                              value_type,
                               typename hooks<VoidPointer>::auto_base_hook_type
                            >::type,
                            false,
@@ -480,12 +458,6 @@ class test_main_template< VoidPointer, false, Default_Holder >
                          Default_Holder,
                          std::vector< value_type >
                        >::test_all(data);
-
-//      test_list<stateful_value_traits
-//                  < value_type
-//                  , list_node_traits<VoidPointer>
-//                  , auto_unlink>
-//               >::test_all(data);
 
       return 0;
    }
