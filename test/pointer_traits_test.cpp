@@ -76,7 +76,7 @@ class CompleteSmartPtr
    {  return *ptr_;  }
 
    operator unspecified_bool_type() const
-   {  return m_ptr? &CompleteSmartPtr::unspecified_bool_type_func : 0;   }
+   {  return ptr_? &CompleteSmartPtr::unspecified_bool_type_func : 0;   }
 
    template<class U>
    static CompleteSmartPtr static_cast_from(const CompleteSmartPtr<U> &uptr)
