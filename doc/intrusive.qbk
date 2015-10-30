@@ -3842,6 +3842,7 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
    the container must be partitioned in regards to the passed comparison object.
 *  Fixed bugs:
    *  [@https://svn.boost.org/trac/boost/ticket/11701 Boost Trac #11701: ['Regression in boost::intrusive::set::equal_range]]
+   *  [@https://svn.boost.org/trac/boost/ticket/11765 Boost Trac #11765: ['sgtree.hpp:830: bad if test ?]]
 
 [endsect]
 
