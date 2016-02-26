@@ -81,9 +81,13 @@ class splay_set_impl
    static const bool constant_time_size = tree_type::constant_time_size;
 
    public:
+   //! @copydoc ::boost::intrusive::splaytree::splaytree()
+   splay_set_impl()
+      :  tree_type()
+   {}
+
    //! @copydoc ::boost::intrusive::splaytree::splaytree(const key_compare &,const value_traits &)
-   explicit splay_set_impl( const key_compare &cmp = key_compare()
-                    , const value_traits &v_traits = value_traits())
+   explicit splay_set_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  tree_type(cmp, v_traits)
    {}
 
@@ -497,8 +501,11 @@ class splay_set
    //Assert if passed value traits are compatible with the type
    BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
-   explicit splay_set( const key_compare &cmp = key_compare()
-                     , const value_traits &v_traits = value_traits())
+   splay_set()
+      :  Base()
+   {}
+
+   explicit splay_set( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  Base(cmp, v_traits)
    {}
 
@@ -594,9 +601,13 @@ class splay_multiset_impl
    static const bool constant_time_size = tree_type::constant_time_size;
 
    public:
+   //! @copydoc ::boost::intrusive::splaytree::splaytree()
+   splay_multiset_impl()
+      :  tree_type()
+   {}
+
    //! @copydoc ::boost::intrusive::splaytree::splaytree(const key_compare &,const value_traits &)
-   explicit splay_multiset_impl( const key_compare &cmp = key_compare()
-                         , const value_traits &v_traits = value_traits())
+   explicit splay_multiset_impl(const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  tree_type(cmp, v_traits)
    {}
 
@@ -973,8 +984,11 @@ class splay_multiset
    //Assert if passed value traits are compatible with the type
    BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
-   explicit splay_multiset( const key_compare &cmp = key_compare()
-                          , const value_traits &v_traits = value_traits())
+   splay_multiset()
+      :  Base()
+   {}
+
+   explicit splay_multiset( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  Base(cmp, v_traits)
    {}
 

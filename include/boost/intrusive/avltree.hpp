@@ -121,10 +121,13 @@ class avltree_impl
 
    typedef typename implementation_defined::insert_commit_data insert_commit_data;
 
+   //! @copydoc ::boost::intrusive::bstree::bstree()
+   avltree_impl()
+      :  tree_type()
+   {}
 
    //! @copydoc ::boost::intrusive::bstree::bstree(const key_compare &,const value_traits &)
-   explicit avltree_impl( const key_compare &cmp = key_compare()
-                       , const value_traits &v_traits = value_traits())
+   explicit avltree_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  tree_type(cmp, v_traits)
    {}
 
@@ -507,8 +510,11 @@ class avltree
    //Assert if passed value traits are compatible with the type
    BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
-   explicit avltree( const key_compare &cmp = key_compare()
-                   , const value_traits &v_traits = value_traits())
+   avltree()
+      :  Base()
+   {}
+
+   explicit avltree( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  Base(cmp, v_traits)
    {}
 

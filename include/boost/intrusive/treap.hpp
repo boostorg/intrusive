@@ -159,7 +159,18 @@ class treap_impl
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks)
    //!   or the copy constructor of the value_compare/priority_compare objects throw. Basic guarantee.
-   explicit treap_impl( const key_compare &cmp    = key_compare()
+   treap_impl()
+      : tree_type(), prio_base(priority_compare())
+   {}
+
+   //! <b>Effects</b>: Constructs an empty container.
+   //!
+   //! <b>Complexity</b>: Constant.
+   //!
+   //! <b>Throws</b>: If value_traits::node_traits::node
+   //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks)
+   //!   or the copy constructor of the value_compare/priority_compare objects throw. Basic guarantee.
+   explicit treap_impl( const key_compare &cmp
                       , const priority_compare &pcmp = priority_compare()
                       , const value_traits &v_traits = value_traits())
       : tree_type(cmp, v_traits), prio_base(pcmp)
@@ -1147,8 +1158,11 @@ class treap
 
    //Assert if passed value traits are compatible with the type
    BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
+   treap()
+      :  Base()
+   {}
 
-   explicit treap( const key_compare &cmp = key_compare()
+   explicit treap( const key_compare &cmp
                  , const priority_compare &pcmp = priority_compare()
                  , const value_traits &v_traits = value_traits())
       :  Base(cmp, pcmp, v_traits)

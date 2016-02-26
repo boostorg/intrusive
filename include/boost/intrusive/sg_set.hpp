@@ -81,9 +81,13 @@ class sg_set_impl
    static const bool constant_time_size = tree_type::constant_time_size;
 
    public:
+   //! @copydoc ::boost::intrusive::sgtree::sgtree()
+   sg_set_impl()
+      :  tree_type()
+   {}
+
    //! @copydoc ::boost::intrusive::sgtree::sgtree(const key_compare &,const value_traits &)
-   explicit sg_set_impl( const key_compare &cmp = key_compare()
-                    , const value_traits &v_traits = value_traits())
+   explicit sg_set_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  tree_type(cmp, v_traits)
    {}
 
@@ -487,8 +491,11 @@ class sg_set
    //Assert if passed value traits are compatible with the type
    BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
-   explicit sg_set( const key_compare &cmp = key_compare()
-                  , const value_traits &v_traits = value_traits())
+   sg_set()
+      :  Base()
+   {}
+
+   explicit sg_set( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  Base(cmp, v_traits)
    {}
 
@@ -584,9 +591,13 @@ class sg_multiset_impl
    static const bool constant_time_size = tree_type::constant_time_size;
 
    public:
+   //! @copydoc ::boost::intrusive::sgtree::sgtree()
+   sg_multiset_impl()
+      :  tree_type()
+   {}
+
    //! @copydoc ::boost::intrusive::sgtree::sgtree(const key_compare &,const value_traits &)
-   explicit sg_multiset_impl( const key_compare &cmp = key_compare()
-                         , const value_traits &v_traits = value_traits())
+   explicit sg_multiset_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  tree_type(cmp, v_traits)
    {}
 
@@ -960,8 +971,11 @@ class sg_multiset
    //Assert if passed value traits are compatible with the type
    BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
-   sg_multiset( const key_compare &cmp = key_compare()
-           , const value_traits &v_traits = value_traits())
+   sg_multiset()
+      :  Base()
+   {}
+
+   explicit sg_multiset( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  Base(cmp, v_traits)
    {}
 

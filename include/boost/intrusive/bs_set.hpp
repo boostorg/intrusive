@@ -80,9 +80,13 @@ class bs_set_impl
    static const bool constant_time_size = tree_type::constant_time_size;
 
    public:
+   //! @copydoc ::boost::intrusive::bstree::bstree()
+   bs_set_impl()
+      :  tree_type()
+   {}
+
    //! @copydoc ::boost::intrusive::bstree::bstree(const key_compare &,const value_traits &)
-   explicit bs_set_impl( const key_compare &cmp = key_compare()
-                    , const value_traits &v_traits = value_traits())
+   explicit bs_set_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  tree_type(cmp, v_traits)
    {}
 
@@ -473,8 +477,11 @@ class bs_set
    //Assert if passed value traits are compatible with the type
    BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
-   explicit bs_set( const key_compare &cmp = key_compare()
-                  , const value_traits &v_traits = value_traits())
+   bs_set()
+      :  Base()
+   {}
+
+   explicit bs_set( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  Base(cmp, v_traits)
    {}
 
@@ -569,9 +576,13 @@ class bs_multiset_impl
    static const bool constant_time_size = tree_type::constant_time_size;
 
    public:
+   //! @copydoc ::boost::intrusive::bstree::bstree()
+   bs_multiset_impl()
+      :  tree_type()
+   {}
+
    //! @copydoc ::boost::intrusive::bstree::bstree(const key_compare &,const value_traits &)
-   explicit bs_multiset_impl( const key_compare &cmp = key_compare()
-                            , const value_traits &v_traits = value_traits())
+   explicit bs_multiset_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  tree_type(cmp, v_traits)
    {}
 
@@ -932,8 +943,11 @@ class bs_multiset
    //Assert if passed value traits are compatible with the type
    BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
-   explicit bs_multiset( const key_compare &cmp = key_compare()
-                       , const value_traits &v_traits = value_traits())
+   bs_multiset()
+      :  Base()
+   {}
+
+   explicit bs_multiset( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  Base(cmp, v_traits)
    {}
 

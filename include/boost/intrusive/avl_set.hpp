@@ -82,9 +82,13 @@ class avl_set_impl
 
    public:
 
+   //! @copydoc ::boost::intrusive::avltree::avltree()
+   avl_set_impl()
+      :  tree_type()
+   {}
+
    //! @copydoc ::boost::intrusive::avltree::avltree(const key_compare &,const value_traits &)
-   explicit avl_set_impl( const key_compare &cmp = key_compare()
-                    , const value_traits &v_traits = value_traits())
+   explicit avl_set_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  tree_type(cmp, v_traits)
    {}
 
@@ -476,8 +480,11 @@ class avl_set
    //Assert if passed value traits are compatible with the type
    BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
-   explicit avl_set( const key_compare &cmp = key_compare()
-                   , const value_traits &v_traits = value_traits())
+   avl_set()
+      :  Base()
+   {}
+
+   explicit avl_set( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  Base(cmp, v_traits)
    {}
 
@@ -573,9 +580,13 @@ class avl_multiset_impl
    static const bool constant_time_size = tree_type::constant_time_size;
 
    public:
+   //! @copydoc ::boost::intrusive::avltree::avltree()
+   avl_multiset_impl()
+      :  tree_type()
+   {}
+
    //! @copydoc ::boost::intrusive::avltree::avltree(const key_compare &,const value_traits &)
-   explicit avl_multiset_impl( const key_compare &cmp = key_compare()
-                         , const value_traits &v_traits = value_traits())
+   explicit avl_multiset_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  tree_type(cmp, v_traits)
    {}
 
@@ -936,8 +947,11 @@ class avl_multiset
    //Assert if passed value traits are compatible with the type
    BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
-   explicit avl_multiset( const key_compare &cmp = key_compare()
-                        , const value_traits &v_traits = value_traits())
+   avl_multiset()
+      :  Base()
+   {}
+
+   explicit avl_multiset( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  Base(cmp, v_traits)
    {}
 

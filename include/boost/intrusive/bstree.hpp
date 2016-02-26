@@ -679,8 +679,18 @@ class bstree_impl
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks)
    //!   or the copy constructor of the key_compare object throws. Basic guarantee.
-   explicit bstree_impl( const key_compare &cmp = key_compare()
-                       , const value_traits &v_traits = value_traits())
+   bstree_impl()
+      :  data_type(key_compare(), value_traits())
+   {}
+
+   //! <b>Effects</b>: Constructs an empty container with given comparison and traits.
+   //!
+   //! <b>Complexity</b>: Constant.
+   //!
+   //! <b>Throws</b>: If value_traits::node_traits::node
+   //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks)
+   //!   or the copy constructor of the key_compare object throws. Basic guarantee.
+   explicit bstree_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  data_type(cmp, v_traits)
    {}
 
@@ -2052,8 +2062,11 @@ class bstree
    //Assert if passed value traits are compatible with the type
    BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
-   bstree( const key_compare &cmp = key_compare()
-         , const value_traits &v_traits = value_traits())
+   bstree()
+      :  Base()
+   {}
+
+   explicit bstree( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  Base(cmp, v_traits)
    {}
 

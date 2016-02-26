@@ -3839,6 +3839,7 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 *  Fixed bugs:
    *  [@https://svn.boost.org/trac/boost/ticket/11832 Boost Trac #11832: ['clang-cl + boost intrusive = miscompile]]
+   *  [@https://svn.boost.org/trac/boost/ticket/11865 Boost Trac #11865: ['Intrusive list explicit ctor error with Clang 3.6 (C++11/14)]]
 
 [endsect]
 
