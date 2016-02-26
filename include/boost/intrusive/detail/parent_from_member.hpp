@@ -24,7 +24,7 @@
 #include <boost/intrusive/detail/workaround.hpp>
 #include <cstddef>
 
-#if defined(BOOST_MSVC) || ((defined(_WIN32) || defined(__WIN32__) || defined(WIN32)) && defined(BOOST_INTEL))
+#if defined(_MSC_VER)
    #define BOOST_INTRUSIVE_MSVC_ABI_PTR_TO_MEMBER
    #include <boost/static_assert.hpp>
 #endif

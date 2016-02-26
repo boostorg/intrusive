@@ -3835,6 +3835,13 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 [section:release_notes Release Notes]
 
+[section:release_notes_boost_1_61_00 Boost 1.61 Release]
+
+*  Fixed bugs:
+   *  [@https://svn.boost.org/trac/boost/ticket/11832 Boost Trac #11832: ['clang-cl + boost intrusive = miscompile]]
+
+[endsect]
+
 [section:release_notes_boost_1_60_00 Boost 1.60 Release]
 
 *  [link intrusive.advanced_lookups_insertions Advanced lookup and insertions] in ordered associative containers
