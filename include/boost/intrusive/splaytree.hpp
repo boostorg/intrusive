@@ -244,6 +244,14 @@ class splaytree_impl
    //! @copydoc ::boost::intrusive::bstree::insert_unique(const_iterator,reference)
    iterator insert_unique(const_iterator hint, reference value);
 
+   //! @copydoc ::boost::intrusive::bstree::insert_unique_check(const key_type&,insert_commit_data&)
+   std::pair<iterator, bool> insert_unique_check
+      (const key_type &key, insert_commit_data &commit_data);
+
+   //! @copydoc ::boost::intrusive::bstree::insert_unique_check(const_iterator,const key_type&,insert_commit_data&)
+   std::pair<iterator, bool> insert_unique_check
+      (const_iterator hint, const key_type &key, insert_commit_data &commit_data);
+
    //! @copydoc ::boost::intrusive::bstree::insert_unique_check(const KeyType&,KeyTypeKeyCompare,insert_commit_data&)
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<iterator, bool> insert_unique_check

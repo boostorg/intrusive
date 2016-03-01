@@ -476,8 +476,20 @@ struct bstbase2
    }
 
    //insert_unique_check
-   template<class KeyType, class KeyTypeKeyCompare>
    std::pair<iterator, bool> insert_unique_check
+      (const key_type &key, insert_commit_data &commit_data)
+   {  return this->insert_unique_check(key, this->key_comp(), commit_data);   }
+
+   std::pair<iterator, bool> insert_unique_check
+      (const_iterator hint, const key_type &key, insert_commit_data &commit_data)
+   {  return this->insert_unique_check(hint, key, this->key_comp(), commit_data);   }
+
+   template<class KeyType, class KeyTypeKeyCompare>
+   BOOST_INTRUSIVE_DOC1ST(std::pair<iterator BOOST_INTRUSIVE_I bool>
+      , typename detail::disable_if_convertible
+         <KeyType BOOST_INTRUSIVE_I const_iterator BOOST_INTRUSIVE_I 
+         std::pair<iterator BOOST_INTRUSIVE_I bool> >::type)
+      insert_unique_check
       (const KeyType &key, KeyTypeKeyCompare comp, insert_commit_data &commit_data)
    {
       std::pair<node_ptr, bool> ret =
@@ -488,8 +500,7 @@ struct bstbase2
 
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<iterator, bool> insert_unique_check
-      (const_iterator hint, const KeyType &key
-      ,KeyTypeKeyCompare comp, insert_commit_data &commit_data)
+      (const_iterator hint, const KeyType &key, KeyTypeKeyCompare comp, insert_commit_data &commit_data)
    {
       std::pair<node_ptr, bool> ret =
          (node_algorithms::insert_unique_check

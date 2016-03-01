@@ -42,10 +42,10 @@ struct priority_compare
 
 /// @cond
 
-template<class Less, class T>
+template<class PrioComp, class T>
 struct get_prio
 {
-   typedef Less type;
+   typedef PrioComp type;
 };
 
 

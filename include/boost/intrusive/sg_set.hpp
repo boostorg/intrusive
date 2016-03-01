@@ -198,6 +198,17 @@ class sg_set_impl
    iterator insert(const_iterator hint, reference value)
    {  return tree_type::insert_unique(hint, value);  }
 
+   //! @copydoc ::boost::intrusive::sgtree::insert_unique_check(const key_type&,insert_commit_data&)
+   std::pair<iterator, bool> insert_check
+      (const key_type &key, insert_commit_data &commit_data)
+   {  return tree_type::insert_unique_check(key, commit_data); }
+
+   //! @copydoc ::boost::intrusive::sgtree::insert_unique_check(const_iterator,const key_type&,insert_commit_data&)
+   std::pair<iterator, bool> insert_check
+      (const_iterator hint, const key_type &key
+      ,insert_commit_data &commit_data)
+   {  return tree_type::insert_unique_check(hint, key, commit_data); }
+
    //! @copydoc ::boost::intrusive::sgtree::insert_unique_check(const KeyType&,KeyTypeKeyCompare,insert_commit_data&)
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<iterator, bool> insert_check
@@ -323,21 +334,21 @@ class sg_set_impl
 
    #endif   //   #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
-   //! @copydoc ::boost::intrusive::rbtree::equal_range(const key_type &)
+   //! @copydoc ::boost::intrusive::sgtree::equal_range(const key_type &)
    std::pair<iterator,iterator> equal_range(const key_type &key)
    {  return this->tree_type::lower_bound_range(key); }
 
-   //! @copydoc ::boost::intrusive::rbtree::equal_range(const KeyType&,KeyTypeKeyCompare)
+   //! @copydoc ::boost::intrusive::sgtree::equal_range(const KeyType&,KeyTypeKeyCompare)
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<iterator,iterator> equal_range(const KeyType& key, KeyTypeKeyCompare comp)
    {  return this->tree_type::equal_range(key, comp); }
 
-   //! @copydoc ::boost::intrusive::rbtree::equal_range(const key_type &)const
+   //! @copydoc ::boost::intrusive::sgtree::equal_range(const key_type &)const
    std::pair<const_iterator, const_iterator>
       equal_range(const key_type &key) const
    {  return this->tree_type::lower_bound_range(key); }
 
-   //! @copydoc ::boost::intrusive::rbtree::equal_range(const KeyType&,KeyTypeKeyCompare)const
+   //! @copydoc ::boost::intrusive::sgtree::equal_range(const KeyType&,KeyTypeKeyCompare)const
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<const_iterator, const_iterator>
       equal_range(const KeyType& key, KeyTypeKeyCompare comp) const

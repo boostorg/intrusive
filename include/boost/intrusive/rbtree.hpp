@@ -263,6 +263,14 @@ class rbtree_impl
       (const_iterator hint, const KeyType &key
       ,KeyTypeKeyCompare comp, insert_commit_data &commit_data);
 
+   //! @copydoc ::boost::intrusive::bstree::insert_unique_check(const key_type&,insert_commit_data&)
+   std::pair<iterator, bool> insert_unique_check
+      (const key_type &key, insert_commit_data &commit_data);
+
+   //! @copydoc ::boost::intrusive::bstree::insert_unique_check(const_iterator,const key_type&,insert_commit_data&)
+   std::pair<iterator, bool> insert_unique_check
+      (const_iterator hint, const key_type &key, insert_commit_data &commit_data);
+
    //! @copydoc ::boost::intrusive::bstree::insert_unique_commit
    iterator insert_unique_commit(reference value, const insert_commit_data &commit_data);
 
