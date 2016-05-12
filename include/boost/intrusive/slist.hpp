@@ -343,8 +343,7 @@ class slist_impl
    slist_impl(BOOST_RV_REF(slist_impl) x)
       : data_(::boost::move(x.priv_value_traits()))
    {
-      this->priv_size_traits().set_size(size_type(0));
-      node_algorithms::init_header(this->get_root_node());
+      this->set_default_constructed_state();
       //nothrow, no need to rollback to release elements on exception
       this->swap(x);
    }
