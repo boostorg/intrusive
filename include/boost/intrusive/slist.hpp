@@ -1260,7 +1260,7 @@ class slist_impl
          if(l) *l = this->previous(this->cend());
       }
       else{
-         const_iterator last_x(x.previous(x.end()));  //<- constant time if cache_last is active
+         const_iterator last_x(x.previous(x.end()));  //constant time if cache_last is active
          node_ptr prev_n(prev.pointed_node());
          node_ptr last_x_n(last_x.pointed_node());
          if(cache_last){
