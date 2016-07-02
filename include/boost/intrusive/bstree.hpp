@@ -554,17 +554,9 @@ struct bstbase_hack<ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, false, SizeTyp
 
    typedef detail::size_holder<false, SizeType>     size_traits;
 
-   size_traits &sz_traits()
-   {  return s_size_traits;  }
-
-   const size_traits &sz_traits() const
-   {  return s_size_traits;  }
-
-   static size_traits s_size_traits;
+   size_traits sz_traits() const
+   {  return size_traits();  }
 };
-
-template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyComp, class SizeType, algo_types AlgoType, typename HeaderHolder>
-detail::size_holder<false, SizeType> bstbase_hack<ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, false, SizeType, AlgoType, HeaderHolder>::s_size_traits;
 
 //This class will
 template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyComp, bool ConstantTimeSize, class SizeType, algo_types AlgoType, typename HeaderHolder>
@@ -955,11 +947,7 @@ class bstree_impl
       ::boost::adl_move_swap(this->comp(), this->comp());
       //These can't throw
       node_algorithms::swap_tree(this->header_ptr(), node_ptr(other.header_ptr()));
-      if(constant_time_size){
-         size_type backup = this->sz_traits().get_size();
-         this->sz_traits().set_size(other.sz_traits().get_size());
-         other.sz_traits().set_size(backup);
-      }
+      this->sz_traits().swap(other.sz_traits());
    }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.

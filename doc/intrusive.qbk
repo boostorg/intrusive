@@ -3839,6 +3839,7 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 *  Fixed bugs:
    *  [@https://svn.boost.org/trac/boost/ticket/12190 Boost Trac #12190: ['Intrusive List + Flat Map combination crashes]]
+   *  [@https://svn.boost.org/trac/boost/ticket/12245 Boost Trac #12245: ['bstree uses a shared static size_traits for constant_time_size<false>]]
 
 [endsect]
 

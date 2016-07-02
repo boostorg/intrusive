@@ -716,11 +716,7 @@ class slist_impl
       else{
          this->priv_swap_lists(this->get_root_node(), other.get_root_node(), detail::bool_<linear>());
       }
-      if(constant_time_size){
-         size_type backup = this->priv_size_traits().get_size();
-         this->priv_size_traits().set_size(other.priv_size_traits().get_size());
-         other.priv_size_traits().set_size(backup);
-      }
+      this->priv_size_traits().swap(other.priv_size_traits());
    }
 
    //! <b>Effects</b>: Moves backwards all the elements, so that the first

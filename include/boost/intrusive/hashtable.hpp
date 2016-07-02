@@ -119,6 +119,8 @@ struct prime_list_holder
    static const std::size_t prime_list_size;
 };
 
+#if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
+
 //We only support LLP64(Win64) or LP64(most Unix) data models
 #ifdef _WIN64  //In 64 bit windows sizeof(size_t) == sizeof(unsigned long long)
    #define BOOST_INTRUSIVE_PRIME_C(NUMBER) NUMBER##ULL
@@ -172,6 +174,8 @@ const std::size_t prime_list_holder<Dummy>::prime_list[] = {
 
 #undef BOOST_INTRUSIVE_PRIME_C
 #undef BOOST_INTRUSIVE_64_BIT_SIZE_T
+
+#endif   //#if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
 template<int Dummy>
 const std::size_t prime_list_holder<Dummy>::prime_list_size
@@ -1243,10 +1247,13 @@ struct hashtable_size_traits_wrapper
 
    size_traits size_traits_;
 
-   const size_traits &priv_size_traits() const
+   typedef const size_traits & size_traits_const_t;
+   typedef       size_traits & size_traits_t;
+
+   size_traits_const_t priv_size_traits() const
    {  return size_traits_; }
 
-   size_traits &priv_size_traits()
+   size_traits_t priv_size_traits()
    {  return size_traits_; }
 };
 
@@ -1265,17 +1272,12 @@ struct hashtable_size_traits_wrapper<DeriveFrom, SizeType, false>
 
    typedef detail::size_holder< false, SizeType>   size_traits;
 
-   const size_traits &priv_size_traits() const
-   {  return size_traits_; }
+   typedef size_traits size_traits_const_t;
+   typedef size_traits size_traits_t;
 
-   size_traits &priv_size_traits()
-   {  return size_traits_; }
-
-   static size_traits size_traits_;
+   BOOST_INTRUSIVE_FORCEINLINE size_traits priv_size_traits() const
+   {  return size_traits(); }
 };
-
-template<class DeriveFrom, class SizeType>
-detail::size_holder< false, SizeType > hashtable_size_traits_wrapper<DeriveFrom, SizeType, false>::size_traits_;
 
 //hashdata_internal
 //Stores bucket_hash_equal_t and split_traits
@@ -1360,10 +1362,10 @@ struct hashdata_internal
       :  internal_type(val_traits, ::boost::forward<BucketTraitsType>(b_traits), h, e)
    {}
 
-   split_traits &priv_split_traits()
+   BOOST_INTRUSIVE_FORCEINLINE typename internal_type::size_traits_t priv_split_traits()
    {  return this->priv_size_traits();  }
 
-   const split_traits &priv_split_traits() const
+   BOOST_INTRUSIVE_FORCEINLINE typename internal_type::size_traits_const_t priv_split_traits() const
    {  return this->priv_size_traits();  }
 
    ~hashdata_internal()
@@ -1790,15 +1792,10 @@ class hashtable_impl
    {
       this->priv_swap_cache(x);
       x.priv_initialize_cache();
-      if(constant_time_size){
-         this->priv_size_traits().set_size(size_type(0));
-         this->priv_size_traits().set_size(x.priv_size_traits().get_size());
-         x.priv_size_traits().set_size(size_type(0));
-      }
-      if(incremental){
-         this->priv_split_traits().set_size(x.priv_split_traits().get_size());
-         x.priv_split_traits().set_size(size_type(0));
-      }
+      this->priv_size_traits().set_size(x.priv_size_traits().get_size());
+      x.priv_size_traits().set_size(size_type(0));
+      this->priv_split_traits().set_size(x.priv_split_traits().get_size());
+      x.priv_split_traits().set_size(size_type(0));
    }
 
    //! <b>Effects</b>: to-do
@@ -1946,8 +1943,8 @@ class hashtable_impl
       ::boost::adl_move_swap(this->priv_bucket_traits(), other.priv_bucket_traits());
       ::boost::adl_move_swap(this->priv_value_traits(), other.priv_value_traits());
       this->priv_swap_cache(other);
-      ::boost::adl_move_swap(this->priv_size_traits(), other.priv_size_traits());
-      ::boost::adl_move_swap(this->priv_split_traits(), other.priv_split_traits());
+      this->priv_size_traits().swap(other.priv_size_traits());
+      this->priv_split_traits().swap(other.priv_split_traits());
    }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw
