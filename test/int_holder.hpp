@@ -96,7 +96,7 @@ struct int_holder_key_of_value
 {
    typedef int_holder type;
 
-   const type &operator()(const ValueType &tv)
+   type operator()(const ValueType &tv)
    {  return tv.get_int_holder();  }
 };
 

@@ -132,18 +132,18 @@ template <class Type>
 bool priority_order(const Type& t1, const Type& t2)
 {
    std::size_t hash1 = boost::hash<int>()((&t1)->int_value());
-   boost::hash_combine(hash1, &t1);
+   boost::hash_combine(hash1, -hash1);
    std::size_t hash2 = boost::hash<int>()((&t2)->int_value());
-   boost::hash_combine(hash2, &t2);
+   boost::hash_combine(hash2, -hash2);
    return hash1 < hash2;
 }
 
 bool priority_order(int t1, int t2)
 {
    std::size_t hash1 = boost::hash<int>()(t1);
-   boost::hash_combine(hash1, &t1);
+   boost::hash_combine(hash1, -hash1);
    std::size_t hash2 = boost::hash<int>()(t2);
-   boost::hash_combine(hash2, &t2);
+   boost::hash_combine(hash2, -hash2);
    return hash1 < hash2;
 }
 

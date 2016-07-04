@@ -24,10 +24,14 @@
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/ebo_functor_holder.hpp>
 
+
 namespace boost {
 namespace intrusive {
 namespace detail {
 
+
+//This function object transforms a key comparison type to
+//a function that can compare nodes or nodes with nodes or keys.
 template < class KeyTypeKeyCompare
          , class ValueTraits
          , class KeyOfValue = void
@@ -46,48 +50,63 @@ struct key_nodeptr_comp
             , detail::identity<value_type>
             , KeyOfValue
             >::type                                key_of_value;
-   typedef typename key_of_value::type         key_type;
 
-   key_nodeptr_comp(KeyTypeKeyCompare kcomp, const ValueTraits *traits)
+   template <class P1>
+   struct is_same_or_nodeptr_convertible
+   {
+      static const bool same_type = is_same<P1,const_node_ptr>::value || is_same<P1,node_ptr>::value;
+      static const bool value = same_type || is_convertible<P1, const_node_ptr>::value;
+   };
+
+   BOOST_INTRUSIVE_FORCEINLINE key_nodeptr_comp(KeyTypeKeyCompare kcomp, const ValueTraits *traits)
       :  base_t(kcomp), traits_(traits)
    {}
 
-   template<class T>
-   struct is_node_ptr
-   {
-      static const bool value = is_same<T, const_node_ptr>::value || is_same<T, node_ptr>::value;
-   };
+   //pred(pnode)
+   template<class T1>
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const T1 &t1, typename enable_if_c< is_same_or_nodeptr_convertible<T1>::value >::type* =0) const
+   {  return base_t::get()(key_of_value()(*traits_->to_value_ptr(t1)));  }
 
-   //key_forward
-   template<class T>
-   typename enable_if<is_node_ptr<T>, const key_type &>::type key_forward(const T &node) const
-   {  return key_of_value()(*traits_->to_value_ptr(node));  }
-
-   template<class T>
-   #if defined(BOOST_MOVE_HELPERS_RETURN_SFINAE_BROKEN)
-   const T &key_forward (const T &key, typename disable_if<is_node_ptr<T> >::type* =0) const
-   #else
-   typename disable_if<is_node_ptr<T>, const T &>::type key_forward(const T &key) const
-   #endif
-   {  return key;  }
-
-   //operator() 1 arg
-   template<class KeyType>
-   bool operator()(const KeyType &key1) const
-   {  return base_t::get()(this->key_forward(key1));  }
-
-   template<class KeyType>
-   bool operator()(const KeyType &key1)
-   {  return base_t::get()(this->key_forward(key1));  }
+   template<class T1>
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const T1 &t1, typename enable_if_c< is_same_or_nodeptr_convertible<T1>::value >::type* =0)
+   {  return base_t::get()(key_of_value()(*traits_->to_value_ptr(t1)));  }
 
    //operator() 2 arg
-   template<class KeyType, class KeyType2>
-   bool operator()(const KeyType &key1, const KeyType2 &key2) const
-   {  return base_t::get()(this->key_forward(key1), this->key_forward(key2));  }
+   //pred(pnode, pnode)
+   template<class T1, class T2>
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const T1 &t1, const T2 &t2, typename enable_if_c< is_same_or_nodeptr_convertible<T1>::value && is_same_or_nodeptr_convertible<T2>::value >::type* =0) const
+   {  return base_t::get()(key_of_value()(*traits_->to_value_ptr(t1)), key_of_value()(*traits_->to_value_ptr(t2)));  }
 
-   template<class KeyType, class KeyType2>
-   bool operator()(const KeyType &key1, const KeyType2 &key2)
-   {  return base_t::get()(this->key_forward(key1), this->key_forward(key2));  }
+   template<class T1, class T2>
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const T1 &t1, const T2 &t2, typename enable_if_c< is_same_or_nodeptr_convertible<T1>::value && is_same_or_nodeptr_convertible<T2>::value >::type* =0)
+   {  return base_t::get()(key_of_value()(*traits_->to_value_ptr(t1)), key_of_value()(*traits_->to_value_ptr(t2)));  }
+
+   //pred(pnode, key)
+   template<class T1, class T2>
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const T1 &t1, const T2 &t2, typename enable_if_c< is_same_or_nodeptr_convertible<T1>::value && !is_same_or_nodeptr_convertible<T2>::value >::type* =0) const
+   {  return base_t::get()(key_of_value()(*traits_->to_value_ptr(t1)), t2);  }
+
+   template<class T1, class T2>
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const T1 &t1, const T2 &t2, typename enable_if_c< is_same_or_nodeptr_convertible<T1>::value && !is_same_or_nodeptr_convertible<T2>::value >::type* =0)
+   {  return base_t::get()(key_of_value()(*traits_->to_value_ptr(t1)), t2);  }
+
+   //pred(key, pnode)
+   template<class T1, class T2>
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const T1 &t1, const T2 &t2, typename enable_if_c< !is_same_or_nodeptr_convertible<T1>::value && is_same_or_nodeptr_convertible<T2>::value >::type* =0) const
+   {  return base_t::get()(t1, key_of_value()(*traits_->to_value_ptr(t2)));  }
+
+   template<class T1, class T2>
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const T1 &t1, const T2 &t2, typename enable_if_c< !is_same_or_nodeptr_convertible<T1>::value && is_same_or_nodeptr_convertible<T2>::value >::type* =0)
+   {  return base_t::get()(t1, key_of_value()(*traits_->to_value_ptr(t2)));  }
+
+   //pred(key, key)
+   template<class T1, class T2>
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const T1 &t1, const T2 &t2, typename enable_if_c< !is_same_or_nodeptr_convertible<T1>::value && !is_same_or_nodeptr_convertible<T2>::value >::type* =0) const
+   {  return base_t::get()(t1, t2);  }
+
+   template<class T1, class T2>
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const T1 &t1, const T2 &t2, typename enable_if_c< !is_same_or_nodeptr_convertible<T1>::value && !is_same_or_nodeptr_convertible<T2>::value >::type* =0)
+   {  return base_t::get()(t1, t2);  }
 
    const ValueTraits *const traits_;
 };
