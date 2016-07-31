@@ -105,7 +105,7 @@ struct bstbase3
 
    struct holder_t : public ValueTraits
    {
-      explicit holder_t(const ValueTraits &vtraits)
+      BOOST_INTRUSIVE_FORCEINLINE explicit holder_t(const ValueTraits &vtraits)
          : ValueTraits(vtraits)
       {}
       header_holder_type root;
@@ -121,34 +121,34 @@ struct bstbase3
       return *base;
    }
 
-   bstbase3(const ValueTraits &vtraits)
+   BOOST_INTRUSIVE_FORCEINLINE bstbase3(const ValueTraits &vtraits)
       : holder(vtraits)
    {
       node_algorithms::init_header(this->header_ptr());
    }
 
-   node_ptr header_ptr()
+   BOOST_INTRUSIVE_FORCEINLINE node_ptr header_ptr()
    { return holder.root.get_node(); }
 
-   const_node_ptr header_ptr() const
+   BOOST_INTRUSIVE_FORCEINLINE const_node_ptr header_ptr() const
    { return holder.root.get_node(); }
 
-   const value_traits &get_value_traits() const
+   BOOST_INTRUSIVE_FORCEINLINE const value_traits &get_value_traits() const
    {  return this->holder;  }
 
-   value_traits &get_value_traits()
+   BOOST_INTRUSIVE_FORCEINLINE value_traits &get_value_traits()
    {  return this->holder;  }
 
    typedef typename boost::intrusive::value_traits_pointers
       <ValueTraits>::const_value_traits_ptr const_value_traits_ptr;
 
-   const_value_traits_ptr priv_value_traits_ptr() const
+   BOOST_INTRUSIVE_FORCEINLINE const_value_traits_ptr priv_value_traits_ptr() const
    {  return pointer_traits<const_value_traits_ptr>::pointer_to(this->get_value_traits());  }
 
    iterator begin()
    {  return iterator(node_algorithms::begin_node(this->header_ptr()), this->priv_value_traits_ptr());   }
 
-   const_iterator begin() const
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator begin() const
    {  return cbegin();   }
 
    const_iterator cbegin() const
@@ -157,37 +157,37 @@ struct bstbase3
    iterator end()
    {  return iterator(node_algorithms::end_node(this->header_ptr()), this->priv_value_traits_ptr());   }
 
-   const_iterator end() const
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator end() const
    {  return cend();  }
 
-   const_iterator cend() const
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator cend() const
    {  return const_iterator(node_algorithms::end_node(this->header_ptr()), this->priv_value_traits_ptr());   }
 
-   iterator root()
+   BOOST_INTRUSIVE_FORCEINLINE iterator root()
    {  return iterator(node_algorithms::root_node(this->header_ptr()), this->priv_value_traits_ptr());   }
 
-   const_iterator root() const
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator root() const
    {  return croot();   }
 
-   const_iterator croot() const
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator croot() const
    {  return const_iterator(node_algorithms::root_node(this->header_ptr()), this->priv_value_traits_ptr());   }
 
-   reverse_iterator rbegin()
+   BOOST_INTRUSIVE_FORCEINLINE reverse_iterator rbegin()
    {  return reverse_iterator(end());  }
 
-   const_reverse_iterator rbegin() const
+   BOOST_INTRUSIVE_FORCEINLINE const_reverse_iterator rbegin() const
    {  return const_reverse_iterator(end());  }
 
-   const_reverse_iterator crbegin() const
+   BOOST_INTRUSIVE_FORCEINLINE const_reverse_iterator crbegin() const
    {  return const_reverse_iterator(end());  }
 
-   reverse_iterator rend()
+   BOOST_INTRUSIVE_FORCEINLINE reverse_iterator rend()
    {  return reverse_iterator(begin());   }
 
-   const_reverse_iterator rend() const
+   BOOST_INTRUSIVE_FORCEINLINE const_reverse_iterator rend() const
    {  return const_reverse_iterator(begin());   }
 
-   const_reverse_iterator crend() const
+   BOOST_INTRUSIVE_FORCEINLINE const_reverse_iterator crend() const
    {  return const_reverse_iterator(begin());   }
 
    void replace_node(iterator replace_this, reference with_this)
@@ -199,7 +199,7 @@ struct bstbase3
          node_algorithms::init(replace_this.pointed_node());
    }
 
-   void rebalance()
+   BOOST_INTRUSIVE_FORCEINLINE void rebalance()
    {  node_algorithms::rebalance(this->header_ptr()); }
 
    iterator rebalance_subtree(iterator root)
@@ -223,7 +223,7 @@ struct bstbase3
    const_iterator iterator_to(const_reference value) const
    {  return const_iterator (this->get_value_traits().to_node_ptr(*pointer_traits<pointer>::const_cast_from(pointer_traits<const_pointer>::pointer_to(value))), this->priv_value_traits_ptr()); }
 
-   static void init_node(reference value)
+   BOOST_INTRUSIVE_FORCEINLINE static void init_node(reference value)
    { node_algorithms::init(value_traits::to_node_ptr(value)); }
 
 };
@@ -311,17 +311,17 @@ struct bstbase2
    typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<const_pointer>::difference_type)      difference_type;
    typedef typename node_algorithms::insert_commit_data insert_commit_data;
 
-   value_compare value_comp() const
+   BOOST_INTRUSIVE_FORCEINLINE value_compare value_comp() const
    {  return this->comp();   }
 
-   key_compare key_comp() const
+   BOOST_INTRUSIVE_FORCEINLINE key_compare key_comp() const
    {  return this->comp().key_comp();   }
 
    //lower_bound
-   iterator lower_bound(const key_type &key)
+   BOOST_INTRUSIVE_FORCEINLINE iterator lower_bound(const key_type &key)
    {  return this->lower_bound(key, this->key_comp());   }
 
-   const_iterator lower_bound(const key_type &key) const
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator lower_bound(const key_type &key) const
    {  return this->lower_bound(key, this->key_comp());   }
 
    template<class KeyType, class KeyTypeKeyCompare>
@@ -339,7 +339,7 @@ struct bstbase2
    }
 
    //upper_bound
-   iterator upper_bound(const key_type &key)
+   BOOST_INTRUSIVE_FORCEINLINE iterator upper_bound(const key_type &key)
    {  return this->upper_bound(key, this->key_comp());   }
 
    template<class KeyType, class KeyTypeKeyCompare>
@@ -349,7 +349,7 @@ struct bstbase2
          (this->header_ptr(), key, this->key_node_comp(comp)), this->priv_value_traits_ptr());
    }
 
-   const_iterator upper_bound(const key_type &key) const
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator upper_bound(const key_type &key) const
    {  return this->upper_bound(key, this->key_comp());   }
 
    template<class KeyType, class KeyTypeKeyCompare>
@@ -370,7 +370,7 @@ struct bstbase2
    }
 
    //find
-   iterator find(const key_type &key)
+   BOOST_INTRUSIVE_FORCEINLINE iterator find(const key_type &key)
    {  return this->find(key, this->key_comp()); }
 
    template<class KeyType, class KeyTypeKeyCompare>
@@ -380,7 +380,7 @@ struct bstbase2
          (node_algorithms::find(this->header_ptr(), key, this->key_node_comp(comp)), this->priv_value_traits_ptr());
    }
 
-   const_iterator find(const key_type &key) const
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator find(const key_type &key) const
    {  return this->find(key, this->key_comp()); }
 
    template<class KeyType, class KeyTypeKeyCompare>
@@ -391,7 +391,7 @@ struct bstbase2
    }
 
    //equal_range
-   std::pair<iterator,iterator> equal_range(const key_type &key)
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<iterator,iterator> equal_range(const key_type &key)
    {  return this->equal_range(key, this->key_comp());   }
 
    template<class KeyType, class KeyTypeKeyCompare>
@@ -403,7 +403,7 @@ struct bstbase2
                                           , iterator(ret.second, this->priv_value_traits_ptr()));
    }
 
-   std::pair<const_iterator, const_iterator>
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<const_iterator, const_iterator>
       equal_range(const key_type &key) const
    {  return this->equal_range(key, this->key_comp());   }
 
@@ -418,7 +418,7 @@ struct bstbase2
    }
 
    //lower_bound_range
-   std::pair<iterator,iterator> lower_bound_range(const key_type &key)
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<iterator,iterator> lower_bound_range(const key_type &key)
    {  return this->lower_bound_range(key, this->key_comp());   }
 
    template<class KeyType, class KeyTypeKeyCompare>
@@ -430,7 +430,7 @@ struct bstbase2
                                           , iterator(ret.second, this->priv_value_traits_ptr()));
    }
 
-   std::pair<const_iterator, const_iterator>
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<const_iterator, const_iterator>
       lower_bound_range(const key_type &key) const
    {  return this->lower_bound_range(key, this->key_comp());   }
 
@@ -445,7 +445,7 @@ struct bstbase2
    }
 
    //bounded_range
-   std::pair<iterator,iterator> bounded_range
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<iterator,iterator> bounded_range
       (const key_type &lower_key, const key_type &upper_key, bool left_closed, bool right_closed)
    {  return this->bounded_range(lower_key, upper_key, this->key_comp(), left_closed, right_closed);   }
 
@@ -460,7 +460,7 @@ struct bstbase2
                                           , iterator(ret.second, this->priv_value_traits_ptr()));
    }
 
-   std::pair<const_iterator,const_iterator> bounded_range
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<const_iterator,const_iterator> bounded_range
       (const key_type &lower_key, const key_type &upper_key, bool left_closed, bool right_closed) const
    {  return this->bounded_range(lower_key, upper_key, this->key_comp(), left_closed, right_closed);   }
 
@@ -476,11 +476,11 @@ struct bstbase2
    }
 
    //insert_unique_check
-   std::pair<iterator, bool> insert_unique_check
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<iterator, bool> insert_unique_check
       (const key_type &key, insert_commit_data &commit_data)
    {  return this->insert_unique_check(key, this->key_comp(), commit_data);   }
 
-   std::pair<iterator, bool> insert_unique_check
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<iterator, bool> insert_unique_check
       (const_iterator hint, const key_type &key, insert_commit_data &commit_data)
    {  return this->insert_unique_check(hint, key, this->key_comp(), commit_data);   }
 
@@ -525,7 +525,7 @@ struct bstbase_hack
    typedef typename get_algo
       <AlgoType, node_traits>::type                algo_type;
 
-   bstbase_hack(const key_compare & comp, const ValueTraits &vtraits)
+   BOOST_INTRUSIVE_FORCEINLINE bstbase_hack(const key_compare & comp, const ValueTraits &vtraits)
       : base_type(comp, vtraits)
    {
       this->sz_traits().set_size(size_type(0));
@@ -533,10 +533,10 @@ struct bstbase_hack
 
    typedef detail::size_holder<ConstantTimeSize, SizeType>     size_traits;
 
-   size_traits &sz_traits()
+   BOOST_INTRUSIVE_FORCEINLINE size_traits &sz_traits()
    {  return static_cast<size_traits &>(*this);  }
 
-   const size_traits &sz_traits() const
+   BOOST_INTRUSIVE_FORCEINLINE const size_traits &sz_traits() const
    {  return static_cast<const size_traits &>(*this);  }
 };
 
@@ -548,13 +548,13 @@ struct bstbase_hack<ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, false, SizeTyp
    typedef bstbase2< ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, AlgoType, HeaderHolder> base_type;
    typedef typename base_type::value_compare       value_compare;
    typedef typename base_type::key_compare         key_compare;
-   bstbase_hack(const key_compare & comp, const ValueTraits &vtraits)
+   BOOST_INTRUSIVE_FORCEINLINE bstbase_hack(const key_compare & comp, const ValueTraits &vtraits)
       : base_type(comp, vtraits)
    {}
 
    typedef detail::size_holder<false, SizeType>     size_traits;
 
-   size_traits sz_traits() const
+   BOOST_INTRUSIVE_FORCEINLINE size_traits sz_traits() const
    {  return size_traits();  }
 };
 
@@ -576,7 +576,7 @@ struct bstbase
       <AlgoType, node_traits>::type                node_algorithms;
    typedef SizeType                                size_type;
 
-   bstbase(const key_compare & comp, const ValueTraits &vtraits)
+   BOOST_INTRUSIVE_FORCEINLINE bstbase(const key_compare & comp, const ValueTraits &vtraits)
       : base_type(comp, vtraits)
    {}
 
@@ -732,7 +732,7 @@ class bstree_impl
 
    //! <b>Effects</b>: to-do
    //!
-   bstree_impl& operator=(BOOST_RV_REF(bstree_impl) x)
+   BOOST_INTRUSIVE_FORCEINLINE bstree_impl& operator=(BOOST_RV_REF(bstree_impl) x)
    {  this->swap(x); return *this;  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
