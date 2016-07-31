@@ -3841,6 +3841,7 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
    *  [@https://svn.boost.org/trac/boost/ticket/11994 Boost Trac #11994: ['Support intrusive container key extractors that return the key by value]]
    *  [@https://svn.boost.org/trac/boost/ticket/12184 Boost Trac #12184: ['clang -Wdocumentation warning]]
    *  [@https://svn.boost.org/trac/boost/ticket/12190 Boost Trac #12190: ['Intrusive List + Flat Map combination crashes]]
+   *  [@https://svn.boost.org/trac/boost/ticket/12229 Boost Trac #12229: ['intrusive::unordered_set<T>::rehash() broken]]
    *  [@https://svn.boost.org/trac/boost/ticket/12245 Boost Trac #12245: ['bstree uses a shared static size_traits for constant_time_size<false>]]
 
 [endsect]

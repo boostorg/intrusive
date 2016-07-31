@@ -2835,100 +2835,55 @@ class hashtable_impl
    //!   new_bucket_traits.bucket_count() can be bigger or smaller than this->bucket_count().
    //!   'new_bucket_traits' copy constructor should not throw.
    //!
-   //! <b>Effects</b>: Updates the internal reference with the new bucket, erases
-   //!   the values from the old bucket and inserts then in the new one.
+   //! <b>Effects</b>:
+   //!   If `new_bucket_traits.bucket_begin() == this->bucket_pointer()` is false,
+   //!   unlinks values from the old bucket and inserts then in the new one according
+   //!   to the hash value of values.
+   //!
+   //!   If `new_bucket_traits.bucket_begin() == this->bucket_pointer()` is true,
+   //!   the implementations avoids moving values as much as possible.
+   //!
    //!   Bucket traits hold by *this is assigned from new_bucket_traits.
    //!   If the container is configured as incremental<>, the split bucket is set
    //!   to the new bucket_count().
    //!
    //!   If store_hash option is true, this method does not use the hash function.
+   //!   If false, the implementation tries to minimize calls to the hash function
+   //!	 (e.g. once for equivalent values if optimize_multikey<true> is true).
+   //!
+   //!   If rehash is successful updates the internal bucket_traits with new_bucket_traits.
    //!
    //! <b>Complexity</b>: Average case linear in this->size(), worst case quadratic.
    //!
    //! <b>Throws</b>: If the hasher functor throws. Basic guarantee.
    void rehash(const bucket_traits &new_bucket_traits)
    {
-      const bucket_ptr new_buckets      = new_bucket_traits.bucket_begin();
-            size_type  new_bucket_count = new_bucket_traits.bucket_count();
-      const bucket_ptr old_buckets      = this->priv_bucket_pointer();
-            size_type  old_bucket_count = this->priv_bucket_count();
+      this->rehash_impl(new_bucket_traits, false);
+   }
 
-      //Check power of two bucket array if the option is activated
-      BOOST_INTRUSIVE_INVARIANT_ASSERT
-         (!power_2_buckets || (0 == (new_bucket_count & (new_bucket_count-1u))));
-
-      size_type n = this->priv_get_cache_bucket_num();
-      const bool same_buffer = old_buckets == new_buckets;
-      //If the new bucket length is a common factor
-      //of the old one we can avoid hash calculations.
-      const bool fast_shrink = (!incremental) && (old_bucket_count >= new_bucket_count) &&
-         (power_2_buckets || (old_bucket_count % new_bucket_count) == 0);
-      //If we are shrinking the same bucket array and it's
-      //is a fast shrink, just rehash the last nodes
-      size_type new_first_bucket_num = new_bucket_count;
-      if(same_buffer && fast_shrink && (n < new_bucket_count)){
-         new_first_bucket_num = n;
-         n = new_bucket_count;
-      }
-
-      //Anti-exception stuff: they destroy the elements if something goes wrong.
-      //If the source and destination buckets are the same, the second rollback function
-      //is harmless, because all elements have been already unlinked and destroyed
-      typedef detail::init_disposer<node_algorithms> NodeDisposer;
-      typedef detail::exception_array_disposer<bucket_type, NodeDisposer, size_type> ArrayDisposer;
-      NodeDisposer node_disp;
-      ArrayDisposer rollback1(new_buckets[0], node_disp, new_bucket_count);
-      ArrayDisposer rollback2(old_buckets[0], node_disp, old_bucket_count);
-
-      //Put size in a safe value for rollback exception
-      size_type const size_backup = this->priv_size_traits().get_size();
-      this->priv_size_traits().set_size(0);
-      //Put cache to safe position
-      this->priv_initialize_cache();
-      this->priv_insertion_update_cache(size_type(0u));
-
-      //Iterate through nodes
-      for(; n < old_bucket_count; ++n){
-         bucket_type &old_bucket = old_buckets[n];
-         if(!fast_shrink){
-            for( siterator before_i(old_bucket.before_begin()), i(old_bucket.begin()), end_sit(old_bucket.end())
-               ; i != end_sit
-               ; i = before_i, ++i){
-               const value_type &v = this->priv_value_from_slist_node(i.pointed_node());
-               const std::size_t hash_value = this->priv_stored_or_compute_hash(v, store_hash_t());
-               const size_type new_n = detail::hash_to_bucket_split<power_2_buckets, incremental>
-                  (hash_value, new_bucket_count, new_bucket_count);
-               if(cache_begin && new_n < new_first_bucket_num)
-                  new_first_bucket_num = new_n;
-               siterator const last = (priv_last_in_group)(i);
-               if(same_buffer && new_n == n){
-                  before_i = last;
-               }
-               else{
-                  bucket_type &new_b = new_buckets[new_n];
-                  new_b.splice_after(new_b.before_begin(), old_bucket, before_i, last);
-               }
-            }
-         }
-         else{
-            const size_type new_n = detail::hash_to_bucket_split<power_2_buckets, incremental>(n, new_bucket_count, new_bucket_count);
-            if(cache_begin && new_n < new_first_bucket_num)
-               new_first_bucket_num = new_n;
-            bucket_type &new_b = new_buckets[new_n];
-            new_b.splice_after( new_b.before_begin()
-                              , old_bucket
-                              , old_bucket.before_begin()
-                              , bucket_plus_vtraits_t::priv_get_last(old_bucket, optimize_multikey_t()));
-         }
-      }
-
-      this->priv_size_traits().set_size(size_backup);
-      this->priv_split_traits().set_size(new_bucket_count);
-      this->priv_bucket_traits() = new_bucket_traits;
-      this->priv_initialize_cache();
-      this->priv_insertion_update_cache(new_first_bucket_num);
-      rollback1.release();
-      rollback2.release();
+   //! <b>Note</b>: This function is used when keys from inserted elements are changed 
+   //!  (e.g. a language change when key is a string) but uniqueness and hash properties are
+   //!  preserved so a fast full rehash recovers invariants for *this without extracting and
+   //!  reinserting all elements again.
+   //!
+   //! <b>Requires</b>: Calls produced to the hash function should not alter the value uniqueness
+   //!  properties of already inserted elements. If hasher(key1) == hasher(key2) was true when
+   //!  elements were inserted, it shall be true during calls produced in the execution of this function.
+   //!
+   //!  key_equal is not called inside this function so it is assumed that key_equal(value1, value2)
+   //!  should produce the same results as before for inserted elements.
+   //!
+   //! <b>Effects</b>: Reprocesses all values hold by *this, recalculating their hash values
+   //!   and redistributing them though the buckets.
+   //!
+   //!   If store_hash option is true, this method uses the hash function and updates the stored hash value.
+   //!
+   //! <b>Complexity</b>: Average case linear in this->size(), worst case quadratic.
+   //!
+   //! <b>Throws</b>: If the hasher functor throws. Basic guarantee.
+   void full_rehash()
+   {
+      this->rehash_impl(this->priv_bucket_traits(), true);
    }
 
    //! <b>Requires</b>:
@@ -3112,6 +3067,110 @@ class hashtable_impl
    /// @cond
    void check() const {}
    private:
+
+   void rehash_impl(const bucket_traits &new_bucket_traits, bool do_full_rehash)
+   {
+      const bucket_ptr new_buckets      = new_bucket_traits.bucket_begin();
+            size_type  new_bucket_count = new_bucket_traits.bucket_count();
+      const bucket_ptr old_buckets      = this->priv_bucket_pointer();
+            size_type  old_bucket_count = this->priv_bucket_count();
+
+      //Check power of two bucket array if the option is activated
+      BOOST_INTRUSIVE_INVARIANT_ASSERT
+         (!power_2_buckets || (0 == (new_bucket_count & (new_bucket_count-1u))));
+
+      size_type n = this->priv_get_cache_bucket_num();
+      const bool same_buffer = old_buckets == new_buckets;
+      //If the new bucket length is a common factor
+      //of the old one we can avoid hash calculations.
+      const bool fast_shrink = (!do_full_rehash) && (!incremental) && (old_bucket_count >= new_bucket_count) &&
+         (power_2_buckets || (old_bucket_count % new_bucket_count) == 0);
+      //If we are shrinking the same bucket array and it's
+      //is a fast shrink, just rehash the last nodes
+      size_type new_first_bucket_num = new_bucket_count;
+      if(same_buffer && fast_shrink && (n < new_bucket_count)){
+         new_first_bucket_num = n;
+         n = new_bucket_count;
+      }
+
+      //Anti-exception stuff: they destroy the elements if something goes wrong.
+      //If the source and destination buckets are the same, the second rollback function
+      //is harmless, because all elements have been already unlinked and destroyed
+      typedef detail::init_disposer<node_algorithms> NodeDisposer;
+      typedef detail::exception_array_disposer<bucket_type, NodeDisposer, size_type> ArrayDisposer;
+      NodeDisposer node_disp;
+      ArrayDisposer rollback1(new_buckets[0], node_disp, new_bucket_count);
+      ArrayDisposer rollback2(old_buckets[0], node_disp, old_bucket_count);
+
+      //Put size in a safe value for rollback exception
+      size_type const size_backup = this->priv_size_traits().get_size();
+      this->priv_size_traits().set_size(0);
+      //Put cache to safe position
+      this->priv_initialize_cache();
+      this->priv_insertion_update_cache(size_type(0u));
+
+      //Iterate through nodes
+      for(; n < old_bucket_count; ++n){
+         bucket_type &old_bucket = old_buckets[n];
+         if(!fast_shrink){
+            for( siterator before_i(old_bucket.before_begin()), i(old_bucket.begin()), end_sit(old_bucket.end())
+               ; i != end_sit
+               ; i = before_i, ++i){
+
+               //First obtain hash value (and store it if do_full_rehash)
+               std::size_t hash_value;
+               if(do_full_rehash){
+                  value_type &v = this->priv_value_from_slist_node(i.pointed_node());
+                  hash_value = this->priv_hasher()(key_of_value()(v));
+                  node_functions_t::store_hash(pointer_traits<node_ptr>::pointer_to(this->priv_value_to_node(v)), hash_value, store_hash_t());
+               }
+               else{
+                  const value_type &v = this->priv_value_from_slist_node(i.pointed_node());
+                  hash_value = this->priv_stored_or_compute_hash(v, store_hash_t());
+               }
+
+               //Now calculate the new bucket position
+               const size_type new_n = detail::hash_to_bucket_split<power_2_buckets, incremental>
+                  (hash_value, new_bucket_count, new_bucket_count);
+
+               //Update first used bucket cache
+               if(cache_begin && new_n < new_first_bucket_num)
+                  new_first_bucket_num = new_n;
+
+               //If the target bucket is new, transfer the whole group
+               siterator const last = (priv_last_in_group)(i);
+
+               if(same_buffer && new_n == n){
+                  before_i = last;
+               }
+               else{
+                  bucket_type &new_b = new_buckets[new_n];
+                  new_b.splice_after(new_b.before_begin(), old_bucket, before_i, last);
+               }
+            }
+         }
+         else{
+            const size_type new_n = detail::hash_to_bucket_split<power_2_buckets, incremental>(n, new_bucket_count, new_bucket_count);
+            if(cache_begin && new_n < new_first_bucket_num)
+               new_first_bucket_num = new_n;
+            bucket_type &new_b = new_buckets[new_n];
+            new_b.splice_after( new_b.before_begin()
+                              , old_bucket
+                              , old_bucket.before_begin()
+                              , bucket_plus_vtraits_t::priv_get_last(old_bucket, optimize_multikey_t()));
+         }
+      }
+
+      this->priv_size_traits().set_size(size_backup);
+      this->priv_split_traits().set_size(new_bucket_count);
+      if(&new_bucket_traits != &this->priv_bucket_traits()){
+         this->priv_bucket_traits() = new_bucket_traits;
+      }
+      this->priv_initialize_cache();
+      this->priv_insertion_update_cache(new_first_bucket_num);
+      rollback1.release();
+      rollback2.release();
+   }
 
    template <class MaybeConstHashtableImpl, class Cloner, class Disposer>
    void priv_clone_from(MaybeConstHashtableImpl &src, Cloner cloner, Disposer disposer)

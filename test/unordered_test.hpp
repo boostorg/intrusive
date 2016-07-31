@@ -530,27 +530,32 @@ void test_unordered<ValueTraits, ContainerDefiner>
    {  int init_values [] = { 1, 2, 2, 3, 4, 5 };
    TEST_INTRUSIVE_SEQUENCE_MAYBEUNIQUE( init_values, testset1 );  }
 
-   //Full shrink rehash
+   //Shrink rehash
    testset1.rehash(bucket_traits(
       pointer_traits<typename unordered_type::bucket_ptr>::
          pointer_to(buckets1[0]), 4));
    BOOST_TEST (testset1.incremental_rehash() == false);
    {  int init_values [] = { 4, 5, 1, 2, 2, 3 };
       TEST_INTRUSIVE_SEQUENCE_MAYBEUNIQUE( init_values, testset1 );  }
-   //Full shrink rehash again
+
+   //Shrink rehash again
    testset1.rehash(bucket_traits(
       pointer_traits<typename unordered_type::bucket_ptr>::
          pointer_to(buckets1[0]), 2));
    BOOST_TEST (testset1.incremental_rehash() == false);
    {  int init_values [] = { 2, 2, 4, 3, 5, 1 };
       TEST_INTRUSIVE_SEQUENCE_MAYBEUNIQUE( init_values, testset1 );  }
-   //Full growing rehash
+
+   //Growing rehash
    testset1.rehash(bucket_traits(
       pointer_traits<typename unordered_type::bucket_ptr>::
          pointer_to(buckets1[0]), BucketSize));
-   BOOST_TEST (testset1.incremental_rehash() == false);
+
+   //Full rehash (no effects)
+   testset1.full_rehash();
    {  int init_values [] = { 1, 2, 2, 3, 4, 5 };
       TEST_INTRUSIVE_SEQUENCE_MAYBEUNIQUE( init_values, testset1 );  }
+
    //Incremental rehash shrinking
    //First incremental rehashes should lead to the same sequence
    for(std::size_t split_bucket = testset1.split_count(); split_bucket > 6; --split_bucket){
@@ -559,16 +564,19 @@ void test_unordered<ValueTraits, ContainerDefiner>
       {  int init_values [] = { 1, 2, 2, 3, 4, 5 };
       TEST_INTRUSIVE_SEQUENCE_MAYBEUNIQUE( init_values, testset1 );  }
    }
+
    //Incremental rehash step
    BOOST_TEST (testset1.incremental_rehash(false) == true);
    BOOST_TEST(testset1.split_count() == (BucketSize/2+1));
    {  int init_values [] = { 5, 1, 2, 2, 3, 4 };
       TEST_INTRUSIVE_SEQUENCE_MAYBEUNIQUE( init_values, testset1 );  }
+
    //Incremental rehash step 2
    BOOST_TEST (testset1.incremental_rehash(false) == true);
    BOOST_TEST(testset1.split_count() == (BucketSize/2));
    {  int init_values [] = { 4, 5, 1, 2, 2, 3 };
       TEST_INTRUSIVE_SEQUENCE_MAYBEUNIQUE( init_values, testset1 );  }
+
    //This incremental rehash should fail because we've reached the half of the bucket array
    BOOST_TEST(testset1.incremental_rehash(false) == false);
    BOOST_TEST(testset1.split_count() == BucketSize/2);
@@ -617,6 +625,11 @@ void test_unordered<ValueTraits, ContainerDefiner>
    testset1.rehash(bucket_traits(
       pointer_traits<typename unordered_type::bucket_ptr>::
          pointer_to(buckets3[0]), BucketSize*2));
+   {  int init_values [] = { 1, 2, 2, 3, 4, 5 };
+      TEST_INTRUSIVE_SEQUENCE_MAYBEUNIQUE( init_values, testset1 );  }
+
+   //Full rehash (no effects)
+   testset1.full_rehash();
    {  int init_values [] = { 1, 2, 2, 3, 4, 5 };
       TEST_INTRUSIVE_SEQUENCE_MAYBEUNIQUE( init_values, testset1 );  }
 }
