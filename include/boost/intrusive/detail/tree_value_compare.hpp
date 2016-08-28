@@ -25,7 +25,6 @@
 namespace boost{
 namespace intrusive{
 
-
 //This function object takes a KeyCompare function object
 //and compares values that contains keys using KeyOfValue
 template<class Key, class T, class KeyCompare, class KeyOfValue>
@@ -62,18 +61,20 @@ struct tree_value_compare
    BOOST_INTRUSIVE_FORCEINLINE key_compare &key_comp()
    {  return static_cast<key_compare &>(*this);  }
 
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const key_type &key1, const key_type &key2) const
+   {  return key_compare::operator()(key1, key2);  }
+
    template<class U>
-   struct is_key
-      : boost::intrusive::detail::is_same<const U, const key_type>
-   {};
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const key_type &key1, const U &nonkey2) const
+   {  return key_compare::operator()(key1, KeyOfValue()(nonkey2));  }
+
+   template<class U>
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const U &nonkey1, const key_type &key2) const
+   {  return key_compare::operator()(KeyOfValue()(nonkey1), key2);  }
 
    template<class U, class V>
-   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const U &key1, const V &key2) const
-   {  return key_compare::operator()(KeyOfValue()(key1), KeyOfValue()(key2));  }
-
-   template<class U, class V>
-   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const U &key1, const V &key2)
-   {  return key_compare::operator()(KeyOfValue()(key1), KeyOfValue()(key2));  }
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const U &nonkey1, const V &nonkey2) const
+   {  return key_compare::operator()(KeyOfValue()(nonkey1), KeyOfValue()(nonkey2));  }
 };
 
 }  //namespace intrusive{
