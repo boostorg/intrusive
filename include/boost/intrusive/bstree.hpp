@@ -262,7 +262,7 @@ struct bst_key_types
                       , key_type
                       >::type                key_compare;
    typedef tree_value_compare
-      <key_type, T, key_compare, key_of_value>  value_compare;
+      <key_compare, key_of_value>  value_compare;
 };
 
 template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyComp, algo_types AlgoType, typename HeaderHolder>

@@ -27,15 +27,16 @@ namespace intrusive{
 
 //This function object takes a KeyCompare function object
 //and compares values that contains keys using KeyOfValue
-template<class Key, class T, class KeyCompare, class KeyOfValue>
+template<class KeyCompare, class KeyOfValue>
 struct tree_value_compare
    :  public boost::intrusive::detail::ebo_functor_holder<KeyCompare>
 {
+   typedef KeyCompare                  key_compare;
+   typedef KeyOfValue                  key_of_value;
+   typedef typename KeyOfValue::type   key_type;
+
    typedef boost::intrusive::detail::ebo_functor_holder<KeyCompare> base_t;
-   typedef T            value_type;
-   typedef KeyCompare   key_compare;
-   typedef KeyOfValue   key_of_value;
-   typedef Key          key_type;
+
 
    BOOST_INTRUSIVE_FORCEINLINE tree_value_compare()
       :  base_t()
@@ -62,19 +63,19 @@ struct tree_value_compare
    {  return static_cast<key_compare &>(*this);  }
 
    BOOST_INTRUSIVE_FORCEINLINE bool operator()(const key_type &key1, const key_type &key2) const
-   {  return key_compare::operator()(key1, key2);  }
+   {  return this->key_comp()(key1, key2);  }
 
    template<class U>
    BOOST_INTRUSIVE_FORCEINLINE bool operator()(const key_type &key1, const U &nonkey2) const
-   {  return key_compare::operator()(key1, KeyOfValue()(nonkey2));  }
+   {  return this->key_comp()()(key1, KeyOfValue()(nonkey2));  }
 
    template<class U>
    BOOST_INTRUSIVE_FORCEINLINE bool operator()(const U &nonkey1, const key_type &key2) const
-   {  return key_compare::operator()(KeyOfValue()(nonkey1), key2);  }
+   {  return this->key_comp()(KeyOfValue()(nonkey1), key2);  }
 
    template<class U, class V>
    BOOST_INTRUSIVE_FORCEINLINE bool operator()(const U &nonkey1, const V &nonkey2) const
-   {  return key_compare::operator()(KeyOfValue()(nonkey1), KeyOfValue()(nonkey2));  }
+   {  return this->key_comp()(KeyOfValue()(nonkey1), KeyOfValue()(nonkey2));  }
 };
 
 }  //namespace intrusive{
