@@ -25,27 +25,22 @@ namespace boost{
 namespace intrusive{
 namespace test{
 
-template<class ValueTraits, class ContainerDefiner>
+template<class ContainerDefiner>
 struct test_generic_multiset
 {
-   typedef typename ValueTraits::value_type value_type;
-   typedef typename ValueTraits::pointer pointer;
-   typedef typename ValueTraits::const_pointer const_pointer;
-   typedef typename ValueContainer< value_type >::type value_cont_type;
-   typedef typename pointer_traits<pointer>::reference      reference;
-   typedef typename pointer_traits
-      <const_pointer>::reference                            const_reference;
+   typedef typename ContainerDefiner::value_cont_type    value_cont_type;
 
    static void test_all();
    static void test_sort(value_cont_type&);
    static void test_insert(value_cont_type&);
    static void test_swap(value_cont_type&);
+   static void test_merge(value_cont_type&);
    static void test_find(value_cont_type&);
    static void test_impl();
 };
 
-template<class ValueTraits, class ContainerDefiner>
-void test_generic_multiset<ValueTraits, ContainerDefiner>::test_all ()
+template<class ContainerDefiner>
+void test_generic_multiset<ContainerDefiner>::test_all ()
 {
    static const int random_init[6] = { 3, 2, 4, 1, 5, 2 };
    value_cont_type values (6);
@@ -69,14 +64,15 @@ void test_generic_multiset<ValueTraits, ContainerDefiner>::test_all ()
    test_sort(values);
    test_insert(values);
    test_swap(values);
+   test_merge(values);
    test_find(values);
    test_impl();
-   test_generic_assoc<ValueTraits, ContainerDefiner>::test_all(values);
+   test_generic_assoc<ContainerDefiner>::test_all(values);
 }
 
 //test case due to an error in tree implementation:
-template<class ValueTraits, class ContainerDefiner>
-void test_generic_multiset<ValueTraits, ContainerDefiner>::test_impl()
+template<class ContainerDefiner>
+void test_generic_multiset<ContainerDefiner>::test_impl()
 {
    value_cont_type values (5);
    for (int i = 0; i < 5; ++i)
@@ -97,8 +93,8 @@ void test_generic_multiset<ValueTraits, ContainerDefiner>::test_impl()
 }
 
 //test: constructor, iterator, clear, reverse_iterator, front, back, size:
-template<class ValueTraits, class ContainerDefiner>
-void test_generic_multiset<ValueTraits, ContainerDefiner>::test_sort(value_cont_type& values)
+template<class ContainerDefiner>
+void test_generic_multiset<ContainerDefiner>::test_sort(value_cont_type& values)
 {
    typedef typename ContainerDefiner::template container
       <>::type multiset_type;
@@ -123,14 +119,15 @@ void test_generic_multiset<ValueTraits, ContainerDefiner>::test_sort(value_cont_
 }
 
 //test: insert, const_iterator, const_reverse_iterator, erase, iterator_to:
-template<class ValueTraits, class ContainerDefiner>
-void test_generic_multiset<ValueTraits, ContainerDefiner>::test_insert(value_cont_type& values)
+template<class ContainerDefiner>
+void test_generic_multiset<ContainerDefiner>::test_insert(value_cont_type& values)
 {
    typedef typename ContainerDefiner::template container
       <>::type multiset_type;
 
    multiset_type testset;
    testset.insert(values.begin() + 2, values.begin() + 5);
+   testset.check();
    {  int init_values [] = { 1, 4, 5 };
       TEST_INTRUSIVE_SEQUENCE( init_values, testset.begin() );  }
 
@@ -138,6 +135,7 @@ void test_generic_multiset<ValueTraits, ContainerDefiner>::test_insert(value_con
    BOOST_TEST (i->value_ == 1);
 
    i = testset.insert (i, values[0]);
+   testset.check();
    BOOST_TEST (&*i == &values[0]);
 
    {  int init_values [] = { 5, 4, 3, 1 };
@@ -150,14 +148,15 @@ void test_generic_multiset<ValueTraits, ContainerDefiner>::test_insert(value_con
    BOOST_TEST (&*i == &values[2]);
 
    testset.erase(i);
+   testset.check();
 
    {  int init_values [] = { 1, 3, 5 };
       TEST_INTRUSIVE_SEQUENCE( init_values, testset.begin() );  }
 }
 
 //test: insert (seq-version), swap, erase (seq-version), size:
-template<class ValueTraits, class ContainerDefiner>
-void test_generic_multiset<ValueTraits, ContainerDefiner>::test_swap(value_cont_type& values)
+template<class ContainerDefiner>
+void test_generic_multiset<ContainerDefiner>::test_swap(value_cont_type& values)
 {
    typedef typename ContainerDefiner::template container
       <>::type multiset_type;
@@ -176,9 +175,50 @@ void test_generic_multiset<ValueTraits, ContainerDefiner>::test_swap(value_cont_
    BOOST_TEST (&*testset1.begin() == &values[3]);
 }
 
+template<class ContainerDefiner>
+void test_generic_multiset<ContainerDefiner>::test_merge(value_cont_type& values)
+{
+   typedef typename ContainerDefiner::template container
+      <>::type multiset_type;
+   typedef typename multiset_type::key_of_value key_of_value;
+   //original vector: 3, 2, 4, 1, 5, 2
+   //2,3
+   multiset_type testset1 (values.begin(), values.begin() + 2);
+   //1, 2, 4, 5
+   multiset_type testset2;
+   testset2.insert (values.begin() + 2, values.begin() + 6);
+
+   testset2.merge(testset1);
+   testset1.check();
+   testset2.check();
+
+   BOOST_TEST (testset1.empty());
+   BOOST_TEST (testset2.size() == 6);
+   {  int init_values [] = { 1, 2, 2, 3, 4, 5 };
+      TEST_INTRUSIVE_SEQUENCE( init_values, testset2.begin() );  }
+
+   value_cont_type cmp_val_cont(1);
+   typename value_cont_type::reference cmp_val = cmp_val_cont.front();
+   (&cmp_val)->value_ = 2;
+
+   BOOST_TEST (*testset2.find(key_of_value()(cmp_val)) == values[5]);
+   BOOST_TEST (&*(++testset2.find(key_of_value()(cmp_val))) == &values[1]);
+
+   testset1.merge(testset2);
+   testset1.check();
+   testset2.check();
+
+   BOOST_TEST (testset1.size() == 6);
+   {  int init_values [] = { 1, 2, 2, 3, 4, 5 };
+      TEST_INTRUSIVE_SEQUENCE( init_values, testset1.begin() );  }
+   BOOST_TEST (*testset1.find(key_of_value()(cmp_val)) == values[5]);
+   BOOST_TEST (&*(++testset1.find(key_of_value()(cmp_val))) == &values[1]);
+   BOOST_TEST (testset2.empty());
+}
+
 //test: find, equal_range (lower_bound, upper_bound):
-template<class ValueTraits, class ContainerDefiner>
-void test_generic_multiset<ValueTraits, ContainerDefiner>::test_find(value_cont_type& values)
+template<class ContainerDefiner>
+void test_generic_multiset<ContainerDefiner>::test_find(value_cont_type& values)
 {
    typedef typename ContainerDefiner::template container
       <>::type multiset_type;
@@ -189,7 +229,7 @@ void test_generic_multiset<ValueTraits, ContainerDefiner>::test_find(value_cont_
 
    {
       value_cont_type cmp_val_cont(1);
-      reference cmp_val = cmp_val_cont.front();
+      typename value_cont_type::reference cmp_val = cmp_val_cont.front();
       (&cmp_val)->value_ = 2;
       iterator i = testset.find (key_of_value()(cmp_val));
       BOOST_TEST (i->value_ == 2);
@@ -208,8 +248,8 @@ void test_generic_multiset<ValueTraits, ContainerDefiner>::test_find(value_cont_
       std::pair<iterator,iterator> range;
       std::pair<const_iterator, const_iterator> const_range;
       value_cont_type cmp_val_cont(2);
-      reference cmp_val_lower = cmp_val_cont.front();
-      reference cmp_val_upper = cmp_val_cont.back();
+      typename value_cont_type::reference cmp_val_lower = cmp_val_cont.front();
+      typename value_cont_type::reference cmp_val_upper = cmp_val_cont.back();
       {
       (&cmp_val_lower)->value_ = 1;
       (&cmp_val_upper)->value_ = 2;

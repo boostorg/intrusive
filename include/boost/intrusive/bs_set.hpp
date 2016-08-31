@@ -23,6 +23,11 @@
 #  pragma once
 #endif
 
+#if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
+template<class ValueTraits, class VoidOrKeyOfValue, class Compare, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
+class bs_multiset_impl;
+#endif
+
 namespace boost {
 namespace intrusive {
 
@@ -396,6 +401,26 @@ class bs_set_impl
 
    //! @copydoc ::boost::intrusive::bstree::remove_node
    void remove_node(reference value);
+
+   //! @copydoc ::boost::intrusive::bstree::merge_unique
+   template<class ...Options2>
+   void merge(bs_set<T, Options2...> &source);
+
+   //! @copydoc ::boost::intrusive::bstree::merge_unique
+   template<class ...Options2>
+   void merge(bs_multiset<T, Options2...> &source);
+
+   #else
+
+   template<class Compare2>
+   void merge(bs_set_impl<ValueTraits, VoidOrKeyOfValue, Compare2, SizeType, ConstantTimeSize, HeaderHolder> &source)
+   {  return tree_type::merge_unique(source);  }
+
+
+   template<class Compare2>
+   void merge(bs_multiset_impl<ValueTraits, VoidOrKeyOfValue, Compare2, SizeType, ConstantTimeSize, HeaderHolder> &source)
+   {  return tree_type::merge_unique(source);  }
+
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 };
 
@@ -861,6 +886,25 @@ class bs_multiset_impl
 
    //! @copydoc ::boost::intrusive::bstree::remove_node
    void remove_node(reference value);
+
+   //! @copydoc ::boost::intrusive::bstree::merge_equal
+   template<class ...Options2>
+   void merge(bs_multiset<T, Options2...> &source);
+
+   //! @copydoc ::boost::intrusive::bstree::merge_equal
+   template<class ...Options2>
+   void merge(bs_set<T, Options2...> &source);
+
+   #else
+
+   template<class Compare2>
+   void merge(bs_multiset_impl<ValueTraits, VoidOrKeyOfValue, Compare2, SizeType, ConstantTimeSize, HeaderHolder> &source)
+   {  return tree_type::merge_equal(source);  }
+
+   template<class Compare2>
+   void merge(bs_set_impl<ValueTraits, VoidOrKeyOfValue, Compare2, SizeType, ConstantTimeSize, HeaderHolder> &source)
+   {  return tree_type::merge_equal(source);  }
+
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 };
 

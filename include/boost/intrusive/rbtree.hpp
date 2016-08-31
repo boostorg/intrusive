@@ -430,6 +430,14 @@ class rbtree_impl
    //! @copydoc ::boost::intrusive::bstree::remove_node
    void remove_node(reference value);
 
+   //! @copydoc ::boost::intrusive::bstree::merge_unique(bstree<T, Options2...>&)
+   template<class T, class ...Options2>
+   void merge_unique(rbtree<T, Options2...> &);
+
+   //! @copydoc ::boost::intrusive::bstree::merge_equal(bstree<T, Options2...>&)
+   template<class T, class ...Options2>
+   void merge_equal(rbtree<T, Options2...> &);
+
    friend bool operator< (const rbtree_impl &x, const rbtree_impl &y);
 
    friend bool operator==(const rbtree_impl &x, const rbtree_impl &y);

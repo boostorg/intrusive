@@ -364,7 +364,7 @@ struct bstbase2
    {  typedef detail::key_nodeptr_comp<KeyTypeKeyCompare, value_traits, key_of_value> type;  };
 
    template<class KeyTypeKeyCompare>
-   typename key_node_comp_ret<KeyTypeKeyCompare>::type key_node_comp(KeyTypeKeyCompare comp) const
+   BOOST_INTRUSIVE_FORCEINLINE typename key_node_comp_ret<KeyTypeKeyCompare>::type key_node_comp(KeyTypeKeyCompare comp) const
    {
       return detail::key_nodeptr_comp<KeyTypeKeyCompare, value_traits, key_of_value>(comp, &this->get_value_traits());
    }
@@ -1163,6 +1163,36 @@ class bstree_impl
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
+   //! <b>Effects</b>: Checks if a value can be inserted in the container, using
+   //!   a user provided key instead of the value itself.
+   //!
+   //! <b>Returns</b>: If there is an equivalent value
+   //!   returns a pair containing an iterator to the already present value
+   //!   and false. If the value can be inserted returns true in the returned
+   //!   pair boolean and fills "commit_data" that is meant to be used with
+   //!   the "insert_commit" function.
+   //!
+   //! <b>Complexity</b>: Average complexity is at most logarithmic.
+   //!
+   //! <b>Throws</b>: If the comp ordering function throws. Strong guarantee.
+   std::pair<iterator, bool> insert_unique_check(const key_type &key, insert_commit_data &commit_data);
+
+   //! <b>Effects</b>: Checks if a value can be inserted in the container, using
+   //!   a user provided key instead of the value itself, using "hint"
+   //!   as a hint to where it will be inserted.
+   //!
+   //! <b>Returns</b>: If there is an equivalent value
+   //!   returns a pair containing an iterator to the already present value
+   //!   and false. If the value can be inserted returns true in the returned
+   //!   pair boolean and fills "commit_data" that is meant to be used with
+   //!   the "insert_commit" function.
+   //!
+   //! <b>Complexity</b>: Logarithmic in general, but it's amortized
+   //!   constant time if t is inserted immediately before hint.
+   //!
+   //! <b>Throws</b>: If the comp ordering function throws. Strong guarantee.
+   std::pair<iterator, bool> insert_unique_check(const_iterator hint, const key_type &key, insert_commit_data &commit_data);
+
    //! <b>Requires</b>: comp must be a comparison function that induces
    //!   the same strict weak ordering as key_compare. The difference is that
    //!   comp compares an arbitrary key with the contained values.
@@ -1912,6 +1942,78 @@ class bstree_impl
       node_algorithms::unlink(to_remove);
       if(safemode_or_autounlink)
          node_algorithms::init(to_remove);
+   }
+
+   //! <b>Requires</b>: "source" container's Options can only can differ in the comparison
+   //!   function from *this.
+   //! 
+   //! <b>Effects</b>: Attempts to extract each element in source and insert it into a using
+   //!   the comparison object of *this. If there is an element in a with key equivalent to the
+   //!   key of an element from source, then that element is not extracted from source.
+   //! 
+   //! <b>Postcondition</b>: Pointers and references to the transferred elements of source refer
+   //!   to those same elements but as members of *this. Iterators referring to the transferred
+   //!   elements will continue to refer to their elements, but they now behave as iterators into *this,
+   //!   not into source.
+   //!
+   //! <b>Throws</b>: Nothing unless the comparison object throws.
+   //!
+   //! <b>Complexity</b>: N log(a.size() + N) (N has the value source.size())
+   #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
+   template<class T, class ...Options2> void merge_unique(bstree<T, Options2...> &);
+   #else
+   template<class Compare2>
+   void merge_unique(bstree_impl
+      <ValueTraits, VoidOrKeyOfValue, Compare2, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> &source)
+   #endif
+   {
+      node_ptr it   (node_algorithms::begin_node(source.header_ptr()))
+             , itend(node_algorithms::end_node  (source.header_ptr()));
+
+      while(it != itend){
+         node_ptr const p(it);
+         BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || !node_algorithms::unique(p));
+         it = node_algorithms::next_node(it);
+         if( node_algorithms::transfer_unique(this->header_ptr(), this->key_node_comp(this->key_comp()), source.header_ptr(), p) ){
+            source.sz_traits().decrement();
+            this->sz_traits().increment();
+         }
+      }
+   }
+
+   //! <b>Requires</b>: "source" container's Options can only can differ in the comparison
+   //!   function from *this.
+   //! 
+   //! <b>Effects</b>: Extracts each element in source and insert it into a using
+   //!   the comparison object of *this.
+   //! 
+   //! <b>Postcondition</b>: Pointers and references to the transferred elements of source refer
+   //!   to those same elements but as members of *this. Iterators referring to the transferred
+   //!   elements will continue to refer to their elements, but they now behave as iterators into *this,
+   //!   not into source.
+   //!
+   //! <b>Throws</b>: Nothing unless the comparison object throws.
+   //!
+   //! <b>Complexity</b>: N log(a.size() + N) (N has the value source.size())
+   #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
+   template<class T, class ...Options2> void merge_equal(bstree<T, Options2...> &);
+   #else
+   template<class Compare2>
+   void merge_equal(bstree_impl
+      <ValueTraits, VoidOrKeyOfValue, Compare2, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> &source)
+   #endif
+   {
+      node_ptr it   (node_algorithms::begin_node(source.header_ptr()))
+             , itend(node_algorithms::end_node  (source.header_ptr()));
+
+      while(it != itend){
+         node_ptr const p(it);
+         BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || !node_algorithms::unique(p));
+         it = node_algorithms::next_node(it);
+         node_algorithms::transfer_equal(this->header_ptr(), this->key_node_comp(this->key_comp()), source.header_ptr(), p);
+         source.sz_traits().decrement();
+         this->sz_traits().increment();
+      }
    }
 
    //! <b>Effects</b>: Asserts the integrity of the container with additional checks provided by the user.

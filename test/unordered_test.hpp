@@ -27,16 +27,10 @@ namespace test{
 
 static const std::size_t BucketSize = 8;
 
-template<class ValueTraits, class ContainerDefiner>
+template<class ContainerDefiner>
 struct test_unordered
 {
-   typedef typename ValueTraits::value_type value_type;
-   typedef typename ValueTraits::pointer pointer;
-   typedef typename ValueTraits::const_pointer const_pointer;
-   typedef typename ValueContainer< value_type >::type value_cont_type;
-   typedef typename pointer_traits<pointer>::reference      reference;
-   typedef typename pointer_traits
-      <const_pointer>::reference                            const_reference;
+   typedef typename ContainerDefiner::value_cont_type value_cont_type;
 
    static void test_all(value_cont_type& values);
    private:
@@ -51,9 +45,8 @@ struct test_unordered
    static void test_clone(value_cont_type& values);
 };
 
-template<class ValueTraits, class ContainerDefiner>
-void test_unordered<ValueTraits, ContainerDefiner>::
-   test_all (value_cont_type& values)
+template<class ContainerDefiner>
+void test_unordered<ContainerDefiner>::test_all (value_cont_type& values)
 {
    typedef typename ContainerDefiner::template container
       <>::type unordered_type;
@@ -98,9 +91,8 @@ void test_unordered<ValueTraits, ContainerDefiner>::
 }
 
 //test case due to an error in tree implementation:
-template<class ValueTraits, class ContainerDefiner>
-void test_unordered<ValueTraits, ContainerDefiner>
-   ::test_impl()
+template<class ContainerDefiner>
+void test_unordered<ContainerDefiner>::test_impl()
 {
    typedef typename ContainerDefiner::template container
       <>::type unordered_type;
@@ -127,9 +119,8 @@ void test_unordered<ValueTraits, ContainerDefiner>
 }
 
 //test: constructor, iterator, clear, reverse_iterator, front, back, size:
-template<class ValueTraits, class ContainerDefiner>
-void test_unordered<ValueTraits, ContainerDefiner>
-   ::test_sort(value_cont_type& values)
+template<class ContainerDefiner>
+void test_unordered<ContainerDefiner>::test_sort(value_cont_type& values)
 {
    typedef typename ContainerDefiner::template container
       <>::type unordered_type;
@@ -154,9 +145,8 @@ void test_unordered<ValueTraits, ContainerDefiner>
 }
 
 //test: insert, const_iterator, const_reverse_iterator, erase, iterator_to:
-template<class ValueTraits, class ContainerDefiner>
-void test_unordered<ValueTraits, ContainerDefiner>
-   ::test_insert(value_cont_type& values, detail::false_) //not multikey
+template<class ContainerDefiner>
+void test_unordered<ContainerDefiner>::test_insert(value_cont_type& values, detail::false_) //not multikey
 {
 
    typedef typename ContainerDefiner::template container
@@ -212,9 +202,8 @@ void test_unordered<ValueTraits, ContainerDefiner>
    }
 }
 
-template<class ValueTraits, class ContainerDefiner>
-void test_unordered<ValueTraits, ContainerDefiner>
-   ::test_insert(value_cont_type& values, detail::true_) //is multikey
+template<class ContainerDefiner>
+void test_unordered<ContainerDefiner>::test_insert(value_cont_type& values, detail::true_) //is multikey
 {
    typedef typename ContainerDefiner::template container
       <>::type unordered_type;
@@ -405,9 +394,8 @@ void test_unordered<ValueTraits, ContainerDefiner>
 }
 
 //test: insert (seq-version), swap, erase (seq-version), size:
-template<class ValueTraits, class ContainerDefiner>
-void test_unordered<ValueTraits, ContainerDefiner>::
-   test_swap(value_cont_type& values)
+template<class ContainerDefiner>
+void test_unordered<ContainerDefiner>::test_swap(value_cont_type& values)
 {
    typedef typename ContainerDefiner::template container
       <>::type unordered_type;
@@ -454,9 +442,8 @@ void test_unordered<ValueTraits, ContainerDefiner>::
 
 //test: rehash:
 
-template<class ValueTraits, class ContainerDefiner>
-void test_unordered<ValueTraits, ContainerDefiner>
-   ::test_rehash(value_cont_type& values, detail::true_)
+template<class ContainerDefiner>
+void test_unordered<ContainerDefiner>::test_rehash(value_cont_type& values, detail::true_)
 {
    typedef typename ContainerDefiner::template container
       <>::type unordered_type;
@@ -583,9 +570,8 @@ void test_unordered<ValueTraits, ContainerDefiner>
    {  int init_values [] = { 4, 5, 1, 2, 2, 3 };
    TEST_INTRUSIVE_SEQUENCE_MAYBEUNIQUE( init_values, testset1 );  }
 }
-template<class ValueTraits, class ContainerDefiner>
-void test_unordered<ValueTraits, ContainerDefiner>
-   ::test_rehash(value_cont_type& values, detail::false_)
+template<class ContainerDefiner>
+void test_unordered<ContainerDefiner>::test_rehash(value_cont_type& values, detail::false_)
 {
    typedef typename ContainerDefiner::template container
       <>::type unordered_type;
@@ -635,12 +621,12 @@ void test_unordered<ValueTraits, ContainerDefiner>
 }
 
 //test: find, equal_range (lower_bound, upper_bound):
-template<class ValueTraits, class ContainerDefiner>
-void test_unordered<ValueTraits, ContainerDefiner>::
-   test_find(value_cont_type& values)
+template<class ContainerDefiner>
+void test_unordered<ContainerDefiner>::test_find(value_cont_type& values)
 {
    typedef typename ContainerDefiner::template container
       <>::type unordered_type;
+   typedef typename unordered_type::value_type value_type;
 
    typedef typename unordered_type::bucket_traits  bucket_traits;
    typedef typename unordered_type::key_of_value   key_of_value;
@@ -673,13 +659,13 @@ void test_unordered<ValueTraits, ContainerDefiner>::
 }
 
 
-template<class ValueTraits, class ContainerDefiner>
-void test_unordered<ValueTraits, ContainerDefiner>
-   ::test_clone(value_cont_type& values)
+template<class ContainerDefiner>
+void test_unordered<ContainerDefiner>::test_clone(value_cont_type& values)
 {
    typedef typename ContainerDefiner::template container
       <>::type unordered_type;
-   typedef std::multiset<typename ValueTraits::value_type> std_multiset_t;
+   typedef typename unordered_type::value_type value_type;
+   typedef std::multiset<value_type> std_multiset_t;
 
    typedef typename unordered_type::bucket_traits bucket_traits;
    {

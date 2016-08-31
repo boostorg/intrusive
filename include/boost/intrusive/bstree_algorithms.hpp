@@ -1319,6 +1319,43 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       erase(header, z, ignored);
    }
 
+   //! <b>Requires</b>: header1 and header2 must be the headers of trees tree1 and tree2
+   //!   respectively, z a non-header node of tree1. NodePtrCompare is the comparison
+   //!   function of tree1..
+   //!
+   //! <b>Effects</b>: Transfers node "z" from tree1 to tree2 if tree1 does not contain
+   //!   a node that is equivalent to z.
+   //!
+   //! <b>Returns</b>: True if the node was trasferred, false otherwise.
+   //!
+   //! <b>Complexity</b>: Logarithmic.
+   //!
+   //! <b>Throws</b>: If the comparison throws.
+   template<class NodePtrCompare>
+   BOOST_INTRUSIVE_FORCEINLINE static bool transfer_unique
+      (const node_ptr & header1, NodePtrCompare comp, const node_ptr &header2, const node_ptr & z)
+   {
+      data_for_rebalance ignored;
+      return transfer_unique(header1, comp, header2, z, ignored);
+   }
+
+   //! <b>Requires</b>: header1 and header2 must be the headers of trees tree1 and tree2
+   //!   respectively, z a non-header node of tree1. NodePtrCompare is the comparison
+   //!   function of tree1..
+   //!
+   //! <b>Effects</b>: Transfers node "z" from tree1 to tree2.
+   //!
+   //! <b>Complexity</b>: Logarithmic.
+   //!
+   //! <b>Throws</b>: If the comparison throws.
+   template<class NodePtrCompare>
+   BOOST_INTRUSIVE_FORCEINLINE static void transfer_equal
+      (const node_ptr & header1, NodePtrCompare comp, const node_ptr &header2, const node_ptr & z)
+   {
+      data_for_rebalance ignored;
+      transfer_equal(header1, comp, header2, z, ignored);
+   }
+
    //! <b>Requires</b>: node is a tree node but not the header.
    //!
    //! <b>Effects</b>: Unlinks the node and rebalances the tree.
@@ -1433,6 +1470,30 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    }
 
    protected:
+
+   template<class NodePtrCompare>
+   static bool transfer_unique
+      (const node_ptr & header1, NodePtrCompare comp, const node_ptr &header2, const node_ptr & z, data_for_rebalance &info)
+   {
+      insert_commit_data commit_data;
+      bool const transferable = insert_unique_check(header1, z, comp, commit_data).second;
+      if(transferable){
+         erase(header2, z, info);
+         insert_commit(header1, z, commit_data);
+      }
+      return transferable;
+   }
+
+   template<class NodePtrCompare>
+   static void transfer_equal
+      (const node_ptr & header1, NodePtrCompare comp, const node_ptr &header2, const node_ptr & z, data_for_rebalance &info)
+   {
+      insert_commit_data commit_data;
+      insert_equal_upper_bound_check(header1, z, comp, commit_data);
+      erase(header2, z, info);
+      insert_commit(header1, z, commit_data);
+   }
+
    static void erase(const node_ptr & header, const node_ptr & z, data_for_rebalance &info)
    {
       node_ptr y(z);

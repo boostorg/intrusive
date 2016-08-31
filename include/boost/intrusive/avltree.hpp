@@ -427,6 +427,14 @@ class avltree_impl
    //! @copydoc ::boost::intrusive::bstree::remove_node
    void remove_node(reference value);
 
+   //! @copydoc ::boost::intrusive::bstree::merge_unique(bstree<T, Options2...>&)
+   template<class T, class ...Options2>
+   void merge_unique(avltree<T, Options2...> &);
+
+   //! @copydoc ::boost::intrusive::bstree::merge_equal(bstree<T, Options2...>&)
+   template<class T, class ...Options2>
+   void merge_equal(avltree<T, Options2...> &);
+
    friend bool operator< (const avltree_impl &x, const avltree_impl &y);
 
    friend bool operator==(const avltree_impl &x, const avltree_impl &y);

@@ -26,6 +26,11 @@
 namespace boost {
 namespace intrusive {
 
+#if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
+template<class ValueTraits, class VoidOrKeyOfValue, class Compare, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
+class avl_multiset_impl;
+#endif
+
 //! The class template avl_set is an intrusive container, that mimics most of
 //! the interface of std::set as described in the C++ standard.
 //!
@@ -399,6 +404,26 @@ class avl_set_impl
 
    //! @copydoc ::boost::intrusive::avltree::remove_node
    void remove_node(reference value);
+
+   //! @copydoc ::boost::intrusive::avltree::merge_unique
+   template<class ...Options2>
+   void merge(avl_set<T, Options2...> &source);
+
+   //! @copydoc ::boost::intrusive::avltree::merge_unique
+   template<class ...Options2>
+   void merge(avl_multiset<T, Options2...> &source);
+
+   #else
+
+   template<class Compare2>
+   void merge(avl_set_impl<ValueTraits, VoidOrKeyOfValue, Compare2, SizeType, ConstantTimeSize, HeaderHolder> &source)
+   {  return tree_type::merge_unique(source);  }
+
+
+   template<class Compare2>
+   void merge(avl_multiset_impl<ValueTraits, VoidOrKeyOfValue, Compare2, SizeType, ConstantTimeSize, HeaderHolder> &source)
+   {  return tree_type::merge_unique(source);  }
+
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 };
 
@@ -865,6 +890,25 @@ class avl_multiset_impl
 
    //! @copydoc ::boost::intrusive::avltree::remove_node
    void remove_node(reference value);
+
+   //! @copydoc ::boost::intrusive::avltree::merge_equal
+   template<class ...Options2>
+   void merge(avl_multiset<T, Options2...> &source);
+
+   //! @copydoc ::boost::intrusive::avltree::merge_equal
+   template<class ...Options2>
+   void merge(avl_set<T, Options2...> &source);
+
+   #else
+
+   template<class Compare2>
+   void merge(avl_multiset_impl<ValueTraits, VoidOrKeyOfValue, Compare2, SizeType, ConstantTimeSize, HeaderHolder> &source)
+   {  return tree_type::merge_equal(source);  }
+
+   template<class Compare2>
+   void merge(avl_set_impl<ValueTraits, VoidOrKeyOfValue, Compare2, SizeType, ConstantTimeSize, HeaderHolder> &source)
+   {  return tree_type::merge_equal(source);  }
+
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 };
 

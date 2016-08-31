@@ -454,6 +454,14 @@ class splaytree_impl
    //! @copydoc ::boost::intrusive::bstree::remove_node
    void remove_node(reference value);
 
+   //! @copydoc ::boost::intrusive::bstree::merge_unique(bstree<T, Options2...>&)
+   template<class T, class ...Options2>
+   void merge_unique(splaytree<T, Options2...> &);
+
+   //! @copydoc ::boost::intrusive::bstree::merge_equal(bstree<T, Options2...>&)
+   template<class T, class ...Options2>
+   void merge_equal(splaytree<T, Options2...> &);
+
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! <b>Requires</b>: i must be a valid iterator of *this.
