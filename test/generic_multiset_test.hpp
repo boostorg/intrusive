@@ -181,11 +181,16 @@ void test_generic_multiset<ContainerDefiner>::test_merge(value_cont_type& values
    typedef typename ContainerDefiner::template container
       <>::type multiset_type;
    typedef typename multiset_type::key_of_value key_of_value;
+   typedef typename multiset_type::key_type     key_type;
+
+   typedef typename ContainerDefiner::template container
+      < compare< std::greater<key_type> > >::type multiset_greater_type;
+
    //original vector: 3, 2, 4, 1, 5, 2
    //2,3
    multiset_type testset1 (values.begin(), values.begin() + 2);
-   //1, 2, 4, 5
-   multiset_type testset2;
+   //5, 4, 2, 1
+   multiset_greater_type testset2;
    testset2.insert (values.begin() + 2, values.begin() + 6);
 
    testset2.merge(testset1);
@@ -194,7 +199,7 @@ void test_generic_multiset<ContainerDefiner>::test_merge(value_cont_type& values
 
    BOOST_TEST (testset1.empty());
    BOOST_TEST (testset2.size() == 6);
-   {  int init_values [] = { 1, 2, 2, 3, 4, 5 };
+   {  int init_values [] = { 5, 4, 3, 2, 2, 1 };
       TEST_INTRUSIVE_SEQUENCE( init_values, testset2.begin() );  }
 
    value_cont_type cmp_val_cont(1);

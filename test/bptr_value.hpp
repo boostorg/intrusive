@@ -85,6 +85,15 @@ struct BPtr_Value
    friend bool operator< (const BPtr_Value &other1, int other2)
    {  return other1.value_ < other2;  }
 
+   friend bool operator> (const BPtr_Value &other1, const BPtr_Value &other2)
+   {  return other1.value_ > other2.value_;  }
+
+   friend bool operator> (int other1, const BPtr_Value &other2)
+   {  return other1 > other2.value_;  }
+
+   friend bool operator> (const BPtr_Value &other1, int other2)
+   {  return other1.value_ > other2;  }
+
    friend bool operator== (const BPtr_Value &other1, const BPtr_Value &other2)
    {  return other1.value_ == other2.value_;  }
 

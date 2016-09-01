@@ -146,7 +146,7 @@ class generic_hook
    //value_traits for this hook.
    , public hook_tags_definer
       < generic_hook<Algo, NodeTraits, Tag, LinkMode, BaseHookType>
-      , detail::is_same<Tag, dft_tag>::value*BaseHookType>
+      , detail::is_same<Tag, dft_tag>::value ? BaseHookType : NoBaseHookId>
    /// @endcond
 {
    /// @cond

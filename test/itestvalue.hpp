@@ -96,6 +96,9 @@ struct testvalue
    bool operator< (const testvalue &other) const
    {  return value_ < other.value_;  }
 
+   bool operator> (const testvalue &other) const
+   {  return value_ > other.value_;  }
+
    bool operator==(const testvalue &other) const
    {  return value_ == other.value_;  }
 
@@ -105,8 +108,14 @@ struct testvalue
    friend bool operator< (int other1, const testvalue &other2)
    {  return other1 < other2.value_.int_;  }
 
+   friend bool operator> (int other1, const testvalue &other2)
+   {  return other1 > other2.value_.int_;  }
+
    friend bool operator< (const testvalue &other1, int other2)
    {  return other1.value_.int_ < other2;  }
+
+   friend bool operator> (const testvalue &other1, int other2)
+   {  return other1.value_.int_ > other2;  }
 
    friend bool operator== (int other1, const testvalue &other2)
    {  return other1 == other2.value_.int_;  }

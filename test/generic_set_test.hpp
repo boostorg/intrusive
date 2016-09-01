@@ -263,10 +263,15 @@ void test_generic_set<ContainerDefiner>::test_merge(value_cont_type& values)
 {
    typedef typename ContainerDefiner::template container
       <>::type set_type;
+   typedef typename set_type::key_type key_type;
+
+   typedef typename ContainerDefiner::template container
+      < compare< std::greater<key_type> > >::type set_greater_type;
+
    //2,3
    set_type testset1 (values.begin(), values.begin() + 2);
-   //1, 2, 4, 5
-   set_type testset2;
+   //5, 4, 2, 1
+   set_greater_type testset2;
    testset2.insert (values.begin() + 2, values.begin() + 6);
 
    testset2.merge(testset1);
@@ -279,7 +284,7 @@ void test_generic_set<ContainerDefiner>::test_merge(value_cont_type& values)
    BOOST_TEST (&*testset1.begin() == &values[1]);
 
    BOOST_TEST (testset2.size() == 5);
-   {  int init_values [] = { 1, 2, 3, 4, 5 };
+   {  int init_values [] = { 5, 4, 3, 2, 1 };
       TEST_INTRUSIVE_SEQUENCE( init_values, testset2.begin() );  }
 
    testset1.merge(testset2);

@@ -156,6 +156,9 @@ struct alpha_holder
    multiply_by_alpha_t get_multiply_by_alpha_t() const
    {  return multiply_by_alpha_t(alpha_);  }
 
+   SizeType &get_max_tree_size()
+   {  return max_tree_size_;  }
+
    protected:
    float alpha_;
    float inv_minus_logalpha_;
@@ -189,6 +192,10 @@ struct alpha_holder<false, SizeType>
    multiply_by_alpha_t get_multiply_by_alpha_t() const
    {  return multiply_by_alpha_t();  }
 
+   SizeType &get_max_tree_size()
+   {  return max_tree_size_;  }
+
+   protected:
    SizeType max_tree_size_;
 };
 
@@ -714,14 +721,14 @@ class sgtree_impl
          it = node_algorithms::next_node(it);
 
          std::size_t max_tree1_size = this->max_tree_size_;
-         std::size_t max_tree2_size = source.max_tree_size_;
+         std::size_t max_tree2_size = source.get_max_tree_size();
          if( node_algorithms::transfer_unique
                ( this->header_ptr(), this->key_node_comp(this->key_comp()), this->size(), max_tree1_size
                , source.header_ptr(), p, source.size(), max_tree2_size
                , this->get_h_alpha_func(), this->get_alpha_by_max_size_func()) ){
             this->max_tree_size_  = (size_type)max_tree1_size;
             this->sz_traits().increment();
-            source.max_tree_size_ = (size_type)max_tree2_size;
+            source.get_max_tree_size() = (size_type)max_tree2_size;
             source.sz_traits().decrement();
          }
       }
@@ -744,14 +751,14 @@ class sgtree_impl
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || !node_algorithms::unique(p));
          it = node_algorithms::next_node(it);
          std::size_t max_tree1_size = this->max_tree_size_;
-         std::size_t max_tree2_size = source.max_tree_size_;
+         std::size_t max_tree2_size = source.get_max_tree_size();
          node_algorithms::transfer_equal
             ( this->header_ptr(), this->key_node_comp(this->key_comp()), this->size(), max_tree1_size
             , source.header_ptr(), p, source.size(), max_tree2_size
             , this->get_h_alpha_func(), this->get_alpha_by_max_size_func());
          this->max_tree_size_  = (size_type)max_tree1_size;
          this->sz_traits().increment();
-         source.max_tree_size_ = (size_type)max_tree2_size;
+         source.get_max_tree_size() = (size_type)max_tree2_size;
          source.sz_traits().decrement();
       }
    }
