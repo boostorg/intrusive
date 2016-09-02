@@ -18,6 +18,8 @@
 #include <iostream>
 #include "bounded_pointer.hpp"
 #include "common_functors.hpp"
+#include "int_holder.hpp"
+#include <boost/intrusive/link_mode.hpp>
 
 
 namespace boost {
