@@ -197,17 +197,16 @@ void test_generic_set<ContainerDefiner>::test_insert_advanced
    typedef typename ContainerDefiner::template container
       <>::type set_type;
    typedef typename set_type::key_of_value key_of_value;
-   typedef typename set_type::key_type    key_type;
    typedef typename set_type::value_type  value_type;
-   typedef priority_compare<key_type> prio_comp_t;
+   typedef priority_compare<> prio_comp_t;
    {
       set_type testset;
       testset.insert(values.begin(), values.begin() + values.size());
       testset.check();
       value_type v(1);
       typename set_type::insert_commit_data data;
-      BOOST_TEST ((!testset.insert_check(key_of_value()(v), testset.key_comp(), prio_comp_t(), data).second));
-      BOOST_TEST ((!testset.insert_check(testset.begin(), key_of_value()(v), testset.key_comp(), prio_comp_t(), data).second));
+      BOOST_TEST ((!testset.insert_check(1, any_less(), prio_comp_t(), data).second));
+      BOOST_TEST ((!testset.insert_check(testset.begin(), 1, any_less(), prio_comp_t(), data).second));
       BOOST_TEST ((!testset.insert_check(key_of_value()(v), data).second));
       BOOST_TEST ((!testset.insert_check(testset.begin(), key_of_value()(v), data).second));
    }
@@ -228,9 +227,9 @@ void test_generic_set<ContainerDefiner>::test_insert_advanced
       testset.check();
       value_type v(1);
       typename set_type::insert_commit_data data;
-      BOOST_TEST ((!testset.insert_check(key_of_value()(v), testset.key_comp(), data).second));
-      BOOST_TEST ((!testset.insert_check(testset.begin(), key_of_value()(v), testset.key_comp(), data).second));
+      BOOST_TEST ((!testset.insert_check(1, any_less(), data).second));
       BOOST_TEST ((!testset.insert_check(key_of_value()(v), data).second));
+      BOOST_TEST ((!testset.insert_check(testset.begin(), 1, any_less(), data).second));
       BOOST_TEST ((!testset.insert_check(testset.begin(), key_of_value()(v), data).second));
    }
 }
@@ -319,9 +318,12 @@ void test_generic_set<ContainerDefiner>::test_find(value_cont_type& values)
       reference cmp_val = cmp_val_cont.front();
       (&cmp_val)->value_ = 2;
       iterator i = testset.find(key_of_value()(cmp_val));
+      BOOST_TEST (i == testset.find(2, any_less()));
       BOOST_TEST (i->value_ == 2);
       BOOST_TEST ((++i)->value_ != 2);
+
       std::pair<iterator,iterator> range = testset.equal_range (key_of_value()(cmp_val));
+      BOOST_TEST(range == testset.equal_range (2, any_less()));
 
       BOOST_TEST (range.first->value_ == 2);
       BOOST_TEST (range.second->value_ == 3);
@@ -329,6 +331,7 @@ void test_generic_set<ContainerDefiner>::test_find(value_cont_type& values)
 
       (&cmp_val)->value_ = 7;
       BOOST_TEST (testset.find (key_of_value()(cmp_val)) == testset.end());
+      BOOST_TEST (testset.find (7, any_less()) == testset.end());
    }
 
    {
@@ -344,6 +347,7 @@ void test_generic_set<ContainerDefiner>::test_find(value_cont_type& values)
       (&cmp_val_upper)->value_ = 2;
       //left-closed, right-closed
       range = testset.bounded_range (key_of_value()(cmp_val_lower), key_of_value()(cmp_val_upper), true, true);
+      BOOST_TEST (range == testset.bounded_range (1, 2, any_less(), true, true));
       BOOST_TEST (range.first->value_ == 1);
       BOOST_TEST (range.second->value_ == 3);
       BOOST_TEST (boost::intrusive::iterator_distance (range.first, range.second) == 2);
@@ -352,6 +356,7 @@ void test_generic_set<ContainerDefiner>::test_find(value_cont_type& values)
       (&cmp_val_lower)->value_ = 1;
       (&cmp_val_upper)->value_ = 2;
       const_range = const_testset.bounded_range (key_of_value()(cmp_val_lower), key_of_value()(cmp_val_upper), true, false);
+      BOOST_TEST (const_range == const_testset.bounded_range (1, 2, any_less(), true, false));
       BOOST_TEST (const_range.first->value_ == 1);
       BOOST_TEST (const_range.second->value_ == 2);
       BOOST_TEST (boost::intrusive::iterator_distance (const_range.first, const_range.second) == 1);
@@ -359,6 +364,7 @@ void test_generic_set<ContainerDefiner>::test_find(value_cont_type& values)
       (&cmp_val_lower)->value_ = 1;
       (&cmp_val_upper)->value_ = 3;
       range = testset.bounded_range (key_of_value()(cmp_val_lower), key_of_value()(cmp_val_upper), true, false);
+      BOOST_TEST (range == testset.bounded_range (1, 3, any_less(), true, false));
       BOOST_TEST (range.first->value_ == 1);
       BOOST_TEST (range.second->value_ == 3);
       BOOST_TEST (boost::intrusive::iterator_distance (range.first, range.second) == 2);
@@ -367,6 +373,7 @@ void test_generic_set<ContainerDefiner>::test_find(value_cont_type& values)
       (&cmp_val_lower)->value_ = 1;
       (&cmp_val_upper)->value_ = 2;
       const_range = const_testset.bounded_range (key_of_value()(cmp_val_lower), key_of_value()(cmp_val_upper), false, true);
+      BOOST_TEST (const_range == const_testset.bounded_range (1, 2, any_less(), false, true));
       BOOST_TEST (const_range.first->value_ == 2);
       BOOST_TEST (const_range.second->value_ == 3);
       BOOST_TEST (boost::intrusive::iterator_distance (const_range.first, const_range.second) == 1);
@@ -375,6 +382,7 @@ void test_generic_set<ContainerDefiner>::test_find(value_cont_type& values)
       (&cmp_val_lower)->value_ = 1;
       (&cmp_val_upper)->value_ = 2;
       range = testset.bounded_range (key_of_value()(cmp_val_lower), key_of_value()(cmp_val_upper), false, false);
+      BOOST_TEST (range == testset.bounded_range (1, 2, any_less(), false, false));
       BOOST_TEST (range.first->value_ == 2);
       BOOST_TEST (range.second->value_ == 2);
       BOOST_TEST (boost::intrusive::iterator_distance (range.first, range.second) == 0);
@@ -383,6 +391,7 @@ void test_generic_set<ContainerDefiner>::test_find(value_cont_type& values)
       (&cmp_val_lower)->value_ = 5;
       (&cmp_val_upper)->value_ = 6;
       const_range = const_testset.bounded_range (key_of_value()(cmp_val_lower), key_of_value()(cmp_val_upper), true, false);
+      BOOST_TEST (const_range == const_testset.bounded_range (5, 6, any_less(), true, false));
       BOOST_TEST (const_range.first->value_ == 5);
       BOOST_TEST (const_range.second == const_testset.end());
       BOOST_TEST (boost::intrusive::iterator_distance (const_range.first, const_range.second) == 1);

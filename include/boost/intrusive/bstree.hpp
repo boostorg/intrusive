@@ -252,17 +252,18 @@ struct get_key_of_value<void, T>
    typedef ::boost::intrusive::detail::identity<T> type;
 };
 
-template<class T, class VoidOrKeyOfValue, class VoidOrKeyComp>
+template<class ValuePtr, class VoidOrKeyOfValue, class VoidOrKeyComp>
 struct bst_key_types
 {
+   typedef typename pointer_element<ValuePtr>::type   value_type;
    typedef typename get_key_of_value
-      < VoidOrKeyOfValue, T>::type           key_of_value;
-   typedef typename key_of_value::type   key_type;
+      < VoidOrKeyOfValue, value_type>::type           key_of_value;
+   typedef typename key_of_value::type                key_type;
    typedef typename get_compare< VoidOrKeyComp
                       , key_type
-                      >::type                key_compare;
+                      >::type                         key_compare;
    typedef tree_value_compare
-      <key_compare, key_of_value>  value_compare;
+      <ValuePtr, key_compare, key_of_value>           value_compare;
 };
 
 template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyComp, algo_types AlgoType, typename HeaderHolder>
@@ -271,15 +272,16 @@ struct bstbase2
    //Use public inheritance to avoid MSVC bugs with closures
    : public detail::ebo_functor_holder
             < typename bst_key_types
-               < typename ValueTraits::value_type
+               < typename ValueTraits::pointer
                , VoidOrKeyOfValue
                , VoidOrKeyComp
+               
                >::value_compare
             >
    , public bstbase3<ValueTraits, AlgoType, HeaderHolder>
 {
    typedef bstbase3<ValueTraits, AlgoType, HeaderHolder>             treeheader_t;
-   typedef bst_key_types< typename ValueTraits::value_type
+   typedef bst_key_types< typename ValueTraits::pointer
                         , VoidOrKeyOfValue
                         , VoidOrKeyComp>                             key_types;
    typedef typename treeheader_t::value_traits                       value_traits;

@@ -66,6 +66,20 @@ class empty_disposer
    {}
 };
 
+struct any_less
+{
+   template<class T, class U>
+   bool operator()(const T &t, const U &u) const
+   {  return t < u;  }
+};
+
+struct any_greater
+{
+   template<class T, class U>
+   bool operator()(const T &t, const U &u) const
+   {  return t > u;  }
+};
+
 }  //namespace test       {
 }  //namespace intrusive  {
 }  //namespace boost      {

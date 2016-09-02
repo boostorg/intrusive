@@ -136,22 +136,19 @@ struct testvalue
    }
 };
 
+template<class T>
+std::size_t priority_hash(const T &t)
+{  return boost::hash<int>()((&t)->int_value()); }
 
-template <class Type>
-bool priority_order(const Type& t1, const Type& t2)
-{
-   std::size_t hash1 = boost::hash<int>()((&t1)->int_value());
-   boost::hash_combine(hash1, -hash1);
-   std::size_t hash2 = boost::hash<int>()((&t2)->int_value());
-   boost::hash_combine(hash2, -hash2);
-   return hash1 < hash2;
-}
+std::size_t priority_hash(int i)
+{  return boost::hash<int>()(i); }
 
-bool priority_order(int t1, int t2)
+template <class T, class U>
+bool priority_order(const T& t1, const U& t2)
 {
-   std::size_t hash1 = boost::hash<int>()(t1);
+   std::size_t hash1 = (priority_hash)(t1);
    boost::hash_combine(hash1, -hash1);
-   std::size_t hash2 = boost::hash<int>()(t2);
+   std::size_t hash2 = (priority_hash)(t2);
    boost::hash_combine(hash2, -hash2);
    return hash1 < hash2;
 }
