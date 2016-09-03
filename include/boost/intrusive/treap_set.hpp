@@ -160,6 +160,15 @@ class treap_set_impl
    //! @copydoc ::boost::intrusive::treap::crend()const
    const_reverse_iterator crend() const;
 
+   //! @copydoc ::boost::intrusive::treap::root()
+   iterator root();
+
+   //! @copydoc ::boost::intrusive::treap::root()const
+   const_iterator root() const;
+
+   //! @copydoc ::boost::intrusive::treap::croot()const
+   const_iterator croot() const;
+
    //! @copydoc ::boost::intrusive::treap::container_from_end_iterator(iterator)
    static treap_set_impl &container_from_end_iterator(iterator end_iterator);
 
@@ -705,6 +714,15 @@ class treap_multiset_impl
 
    //! @copydoc ::boost::intrusive::treap::crend()const
    const_reverse_iterator crend() const;
+
+   //! @copydoc ::boost::intrusive::treap::root()
+   iterator root();
+
+   //! @copydoc ::boost::intrusive::treap::root()const
+   const_iterator root() const;
+
+   //! @copydoc ::boost::intrusive::treap::croot()const
+   const_iterator croot() const;
 
    //! @copydoc ::boost::intrusive::treap::container_from_end_iterator(iterator)
    static treap_multiset_impl &container_from_end_iterator(iterator end_iterator);

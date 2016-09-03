@@ -155,6 +155,15 @@ class avl_set_impl
    //! @copydoc ::boost::intrusive::avltree::crend()const
    const_reverse_iterator crend() const;
 
+   //! @copydoc ::boost::intrusive::avltree::root()
+   iterator root();
+
+   //! @copydoc ::boost::intrusive::avltree::root()const
+   const_iterator root() const;
+
+   //! @copydoc ::boost::intrusive::avltree::croot()const
+   const_iterator croot() const;
+
    //! @copydoc ::boost::intrusive::avltree::container_from_end_iterator(iterator)
    static avl_set_impl &container_from_end_iterator(iterator end_iterator);
 
@@ -682,6 +691,15 @@ class avl_multiset_impl
 
    //! @copydoc ::boost::intrusive::avltree::crend()const
    const_reverse_iterator crend() const;
+
+   //! @copydoc ::boost::intrusive::avltree::root()
+   iterator root();
+
+   //! @copydoc ::boost::intrusive::avltree::root()const
+   const_iterator root() const;
+
+   //! @copydoc ::boost::intrusive::avltree::croot()const
+   const_iterator croot() const;
 
    //! @copydoc ::boost::intrusive::avltree::container_from_end_iterator(iterator)
    static avl_multiset_impl &container_from_end_iterator(iterator end_iterator);

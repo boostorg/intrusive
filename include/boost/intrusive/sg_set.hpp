@@ -153,6 +153,15 @@ class sg_set_impl
    //! @copydoc ::boost::intrusive::sgtree::crend()const
    const_reverse_iterator crend() const;
 
+   //! @copydoc ::boost::intrusive::sgtree::root()
+   iterator root();
+
+   //! @copydoc ::boost::intrusive::sgtree::root()const
+   const_iterator root() const;
+
+   //! @copydoc ::boost::intrusive::sgtree::croot()const
+   const_iterator croot() const;
+
    //! @copydoc ::boost::intrusive::sgtree::container_from_end_iterator(iterator)
    static sg_set_impl &container_from_end_iterator(iterator end_iterator);
 
@@ -691,6 +700,15 @@ class sg_multiset_impl
 
    //! @copydoc ::boost::intrusive::sgtree::crend()const
    const_reverse_iterator crend() const;
+
+   //! @copydoc ::boost::intrusive::sgtree::root()
+   iterator root();
+
+   //! @copydoc ::boost::intrusive::sgtree::root()const
+   const_iterator root() const;
+
+   //! @copydoc ::boost::intrusive::sgtree::croot()const
+   const_iterator croot() const;
 
    //! @copydoc ::boost::intrusive::sgtree::container_from_end_iterator(iterator)
    static sg_multiset_impl &container_from_end_iterator(iterator end_iterator);

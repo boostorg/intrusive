@@ -155,6 +155,15 @@ class set_impl
    //! @copydoc ::boost::intrusive::rbtree::crend()const
    const_reverse_iterator crend() const;
 
+   //! @copydoc ::boost::intrusive::rbtree::root()
+   iterator root();
+
+   //! @copydoc ::boost::intrusive::rbtree::root()const
+   const_iterator root() const;
+
+   //! @copydoc ::boost::intrusive::rbtree::croot()const
+   const_iterator croot() const;
+
    //! @copydoc ::boost::intrusive::rbtree::container_from_end_iterator(iterator)
    static set_impl &container_from_end_iterator(iterator end_iterator);
 
@@ -682,6 +691,15 @@ class multiset_impl
 
    //! @copydoc ::boost::intrusive::rbtree::crend()const
    const_reverse_iterator crend() const;
+
+   //! @copydoc ::boost::intrusive::rbtree::root()
+   iterator root();
+
+   //! @copydoc ::boost::intrusive::rbtree::root()const
+   const_iterator root() const;
+
+   //! @copydoc ::boost::intrusive::rbtree::croot()const
+   const_iterator croot() const;
 
    //! @copydoc ::boost::intrusive::rbtree::container_from_end_iterator(iterator)
    static multiset_impl &container_from_end_iterator(iterator end_iterator);

@@ -153,6 +153,15 @@ class splay_set_impl
    //! @copydoc ::boost::intrusive::splaytree::crend()const
    const_reverse_iterator crend() const;
 
+   //! @copydoc ::boost::intrusive::splaytree::root()
+   iterator root();
+
+   //! @copydoc ::boost::intrusive::splaytree::root()const
+   const_iterator root() const;
+
+   //! @copydoc ::boost::intrusive::splaytree::croot()const
+   const_iterator croot() const;
+
    //! @copydoc ::boost::intrusive::splaytree::container_from_end_iterator(iterator)
    static splay_set_impl &container_from_end_iterator(iterator end_iterator);
 
@@ -703,6 +712,15 @@ class splay_multiset_impl
 
    //! @copydoc ::boost::intrusive::splaytree::crend()const
    const_reverse_iterator crend() const;
+
+   //! @copydoc ::boost::intrusive::splaytree::root()
+   iterator root();
+
+   //! @copydoc ::boost::intrusive::splaytree::root()const
+   const_iterator root() const;
+
+   //! @copydoc ::boost::intrusive::splaytree::croot()const
+   const_iterator croot() const;
 
    //! @copydoc ::boost::intrusive::splaytree::container_from_end_iterator(iterator)
    static splay_multiset_impl &container_from_end_iterator(iterator end_iterator);

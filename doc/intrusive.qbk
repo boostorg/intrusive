@@ -3847,6 +3847,7 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
    *  [@https://svn.boost.org/trac/boost/ticket/12432 Boost Trac #12432: ['Forced KeyOfValue creation when using custom compare on insert_check]]
 
 *  Implemented `merge` functions in ordered associative containers.
+*  Officially documented `root()` function for tree-based containers.
 
 [endsect]
 

@@ -382,6 +382,15 @@ class sgtree_impl
    //! @copydoc ::boost::intrusive::bstree::crend()const
    const_reverse_iterator crend() const;
 
+   //! @copydoc ::boost::intrusive::bstree::root()
+   iterator root();
+
+   //! @copydoc ::boost::intrusive::bstree::root()const
+   const_iterator root() const;
+
+   //! @copydoc ::boost::intrusive::bstree::croot()const
+   const_iterator croot() const;
+
    //! @copydoc ::boost::intrusive::bstree::container_from_end_iterator(iterator)
    static sgtree_impl &container_from_end_iterator(iterator end_iterator);
 
