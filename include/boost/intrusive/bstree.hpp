@@ -838,6 +838,27 @@ class bstree_impl
    //! <b>Throws</b>: Nothing.
    const_reverse_iterator crend() const;
 
+   //! <b>Effects</b>: Returns a iterator pointing to the root node of the container or end() if not present.
+   //!
+   //! <b>Complexity</b>: Constant.
+   //!
+   //! <b>Throws</b>: Nothing.
+   iterator root();
+
+   //! <b>Effects</b>: Returns a const_iterator pointing to the root node of the container or cend() if not present.
+   //!
+   //! <b>Complexity</b>: Constant.
+   //!
+   //! <b>Throws</b>: Nothing.
+   const_iterator root() const;
+
+   //! <b>Effects</b>: Returns a const_iterator pointing to the root node of the container or cend() if not present.
+   //!
+   //! <b>Complexity</b>: Constant.
+   //!
+   //! <b>Throws</b>: Nothing.
+   const_iterator croot() const;
+
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! <b>Precondition</b>: end_iterator must be a valid end iterator
