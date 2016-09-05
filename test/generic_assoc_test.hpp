@@ -20,9 +20,36 @@
 #include "test_macros.hpp"
 #include "test_container.hpp"
 
+#ifdef BOOST_NO_CXX98_RANDOM_SHUFFLE
+#include <boost/move/adl_move_swap.hpp>
+#include <boost/move/detail/iterator_traits.hpp>
+#include <stdlib.h>
+#endif
+
 namespace boost{
 namespace intrusive{
 namespace test{
+
+#ifdef BOOST_NO_CXX98_RANDOM_SHUFFLE
+
+template< class RandomIt >
+void random_shuffle( RandomIt first, RandomIt last )
+{
+   typedef typename boost::movelib::iterator_traits<RandomIt>::difference_type difference_type;
+   difference_type n = last - first;
+   for (difference_type i = n-1; i > 0; --i) {
+      difference_type j = std::rand() % (i+1);
+      if(j != i) {
+         boost::adl_move_swap(first[i], first[j]);
+      }
+   }
+}
+
+#else
+
+using std::random_shuffle;
+
+#endif
 
 BOOST_INTRUSIVE_HAS_MEMBER_FUNC_CALLED(has_splay, splay)
 
@@ -122,7 +149,7 @@ void test_generic_assoc<ContainerDefiner>::test_insert_erase_burst()
       }
       TEST_INTRUSIVE_SEQUENCE_EXPECTED(testset, testset.begin());
       //Random erasure
-      std::random_shuffle(it_vector.begin(), it_vector.end());
+      boost::intrusive::test::random_shuffle(it_vector.begin(), it_vector.end());
       for(std::size_t i = 0; i != MaxValues; ++i){
          testset.erase(testset.iterator_to(*it_vector[i]));
          testset.check();
