@@ -3835,6 +3835,13 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 [section:release_notes Release Notes]
 
+[section:release_notes_boost_1_63_00 Boost 1.63 Release]
+
+*  Fixed bugs:
+   *  [@https://svn.boost.org/trac/boost/ticket/12556 Boost Trac #12556: ['member_value_traits.hpp has a missing #include]]
+
+[endsect]
+
 [section:release_notes_boost_1_62_00 Boost 1.62 Release]
 
 *  Fixed bugs:
