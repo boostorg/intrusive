@@ -701,7 +701,7 @@ with the name of the file to include:
 
 These hooks have exactly the same size overhead as their analog non auto-unlinking
 hooks, but they have a restriction: they can only be used with
-[link intrusive.presenting_containers non-constant time containers].
+[link intrusive.presenting_containers non-constant time size containers].
 There is a reason for this:
 
 * Auto-unlink hooks don't store any reference to the container where they are inserted.
