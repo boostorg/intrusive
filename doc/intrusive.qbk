@@ -1393,9 +1393,15 @@ The option is called [classref boost::intrusive::key_of_value].
 
 If a user specifies that option when defining a `set/multiset` intrusive container, it specifies a function object
 that will tell the container which is the type of the ['key] that `value_type` holds and how to obtain it. This
-function object must be lightweight, `DefaultConstructible`, it shall define a `type` member that defines the type
-of the key and a member function to obtain a const reference to the key stored inside a `value_type`. Let's
-see an example of how a set can be configured as a map indexed by an integer stored in the `value_type`.
+function object must be:
+
+* Lightweight to copy.
+* Default constructible (when the container constructor overload requires it).
+* It shall define:
+   * A `type` member that defines the type of the key
+   * A member function that returns the key derived a `value_type`, either by value or by const-reference.
+
+Let's see an example of how a set can be configured as a map indexed by an integer stored in the `value_type`:
  
 [import ../example/doc_map.cpp]
 [doc_map_code]
