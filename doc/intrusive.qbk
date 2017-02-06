@@ -3316,6 +3316,28 @@ To analyze the thread safety, consider the following points:
 
 [endsect]
 
+[section:boost_intrusive_iterators Boost.Intrusive Iterator features]
+
+[section:null_forward_iterators Null forward iterators]
+
+[*Boost.Intrusive] implements
+[@http://www.open-std.org/JTC1/sc22/WG21/docs/papers/2013/n3644.pdf C++14 Null Forward Iterators],
+a feature that was introduced with C++14. This means that equality and inequality comparison are defined
+over all iterators for the same underlying sequence and the value initialized-iterators.
+
+Value initialized iterators behave as if they refer past the end of the same empty sequence:
+
+[c++]
+
+   list<MyType> l = { ... };
+   auto ni = list<MyType>::iterator();
+   auto nd = list<MyType2>::iterator();
+   ni == ni; // True.
+   nd != nd; // False.
+   ni == nd; // Won't compile.
+
+[endsect]
+
 [section:scary_iterators Scary Iterators]
 
 The paper N2913, titled [@http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2009/n2913.pdf,
@@ -3343,6 +3365,8 @@ More concretely, the following options and conditions guarantee that iterator ty
 * [*`treap_[multi]set`]: `priority<>`
 * [*`bs_[multi]set`, `sg_[multi]set`, `treap_[multi]set`, `splay_[multi]set`]:
    They share the same iterator type when configured with the same options.
+
+[endsect]
 
 [endsect]
 
