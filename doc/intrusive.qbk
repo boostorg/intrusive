@@ -3869,6 +3869,7 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 *  Fixed bugs:
    *  [@https://svn.boost.org/trac/boost/ticket/12745 Boost Trac #12745: ['key_nodeptr_comp broken if the key type is void*]]
+   *  [@https://svn.boost.org/trac/boost/ticket/12761 Boost Trac #12761: ['intrusive::set::swap doesn't swap the comparison function*]]
 
 [endsect]
 
