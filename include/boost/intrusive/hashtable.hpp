@@ -1910,7 +1910,7 @@ class hashtable_impl
       }
       else{
          size_type bucket_cnt = this->bucket_count();
-         const bucket_type *b = boost::intrusive::detail::to_raw_pointer(this->priv_bucket_pointer());
+         const bucket_type *b = boost::movelib::to_raw_pointer(this->priv_bucket_pointer());
          for (size_type n = 0; n < bucket_cnt; ++n, ++b){
             if(!b->empty()){
                return false;
@@ -1933,7 +1933,7 @@ class hashtable_impl
       else{
          size_type len = 0;
          size_type bucket_cnt = this->bucket_count();
-         const bucket_type *b = boost::intrusive::detail::to_raw_pointer(this->priv_bucket_pointer());
+         const bucket_type *b = boost::movelib::to_raw_pointer(this->priv_bucket_pointer());
          for (size_type n = 0; n < bucket_cnt; ++n, ++b){
             len += b->size();
          }
