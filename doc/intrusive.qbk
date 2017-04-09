@@ -331,7 +331,7 @@ and optionally, the user can specify options. We have 3 option types:
    containers can have a `size_type` that might be different from `std::size_t`
    (for example, STL-like containers use the `size_type` defined by their allocator).
    [*Boost.Intrusive] can be used to implement such containers specifying the
-   the type of the size. By default the type is `std::size_t`.
+   type of the size. By default the type is `std::size_t`.
 
 Example of a constant-time size intrusive list that will store Foo objects, using
 the base hook with the default tag:
@@ -863,7 +863,7 @@ the section [link intrusive.usage How to use Boost.Intrusive]:
 *  [*`constant_time_size<bool Enabled>`]: To activate the constant-time `size()` operation.
    Default: `constant_time_size<true>`
 
-*  [*`size_type<bool Enabled>`]: To specify the type that will be used to store the size
+*  [*`size_type<typename SizeType>`]: To specify the type that will be used to store the size
    of the container. Default: `size_type<std::size_t>`.
 
 [classref boost::intrusive::slist slist] can receive additional options:
@@ -965,7 +965,7 @@ the section [link intrusive.usage How to use Boost.Intrusive]:
 *  [*`constant_time_size<bool Enabled>`]: To activate the constant-time `size()` operation.
    Default: `constant_time_size<true>`
 
-*  [*`size_type<bool Enabled>`]: To specify the type that will be used to store the size
+*  [*`size_type<typename SizeType>`]: To specify the type that will be used to store the size
    of the container. Default: `size_type<std::size_t>`
 
 [endsect]
@@ -1089,7 +1089,7 @@ These containers receive the same options explained in the section
 *  [*`constant_time_size<bool Enabled>`]: To activate the constant-time `size()` operation.
    Default: `constant_time_size<true>`
 
-*  [*`size_type<bool Enabled>`]: To specify the type that will be used to store the size
+*  [*`size_type<typename SizeType>`]: To specify the type that will be used to store the size
    of the container. Default: `size_type<std::size_t>`
 
 And they also can receive an additional option:
@@ -1279,7 +1279,7 @@ receive the same options explained in the section
 *  [*`constant_time_size<bool Enabled>`]: To activate the constant-time `size()` operation.
    Default: `constant_time_size<true>`
 
-*  [*`size_type<bool Enabled>`]: To specify the type that will be used to store the size
+*  [*`size_type<typename SizeType>`]: To specify the type that will be used to store the size
    of the container. Default: `size_type<std::size_t>`
 
 And they also can receive additional options:
@@ -1511,7 +1511,7 @@ These containers receive the same options explained in the section
 *  [*`constant_time_size<bool Enabled>`]: To activate the constant-time `size()` operation.
    Default: `constant_time_size<true>`
 
-*  [*`size_type<bool Enabled>`]: To specify the type that will be used to store the size
+*  [*`size_type<typename SizeType>`]: To specify the type that will be used to store the size
    of the container. Default: `size_type<std::size_t>`
 
 And they also can receive an additional option:
@@ -1613,7 +1613,7 @@ These containers receive the same options explained in the section
 *  [*`constant_time_size<bool Enabled>`]: To activate the constant-time `size()` operation.
    Default: `constant_time_size<true>`
 
-*  [*`size_type<bool Enabled>`]: To specify the type that will be used to store the size
+*  [*`size_type<typename SizeType>`]: To specify the type that will be used to store the size
    of the container. Default: `size_type<std::size_t>`
 
 And they also can receive an additional option:
@@ -1724,7 +1724,7 @@ These containers receive the same options explained in the section
    to configure the container. (To learn about value traits go to the section
    [link intrusive.value_traits Containers with custom ValueTraits].)
 
-*  [*`size_type<bool Enabled>`]: To specify the type that will be used to store the size
+*  [*`size_type<typename SizeType>`]: To specify the type that will be used to store the size
    of the container. Default: `size_type<std::size_t>`
 
 And they also can receive additional options:
@@ -1827,7 +1827,7 @@ These containers receive the same options explained in the section
 *  [*`constant_time_size<bool Enabled>`]: To activate the constant-time `size()` operation.
    Default: `constant_time_size<true>`
 
-*  [*`size_type<bool Enabled>`]: To specify the type that will be used to store the size
+*  [*`size_type<typename SizeType>`]: To specify the type that will be used to store the size
    of the container. Default: `size_type<std::size_t>`
 
 And they also can receive additional options:
@@ -3864,6 +3864,13 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 [endsect]
 
 [section:release_notes Release Notes]
+
+[section:release_notes_boost_1_65_00 Boost 1.65 Release]
+
+*  Fixed bugs:
+   *  [@https://svn.boost.org/trac/boost/ticket/12894 Boost Trac #12894: ['Allow non std::size_t size_type]]
+
+[endsect]
 
 [section:release_notes_boost_1_64_00 Boost 1.64 Release]
 
