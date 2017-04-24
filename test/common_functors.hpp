@@ -16,6 +16,7 @@
 #include<boost/intrusive/detail/iterator.hpp>
 #include<boost/intrusive/detail/mpl.hpp>
 #include<boost/static_assert.hpp>
+#include<boost/move/detail/to_raw_pointer.hpp>
 
 namespace boost      {
 namespace intrusive  {
@@ -30,7 +31,7 @@ class delete_disposer
    {
       typedef typename boost::intrusive::iterator_traits<Pointer>::value_type value_type;
       BOOST_STATIC_ASSERT(( detail::is_same<T, value_type>::value ));
-      delete boost::intrusive::detail::to_raw_pointer(p);
+      delete boost::movelib::to_raw_pointer(p);
    }
 };
 

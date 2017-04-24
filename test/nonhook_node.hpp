@@ -15,11 +15,12 @@
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
-#include <boost/detail/lightweight_test.hpp>
-#include <boost/static_assert.hpp>
-#include <boost/intrusive/detail/to_raw_pointer.hpp>
 #include <boost/intrusive/detail/parent_from_member.hpp>
 
+#include <boost/move/detail/to_raw_pointer.hpp>
+
+#include <boost/static_assert.hpp>
+#include <boost/detail/lightweight_test.hpp>
 
 namespace boost{
 namespace intrusive{
@@ -103,14 +104,14 @@ struct nonhook_node_member_value_traits
    {
       return pointer_traits<pointer>::pointer_to
       (*detail::parent_from_member<T, NonHook_Member>
-      (static_cast<NonHook_Member*>(boost::intrusive::detail::to_raw_pointer(n)), P));
+      (static_cast<NonHook_Member*>(boost::movelib::to_raw_pointer(n)), P));
    }
 
    static const_pointer to_value_ptr(const_node_ptr n)
    {
       return pointer_traits<const_pointer>::pointer_to
       (*detail::parent_from_member<T, NonHook_Member>
-      (static_cast<const NonHook_Member*>(boost::intrusive::detail::to_raw_pointer(n)), P));
+      (static_cast<const NonHook_Member*>(boost::movelib::to_raw_pointer(n)), P));
    }
 };
 
