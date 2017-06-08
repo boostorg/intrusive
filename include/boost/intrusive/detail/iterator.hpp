@@ -114,11 +114,11 @@ struct iterator_disable_if_tag
 template<class I, class Tag, class Tag2, class R = void>
 struct iterator_enable_if_convertible_tag
    : ::boost::move_detail::enable_if_c
-      < ::boost::move_detail::is_convertible
+      < ::boost::move_detail::is_same_or_convertible
          < typename boost::intrusive::iterator_traits<I>::iterator_category 
          , Tag
          >::value &&
-        !::boost::move_detail::is_convertible
+        !::boost::move_detail::is_same_or_convertible
          < typename boost::intrusive::iterator_traits<I>::iterator_category 
          , Tag2
          >::value
@@ -177,7 +177,7 @@ BOOST_INTRUSIVE_FORCEINLINE typename iterator_enable_if_tag<InputIt, std::random
 
 template<class InputIt, class Distance>
 BOOST_INTRUSIVE_FORCEINLINE typename iterator_enable_if_convertible_tag
-   <InputIt, boost::iterators::incrementable_traversal_tag, boost::iterators::single_pass_traversal_tag>::type
+   <InputIt, const boost::iterators::incrementable_traversal_tag&, const boost::iterators::single_pass_traversal_tag&>::type
    iterator_advance(InputIt& it, Distance n)
 {
    while(n--)
@@ -186,7 +186,7 @@ BOOST_INTRUSIVE_FORCEINLINE typename iterator_enable_if_convertible_tag
 
 template<class InputIt, class Distance>
 BOOST_INTRUSIVE_FORCEINLINE typename iterator_enable_if_convertible_tag
-   <InputIt, boost::iterators::single_pass_traversal_tag, boost::iterators::forward_traversal_tag>::type
+   <InputIt, const boost::iterators::single_pass_traversal_tag &, const boost::iterators::forward_traversal_tag&>::type
    iterator_advance(InputIt& it, Distance n)
 {
    while(n--)
@@ -195,7 +195,7 @@ BOOST_INTRUSIVE_FORCEINLINE typename iterator_enable_if_convertible_tag
 
 template<class InputIt, class Distance>
 BOOST_INTRUSIVE_FORCEINLINE typename iterator_enable_if_convertible_tag
-   <InputIt, boost::iterators::forward_traversal_tag, boost::iterators::bidirectional_traversal_tag>::type
+   <InputIt, const boost::iterators::forward_traversal_tag&, const boost::iterators::bidirectional_traversal_tag&>::type
    iterator_advance(InputIt& it, Distance n)
 {
    while(n--)
@@ -204,7 +204,7 @@ BOOST_INTRUSIVE_FORCEINLINE typename iterator_enable_if_convertible_tag
 
 template<class InputIt, class Distance>
 BOOST_INTRUSIVE_FORCEINLINE typename iterator_enable_if_convertible_tag
-   <InputIt, boost::iterators::bidirectional_traversal_tag, boost::iterators::random_access_traversal_tag>::type
+   <InputIt, const boost::iterators::bidirectional_traversal_tag&, const boost::iterators::random_access_traversal_tag&>::type
    iterator_advance(InputIt& it, Distance n)
 {
    for (; 0 < n; --n)
@@ -217,7 +217,7 @@ class fake{};
 
 template<class InputIt, class Distance>
 BOOST_INTRUSIVE_FORCEINLINE typename iterator_enable_if_convertible_tag
-   <InputIt, boost::iterators::random_access_traversal_tag, fake>::type
+   <InputIt, const boost::iterators::random_access_traversal_tag&, const fake&>::type
    iterator_advance(InputIt& it, Distance n)
 {
    it += n;
