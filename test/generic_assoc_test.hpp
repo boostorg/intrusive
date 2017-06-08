@@ -11,7 +11,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 #include <boost/container/vector.hpp> //vector
-#include <algorithm> //sort, random_shuffle
 #include <boost/intrusive/detail/config_begin.hpp>
 #include "common_functors.hpp"
 #include <boost/intrusive/options.hpp>
@@ -122,7 +121,7 @@ void test_generic_assoc<ContainerDefiner>::test_insert_erase_burst()
       }
       TEST_INTRUSIVE_SEQUENCE_EXPECTED(testset, testset.begin());
       //Random erasure
-      std::random_shuffle(it_vector.begin(), it_vector.end());
+      random_shuffle(it_vector.begin(), it_vector.end());
       for(std::size_t i = 0; i != MaxValues; ++i){
          testset.erase(testset.iterator_to(*it_vector[i]));
          testset.check();

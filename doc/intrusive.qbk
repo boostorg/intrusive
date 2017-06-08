@@ -3869,6 +3869,9 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 *  Fixed bugs:
    *  [@https://svn.boost.org/trac/boost/ticket/12894 Boost Trac #12894: ['Allow non std::size_t size_type]]
+   *  [@https://svn.boost.org/trac/boost/ticket/12698 Boost Trac #12698: ['base64 iterators can't be used with iterator_advance]]
+   *  [@https://github.com/boostorg/intrusive/pull/23 GitHub Pull #23: ['Conditionally replace deprecated/removed C++98 std::random_shuffle by...]]
+   *  [@https://github.com/boostorg/intrusive/pull/24 GitHub Pull #24: ['Adds support for MSVC ARM64 target]]
 
 [endsect]
 
