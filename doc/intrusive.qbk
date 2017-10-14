@@ -2424,7 +2424,7 @@ This section will expand the explanation of previously presented basic concepts
 before explaining the customization options of [*Boost.Intrusive].
 
 *  [*Node Algorithms]: A set of static functions that implement basic operations
-   on a group of nodes: initialize a node, link_mode_type a node to a group of nodes,
+   on a group of nodes: initialize a node, link a node to a group of nodes,
    unlink a node from another group of nodes, etc. For example, a circular
    singly linked list is a group of nodes, where each node has a pointer to the
    next node. [*Node Algorithms] just require a [*NodeTraits]
