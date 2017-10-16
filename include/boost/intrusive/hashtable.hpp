@@ -1822,7 +1822,7 @@ class hashtable_impl
       x.priv_split_traits().set_size(size_type(0));
    }
 
-   //! <b>Effects</b>: Equivalnet to swap.
+   //! <b>Effects</b>: Equivalent to swap.
    //!
    hashtable_impl& operator=(BOOST_RV_REF(hashtable_impl) x)
    {  this->swap(x); return *this;  }
