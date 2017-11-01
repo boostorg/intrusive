@@ -144,9 +144,11 @@ A non-intrusive container has some limitations:
    a size overhead for each allocation to store bookkeeping information and a
    synchronization to protected concurrent allocation from different threads.
 
-*  Only copies of objects are stored in non-intrusive containers. Hence copy
-   or move constructors and copy or move assignment operators are required. Non-copyable
-   and non-movable objects can't be stored in non-intrusive containers.
+*  Before C++11, only copies of objects could be stored in non-intrusive containers. Still
+   copy or move constructors and copy or move assignment operators are required
+   and non-copyable and non-movable objects can't be stored in some containers. In any case,
+   [*new] objects have to be created inside the container using constructors and the same
+   object can't be shared between two containers.
 
 *  It's not possible to store a derived object in a STL-container while
    retaining its original type.
@@ -155,6 +157,9 @@ Intrusive containers have some important advantages:
 
 *  Operating with intrusive containers doesn't invoke any memory management at all.
    The time and size overhead associated with dynamic memory can be minimized.
+
+*  The same object can be inserted in more than one container at the same time with
+   a tiny overhead in the object size.
 
 *  Iterating an Intrusive container needs less memory accesses than the semantically
    equivalent container of pointers: iteration is faster.
@@ -208,7 +213,7 @@ Intrusive containers have also downsides:
     [[Memory management]                                                         [External]                          [Internal through allocator]]
     [[Insertion/Erasure time]                                                    [Faster]                            [Slower]]
     [[Memory locality]                                                           [Better]                            [Worse]]
-    [[Can hold non-copyable and non-movable objects by value]                    [Yes]                               [No]]
+    [[Can insert the same object in more than one container]                     [Yes]                               [No]]
     [[Exception guarantees]                                                      [Better]                            [Worse]]
     [[Computation of iterator from value]                                        [Constant]                          [Non-constant]]
     [[Insertion/erasure predictability]                                          [High]                              [Low]]
@@ -2419,7 +2424,7 @@ This section will expand the explanation of previously presented basic concepts
 before explaining the customization options of [*Boost.Intrusive].
 
 *  [*Node Algorithms]: A set of static functions that implement basic operations
-   on a group of nodes: initialize a node, link_mode_type a node to a group of nodes,
+   on a group of nodes: initialize a node, link a node to a group of nodes,
    unlink a node from another group of nodes, etc. For example, a circular
    singly linked list is a group of nodes, where each node has a pointer to the
    next node. [*Node Algorithms] just require a [*NodeTraits]
