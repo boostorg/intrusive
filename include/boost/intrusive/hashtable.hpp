@@ -3370,7 +3370,7 @@ class hashtable_impl
       , size_type &found_bucket
       , size_type &cnt) const
    {
-      cnt = 0;
+      size_type internal_cnt = 0;
       //Let's see if the element is present
       
       siterator prev;
@@ -3386,20 +3386,21 @@ class hashtable_impl
          //the same bucket
          bucket_type &b = this->priv_bucket_pointer()[n_bucket];
          siterator it = to_return.first;
-         ++cnt;   //At least one is found
+         ++internal_cnt;   //At least one is found
          if(optimize_multikey){
             to_return.second = ++(priv_last_in_group)(it);
-            cnt += boost::intrusive::iterator_distance(++it, to_return.second);
+            internal_cnt += boost::intrusive::iterator_distance(++it, to_return.second);
          }
          else{
             siterator const bend = b.end();
             while(++it != bend &&
                   this->priv_is_value_equal_to_key(this->priv_value_from_slist_node(it.pointed_node()), h, key, equal_func)){
-               ++cnt;
+               ++internal_cnt;
             }
             to_return.second = it;
          }
       }
+      cnt = internal_cnt;
       return to_return;
    }
 
