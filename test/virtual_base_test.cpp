@@ -44,11 +44,15 @@ class MyClass
    ,  public virtual VirtualBase3
 {
    int int_;
+
    public:
    list_member_hook<> list_hook_;
    MyClass(int i = 0)
       :  int_(i)
    {}
+   //<-
+   int get_int() const { return int_; }
+   //->
 };
 
 //Define a list that will store MyClass using the public base hook
