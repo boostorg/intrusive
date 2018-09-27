@@ -35,7 +35,16 @@ class NonVirtualBase
    :  public virtual VirtualBase
    ,  public virtual VirtualBase2
 {
-   public:
+   protected:
+   NonVirtualBase()
+      : dummy()
+   {}
+
+   //<-
+   const int *get_dummy() const { return dummy; }
+   //->
+
+   private:
    int dummy[10];
 };
 
