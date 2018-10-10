@@ -3515,14 +3515,10 @@ class hashtable_impl
 };
 
 /// @cond
-#if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template < class T
          , bool UniqueKeys
          , class PackedOptions
          >
-#else
-template <class T, bool UniqueKeys, class ...Options>
-#endif
 struct make_bucket_traits
 {
    //Real value traits must be calculated from options
