@@ -49,6 +49,17 @@ compiler include path.
 
 [endsect]
 
+[section:tested_compilers Tested compilers]
+
+[*Boost.Intrusive] has been tested on the following compilers/platforms:
+
+*  Visual C++ >= 7.1.
+*  GCC >= 4.1.
+
+[warning GCC < 4.3 and MSVC < 9.0 are deprecated and will be removed in the next version.]
+
+[endsect]
+
 [endsect]
 
 [section:intrusive_vs_nontrusive Intrusive and non-intrusive containers]
@@ -4154,16 +4165,6 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 *  Added `container_from_iterator` function to tree-based containers.
 
 [endsect]
-
-[endsect]
-
-[section:tested_compilers Tested compilers]
-
-[*Boost.Intrusive] has been tested on the following compilers/platforms:
-
-*  Visual >= 7.1
-*  GCC >= 4.1
-*  Intel 11
 
 [endsect]
 
