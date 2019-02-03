@@ -129,8 +129,8 @@ class treap_impl
    typedef detail::key_nodeptr_comp<priority_compare, value_traits, key_of_value> key_node_prio_comp_t;
 
    template<class KeyPrioComp>
-   detail::key_nodeptr_comp<KeyPrioComp, value_traits, key_of_value> key_node_prio_comp(KeyPrioComp keypriocomp) const
-   {  return detail::key_nodeptr_comp<KeyPrioComp, value_traits, key_of_value>(keypriocomp, &this->get_value_traits());  }
+   detail::key_nodeptr_comp<KeyPrioComp, value_traits> key_node_prio_comp(KeyPrioComp keypriocomp) const
+   {  return detail::key_nodeptr_comp<KeyPrioComp, value_traits>(keypriocomp, &this->get_value_traits());  }
 
    /// @cond
    private:
@@ -496,7 +496,7 @@ class treap_impl
    std::pair<iterator, bool> insert_unique(reference value)
    {
       insert_commit_data commit_data;
-      std::pair<iterator, bool> ret = this->insert_unique_check(key_of_value()(value), commit_data);
+      std::pair<iterator, bool> ret = this->insert_unique_check(key_of_value()(value), value, commit_data);
       if(!ret.second)
          return ret;
       return std::pair<iterator, bool> (this->insert_unique_commit(value, commit_data), true);
@@ -581,8 +581,8 @@ class treap_impl
    //!   "commit_data" remains valid for a subsequent "insert_commit" only if no more
    //!   objects are inserted or erased from the container.
    std::pair<iterator, bool> insert_unique_check
-      ( const key_type &key, insert_commit_data &commit_data)
-   {  return this->insert_unique_check(key, this->key_comp(), this->priv_pcomp(), commit_data); }
+      ( const key_type &key, reference value, insert_commit_data &commit_data)
+   {  return this->insert_unique_check(key, value, this->key_comp(), this->priv_pcomp(), commit_data); }
 
    //! <b>Effects</b>: Checks if a value can be inserted in the container, using
    //!   a user provided key instead of the value itself, using "hint"
@@ -613,8 +613,8 @@ class treap_impl
    //!   "commit_data" remains valid for a subsequent "insert_commit" only if no more
    //!   objects are inserted or erased from the container.
    std::pair<iterator, bool> insert_unique_check
-      ( const_iterator hint, const key_type &key, insert_commit_data &commit_data)
-   {  return this->insert_unique_check(hint, key, this->key_comp(), this->priv_pcomp(), commit_data); }
+      ( const_iterator hint, const key_type &key, reference value, insert_commit_data &commit_data)
+   {  return this->insert_unique_check(hint, key, value, this->key_comp(), this->priv_pcomp(), commit_data); }
 
    //! <b>Requires</b>: comp must be a comparison function that induces
    //!   the same strict weak ordering as key_compare.
@@ -655,12 +655,13 @@ class treap_impl
          <KeyType BOOST_INTRUSIVE_I const_iterator BOOST_INTRUSIVE_I 
          std::pair<iterator BOOST_INTRUSIVE_I bool> >::type)
       insert_unique_check
-      ( const KeyType &key, KeyTypeKeyCompare comp
+      ( const KeyType &key, reference value, KeyTypeKeyCompare comp
       , KeyValuePrioCompare key_value_pcomp, insert_commit_data &commit_data)
    {
       std::pair<node_ptr, bool> const ret =
          (node_algorithms::insert_unique_check
             ( this->tree_type::header_ptr(), key
+            , this->get_value_traits().to_node_ptr(value)
             , this->key_node_comp(comp), this->key_node_prio_comp(key_value_pcomp), commit_data));
       return std::pair<iterator, bool>(iterator(ret.first, this->priv_value_traits_ptr()), ret.second);
    }
@@ -702,7 +703,7 @@ class treap_impl
    //!   objects are inserted or erased from the container.
    template<class KeyType, class KeyTypeKeyCompare, class KeyValuePrioCompare>
    std::pair<iterator, bool> insert_unique_check
-      ( const_iterator hint, const KeyType &key
+      ( const_iterator hint, const KeyType &key, reference value
       , KeyTypeKeyCompare comp
       , KeyValuePrioCompare key_value_pcomp
       , insert_commit_data &commit_data)
@@ -710,6 +711,7 @@ class treap_impl
       std::pair<node_ptr, bool> const ret =
          (node_algorithms::insert_unique_check
             ( this->tree_type::header_ptr(), hint.pointed_node(), key
+            , this->get_value_traits().to_node_ptr(value)
             , this->key_node_comp(comp), this->key_node_prio_comp(key_value_pcomp), commit_data));
       return std::pair<iterator, bool>(iterator(ret.first, this->priv_value_traits_ptr()), ret.second);
    }
@@ -1061,7 +1063,7 @@ class treap_impl
    template <class ExtraChecker>
    void check(ExtraChecker extra_checker) const
    {
-      typedef detail::key_nodeptr_comp<priority_compare, value_traits, key_of_value> nodeptr_prio_comp_t;
+      typedef detail::key_nodeptr_comp<priority_compare, value_traits> nodeptr_prio_comp_t;
       tree_type::check(detail::treap_node_extra_checker
          <ValueTraits, nodeptr_prio_comp_t, ExtraChecker>
             (this->key_node_prio_comp(this->priv_pcomp()), extra_checker));

@@ -483,14 +483,14 @@ class treap_algorithms
    //!   if no more objects are inserted or erased from the set.
    template<class KeyType, class KeyNodePtrCompare, class KeyNodePtrPrioCompare>
    static std::pair<node_ptr, bool> insert_unique_check
-      (const_node_ptr header,  const KeyType &key
+      (const_node_ptr header,  const KeyType &key, node_ptr value
       ,KeyNodePtrCompare comp, KeyNodePtrPrioCompare pcomp
       ,insert_commit_data &commit_data)
    {
       std::pair<node_ptr, bool> ret =
          bstree_algo::insert_unique_check(header, key, comp, commit_data);
       if(ret.second)
-         rebalance_after_insertion_check(header, commit_data.node, key, pcomp, commit_data.rotations);
+         rebalance_after_insertion_check(header, commit_data.node, value, pcomp, commit_data.rotations);
       return ret;
    }
 
@@ -536,6 +536,7 @@ class treap_algorithms
    template<class KeyType, class KeyNodePtrCompare, class KeyNodePtrPrioCompare>
    static std::pair<node_ptr, bool> insert_unique_check
       (const_node_ptr header, node_ptr hint, const KeyType &key
+      ,node_ptr value
       ,KeyNodePtrCompare comp, KeyNodePtrPrioCompare pcomp, insert_commit_data &commit_data)
    {
       std::pair<node_ptr, bool> ret =
@@ -639,9 +640,9 @@ class treap_algorithms
       rotate_up_n(h, new_node, commit_data.rotations);
    }
 
-   template<class Key, class KeyNodePriorityCompare>
+   template<class KeyNodePriorityCompare>
    static void rebalance_after_insertion_check
-      (const_node_ptr header, const_node_ptr up, const Key &k
+      (const_node_ptr header, const_node_ptr up, node_ptr k
       , KeyNodePriorityCompare pcomp, std::size_t &num_rotations)
    {
       const_node_ptr upnode(up);
