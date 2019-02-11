@@ -49,10 +49,22 @@ namespace intrusive {
 struct treap_defaults
    : bstree_defaults
 {
+   typedef void priority_of_value;
    typedef void priority;
 };
 
 /// @endcond
+
+template<class ValuePtr, class VoidOrPriorityOfValue, class VoidOrPrioComp>
+struct treap_priority_types
+{
+    typedef bst_key_types
+        <ValuePtr, VoidOrPriorityOfValue, VoidOrPrioComp> priority_types;
+
+    typedef typename priority_types::key_type           priority_type;
+    typedef typename priority_types::key_of_value       priority_of_value;
+    typedef typename priority_types::key_compare        priority_compare;
+};
 
 //! The class template treap is an intrusive treap container that
 //! is used to construct intrusive set and multiset containers. The no-throw
@@ -70,18 +82,11 @@ struct treap_defaults
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyComp, class VoidOrPrioComp, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
+template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyComp, class VoidOrPrioOfValue, class VoidOrPrioComp, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
 #endif
 class treap_impl
    /// @cond
    : public bstree_impl<ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, SizeType, ConstantTimeSize, BsTreeAlgorithms, HeaderHolder>
-   //Use public inheritance to avoid MSVC bugs with closures
-   , public detail::ebo_functor_holder
-         < typename get_prio
-            < VoidOrPrioComp
-            , typename bstree_impl
-               <ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, SizeType, ConstantTimeSize, BsTreeAlgorithms, HeaderHolder>::key_type>::type
-         >
    /// @endcond
 {
    public:
@@ -91,12 +96,15 @@ class treap_impl
                       , ConstantTimeSize, BsTreeAlgorithms
                       , HeaderHolder>                                tree_type;
    typedef tree_type                                                 implementation_defined;
-   typedef get_prio
-               < VoidOrPrioComp
-               , typename tree_type::key_type>                       get_prio_type;
+
+   typedef treap_priority_types
+               < typename ValueTraits::pointer
+               , VoidOrPrioOfValue
+               , VoidOrPrioComp>                                     get_prio_type;
+
 
    typedef detail::ebo_functor_holder
-      <typename get_prio_type::type>                                 prio_base;
+      <typename get_prio_type::priority_compare>                     prio_type;
 
    /// @endcond
 
@@ -120,17 +128,26 @@ class treap_impl
    typedef typename implementation_defined::node_ptr                 node_ptr;
    typedef typename implementation_defined::const_node_ptr           const_node_ptr;
    typedef BOOST_INTRUSIVE_IMPDEF(treap_algorithms<node_traits>)     node_algorithms;
-   typedef BOOST_INTRUSIVE_IMPDEF(typename get_prio_type::type)      priority_compare;
+   typedef typename get_prio_type::priority_type                     priority_type;
+   typedef typename get_prio_type::priority_of_value                 priority_of_value;
+   typedef typename get_prio_type::priority_compare                  priority_compare;
+
+   typedef detail::ebo_functor_holder
+       <typename get_prio_type::priority_compare> prio_comp_holder;
 
    static const bool constant_time_size      = implementation_defined::constant_time_size;
    static const bool stateful_value_traits   = implementation_defined::stateful_value_traits;
    static const bool safemode_or_autounlink = is_safe_autounlink<value_traits::link_mode>::value;
 
-   typedef detail::key_nodeptr_comp<priority_compare, value_traits, key_of_value> key_node_prio_comp_t;
+   template<class KeyPrioComp>
+   struct priority_node_comp_ret
+   {  typedef detail::key_nodeptr_comp<KeyPrioComp, value_traits, priority_of_value> type;  };
 
    template<class KeyPrioComp>
-   detail::key_nodeptr_comp<KeyPrioComp, value_traits> key_node_prio_comp(KeyPrioComp keypriocomp) const
-   {  return detail::key_nodeptr_comp<KeyPrioComp, value_traits>(keypriocomp, &this->get_value_traits());  }
+   BOOST_INTRUSIVE_FORCEINLINE typename priority_node_comp_ret<KeyPrioComp>::type key_node_prio_comp(KeyPrioComp comp) const
+   {
+      return detail::key_nodeptr_comp<KeyPrioComp, value_traits, priority_of_value>(comp, &this->get_value_traits());
+   }
 
    /// @cond
    private:
@@ -139,10 +156,10 @@ class treap_impl
    BOOST_MOVABLE_BUT_NOT_COPYABLE(treap_impl)
 
    const priority_compare &priv_pcomp() const
-   {  return static_cast<const prio_base&>(*this).get();  }
+   {  return static_cast<const prio_comp_holder&>(this->prio_comp_).get(); }
 
    priority_compare &priv_pcomp()
-   {  return static_cast<prio_base&>(*this).get();  }
+   {  return static_cast<prio_comp_holder&>(this->prio_comp_).get(); }
 
    /// @endcond
 
@@ -157,7 +174,7 @@ class treap_impl
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks)
    //!   or the copy constructor of the value_compare/priority_compare objects throw. Basic guarantee.
    treap_impl()
-      : tree_type(), prio_base(priority_compare())
+      : tree_type(), prio_comp_(priority_compare())
    {}
 
    //! <b>Effects</b>: Constructs an empty container.
@@ -170,7 +187,7 @@ class treap_impl
    explicit treap_impl( const key_compare &cmp
                       , const priority_compare &pcmp = priority_compare()
                       , const value_traits &v_traits = value_traits())
-      : tree_type(cmp, v_traits), prio_base(pcmp)
+      : tree_type(cmp, v_traits), prio_comp_(pcmp)
    {}
 
    //! <b>Requires</b>: Dereferencing iterator must yield an lvalue of type value_type.
@@ -191,7 +208,7 @@ class treap_impl
             , const key_compare &cmp     = key_compare()
             , const priority_compare &pcmp = priority_compare()
             , const value_traits &v_traits = value_traits())
-      : tree_type(cmp, v_traits), prio_base(pcmp)
+      : tree_type(cmp, v_traits), prio_comp_(pcmp)
    {
       if(unique)
          this->insert_unique(b, e);
@@ -202,7 +219,7 @@ class treap_impl
    //! @copydoc ::boost::intrusive::bstree::bstree(bstree &&)
    treap_impl(BOOST_RV_REF(treap_impl) x)
       : tree_type(BOOST_MOVE_BASE(tree_type, x))
-      , prio_base(::boost::move(x.priv_pcomp()))
+      , prio_comp_(::boost::move(x.priv_pcomp()))
    {}
 
    //! @copydoc ::boost::intrusive::bstree::operator=(bstree &&)
@@ -496,7 +513,7 @@ class treap_impl
    std::pair<iterator, bool> insert_unique(reference value)
    {
       insert_commit_data commit_data;
-      std::pair<iterator, bool> ret = this->insert_unique_check(key_of_value()(value), value, commit_data);
+      std::pair<iterator, bool> ret = this->insert_unique_check(key_of_value()(value), commit_data);
       if(!ret.second)
          return ret;
       return std::pair<iterator, bool> (this->insert_unique_commit(value, commit_data), true);
@@ -581,8 +598,8 @@ class treap_impl
    //!   "commit_data" remains valid for a subsequent "insert_commit" only if no more
    //!   objects are inserted or erased from the container.
    std::pair<iterator, bool> insert_unique_check
-      ( const key_type &key, reference value, insert_commit_data &commit_data)
-   {  return this->insert_unique_check(key, value, this->key_comp(), this->priv_pcomp(), commit_data); }
+      ( const key_type &key, insert_commit_data &commit_data)
+   {  return this->insert_unique_check(key, this->key_comp(), commit_data); }
 
    //! <b>Effects</b>: Checks if a value can be inserted in the container, using
    //!   a user provided key instead of the value itself, using "hint"
@@ -613,8 +630,8 @@ class treap_impl
    //!   "commit_data" remains valid for a subsequent "insert_commit" only if no more
    //!   objects are inserted or erased from the container.
    std::pair<iterator, bool> insert_unique_check
-      ( const_iterator hint, const key_type &key, reference value, insert_commit_data &commit_data)
-   {  return this->insert_unique_check(hint, key, value, this->key_comp(), this->priv_pcomp(), commit_data); }
+      ( const_iterator hint, const key_type &key, insert_commit_data &commit_data)
+   {  return this->insert_unique_check(hint, key, this->key_comp(), commit_data); }
 
    //! <b>Requires</b>: comp must be a comparison function that induces
    //!   the same strict weak ordering as key_compare.
@@ -649,20 +666,19 @@ class treap_impl
    //!
    //!   "commit_data" remains valid for a subsequent "insert_commit" only if no more
    //!   objects are inserted or erased from the container.
-   template<class KeyType, class KeyTypeKeyCompare, class KeyValuePrioCompare>
+   template<class KeyType, class KeyTypeKeyCompare>
    BOOST_INTRUSIVE_DOC1ST(std::pair<iterator BOOST_INTRUSIVE_I bool>
       , typename detail::disable_if_convertible
          <KeyType BOOST_INTRUSIVE_I const_iterator BOOST_INTRUSIVE_I 
          std::pair<iterator BOOST_INTRUSIVE_I bool> >::type)
       insert_unique_check
-      ( const KeyType &key, reference value, KeyTypeKeyCompare comp
-      , KeyValuePrioCompare key_value_pcomp, insert_commit_data &commit_data)
+      ( const KeyType &key, KeyTypeKeyCompare comp
+      , insert_commit_data &commit_data)
    {
       std::pair<node_ptr, bool> const ret =
          (node_algorithms::insert_unique_check
             ( this->tree_type::header_ptr(), key
-            , this->get_value_traits().to_node_ptr(value)
-            , this->key_node_comp(comp), this->key_node_prio_comp(key_value_pcomp), commit_data));
+            , this->key_node_comp(comp), commit_data));
       return std::pair<iterator, bool>(iterator(ret.first, this->priv_value_traits_ptr()), ret.second);
    }
 
@@ -701,18 +717,16 @@ class treap_impl
    //!
    //!   "commit_data" remains valid for a subsequent "insert_commit" only if no more
    //!   objects are inserted or erased from the container.
-   template<class KeyType, class KeyTypeKeyCompare, class KeyValuePrioCompare>
+   template<class KeyType, class KeyTypeKeyCompare>
    std::pair<iterator, bool> insert_unique_check
-      ( const_iterator hint, const KeyType &key, reference value
+      ( const_iterator hint, const KeyType &key
       , KeyTypeKeyCompare comp
-      , KeyValuePrioCompare key_value_pcomp
       , insert_commit_data &commit_data)
    {
       std::pair<node_ptr, bool> const ret =
          (node_algorithms::insert_unique_check
             ( this->tree_type::header_ptr(), hint.pointed_node(), key
-            , this->get_value_traits().to_node_ptr(value)
-            , this->key_node_comp(comp), this->key_node_prio_comp(key_value_pcomp), commit_data));
+            , this->key_node_comp(comp), commit_data));
       return std::pair<iterator, bool>(iterator(ret.first, this->priv_value_traits_ptr()), ret.second);
    }
 
@@ -737,7 +751,7 @@ class treap_impl
    {
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
       BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::unique(to_insert));
-      node_algorithms::insert_unique_commit(this->tree_type::header_ptr(), to_insert, commit_data);
+      node_algorithms::insert_unique_commit(this->tree_type::header_ptr(), to_insert, this->key_node_prio_comp(this->priv_pcomp()), commit_data);
       this->tree_type::sz_traits().increment();
       return iterator(to_insert, this->priv_value_traits_ptr());
    }
@@ -1015,7 +1029,7 @@ class treap_impl
    #else
    template<class Compare2>
    void merge_unique(treap_impl
-      <ValueTraits, VoidOrKeyOfValue, Compare2, VoidOrPrioComp, SizeType, ConstantTimeSize, HeaderHolder> &source)
+      <ValueTraits, VoidOrKeyOfValue, Compare2, VoidOrPrioOfValue, VoidOrPrioComp, SizeType, ConstantTimeSize, HeaderHolder> &source)
    #endif
    {
       node_ptr it   (node_algorithms::begin_node(source.header_ptr()))
@@ -1041,7 +1055,7 @@ class treap_impl
    #else
    template<class Compare2>
    void merge_equal(treap_impl
-      <ValueTraits, VoidOrKeyOfValue, Compare2, VoidOrPrioComp, SizeType, ConstantTimeSize, HeaderHolder> &source)
+      <ValueTraits, VoidOrKeyOfValue, Compare2, VoidOrPrioOfValue, VoidOrPrioComp, SizeType, ConstantTimeSize, HeaderHolder> &source)
    #endif
    {
       node_ptr it   (node_algorithms::begin_node(source.header_ptr()))
@@ -1063,7 +1077,7 @@ class treap_impl
    template <class ExtraChecker>
    void check(ExtraChecker extra_checker) const
    {
-      typedef detail::key_nodeptr_comp<priority_compare, value_traits> nodeptr_prio_comp_t;
+      typedef detail::key_nodeptr_comp<priority_compare, value_traits, priority_of_value> nodeptr_prio_comp_t;
       tree_type::check(detail::treap_node_extra_checker
          <ValueTraits, nodeptr_prio_comp_t, ExtraChecker>
             (this->key_node_prio_comp(this->priv_pcomp()), extra_checker));
@@ -1214,6 +1228,8 @@ class treap_impl
       return b.unconst();
    }
    /// @endcond
+
+   prio_comp_holder prio_comp_;
 };
 
 
@@ -1224,14 +1240,15 @@ template<class T, class ...Options>
 #else
 template<class T, class O1 = void, class O2 = void
                 , class O3 = void, class O4 = void
-                , class O5 = void, class O6 = void>
+                , class O5 = void, class O6 = void
+                , class O7 = void>
 #endif
 struct make_treap
 {
    typedef typename pack_options
       < treap_defaults,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4, O5, O6
+      O1, O2, O3, O4, O5, O6, O7
       #else
       Options...
       #endif
@@ -1244,6 +1261,7 @@ struct make_treap
          < value_traits
          , typename packed_options::key_of_value
          , typename packed_options::compare
+         , typename packed_options::priority_of_value
          , typename packed_options::priority
          , typename packed_options::size_type
          , packed_options::constant_time_size
@@ -1256,14 +1274,14 @@ struct make_treap
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
 #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-template<class T, class O1, class O2, class O3, class O4, class O5, class O6>
+template<class T, class O1, class O2, class O3, class O4, class O5, class O6, class O7>
 #else
 template<class T, class ...Options>
 #endif
 class treap
    :  public make_treap<T,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4, O5, O6
+      O1, O2, O3, O4, O5, O6, O7
       #else
       Options...
       #endif
@@ -1272,7 +1290,7 @@ class treap
    typedef typename make_treap
       <T,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4, O5, O6
+      O1, O2, O3, O4, O5, O6, O7
       #else
       Options...
       #endif
