@@ -63,7 +63,10 @@ struct treap_priority_types
 
     typedef typename priority_types::key_type           priority_type;
     typedef typename priority_types::key_of_value       priority_of_value;
-    typedef typename priority_types::key_compare        priority_compare;
+    typedef typename get_prio
+	< VoidOrPrioComp
+	, priority_type
+	>::type                                         priority_compare;
 };
 
 struct treap_priority_base_tag
