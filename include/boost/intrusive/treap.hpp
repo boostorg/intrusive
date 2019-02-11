@@ -66,6 +66,9 @@ struct treap_priority_types
     typedef typename priority_types::key_compare        priority_compare;
 };
 
+struct treap_priority_base_tag
+{};
+
 //! The class template treap is an intrusive treap container that
 //! is used to construct intrusive set and multiset containers. The no-throw
 //! guarantee holds only, if the key_compare object and priority_compare object
@@ -87,6 +90,15 @@ template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyComp, class V
 class treap_impl
    /// @cond
    : public bstree_impl<ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, SizeType, ConstantTimeSize, BsTreeAlgorithms, HeaderHolder>
+   //Use public inheritance to avoid MSVC bugs with closures
+   , public detail::ebo_functor_holder
+         < typename treap_priority_types
+               < typename ValueTraits::pointer
+               , VoidOrPrioOfValue
+               , VoidOrPrioComp
+               >::priority_compare
+         , treap_priority_base_tag
+         >
    /// @endcond
 {
    public:
@@ -104,7 +116,9 @@ class treap_impl
 
 
    typedef detail::ebo_functor_holder
-      <typename get_prio_type::priority_compare>                     prio_type;
+      < typename get_prio_type::priority_compare
+      , treap_priority_base_tag
+      >                                                              prio_base;
 
    /// @endcond
 
@@ -132,9 +146,6 @@ class treap_impl
    typedef typename get_prio_type::priority_of_value                 priority_of_value;
    typedef typename get_prio_type::priority_compare                  priority_compare;
 
-   typedef detail::ebo_functor_holder
-       <typename get_prio_type::priority_compare> prio_comp_holder;
-
    static const bool constant_time_size      = implementation_defined::constant_time_size;
    static const bool stateful_value_traits   = implementation_defined::stateful_value_traits;
    static const bool safemode_or_autounlink = is_safe_autounlink<value_traits::link_mode>::value;
@@ -156,10 +167,10 @@ class treap_impl
    BOOST_MOVABLE_BUT_NOT_COPYABLE(treap_impl)
 
    const priority_compare &priv_pcomp() const
-   {  return static_cast<const prio_comp_holder&>(this->prio_comp_).get(); }
+   {  return static_cast<const prio_base&>(*this).get(); }
 
    priority_compare &priv_pcomp()
-   {  return static_cast<prio_comp_holder&>(this->prio_comp_).get(); }
+   {  return static_cast<prio_base&>(*this).get(); }
 
    /// @endcond
 
@@ -174,7 +185,7 @@ class treap_impl
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks)
    //!   or the copy constructor of the value_compare/priority_compare objects throw. Basic guarantee.
    treap_impl()
-      : tree_type(), prio_comp_(priority_compare())
+      : tree_type(), prio_base(priority_compare())
    {}
 
    //! <b>Effects</b>: Constructs an empty container.
@@ -187,7 +198,7 @@ class treap_impl
    explicit treap_impl( const key_compare &cmp
                       , const priority_compare &pcmp = priority_compare()
                       , const value_traits &v_traits = value_traits())
-      : tree_type(cmp, v_traits), prio_comp_(pcmp)
+      : tree_type(cmp, v_traits), prio_base(pcmp)
    {}
 
    //! <b>Requires</b>: Dereferencing iterator must yield an lvalue of type value_type.
@@ -208,7 +219,7 @@ class treap_impl
             , const key_compare &cmp     = key_compare()
             , const priority_compare &pcmp = priority_compare()
             , const value_traits &v_traits = value_traits())
-      : tree_type(cmp, v_traits), prio_comp_(pcmp)
+      : tree_type(cmp, v_traits), prio_base(pcmp)
    {
       if(unique)
          this->insert_unique(b, e);
@@ -219,7 +230,7 @@ class treap_impl
    //! @copydoc ::boost::intrusive::bstree::bstree(bstree &&)
    treap_impl(BOOST_RV_REF(treap_impl) x)
       : tree_type(BOOST_MOVE_BASE(tree_type, x))
-      , prio_comp_(::boost::move(x.priv_pcomp()))
+      , prio_base(::boost::move(x.priv_pcomp()))
    {}
 
    //! @copydoc ::boost::intrusive::bstree::operator=(bstree &&)
@@ -1228,8 +1239,6 @@ class treap_impl
       return b.unconst();
    }
    /// @endcond
-
-   prio_comp_holder prio_comp_;
 };
 
 
