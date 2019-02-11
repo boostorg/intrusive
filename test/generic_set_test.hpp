@@ -197,6 +197,7 @@ void test_generic_set<ContainerDefiner>::test_insert_advanced
    typedef typename ContainerDefiner::template container
       <>::type set_type;
    typedef typename set_type::key_of_value key_of_value;
+   typedef typename set_type::priority_of_value priority_of_value;
    typedef typename set_type::value_type  value_type;
    typedef priority_compare<> prio_comp_t;
    {
@@ -205,10 +206,10 @@ void test_generic_set<ContainerDefiner>::test_insert_advanced
       testset.check();
       value_type v(1);
       typename set_type::insert_commit_data data;
-      BOOST_TEST ((!testset.insert_check(1, any_less(), prio_comp_t(), data).second));
-      BOOST_TEST ((!testset.insert_check(testset.begin(), 1, any_less(), prio_comp_t(), data).second));
-      BOOST_TEST ((!testset.insert_check(key_of_value()(v), data).second));
-      BOOST_TEST ((!testset.insert_check(testset.begin(), key_of_value()(v), data).second));
+      BOOST_TEST ((!testset.insert_check(1, any_less(), 1, prio_comp_t(), data).second));
+      BOOST_TEST ((!testset.insert_check(testset.begin(), 1, any_less(), 1, prio_comp_t(), data).second));
+      BOOST_TEST ((!testset.insert_check(key_of_value()(v), priority_of_value()(v), data).second));
+      BOOST_TEST ((!testset.insert_check(testset.begin(), key_of_value()(v), priority_of_value()(v), data).second));
    }
 }
 
