@@ -167,10 +167,10 @@ class treap_impl
    BOOST_MOVABLE_BUT_NOT_COPYABLE(treap_impl)
 
    const priority_compare &priv_pcomp() const
-   {  return static_cast<const prio_base&>(*this).get(); }
+   {  return static_cast<const prio_base&>(*this).get();  }
 
    priority_compare &priv_pcomp()
-   {  return static_cast<prio_base&>(*this).get(); }
+   {  return static_cast<prio_base&>(*this).get();  }
 
    /// @endcond
 
