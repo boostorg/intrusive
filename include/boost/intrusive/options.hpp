@@ -96,17 +96,8 @@ BOOST_INTRUSIVE_OPTION_CONSTANT(floating_point, bool, Enabled, floating_point)
 //!functor for the value type
 BOOST_INTRUSIVE_OPTION_TYPE(equal, Equal, Equal, equal)
 
-//!This option setter specifies a function object
-//!that specifies the type of the priority in an associative
-//!container and an operator to obtain it from a value type.
-//!
-//!This function object must the define a `type` member typedef and
-//!a member with signature `type [const&] operator()(const value_type &) const`
-//!that will return the priority from a value_type of an associative container
-BOOST_INTRUSIVE_OPTION_TYPE(priority_of_value, PriorityOfValue, PriorityOfValue, priority_of_value)
-
 //!This option setter specifies the priority comparison
-//!functor for the priority type
+//!functor for the value type
 BOOST_INTRUSIVE_OPTION_TYPE(priority, Priority, Priority, priority)
 
 //!This option setter specifies the hash

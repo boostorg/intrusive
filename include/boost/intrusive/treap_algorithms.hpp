@@ -565,7 +565,7 @@ class treap_algorithms
    //! <b>Notes</b>: This function has only sense if a "insert_unique_check" has been
    //!   previously executed to fill "commit_data". No value should be inserted or
    //!   erased between the "insert_check" and "insert_commit" calls.
-    static void insert_unique_commit
+   static void insert_unique_commit
       (node_ptr header, node_ptr new_node, const insert_commit_data &commit_data)
    {
       bstree_algo::insert_unique_commit(header, new_node, commit_data);
@@ -581,7 +581,7 @@ class treap_algorithms
       bool const transferable = insert_unique_check(header1, z, comp, z, pcomp, commit_data).second;
       if(transferable){
          erase(header2, z, pcomp);
-         insert_unique_commit(header1, z, pcomp, commit_data);         
+         insert_unique_commit(header1, z, commit_data);         
       }
       return transferable;
    }

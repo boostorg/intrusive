@@ -108,7 +108,7 @@ class treap_impl
    typedef tree_type                                                 implementation_defined;
    typedef treap_prio_types
       < typename ValueTraits::pointer
-      , VoidOrPrioOfValue, VoidOrPrioComp>                           treap_prio_types_t;
+      , VoidOrPrioOfValue, VoidOrPrioComp>                          treap_prio_types_t;
 
    typedef detail::ebo_functor_holder
       <typename treap_prio_types_t::priority_compare
