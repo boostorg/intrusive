@@ -66,6 +66,8 @@ struct treap_prio_types
                       >::type                         priority_compare;
 };
 
+struct treap_tag;
+
 /// @endcond
 
 //! The class template treap is an intrusive treap container that
@@ -92,7 +94,7 @@ class treap_impl
    //Use public inheritance to avoid MSVC bugs with closures
    , public detail::ebo_functor_holder
          < typename treap_prio_types<typename ValueTraits::pointer, VoidOrPrioOfValue, VoidOrPrioComp>::priority_compare
-         >
+         , treap_tag>
    /// @endcond
 {
    public:
@@ -104,10 +106,10 @@ class treap_impl
    typedef tree_type                                                 implementation_defined;
    typedef treap_prio_types
       < typename ValueTraits::pointer
-      , VoidOrPrioOfValue, VoidOrPrioComp>                          treap_prio_types_t;
+      , VoidOrPrioOfValue, VoidOrPrioComp>                           treap_prio_types_t;
 
    typedef detail::ebo_functor_holder
-      <typename treap_prio_types_t::priority_compare>                prio_base;
+      <typename treap_prio_types_t::priority_compare, treap_tag>     prio_base;
 
    /// @endcond
 
@@ -173,7 +175,7 @@ class treap_impl
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks)
    //!   or the copy constructor of the value_compare/priority_compare objects throw. Basic guarantee.
    treap_impl()
-      : tree_type(), prio_base(priority_compare())
+      : tree_type(), prio_base()
    {}
 
    //! <b>Effects</b>: Constructs an empty container.
