@@ -65,8 +65,6 @@ class treap_set_impl
    typedef typename implementation_defined::value_traits             value_traits;
    typedef typename implementation_defined::key_type                 key_type;
    typedef typename implementation_defined::key_of_value             key_of_value;
-   typedef typename implementation_defined::priority_type            priority_type;
-   typedef typename implementation_defined::priority_of_value        priority_of_value;
    typedef typename implementation_defined::pointer                  pointer;
    typedef typename implementation_defined::const_pointer            const_pointer;
    typedef typename implementation_defined::reference                reference;
@@ -75,6 +73,7 @@ class treap_set_impl
    typedef typename implementation_defined::size_type                size_type;
    typedef typename implementation_defined::value_compare            value_compare;
    typedef typename implementation_defined::key_compare              key_compare;
+   typedef typename implementation_defined::priority_type            priority_type;
    typedef typename implementation_defined::priority_compare         priority_compare;
    typedef typename implementation_defined::iterator                 iterator;
    typedef typename implementation_defined::const_iterator           const_iterator;
@@ -245,29 +244,30 @@ class treap_set_impl
    iterator insert(const_iterator hint, reference value)
    {  return tree_type::insert_unique(hint, value);  }
 
-   //! @copydoc ::boost::intrusive::treap::insert_unique_check(const key_type&,insert_commit_data&)
-   std::pair<iterator, bool> insert_check( const key_type &key, insert_commit_data &commit_data)
-   {  return tree_type::insert_unique_check(key, commit_data); }
+   //! @copydoc ::boost::intrusive::treap::insert_unique_check(const key_type&,const priority_type &,insert_commit_data&)
+   std::pair<iterator, bool> insert_check( const key_type &key, const priority_type &prio, insert_commit_data &commit_data)
+   {  return tree_type::insert_unique_check(key, prio, commit_data); }
 
-   //! @copydoc ::boost::intrusive::treap::insert_unique_check(const_iterator,const key_type&,insert_commit_data&)
+   //! @copydoc ::boost::intrusive::treap::insert_unique_check(const_iterator,const key_type&,const priority_type &,insert_commit_data&)
    std::pair<iterator, bool> insert_check
-      ( const_iterator hint, const key_type &key, insert_commit_data &commit_data)
-   {  return tree_type::insert_unique_check(hint, key, commit_data); }
+      ( const_iterator hint, const key_type &key, const priority_type &prio, insert_commit_data &commit_data)
+   {  return tree_type::insert_unique_check(hint, key, prio, commit_data); }
 
-   //! @copydoc ::boost::intrusive::treap::insert_unique_check(const KeyType&,KeyTypeKeyCompare,insert_commit_data&)
-   template<class KeyType, class KeyTypeKeyCompare, class KeyValuePrioCompare>
+   //! @copydoc ::boost::intrusive::treap::insert_unique_check(const KeyType&,KeyTypeKeyCompare,PrioValuePrioCompare,insert_commit_data&)
+   template<class KeyType, class KeyTypeKeyCompare, class PrioType, class PrioValuePrioCompare>
    std::pair<iterator, bool> insert_check
-      ( const KeyType &key, KeyTypeKeyCompare comp, KeyValuePrioCompare pcomp
+      ( const KeyType &key, KeyTypeKeyCompare comp, const PrioType &prio, PrioValuePrioCompare pcomp
       , insert_commit_data &commit_data)
-   {  return tree_type::insert_unique_check(key, comp, commit_data); }
+   {  return tree_type::insert_unique_check(key, comp, prio, pcomp, commit_data); }
 
-   //! @copydoc ::boost::intrusive::treap::insert_unique_check(const_iterator,const KeyType&,KeyTypeKeyCompare,KeyValuePrioCompare,insert_commit_data&)
-   template<class KeyType, class KeyTypeKeyCompare, class KeyValuePrioCompare>
+   //! @copydoc ::boost::intrusive::treap::insert_unique_check(const_iterator,const KeyType&,KeyTypeKeyCompare,PrioValuePrioCompare,insert_commit_data&)
+   template<class KeyType, class KeyTypeKeyCompare, class PrioType, class PrioValuePrioCompare>
    std::pair<iterator, bool> insert_check
-      ( const_iterator hint, const KeyType &key
-      , KeyTypeKeyCompare comp, KeyValuePrioCompare key_value_pcomp
+      ( const_iterator hint
+      , const KeyType &key, KeyTypeKeyCompare comp
+      , const PrioType &prio, PrioValuePrioCompare pcomp
       , insert_commit_data &commit_data)
-   {  return tree_type::insert_unique_check(hint, key, comp, commit_data); }
+   {  return tree_type::insert_unique_check(hint, key, comp, prio, pcomp, commit_data); }
 
    //! @copydoc ::boost::intrusive::treap::insert_unique(Iterator,Iterator)
    template<class Iterator>
@@ -542,49 +542,49 @@ class treap_set
    //Assert if passed value traits are compatible with the type
    BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
-   treap_set()
+   BOOST_INTRUSIVE_FORCEINLINE treap_set()
       :  Base()
    {}
 
-   explicit treap_set( const key_compare &cmp
+   BOOST_INTRUSIVE_FORCEINLINE explicit treap_set( const key_compare &cmp
                      , const priority_compare &pcmp = priority_compare()
                      , const value_traits &v_traits = value_traits())
       :  Base(cmp, pcmp, v_traits)
    {}
 
    template<class Iterator>
-   treap_set( Iterator b, Iterator e
+   BOOST_INTRUSIVE_FORCEINLINE treap_set( Iterator b, Iterator e
       , const key_compare &cmp = key_compare()
       , const priority_compare &pcmp = priority_compare()
       , const value_traits &v_traits = value_traits())
       :  Base(b, e, cmp, pcmp, v_traits)
    {}
 
-   treap_set(BOOST_RV_REF(treap_set) x)
+   BOOST_INTRUSIVE_FORCEINLINE treap_set(BOOST_RV_REF(treap_set) x)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
-   treap_set& operator=(BOOST_RV_REF(treap_set) x)
+   BOOST_INTRUSIVE_FORCEINLINE treap_set& operator=(BOOST_RV_REF(treap_set) x)
    {  return static_cast<treap_set &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    template <class Cloner, class Disposer>
-   void clone_from(const treap_set &src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(const treap_set &src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(src, cloner, disposer);  }
 
    template <class Cloner, class Disposer>
-   void clone_from(BOOST_RV_REF(treap_set) src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(treap_set) src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
 
-   static treap_set &container_from_end_iterator(iterator end_iterator)
+   BOOST_INTRUSIVE_FORCEINLINE static treap_set &container_from_end_iterator(iterator end_iterator)
    {  return static_cast<treap_set &>(Base::container_from_end_iterator(end_iterator));   }
 
-   static const treap_set &container_from_end_iterator(const_iterator end_iterator)
+   BOOST_INTRUSIVE_FORCEINLINE static const treap_set &container_from_end_iterator(const_iterator end_iterator)
    {  return static_cast<const treap_set &>(Base::container_from_end_iterator(end_iterator));   }
 
-   static treap_set &container_from_iterator(iterator it)
+   BOOST_INTRUSIVE_FORCEINLINE static treap_set &container_from_iterator(iterator it)
    {  return static_cast<treap_set &>(Base::container_from_iterator(it));   }
 
-   static const treap_set &container_from_iterator(const_iterator it)
+   BOOST_INTRUSIVE_FORCEINLINE static const treap_set &container_from_iterator(const_iterator it)
    {  return static_cast<const treap_set &>(Base::container_from_iterator(it));   }
 };
 
@@ -623,8 +623,6 @@ class treap_multiset_impl
    typedef typename implementation_defined::value_traits             value_traits;
    typedef typename implementation_defined::key_type                 key_type;
    typedef typename implementation_defined::key_of_value             key_of_value;
-   typedef typename implementation_defined::priority_type            priority_type;
-   typedef typename implementation_defined::priority_of_value        priority_of_value;
    typedef typename implementation_defined::pointer                  pointer;
    typedef typename implementation_defined::const_pointer            const_pointer;
    typedef typename implementation_defined::reference                reference;
@@ -633,6 +631,7 @@ class treap_multiset_impl
    typedef typename implementation_defined::size_type                size_type;
    typedef typename implementation_defined::value_compare            value_compare;
    typedef typename implementation_defined::key_compare              key_compare;
+   typedef typename implementation_defined::priority_type            priority_type;
    typedef typename implementation_defined::priority_compare         priority_compare;
    typedef typename implementation_defined::iterator                 iterator;
    typedef typename implementation_defined::const_iterator           const_iterator;
@@ -1058,49 +1057,49 @@ class treap_multiset
    //Assert if passed value traits are compatible with the type
    BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
-   treap_multiset()
+   BOOST_INTRUSIVE_FORCEINLINE treap_multiset()
       :  Base()
    {}
 
-   explicit treap_multiset( const key_compare &cmp
+   BOOST_INTRUSIVE_FORCEINLINE explicit treap_multiset( const key_compare &cmp
                           , const priority_compare &pcmp = priority_compare()
                           , const value_traits &v_traits = value_traits())
       :  Base(cmp, pcmp, v_traits)
    {}
 
    template<class Iterator>
-   treap_multiset( Iterator b, Iterator e
+   BOOST_INTRUSIVE_FORCEINLINE treap_multiset( Iterator b, Iterator e
       , const key_compare &cmp = key_compare()
       , const priority_compare &pcmp = priority_compare()
       , const value_traits &v_traits = value_traits())
       :  Base(b, e, cmp, pcmp, v_traits)
    {}
 
-   treap_multiset(BOOST_RV_REF(treap_multiset) x)
+   BOOST_INTRUSIVE_FORCEINLINE treap_multiset(BOOST_RV_REF(treap_multiset) x)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
-   treap_multiset& operator=(BOOST_RV_REF(treap_multiset) x)
+   BOOST_INTRUSIVE_FORCEINLINE treap_multiset& operator=(BOOST_RV_REF(treap_multiset) x)
    {  return static_cast<treap_multiset &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    template <class Cloner, class Disposer>
-   void clone_from(const treap_multiset &src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(const treap_multiset &src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(src, cloner, disposer);  }
 
    template <class Cloner, class Disposer>
-   void clone_from(BOOST_RV_REF(treap_multiset) src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(treap_multiset) src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
 
-   static treap_multiset &container_from_end_iterator(iterator end_iterator)
+   BOOST_INTRUSIVE_FORCEINLINE static treap_multiset &container_from_end_iterator(iterator end_iterator)
    {  return static_cast<treap_multiset &>(Base::container_from_end_iterator(end_iterator));   }
 
-   static const treap_multiset &container_from_end_iterator(const_iterator end_iterator)
+   BOOST_INTRUSIVE_FORCEINLINE static const treap_multiset &container_from_end_iterator(const_iterator end_iterator)
    {  return static_cast<const treap_multiset &>(Base::container_from_end_iterator(end_iterator));   }
 
-   static treap_multiset &container_from_iterator(iterator it)
+   BOOST_INTRUSIVE_FORCEINLINE static treap_multiset &container_from_iterator(iterator it)
    {  return static_cast<treap_multiset &>(Base::container_from_iterator(it));   }
 
-   static const treap_multiset &container_from_iterator(const_iterator it)
+   BOOST_INTRUSIVE_FORCEINLINE static const treap_multiset &container_from_iterator(const_iterator it)
    {  return static_cast<const treap_multiset &>(Base::container_from_iterator(it));   }
 };
 

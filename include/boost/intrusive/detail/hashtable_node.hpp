@@ -34,7 +34,6 @@
 
 namespace boost {
 namespace intrusive {
-namespace detail {
 
 template <class Slist>
 struct bucket_impl : public Slist
@@ -149,8 +148,6 @@ struct get_slist_impl
    {};
 };
 
-}  //namespace detail {
-
 template<class BucketValueTraits, bool IsConst>
 class hashtable_iterator
 {
@@ -169,12 +166,12 @@ class hashtable_iterator
    private:
    typedef typename value_traits::node_traits                  node_traits;
    typedef typename node_traits::node_ptr                      node_ptr;
-   typedef typename detail::get_slist_impl
-      < typename detail::reduced_slist_node_traits
+   typedef typename get_slist_impl
+      < typename reduced_slist_node_traits
          <node_traits>::type >::type                           slist_impl;
    typedef typename slist_impl::iterator                       siterator;
    typedef typename slist_impl::const_iterator                 const_siterator;
-   typedef detail::bucket_impl<slist_impl>                     bucket_type;
+   typedef bucket_impl<slist_impl>                     bucket_type;
 
    typedef typename pointer_traits
       <pointer>::template rebind_pointer

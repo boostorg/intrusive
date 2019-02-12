@@ -102,6 +102,15 @@ struct int_holder_key_of_value
    {  return tv.get_int_holder();  }
 };
 
+template<class ValueType>
+struct int_priority_of_value
+{
+   typedef int type;
+
+   type operator()(const ValueType &tv) const
+   {  return tv.int_value();  }
+};
+
 }  //namespace boost{
 }  //namespace intrusive{
 

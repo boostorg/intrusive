@@ -10,11 +10,11 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 #include "itestvalue.hpp"
-#include <boost/intrusive/treap_set.hpp>
 #include "bptr_value.hpp"
 #include "smart_ptr.hpp"
 #include "bs_test_common.hpp"
 #include "generic_set_test.hpp"
+#include <boost/intrusive/treap_set.hpp>
 
 using namespace boost::intrusive;
 
@@ -35,6 +35,7 @@ struct rebinder
          , constant_time_size<ConstantTimeSize>
          , typename common_t::holder_opt
          , typename common_t::key_of_value_opt
+         , typename common_t::prio_of_value_opt
          , Option1
          , Option2
          > type;
