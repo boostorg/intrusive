@@ -54,6 +54,10 @@ struct tree_rebinder_common
    typedef typename detail::if_c
       < Map, key_of_value<int_holder_key_of_value<value_type> >, void
       >::type key_of_value_opt;
+
+   typedef typename detail::if_c
+      < Map, priority_of_value<int_priority_of_value<value_type> >, void
+      >::type prio_of_value_opt;
 };
 
 
