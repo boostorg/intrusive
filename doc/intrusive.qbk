@@ -3885,6 +3885,7 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 *  Fixed bugs:
    *  [@https://github.com/boostorg/intrusive/pull/33 GitHub Pull #33: ['Fix compilation in case if key is void*, again]]
+   *  [@https://github.com/boostorg/intrusive/issues/34 GitHub Issue #34: ['-Wdeprecated-copy on gcc9]]
    *  [@https://github.com/boostorg/intrusive/issues/35 GitHub Issue #35: ['key_of_value on treap_set seems to be broken in 1.69]]
    *  [@https://github.com/boostorg/intrusive/issues/38 GitHub Issue #38: ['treap: Same type for priority and key comparison leads to ambiguous base class error]]
    *  [@https://github.com/boostorg/intrusive/pull/39 GitHub Pull #39: ['Fix -Wextra-semi clang warnings]]
