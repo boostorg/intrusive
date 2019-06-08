@@ -3885,6 +3885,7 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 *  Fixed bugs:
    *  [@https://github.com/boostorg/intrusive/pull/43  GitHub #43: ['Fix tests with BOOST_INTRUSIVE_VARIADIC_TEMPLATES enabled]]
+   *  [@https://github.com/boostorg/intrusive/pull/45  GitHub #45: ['Disable variadic templates for MSVC-12 to avoid ICEs]]
  
 [endsect]
 
