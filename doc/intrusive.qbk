@@ -1852,9 +1852,14 @@ And they also can receive additional options:
    in containers. The comparison functor must induce a strict weak ordering.
    Default: `compare< std::less<key_type> >`
 
+*  [*`priority_of_value<class PriorityOfValue>`]: A function object
+   that specifies the type of the priority (`priority_type`) of a treap
+   container and an operator to obtain it from a value type.
+   Default: `priority_type` is equal to `value_type` (set-like interface).
+
 *  [*`priority<class PriorityCompare>`]: Priority Comparison function for the objects to be inserted
    in containers. The comparison functor must induce a strict weak ordering.
-   Default: `priority< priority_compare<key_type> >`
+   Default: `priority< priority_compare<priority_type> >`
 
 *  [*`key_of_value<class KeyOfValueFunctionObject>`]: A function object that will
    define the `key_type` of the value type to be stored. This type will allow a map-like interface. See
@@ -3884,6 +3889,7 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 [section:release_notes_boost_1_71_00 Boost 1.71 Release]
 
 *  Fixed bugs:
+   *  [@https://github.com/boostorg/intrusive/pull/42  GitHub #42: ['Documentation does not describe treap priority_of_value changes]]
    *  [@https://github.com/boostorg/intrusive/pull/43  GitHub #43: ['Fix tests with BOOST_INTRUSIVE_VARIADIC_TEMPLATES enabled]]
    *  [@https://github.com/boostorg/intrusive/pull/45  GitHub #45: ['Disable variadic templates for MSVC-12 to avoid ICEs]]
  
