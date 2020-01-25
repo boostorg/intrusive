@@ -1014,7 +1014,8 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       while(x){
          ++depth;
          y = x;
-         x = (left_child = comp(key, x)) ?
+         left_child = comp(key, x);
+         x = left_child ?
                NodeTraits::get_left(x) : (prev = y, NodeTraits::get_right(x));
       }
 
