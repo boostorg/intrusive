@@ -83,10 +83,8 @@ struct bstree_node_checker
                      const return_type& check_return_left, const return_type& check_return_right,
                      return_type& check_return)
    {
-      if (check_return_left.max_key_node_ptr)
-         BOOST_INTRUSIVE_INVARIANT_ASSERT(!comp_(p, check_return_left.max_key_node_ptr));
-      if (check_return_right.min_key_node_ptr)
-         BOOST_INTRUSIVE_INVARIANT_ASSERT(!comp_(check_return_right.min_key_node_ptr, p));
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(!check_return_left.max_key_node_ptr || !comp_(p, check_return_left.max_key_node_ptr));
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(!check_return_right.min_key_node_ptr || !comp_(check_return_right.min_key_node_ptr, p));
       check_return.min_key_node_ptr = node_traits::get_left(p)? check_return_left.min_key_node_ptr : p;
       check_return.max_key_node_ptr = node_traits::get_right(p)? check_return_right.max_key_node_ptr : p;
       check_return.node_count = check_return_left.node_count + check_return_right.node_count + 1;
