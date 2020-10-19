@@ -3889,6 +3889,8 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 [section:release_notes_boost_1_75_00 Boost 1.75 Release]
 
 *  Fixed bugs:
+   *  [@https://github.com/boostorg/intrusive/pull/49    GitHub #48: ['MSVC "assignment within conditional" warning fix]]
+   *  [@https://github.com/boostorg/intrusive/pull/49    GitHub #49: ['Fix empty control statement warnings]]
    *  [@https://github.com/boostorg/intrusive/issues/52  GitHub #52: ['Invalid casting in BOOST_INTRUSIVE_BSR_INTRINSIC]]
 
 [endsect]
