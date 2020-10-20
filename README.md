@@ -1,4 +1,7 @@
-Intrusive, part of collection of the [Boost C++ Libraries](http://github.com/boostorg), is a library presenting intrusive containers to the world of C++. Intrusive containers are special containers that offer better performance and exception safety guarantees than non-intrusive containers (like STL containers). The performance benefits of intrusive containers makes them ideal as a building block to efficiently construct complex data structures like multi-index containers or to design high performance code like memory allocation algorithms.
+Boost.Intrusive
+==========
+
+Boost.Intrusive, part of collection of the [Boost C++ Libraries](http://github.com/boostorg), is a library presenting intrusive containers to the world of C++. Intrusive containers are special containers that offer better performance and exception safety guarantees than non-intrusive containers (like STL containers). The performance benefits of intrusive containers makes them ideal as a building block to efficiently construct complex data structures like multi-index containers or to design high performance code like memory allocation algorithms.
 
 While intrusive containers were and are widely used in C, they became more and more forgotten in C++ due to the presence of the standard containers which don't support intrusive techniques.Boost.Intrusive wants to push intrusive containers usage encapsulating the implementation in STL-like interfaces. Hence anyone familiar with standard containers can easily use Boost.Intrusive.
 
