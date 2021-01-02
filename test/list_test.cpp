@@ -17,7 +17,7 @@
 #include "smart_ptr.hpp"
 #include "common_functors.hpp"
 #include <vector>
-#include <boost/detail/lightweight_test.hpp>
+#include <boost/core/lightweight_test.hpp>
 #include "test_macros.hpp"
 #include "test_container.hpp"
 #include <typeinfo>

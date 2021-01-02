@@ -15,7 +15,7 @@
 #include "common_functors.hpp"
 #include <boost/intrusive/options.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
-#include <boost/detail/lightweight_test.hpp>
+#include <boost/core/lightweight_test.hpp>
 #include "test_macros.hpp"
 #include "test_container.hpp"
 

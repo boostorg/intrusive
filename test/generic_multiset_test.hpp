@@ -13,7 +13,7 @@
 #include <boost/container/vector.hpp>
 #include <boost/intrusive/detail/config_begin.hpp>
 #include "common_functors.hpp"
-#include <boost/detail/lightweight_test.hpp>
+#include <boost/core/lightweight_test.hpp>
 #include <boost/intrusive/options.hpp>
 #include <boost/intrusive/detail/iterator.hpp>
 #include "test_macros.hpp"

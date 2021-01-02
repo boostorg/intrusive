@@ -13,7 +13,7 @@
 #ifndef BOOST_INTRUSIVE_TEST_CONTAINER_HPP
 #define BOOST_INTRUSIVE_TEST_CONTAINER_HPP
 
-#include <boost/detail/lightweight_test.hpp>
+#include <boost/core/lightweight_test.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/simple_disposers.hpp>
 #include <boost/intrusive/detail/iterator.hpp>

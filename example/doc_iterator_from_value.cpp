@@ -12,7 +12,7 @@
 //[doc_iterator_from_value
 #include <boost/intrusive/list.hpp>
 #include <boost/intrusive/unordered_set.hpp>
-#include <boost/functional/hash.hpp>
+#include <boost/container_hash/hash.hpp>
 #include <vector>
 
 using namespace boost::intrusive;
