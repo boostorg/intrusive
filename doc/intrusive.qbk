@@ -3888,6 +3888,9 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 [section:release_notes_boost_1_76_00 Boost 1.76 Release]
 
+*  Reduced compile-time dependencies:
+    *   `linear_slist_algorithms` use a simple node_ptr instead of std::pair on return.
+    *   `list`/`slist` use `operator <`/`operator ==` instead of `std::equal_to`/`std::less`.
 *  Fixed bugs:
    * [@https://github.com/boostorg/intrusive/issues/54  GitHub #54: ['set.rbegin() looks like O(log(N))]]
 
