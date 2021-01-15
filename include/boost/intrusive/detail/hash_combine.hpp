@@ -31,9 +31,10 @@
 #include <boost/cstdint.hpp>
 
 #if defined(_MSC_VER)
-#   define BOOST_INTRUSIVE_HASH_ROTL32(x, r) _rotl(x,r)
+#  include <stdlib.h>
+#  define BOOST_INTRUSIVE_HASH_ROTL32(x, r) _rotl(x,r)
 #else
-#   define BOOST_INTRUSIVE_HASH_ROTL32(x, r) (x << r) | (x >> (32 - r))
+#  define BOOST_INTRUSIVE_HASH_ROTL32(x, r) (x << r) | (x >> (32 - r))
 #endif
 
 namespace boost {
