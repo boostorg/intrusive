@@ -35,6 +35,10 @@ struct twin
       : first(), second()
    {}
 
+   twin(const type &f, const type &s)
+      : first(f), second(s)
+   {}
+
    T first;
    T second;
 };
