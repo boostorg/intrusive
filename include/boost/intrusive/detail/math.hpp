@@ -209,13 +209,12 @@ namespace detail {
 //http://www.flipcode.com/archives/Fast_log_Function.shtml
 inline float fast_log2 (float val)
 {
-   float f = val;
    unsigned x;
-   std::memcpy(&x, &val, sizeof(f));
+   std::memcpy(&x, &val, sizeof(float));
    const int log_2 = int((x >> 23) & 255) - 128;
    x &= ~(unsigned(255u) << 23u);
    x += unsigned(127) << 23u;
-   std::memcpy(&val, &x, sizeof(f));
+   std::memcpy(&val, &x, sizeof(float));
    //1+log2(m), m ranging from 1 to 2
    //3rd degree polynomial keeping first derivate continuity.
    //For less precision the line can be commented out
