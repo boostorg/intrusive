@@ -932,7 +932,8 @@ struct bucket_plus_vtraits
 
       //The end node is embedded in the singly linked list:
       //iterate until we reach it.
-      while(!(first_ptr <= it.pointed_node() && it.pointed_node() <= last_ptr)){
+      while(!(std::less_equal<slist_node_ptr>()(first_ptr, it.pointed_node()) &&
+              std::less_equal<slist_node_ptr>()(it.pointed_node(), last_ptr))){
          ++it;
       }
       //Now get the bucket_impl from the iterator
