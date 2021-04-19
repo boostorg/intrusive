@@ -212,7 +212,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant time.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr begin_node(const const_node_ptr & header)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr begin_node(const const_node_ptr & header) BOOST_NOEXCEPT
    {  return node_traits::get_left(header);   }
 
    //! <b>Requires</b>: 'header' is the header node of a tree.
@@ -222,7 +222,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant time.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr end_node(const const_node_ptr & header)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr end_node(const const_node_ptr & header) BOOST_NOEXCEPT
    {  return detail::uncast(header);   }
 
    //! <b>Requires</b>: 'header' is the header node of a tree.
@@ -246,7 +246,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant time.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static bool unique(const const_node_ptr & node)
+   BOOST_INTRUSIVE_FORCEINLINE static bool unique(const const_node_ptr & node) BOOST_NOEXCEPT
    { return !NodeTraits::get_parent(node); }
 
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
@@ -275,7 +275,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!   node1 and node2 are not equivalent according to the ordering rules.
    //!
    //!Experimental function
-   static void swap_nodes(node_ptr node1, node_ptr node2)
+   static void swap_nodes(node_ptr node1, node_ptr node2) BOOST_NOEXCEPT
    {
       if(node1 == node2)
          return;
@@ -299,7 +299,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!   node1 and node2 are not equivalent according to the ordering rules.
    //!
    //!Experimental function
-   static void swap_nodes(node_ptr node1, node_ptr header1, node_ptr node2, node_ptr header2)
+   static void swap_nodes(node_ptr node1, node_ptr header1, node_ptr node2, node_ptr header2) BOOST_NOEXCEPT
    {
       if(node1 == node2)
          return;
@@ -446,7 +446,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!   new_node is not equivalent to node_to_be_replaced according to the
    //!   ordering rules. This function is faster than erasing and inserting
    //!   the node, since no rebalancing and comparison is needed. Experimental function
-   BOOST_INTRUSIVE_FORCEINLINE static void replace_node(node_ptr node_to_be_replaced, node_ptr new_node)
+   BOOST_INTRUSIVE_FORCEINLINE static void replace_node(node_ptr node_to_be_replaced, node_ptr new_node) BOOST_NOEXCEPT
    {
       if(node_to_be_replaced == new_node)
          return;
@@ -467,7 +467,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!   new_node is not equivalent to node_to_be_replaced according to the
    //!   ordering rules. This function is faster than erasing and inserting
    //!   the node, since no rebalancing or comparison is needed. Experimental function
-   static void replace_node(node_ptr node_to_be_replaced, node_ptr header, node_ptr new_node)
+   static void replace_node(node_ptr node_to_be_replaced, node_ptr header, node_ptr new_node) BOOST_NOEXCEPT
    {
       if(node_to_be_replaced == new_node)
          return;
@@ -518,7 +518,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Average constant time.
    //!
    //! <b>Throws</b>: Nothing.
-   static node_ptr next_node(const node_ptr & node);
+   static node_ptr next_node(const node_ptr & node) BOOST_NOEXCEPT;
 
    //! <b>Requires</b>: 'node' is a node from the tree except the leftmost node.
    //!
@@ -527,7 +527,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Average constant time.
    //!
    //! <b>Throws</b>: Nothing.
-   static node_ptr prev_node(const node_ptr & node);
+   static node_ptr prev_node(const node_ptr & node) BOOST_NOEXCEPT;
 
    //! <b>Requires</b>: 'node' is a node of a tree but not the header.
    //!
@@ -557,7 +557,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Throws</b>: Nothing.
    //!
    //! <b>Nodes</b>: If node is inserted in a tree, this function corrupts the tree.
-   BOOST_INTRUSIVE_FORCEINLINE static void init(node_ptr node)
+   BOOST_INTRUSIVE_FORCEINLINE static void init(node_ptr node) BOOST_NOEXCEPT
    {
       NodeTraits::set_parent(node, node_ptr());
       NodeTraits::set_left(node, node_ptr());
@@ -586,7 +586,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Throws</b>: Nothing.
    //!
    //! <b>Nodes</b>: If node is inserted in a tree, this function corrupts the tree.
-   BOOST_INTRUSIVE_FORCEINLINE static void init_header(node_ptr header)
+   BOOST_INTRUSIVE_FORCEINLINE static void init_header(node_ptr header) BOOST_NOEXCEPT
    {
       NodeTraits::set_parent(header, node_ptr());
       NodeTraits::set_left(header, header);
@@ -603,9 +603,9 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Linear to the number of element of the source tree plus the.
    //!   number of elements of tree target tree when calling this function.
    //!
-   //! <b>Throws</b>: If cloner functor throws. If this happens target nodes are disposed.
+   //! <b>Throws</b>: Nothing.
    template<class Disposer>
-   static void clear_and_dispose(const node_ptr & header, Disposer disposer)
+   static void clear_and_dispose(const node_ptr & header, Disposer disposer) BOOST_NOEXCEPT
    {
       node_ptr source_root = NodeTraits::get_parent(header);
       if(!source_root)
@@ -627,7 +627,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!   only be used for more unlink_leftmost_without_rebalance calls.
    //!   This function is normally used to achieve a step by step
    //!   controlled destruction of the tree.
-   static node_ptr unlink_leftmost_without_rebalance(node_ptr header)
+   static node_ptr unlink_leftmost_without_rebalance(node_ptr header) BOOST_NOEXCEPT
    {
       node_ptr leftmost = NodeTraits::get_left(header);
       if (leftmost == header)
@@ -664,7 +664,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Linear time.
    //!
    //! <b>Throws</b>: Nothing.
-   static std::size_t size(const const_node_ptr & header)
+   static std::size_t size(const const_node_ptr & header) BOOST_NOEXCEPT
    {
       node_ptr beg(begin_node(header));
       node_ptr end(end_node(header));
@@ -682,7 +682,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   static void swap_tree(node_ptr header1, node_ptr header2)
+   static void swap_tree(node_ptr header1, node_ptr header2) BOOST_NOEXCEPT
    {
       if(header1 == header2)
          return;
@@ -730,7 +730,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   static bool is_header(const const_node_ptr & p);
+   static bool is_header(const const_node_ptr & p) BOOST_NOEXCEPT;
    #endif
 
    //! <b>Requires</b>: "header" must be the header node of a tree.
@@ -954,7 +954,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!   previously executed to fill "commit_data". No value should be inserted or
    //!   erased between the "insert_check" and "insert_commit" calls.
    BOOST_INTRUSIVE_FORCEINLINE static void insert_unique_commit
-      (node_ptr header, node_ptr new_value, const insert_commit_data &commit_data)
+      (node_ptr header, node_ptr new_value, const insert_commit_data &commit_data) BOOST_NOEXCEPT
    {  return insert_commit(header, new_value, commit_data); }
 
    //! <b>Requires</b>: "header" must be the header node of a tree.
@@ -1194,7 +1194,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
          #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
          , std::size_t *pdepth = 0
          #endif
-      )
+      ) BOOST_NOEXCEPT
    {
       insert_commit_data commit_data;
       insert_before_check(header, pos, commit_data, pdepth);
@@ -1220,7 +1220,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
          #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
          , std::size_t *pdepth = 0
          #endif
-      )
+      ) BOOST_NOEXCEPT
    {
       insert_commit_data commit_data;
       push_back_check(header, commit_data, pdepth);
@@ -1245,7 +1245,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
          #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
          , std::size_t *pdepth = 0
          #endif
-      )
+      ) BOOST_NOEXCEPT
    {
       insert_commit_data commit_data;
       push_front_check(header, commit_data, pdepth);
@@ -1261,7 +1261,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Logarithmic to the number of nodes in the tree.
    //!
    //! <b>Throws</b>: Nothing.
-   static std::size_t depth(const_node_ptr node)
+   static std::size_t depth(const_node_ptr node) BOOST_NOEXCEPT
    {
       std::size_t depth = 0;
       node_ptr p_parent;
@@ -1315,7 +1315,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Amortized constant time.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static void erase(node_ptr header, node_ptr z)
+   BOOST_INTRUSIVE_FORCEINLINE static void erase(node_ptr header, node_ptr z) BOOST_NOEXCEPT
    {
       data_for_rebalance ignored;
       erase(header, z, ignored);
@@ -1365,7 +1365,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Average complexity is constant time.
    //!
    //! <b>Throws</b>: Nothing.
-   static void unlink(node_ptr node)
+   static void unlink(node_ptr node) BOOST_NOEXCEPT
    {
       node_ptr x = NodeTraits::get_parent(node);
       if(x){
@@ -1382,7 +1382,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Throws</b>: Nothing.
    //!
    //! <b>Complexity</b>: Linear.
-   static void rebalance(node_ptr header)
+   static void rebalance(node_ptr header) BOOST_NOEXCEPT
    {
       node_ptr root = NodeTraits::get_parent(header);
       if(root){
@@ -1399,7 +1399,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Throws</b>: Nothing.
    //!
    //! <b>Complexity</b>: Linear.
-   static node_ptr rebalance_subtree(node_ptr old_root)
+   static node_ptr rebalance_subtree(node_ptr old_root) BOOST_NOEXCEPT
    {
       //Taken from:
       //"Tree rebalancing in optimal time and space"
@@ -1585,7 +1585,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Linear time.
    //!
    //! <b>Throws</b>: Nothing.
-   static std::size_t subtree_size(const const_node_ptr & subtree)
+   static std::size_t subtree_size(const const_node_ptr & subtree) BOOST_NOEXCEPT
    {
       std::size_t count = 0;
       if (subtree){
@@ -1628,7 +1628,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static bool is_left_child(const node_ptr & p)
+   BOOST_INTRUSIVE_FORCEINLINE static bool is_left_child(const node_ptr & p) BOOST_NOEXCEPT
    {  return NodeTraits::get_left(NodeTraits::get_parent(p)) == p;  }
 
    //! <b>Requires</b>: p is a node of a tree.
@@ -1638,7 +1638,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static bool is_right_child(const node_ptr & p)
+   BOOST_INTRUSIVE_FORCEINLINE static bool is_right_child(const node_ptr & p) BOOST_NOEXCEPT
    {  return NodeTraits::get_right(NodeTraits::get_parent(p)) == p;  }
 
    static void insert_before_check
@@ -1665,7 +1665,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
          #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
          , std::size_t *pdepth = 0
          #endif
-      )
+      ) BOOST_NOEXCEPT
    {
       node_ptr prev(NodeTraits::get_right(header));
       if(pdepth){
@@ -1680,7 +1680,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
          #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
          , std::size_t *pdepth = 0
          #endif
-      )
+      ) BOOST_NOEXCEPT
    {
       node_ptr pos(NodeTraits::get_left(header));
       if(pdepth){
@@ -1758,7 +1758,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    }
 
    static void insert_commit
-      (node_ptr header, node_ptr new_node, const insert_commit_data &commit_data)
+      (node_ptr header, node_ptr new_node, const insert_commit_data &commit_data) BOOST_NOEXCEPT
    {
       //Check if commit_data has not been initialized by a insert_unique_check call.
       BOOST_INTRUSIVE_INVARIANT_ASSERT(commit_data.node != node_ptr());
@@ -1784,7 +1784,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    }
 
    //Fix header and own's parent data when replacing x with own, providing own's old data with parent
-   static void set_child(node_ptr header, node_ptr new_child, node_ptr new_parent, const bool link_left)
+   static void set_child(node_ptr header, node_ptr new_child, node_ptr new_parent, const bool link_left) BOOST_NOEXCEPT
    {
       if(new_parent == header)
          NodeTraits::set_parent(header, new_child);
@@ -1795,7 +1795,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    }
 
    // rotate p to left (no header and p's parent fixup)
-   static void rotate_left_no_parent_fix(node_ptr p, node_ptr p_right)
+   static void rotate_left_no_parent_fix(node_ptr p, node_ptr p_right) BOOST_NOEXCEPT
    {
       node_ptr p_right_left(NodeTraits::get_left(p_right));
       NodeTraits::set_right(p, p_right_left);
@@ -1807,7 +1807,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    }
 
    // rotate p to left (with header and p's parent fixup)
-   static void rotate_left(node_ptr p, node_ptr p_right, node_ptr p_parent, node_ptr header)
+   static void rotate_left(node_ptr p, node_ptr p_right, node_ptr p_parent, node_ptr header) BOOST_NOEXCEPT
    {
       const bool p_was_left(NodeTraits::get_left(p_parent) == p);
       rotate_left_no_parent_fix(p, p_right);
@@ -1816,7 +1816,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    }
 
    // rotate p to right (no header and p's parent fixup)
-   static void rotate_right_no_parent_fix(node_ptr p, node_ptr p_left)
+   static void rotate_right_no_parent_fix(node_ptr p, node_ptr p_left) BOOST_NOEXCEPT
    {
       node_ptr p_left_right(NodeTraits::get_right(p_left));
       NodeTraits::set_left(p, p_left_right);
@@ -1828,7 +1828,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    }
 
    // rotate p to right (with header and p's parent fixup)
-   static void rotate_right(node_ptr p, node_ptr p_left, node_ptr p_parent, node_ptr header)
+   static void rotate_right(node_ptr p, node_ptr p_left, node_ptr p_parent, node_ptr header) BOOST_NOEXCEPT
    {
       const bool p_was_left(NodeTraits::get_left(p_parent) == p);
       rotate_right_no_parent_fix(p, p_left);
@@ -1838,7 +1838,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
 
    private:
 
-   static void subtree_to_vine(node_ptr vine_tail, std::size_t &size)
+   static void subtree_to_vine(node_ptr vine_tail, std::size_t &size) BOOST_NOEXCEPT
    {
       //Inspired by LibAVL:
       //It uses a clever optimization for trees with parent pointers.
@@ -1865,7 +1865,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       size = len;
    }
 
-   static void compress_subtree(node_ptr scanner, std::size_t count)
+   static void compress_subtree(node_ptr scanner, std::size_t count) BOOST_NOEXCEPT
    {
       while(count--){   //compress "count" spine nodes in the tree with pseudo-root scanner
          node_ptr child = NodeTraits::get_right(scanner);
@@ -1882,7 +1882,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       }
    }
 
-   static void vine_to_subtree(node_ptr super_root, std::size_t count)
+   static void vine_to_subtree(node_ptr super_root, std::size_t count) BOOST_NOEXCEPT
    {
       const std::size_t one_szt = 1u;
       std::size_t leaf_nodes = count + one_szt - std::size_t(one_szt << detail::floor_log2(count + one_szt));
@@ -1909,7 +1909,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Logarithmic.
    //!
    //! <b>Throws</b>: Nothing.
-   static node_ptr get_root(const node_ptr & node)
+   static node_ptr get_root(const node_ptr & node) BOOST_NOEXCEPT
    {
       BOOST_INTRUSIVE_INVARIANT_ASSERT((!inited(node)));
       node_ptr x = NodeTraits::get_parent(node);
@@ -2001,7 +2001,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    }
 
    template<class Disposer>
-   static void dispose_subtree(node_ptr x, Disposer disposer)
+   static void dispose_subtree(node_ptr x, Disposer disposer) BOOST_NOEXCEPT
    {
       while (x){
          node_ptr save(NodeTraits::get_left(x));

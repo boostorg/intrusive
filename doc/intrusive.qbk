@@ -3888,8 +3888,11 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 [section:release_notes_boost_1_77_00 Boost 1.77 Release]
 
+* Added `noexcept` support to the library to obtain better performance and diagnostics.
+
 *  Fixed bugs:
    * [@https://github.com/boostorg/intrusive/pull/57   GitHub #57: ['UB: comparing unrelated pointers]]
+   * [@https://github.com/boostorg/intrusive/issues/59 GitHub #59: ['Add noexcept support to the library]]
    * [@https://github.com/boostorg/intrusive/issues/60 GitHub #60: ['Licensing question for math.hpp]]
 
 [endsect]
