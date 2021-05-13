@@ -34,7 +34,7 @@ NodeTraits::node_ptr get_right(const Node& node) {
    return NodeTraits::get_right(node.this_ptr());
 }
 
-Tree perfect_binary_tree_of_height_2(std::vector<Node>& node_buffer) {
+void perfect_binary_tree_of_height_2(std::vector<Node>& node_buffer, Tree& tree) {
    // Perfect binary tree of height 2
    //            3
    //          ╱   ╲
@@ -42,7 +42,6 @@ Tree perfect_binary_tree_of_height_2(std::vector<Node>& node_buffer) {
    //        ╱ ╲   ╱ ╲
    //       0   2 4   6
    assert(node_buffer.size() == 7);
-   Tree tree;
 
    const Tree::iterator it3 = tree.insert_before(tree.end(), node_buffer[3]);
    const Tree::iterator it1 = tree.insert_before(it3, node_buffer[1]);
@@ -73,8 +72,6 @@ Tree perfect_binary_tree_of_height_2(std::vector<Node>& node_buffer) {
    assert(get_parent(node_buffer[6]) == node_buffer[5].this_ptr());
    assert(get_left(node_buffer[6]) == NULL);
    assert(get_right(node_buffer[6]) == NULL);
-
-   return tree;
 }
 
 // Test that swaps node_buffer 0 and 4 and verifies the results
@@ -265,7 +262,8 @@ struct SwapWithRightChildTest {
 int main() {
    { // SwapUnrelatedLeafNodesTest 0 -> 4
       std::vector<Node> node_buffer(7);
-      Tree tree = perfect_binary_tree_of_height_2(node_buffer);
+      Tree tree;
+      perfect_binary_tree_of_height_2(node_buffer, tree);
       SwapUnrelatedLeafNodesTest test(node_buffer, tree);
       test.swap04();
       test.check();
@@ -273,7 +271,8 @@ int main() {
 
    { // SwapUnrelatedLeafNodesTest 0 <- 4
       std::vector<Node> node_buffer(7);
-      Tree tree = perfect_binary_tree_of_height_2(node_buffer);
+      Tree tree;
+      perfect_binary_tree_of_height_2(node_buffer, tree);
       SwapUnrelatedLeafNodesTest test(node_buffer, tree);
       test.swap40();
       test.check();
@@ -281,7 +280,8 @@ int main() {
 
    { // SwapSiblingLeafNodesTest 0 -> 2
       std::vector<Node> node_buffer(7);
-      Tree tree = perfect_binary_tree_of_height_2(node_buffer);
+      Tree tree;
+      perfect_binary_tree_of_height_2(node_buffer, tree);
       SwapSiblingLeafNodesTest test(node_buffer, tree);
       test.swap02();
       test.check();
@@ -289,7 +289,8 @@ int main() {
 
    { // SwapSiblingLeafNodesTest 0 <- 2
       std::vector<Node> node_buffer(7);
-      Tree tree = perfect_binary_tree_of_height_2(node_buffer);
+      Tree tree;
+      perfect_binary_tree_of_height_2(node_buffer, tree);
       SwapSiblingLeafNodesTest test(node_buffer, tree);
       test.swap20();
       test.check();
@@ -297,7 +298,8 @@ int main() {
 
    { // SwapSiblingNodesTest 1 -> 5
       std::vector<Node> node_buffer(7);
-      Tree tree = perfect_binary_tree_of_height_2(node_buffer);
+      Tree tree;
+      perfect_binary_tree_of_height_2(node_buffer, tree);
       SwapSiblingNodesTest test(node_buffer, tree);
       test.swap15();
       test.check();
@@ -305,7 +307,8 @@ int main() {
 
    { // SwapSiblingNodesTest 1 <- 5
       std::vector<Node> node_buffer(7);
-      Tree tree = perfect_binary_tree_of_height_2(node_buffer);
+      Tree tree;
+      perfect_binary_tree_of_height_2(node_buffer, tree);
       SwapSiblingNodesTest test(node_buffer, tree);
       test.swap51();
       test.check();
@@ -313,7 +316,8 @@ int main() {
 
    { // SwapWithLeftChildTest 0 -> 1
       std::vector<Node> node_buffer(7);
-      Tree tree = perfect_binary_tree_of_height_2(node_buffer);
+      Tree tree;
+      perfect_binary_tree_of_height_2(node_buffer, tree);
       SwapWithLeftChildTest test(node_buffer, tree);
       test.swap01();
       test.check();
@@ -321,7 +325,8 @@ int main() {
 
    { // SwapWithLeftChildTest 0 <- 1
       std::vector<Node> node_buffer(7);
-      Tree tree = perfect_binary_tree_of_height_2(node_buffer);
+      Tree tree;
+      perfect_binary_tree_of_height_2(node_buffer, tree);
       SwapWithLeftChildTest test(node_buffer, tree);
       test.swap10();
       test.check();
@@ -329,7 +334,8 @@ int main() {
 
    { // SwapWithRightChildTest 1 -> 2
       std::vector<Node> node_buffer(7);
-      Tree tree = perfect_binary_tree_of_height_2(node_buffer);
+      Tree tree;
+      perfect_binary_tree_of_height_2(node_buffer, tree);
       SwapWithRightChildTest test(node_buffer, tree);
       test.swap12();
       test.check();
@@ -337,7 +343,8 @@ int main() {
 
    { // SwapWithRightChildTest 1 <- 2
       std::vector<Node> node_buffer(7);
-      Tree tree = perfect_binary_tree_of_height_2(node_buffer);
+      Tree tree;
+      perfect_binary_tree_of_height_2(node_buffer, tree);
       SwapWithRightChildTest test(node_buffer, tree);
       test.swap21();
       test.check();
