@@ -1,6 +1,14 @@
+/////////////////////////////////////////////////////////////////////////////
 //
-// Created by daniel on 27/04/2021.
+// (C) Copyright Daniel Steck   2021
 //
+// Distributed under the Boost Software License, Version 1.0.
+//    (See accompanying file LICENSE_1_0.txt or copy at
+//          http://www.boost.org/LICENSE_1_0.txt)
+//
+// See http://www.boost.org/libs/intrusive for documentation.
+//
+/////////////////////////////////////////////////////////////////////////////
 #include <boost/intrusive/rbtree.hpp>
 #include <boost/next_prior.hpp>
 

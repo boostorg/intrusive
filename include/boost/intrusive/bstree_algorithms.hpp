@@ -1,6 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////
 //
 // (C) Copyright Ion Gaztanaga  2007-2014
+// (C) Copyright Daniel Steck   2021
 //
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
@@ -413,7 +414,8 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
 
       //Finally adjust parent nodes
       if ((temp = NodeTraits::get_parent(node1)) == NodeTraits::get_parent(node2)) {
-         auto left = NodeTraits::get_left(temp);
+         // special logic for the case where the nodes are siblings
+         const node_ptr left = NodeTraits::get_left(temp);
          NodeTraits::set_left(temp, NodeTraits::get_right(temp));
          NodeTraits::set_right(temp, left);
       } else {
