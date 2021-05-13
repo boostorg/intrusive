@@ -405,10 +405,10 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
          NodeTraits::set_parent(temp, node1);
       }
       //Now adjust child nodes for newly inserted node 2
-      if ((temp = NodeTraits::get_left(node2))) {
+      if((temp = NodeTraits::get_left(node2))){
          NodeTraits::set_parent(temp, node2);
       }
-      if ((temp = NodeTraits::get_right(node2))) {
+      if((temp = NodeTraits::get_right(node2))){
          NodeTraits::set_parent(temp, node2);
       }
 
