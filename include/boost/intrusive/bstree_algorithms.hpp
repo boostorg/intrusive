@@ -396,38 +396,46 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       NodeTraits::set_parent(node1, NodeTraits::get_parent(node2));
       NodeTraits::set_parent(node2, temp);
 
-      //Now adjust adjacent nodes for newly inserted node 1
+      //Now adjust child nodes for newly inserted node 1
       if((temp = NodeTraits::get_left(node1))){
          NodeTraits::set_parent(temp, node1);
       }
       if((temp = NodeTraits::get_right(node1))){
          NodeTraits::set_parent(temp, node1);
       }
-      if((temp = NodeTraits::get_parent(node1)) &&
-         //The header has been already updated so avoid it
-         temp != header2){
-         if(NodeTraits::get_left(temp) == node2){
-            NodeTraits::set_left(temp, node1);
-         }
-         if(NodeTraits::get_right(temp) == node2){
-            NodeTraits::set_right(temp, node1);
-         }
-      }
-      //Now adjust adjacent nodes for newly inserted node 2
-      if((temp = NodeTraits::get_left(node2))){
+      //Now adjust child nodes for newly inserted node 2
+      if ((temp = NodeTraits::get_left(node2))) {
          NodeTraits::set_parent(temp, node2);
       }
-      if((temp = NodeTraits::get_right(node2))){
+      if ((temp = NodeTraits::get_right(node2))) {
          NodeTraits::set_parent(temp, node2);
       }
-      if((temp = NodeTraits::get_parent(node2)) &&
-         //The header has been already updated so avoid it
-         temp != header1){
-         if(NodeTraits::get_left(temp) == node1){
-            NodeTraits::set_left(temp, node2);
+
+      //Finally adjust parent nodes
+      if ((temp = NodeTraits::get_parent(node1)) == NodeTraits::get_parent(node2)) {
+         auto left = NodeTraits::get_left(temp);
+         NodeTraits::set_left(temp, NodeTraits::get_right(temp));
+         NodeTraits::set_right(temp, left);
+      } else {
+         if ((temp = NodeTraits::get_parent(node1)) &&
+            //The header has been already updated so avoid it
+            temp != header2) {
+            if (NodeTraits::get_left(temp) == node2) {
+               NodeTraits::set_left(temp, node1);
+            }
+            if (NodeTraits::get_right(temp) == node2) {
+               NodeTraits::set_right(temp, node1);
+            }
          }
-         if(NodeTraits::get_right(temp) == node1){
-            NodeTraits::set_right(temp, node2);
+         if ((temp = NodeTraits::get_parent(node2)) &&
+            //The header has been already updated so avoid it
+            temp != header1) {
+            if (NodeTraits::get_left(temp) == node1) {
+               NodeTraits::set_left(temp, node2);
+            }
+            if (NodeTraits::get_right(temp) == node1) {
+               NodeTraits::set_right(temp, node2);
+            }
          }
       }
    }
