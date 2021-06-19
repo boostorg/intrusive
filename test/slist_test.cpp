@@ -354,6 +354,41 @@ void test_slist< ListType, ValueContainer >
       {  int init_values [] = { 2 };
          TEST_INTRUSIVE_SEQUENCE( init_values, testlist2.begin() );  }
    }
+
+   {  //splice in the same list
+      list_type testlist1 (values.begin(), values.begin() + 5);
+
+      {  int init_values [] = { 1, 2, 3, 4, 5 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
+
+      //nop 1
+      testlist1.splice_after (testlist1.before_begin(), testlist1, testlist1.before_begin(), ++testlist1.before_begin());
+      {  int init_values [] = { 1, 2, 3, 4, 5 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
+
+      //nop 2
+      testlist1.splice_after (++testlist1.before_begin(), testlist1, testlist1.before_begin(), ++testlist1.before_begin());
+      {  int init_values [] = { 1, 2, 3, 4, 5 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
+
+      //nop 3
+      testlist1.splice_after (testlist1.before_begin(), testlist1, ++testlist1.before_begin(), ++testlist1.before_begin());
+      {  int init_values [] = { 1, 2, 3, 4, 5 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
+
+      testlist1.splice_after (testlist1.before_begin(), testlist1, ++testlist1.before_begin(), ++++testlist1.before_begin());
+      {  int init_values [] = { 2, 1, 3, 4, 5 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
+
+      testlist1.splice_after (testlist1.before_begin(), testlist1, ++testlist1.before_begin(), ++++++testlist1.before_begin());
+      {  int init_values [] = { 1, 3, 2, 4, 5 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
+
+      testlist1.splice_after (++++++++testlist1.before_begin(), testlist1, testlist1.before_begin(), ++++testlist1.before_begin());
+      {  int init_values [] = { 2, 4, 1, 3, 5 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
+   }
+
    {  //Now test swap when testlist2 is empty
       list_type testlist1 (values.begin(), values.begin() + 2);
       list_type testlist2;

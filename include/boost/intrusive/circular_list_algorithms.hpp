@@ -253,7 +253,7 @@ class circular_list_algorithms
    //! <b>Throws</b>: Nothing.
    static void transfer(node_ptr p, node_ptr b, node_ptr e) BOOST_NOEXCEPT
    {
-      if (b != e) {
+      if (b != e && p != b && p != e) {
          node_ptr prev_p(NodeTraits::get_previous(p));
          node_ptr prev_b(NodeTraits::get_previous(b));
          node_ptr prev_e(NodeTraits::get_previous(e));
