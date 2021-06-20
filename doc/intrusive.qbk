@@ -3894,6 +3894,7 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
    * [@https://github.com/boostorg/intrusive/pull/57   GitHub #57: ['UB: comparing unrelated pointers]]
    * [@https://github.com/boostorg/intrusive/issues/59 GitHub #59: ['Add noexcept support to the library]]
    * [@https://github.com/boostorg/intrusive/issues/60 GitHub #60: ['Licensing question for math.hpp]]
+   * [@https://github.com/boostorg/intrusive/pull/61   GitHub #61: ['Fix bstree_algorithms<>::swap_nodes]]
    * [@https://github.com/boostorg/intrusive/issues/63 GitHub #63: ['nop splice removes element]]
 
 [endsect]
