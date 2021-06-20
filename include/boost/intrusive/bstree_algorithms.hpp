@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 //
-// (C) Copyright Ion Gaztanaga  2007-2014
+// (C) Copyright Ion Gaztanaga  2007-2021
 // (C) Copyright Daniel Steck   2021
 //
 // Distributed under the Boost Software License, Version 1.0.

@@ -1,7 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////
 //
 // (C) Copyright Olaf Krzikalla 2004-2006.
-// (C) Copyright Ion Gaztanaga  2006-2013.
+// (C) Copyright Ion Gaztanaga  2006-2021.
+// (C) Copyright Daniel Steck   2021
 //
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
@@ -18,6 +19,7 @@
 #include <boost/core/lightweight_test.hpp>
 #include "test_macros.hpp"
 #include "test_container.hpp"
+#include <boost/next_prior.hpp>
 
 namespace boost{
 namespace intrusive{
@@ -40,6 +42,9 @@ struct test_generic_assoc
    static void test_root(value_cont_type&);
    static void test_clone(value_cont_type&);
    static void test_insert_erase_burst();
+   static void test_swap_nodes();
+   template <class Assoc>
+      static void test_perfect_binary_tree_of_height_2(value_cont_type &values, Assoc &assoc);
    static void test_container_from_end(value_cont_type&, detail::true_type);
    static void test_container_from_end(value_cont_type&, detail::false_type) {}
    static void test_splay_up(value_cont_type&, detail::true_type);
@@ -130,6 +135,226 @@ void test_generic_assoc<ContainerDefiner>::test_insert_erase_burst()
    }
 }
 
+// Perfect binary tree of height 2
+//            3                  |
+//          /   \                |
+//         1     5               |
+//        / \   / \              |
+//       0   2 4   6             |
+template<class ContainerDefiner>
+template <class Assoc>
+void test_generic_assoc<ContainerDefiner>::test_perfect_binary_tree_of_height_2
+   (value_cont_type &values, Assoc &assoc)
+{
+   //value_cont_type values;
+   const std::size_t MaxValues = 7;
+   BOOST_TEST(values.size() == MaxValues);
+   for(std::size_t i = 0; i != MaxValues; ++i){
+      (&values[i])->value_ = i;
+   }
+
+   typedef typename Assoc::iterator iterator;
+
+   BOOST_TEST( assoc.empty() );
+   assoc.clear();
+
+   const iterator it3 = assoc.insert_before(assoc.end(), values[3]);
+   const iterator it1 = assoc.insert_before(it3, values[1]);
+   const iterator it5 = assoc.insert_before(assoc.end(), values[5]);
+   assoc.insert_before(it1, values[0]);
+   assoc.insert_before(it3, values[2]);
+   assoc.insert_before(it5, values[4]);
+   assoc.insert_before(assoc.end(), values[6]);
+}
+
+
+template<class ContainerDefiner>
+void test_generic_assoc<ContainerDefiner>::test_swap_nodes()
+{
+// Perfect binary tree of height 2
+//            3                  |
+//          /   \                |
+//         1     5               |
+//        / \   / \              |
+//       0   2 4   6             |
+
+   typedef typename ContainerDefiner::template container
+      <>::type  assoc_type;
+   typedef typename assoc_type::value_traits value_traits_t;
+   typedef typename assoc_type::node_algorithms node_algorithms_t;
+   const std::size_t MaxValues = 7;
+
+   {  //Unrelated swap
+      value_cont_type values(MaxValues);
+      assoc_type testset;
+      test_perfect_binary_tree_of_height_2(values, testset);
+
+      node_algorithms_t::swap_nodes
+         ( value_traits_t::to_node_ptr(values[0])
+         , value_traits_t::to_node_ptr(values[4])
+         );
+
+      BOOST_TEST( (&*boost::next(testset.begin(), 0) == &values[4]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 1) == &values[1]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 2) == &values[2]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 3) == &values[3]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 4) == &values[0]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 5) == &values[5]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 6) == &values[6]) );
+
+      node_algorithms_t::swap_nodes
+         ( value_traits_t::to_node_ptr(values[4])
+         , value_traits_t::to_node_ptr(values[0])
+         );
+
+      BOOST_TEST( (&*boost::next(testset.begin(), 0) == &values[0]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 1) == &values[1]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 2) == &values[2]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 3) == &values[3]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 4) == &values[4]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 5) == &values[5]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 6) == &values[6]) );
+      
+      testset.check();
+   }
+
+   {  //sibling leaf nodes
+      value_cont_type values(MaxValues);
+      assoc_type testset;
+      test_perfect_binary_tree_of_height_2(values, testset);
+
+      node_algorithms_t::swap_nodes
+         ( value_traits_t::to_node_ptr(values[0])
+         , value_traits_t::to_node_ptr(values[2])
+         );
+
+      BOOST_TEST( (&*boost::next(testset.begin(), 0) == &values[2]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 1) == &values[1]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 2) == &values[0]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 3) == &values[3]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 4) == &values[4]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 5) == &values[5]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 6) == &values[6]) );
+
+      node_algorithms_t::swap_nodes
+         ( value_traits_t::to_node_ptr(values[0])
+         , value_traits_t::to_node_ptr(values[2])
+         );
+
+      BOOST_TEST( (&*boost::next(testset.begin(), 0) == &values[0]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 1) == &values[1]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 2) == &values[2]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 3) == &values[3]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 4) == &values[4]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 5) == &values[5]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 6) == &values[6]) );
+      
+      testset.check();
+   }
+
+   {  //sibling nodes
+      value_cont_type values(MaxValues);
+      assoc_type testset;
+      test_perfect_binary_tree_of_height_2(values, testset);
+
+      node_algorithms_t::swap_nodes
+         ( value_traits_t::to_node_ptr(values[1])
+         , value_traits_t::to_node_ptr(values[5])
+         );
+
+      BOOST_TEST( (&*boost::next(testset.begin(), 0) == &values[0]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 1) == &values[5]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 2) == &values[2]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 3) == &values[3]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 4) == &values[4]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 5) == &values[1]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 6) == &values[6]) );
+
+      node_algorithms_t::swap_nodes
+         ( value_traits_t::to_node_ptr(values[1])
+         , value_traits_t::to_node_ptr(values[5])
+         );
+
+      BOOST_TEST( (&*boost::next(testset.begin(), 0) == &values[0]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 1) == &values[1]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 2) == &values[2]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 3) == &values[3]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 4) == &values[4]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 5) == &values[5]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 6) == &values[6]) );
+      
+      testset.check();
+   }
+
+   {  //left child
+      value_cont_type values(MaxValues);
+      assoc_type testset;
+      test_perfect_binary_tree_of_height_2(values, testset);
+
+      node_algorithms_t::swap_nodes
+         ( value_traits_t::to_node_ptr(values[0])
+         , value_traits_t::to_node_ptr(values[1])
+         );
+
+      BOOST_TEST( (&*boost::next(testset.begin(), 0) == &values[1]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 1) == &values[0]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 2) == &values[2]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 3) == &values[3]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 4) == &values[4]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 5) == &values[5]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 6) == &values[6]) );
+
+      node_algorithms_t::swap_nodes
+         ( value_traits_t::to_node_ptr(values[0])
+         , value_traits_t::to_node_ptr(values[1])
+         );
+
+      BOOST_TEST( (&*boost::next(testset.begin(), 0) == &values[0]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 1) == &values[1]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 2) == &values[2]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 3) == &values[3]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 4) == &values[4]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 5) == &values[5]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 6) == &values[6]) );
+      
+      testset.check();
+   }
+
+   {  //right child
+      value_cont_type values(MaxValues);
+      assoc_type testset;
+      test_perfect_binary_tree_of_height_2(values, testset);
+
+      node_algorithms_t::swap_nodes
+         ( value_traits_t::to_node_ptr(values[1])
+         , value_traits_t::to_node_ptr(values[2])
+         );
+
+      BOOST_TEST( (&*boost::next(testset.begin(), 0) == &values[0]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 1) == &values[2]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 2) == &values[1]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 3) == &values[3]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 4) == &values[4]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 5) == &values[5]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 6) == &values[6]) );
+
+      node_algorithms_t::swap_nodes
+         ( value_traits_t::to_node_ptr(values[1])
+         , value_traits_t::to_node_ptr(values[2])
+         );
+
+      BOOST_TEST( (&*boost::next(testset.begin(), 0) == &values[0]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 1) == &values[1]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 2) == &values[2]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 3) == &values[3]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 4) == &values[4]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 5) == &values[5]) );
+      BOOST_TEST( (&*boost::next(testset.begin(), 6) == &values[6]) );
+      
+      testset.check();
+   }
+}
+
 template<class ContainerDefiner>
 void test_generic_assoc<ContainerDefiner>::test_all(value_cont_type& values)
 {
@@ -143,6 +368,7 @@ void test_generic_assoc<ContainerDefiner>::test_all(value_cont_type& values)
    test_rebalance(values, detail::bool_< has_rebalance< assoc_type >::value >());
    test_insert_before(values, detail::bool_< has_insert_before< assoc_type >::value >());
    test_insert_erase_burst();
+   test_swap_nodes();
    test_container_from_iterator(values, detail::bool_< assoc_type::has_container_from_iterator >());
 }
 
