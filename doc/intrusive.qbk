@@ -376,7 +376,7 @@ using:
    struct my_tag1;
    struct my_tag2;
 
-   typedef list_base_hook< tag<my_tag>  > BaseHook;
+   typedef list_base_hook< tag<my_tag1>  > BaseHook;
    typedef list_base_hook< tag<my_tag2> > BaseHook2;
    class Foo   :  public BaseHook, public BaseHook2
    { /**/ };
