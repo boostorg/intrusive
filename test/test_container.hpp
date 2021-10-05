@@ -473,14 +473,14 @@ void test_unordered_associative_container_invariants(Container & c, Data & d)
       di != de ; ++di ){
       const_iterator i = c.find(key_of_value()(*di));
       size_type nb = c.bucket(key_of_value()(*i));
-      size_type bucket_elem = boost::intrusive::iterator_distance(c.begin(nb), c.end(nb));
+      size_type bucket_elem = (size_type) boost::intrusive::iterator_distance(c.begin(nb), c.end(nb));
       BOOST_TEST( bucket_elem ==  c.bucket_size(nb) );
       BOOST_TEST( &*c.local_iterator_to(*c.find(key_of_value()(*di))) == &*i );
       BOOST_TEST( &*c.local_iterator_to(*const_cast<const Container &>(c).find(key_of_value()(*di))) == &*i );
       BOOST_TEST( &*Container::s_local_iterator_to(*c.find(key_of_value()(*di))) == &*i );
       BOOST_TEST( &*Container::s_local_iterator_to(*const_cast<const Container &>(c).find(key_of_value()(*di))) == &*i );
       std::pair<const_iterator, const_iterator> er = c.equal_range(key_of_value()(*di));
-      size_type cnt = boost::intrusive::iterator_distance(er.first, er.second);
+      size_type cnt = (size_type) boost::intrusive::iterator_distance(er.first, er.second);
       BOOST_TEST( cnt == c.count(key_of_value()(*di)));
       if(cnt > 1){
          const_iterator n = er.first;
