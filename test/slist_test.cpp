@@ -291,17 +291,17 @@ void test_slist< ListType, ValueContainer >
    ::test_shift(ValueContainer& values)
 {
    list_type testlist;
-   const int num_values = (int)values.size();
+   const std::size_t num_values = values.size();
    std::vector<int> expected_values(num_values);
 
    //Shift forward all possible positions 3 times
-   for(int s = 1; s <= num_values; ++s){
+   for(std::size_t s = 1; s <= num_values; ++s){
       expected_values.resize(s);
-      for(int i = 0; i < s*3; ++i){
-         testlist.insert_after(testlist.before_begin(), values.begin(), values.begin() + s);
+      for(std::size_t i = 0; i < s*3u; ++i){
+         testlist.insert_after(testlist.before_begin(), values.begin(), values.begin() + std::ptrdiff_t(s));
          testlist.shift_forward(i);
-         for(int j = 0; j < s; ++j){
-            expected_values[(j + s - i%s) % s] = (j + 1);
+         for(std::size_t j = 0; j < s; ++j){
+            expected_values[(j + s - i%s) % s] = int(j + 1);
          }
 
          TEST_INTRUSIVE_SEQUENCE_EXPECTED(expected_values, testlist.begin())
@@ -309,11 +309,11 @@ void test_slist< ListType, ValueContainer >
       }
 
       //Shift backwards all possible positions
-      for(int i = 0; i < s*3; ++i){
-         testlist.insert_after(testlist.before_begin(), values.begin(), values.begin() + s);
+      for(std::size_t i = 0; i < s*3u; ++i){
+         testlist.insert_after(testlist.before_begin(), values.begin(), values.begin() + std::ptrdiff_t(s));
          testlist.shift_backwards(i);
-         for(int j = 0; j < s; ++j){
-            expected_values[(j + i) % s] = (j + 1);
+         for(std::size_t j = 0; j < s; ++j){
+            expected_values[(j + i) % s] = int(j + 1);
          }
 
          TEST_INTRUSIVE_SEQUENCE_EXPECTED(expected_values, testlist.begin())
@@ -463,7 +463,7 @@ template < typename ListType, typename ValueContainer >
 void test_slist< ListType, ValueContainer >
    ::test_clone(ValueContainer& values)
 {
-      list_type testlist1 (values.begin(), values.begin() + values.size());
+      list_type testlist1 (values.begin(), values.begin() + std::ptrdiff_t(values.size()));
       list_type testlist2;
 
       testlist2.clone_from(testlist1, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
@@ -476,7 +476,7 @@ template < typename ListType, typename ValueContainer >
 void test_slist< ListType, ValueContainer >
    ::test_container_from_end(ValueContainer& values, detail::true_type)
 {
-   list_type testlist1 (values.begin(), values.begin() + values.size());
+   list_type testlist1 (values.begin(), values.begin() + std::ptrdiff_t(values.size()));
    BOOST_TEST (testlist1 == list_type::container_from_end_iterator(testlist1.end()));
    BOOST_TEST (testlist1 == list_type::container_from_end_iterator(testlist1.cend()));
 }
@@ -516,8 +516,8 @@ class test_main_template
    {
       typedef testvalue< hooks<VoidPointer> > value_type;
       std::vector< value_type > data (5);
-      for (int i = 0; i < 5; ++i)
-         data[i].value_ = i + 1;
+      for (std::size_t i = 0; i < 5u; ++i)
+         data[i].value_ = (int)i + 1;
 
       make_and_test_slist < typename detail::get_base_value_traits
                   < value_type
@@ -590,8 +590,8 @@ class test_main_template<VoidPointer, false, Default_Holder>
    {
       typedef testvalue< hooks<VoidPointer> > value_type;
       std::vector< value_type > data (5);
-      for (int i = 0; i < 5; ++i)
-         data[i].value_ = i + 1;
+      for (std::size_t i = 0; i < 5u; ++i)
+         data[i].value_ = (int)i + 1;
 
       make_and_test_slist < typename detail::get_base_value_traits
                   < value_type
@@ -659,10 +659,10 @@ struct test_main_template_bptr
 
       {
           bounded_reference_cont< value_type > ref_cont;
-          for (int i = 0; i < 5; ++i)
+          for (std::size_t i = 0; i < 5u; ++i)
           {
               node_ptr tmp = allocator.allocate(1);
-              new (tmp.raw()) value_type(i + 1);
+              new (tmp.raw()) value_type((int)i + 1);
               ref_cont.push_back(*tmp);
           }
 

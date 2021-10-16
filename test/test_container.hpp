@@ -493,10 +493,10 @@ void test_unordered_associative_container_invariants(Container & c, Data & d)
       }
    }
 
-   size_type blen = c.bucket_count();
-   size_type total_objects = 0;
+   std::size_t blen = c.bucket_count();
+   std::size_t total_objects = 0;
    for(size_type i = 0; i < blen; ++i){
-      total_objects += c.bucket_size(i);
+      total_objects += std::size_t(c.bucket_size(i));
    }
    BOOST_TEST( total_objects ==  c.size() );
 }

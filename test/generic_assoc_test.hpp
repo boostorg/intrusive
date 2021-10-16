@@ -16,10 +16,10 @@
 #include "common_functors.hpp"
 #include <boost/intrusive/options.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
+#include <boost/intrusive/detail/iterator.hpp>
 #include <boost/core/lightweight_test.hpp>
 #include "test_macros.hpp"
 #include "test_container.hpp"
-#include <boost/next_prior.hpp>
 
 namespace boost{
 namespace intrusive{
@@ -90,7 +90,7 @@ void test_generic_assoc<ContainerDefiner>::test_insert_erase_burst()
    const std::size_t MaxValues = 200;
    value_cont_type values(MaxValues);
    for(std::size_t i = 0; i != MaxValues; ++i){
-      (&values[i])->value_ = i;
+      (&values[i])->value_ = (int)i;
    }
 
    typedef typename ContainerDefiner::template container
@@ -98,7 +98,7 @@ void test_generic_assoc<ContainerDefiner>::test_insert_erase_burst()
    typedef typename assoc_type::iterator iterator;
 
    {  //Ordered insertion + erasure
-      assoc_type testset (values.begin(), values.begin() + values.size());
+      assoc_type testset (values.begin(), values.end());
       TEST_INTRUSIVE_SEQUENCE_EXPECTED(testset, testset.begin());
       testset.check();
       iterator it(testset.begin()), itend(testset.end());
@@ -150,7 +150,7 @@ void test_generic_assoc<ContainerDefiner>::test_perfect_binary_tree_of_height_2
    const std::size_t MaxValues = 7;
    BOOST_TEST(values.size() == MaxValues);
    for(std::size_t i = 0; i != MaxValues; ++i){
-      (&values[i])->value_ = i;
+      (&values[i])->value_ = (int)i;
    }
 
    typedef typename Assoc::iterator iterator;
@@ -194,26 +194,26 @@ void test_generic_assoc<ContainerDefiner>::test_swap_nodes()
          , value_traits_t::to_node_ptr(values[4])
          );
 
-      BOOST_TEST( (&*boost::next(testset.begin(), 0) == &values[4]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 1) == &values[1]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 2) == &values[2]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 3) == &values[3]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 4) == &values[0]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 5) == &values[5]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 6) == &values[6]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 0) == &values[4]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 1) == &values[1]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 2) == &values[2]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 3) == &values[3]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 4) == &values[0]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 5) == &values[5]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 6) == &values[6]) );
 
       node_algorithms_t::swap_nodes
          ( value_traits_t::to_node_ptr(values[4])
          , value_traits_t::to_node_ptr(values[0])
          );
 
-      BOOST_TEST( (&*boost::next(testset.begin(), 0) == &values[0]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 1) == &values[1]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 2) == &values[2]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 3) == &values[3]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 4) == &values[4]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 5) == &values[5]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 6) == &values[6]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 0) == &values[0]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 1) == &values[1]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 2) == &values[2]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 3) == &values[3]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 4) == &values[4]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 5) == &values[5]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 6) == &values[6]) );
       
       testset.check();
    }
@@ -228,26 +228,26 @@ void test_generic_assoc<ContainerDefiner>::test_swap_nodes()
          , value_traits_t::to_node_ptr(values[2])
          );
 
-      BOOST_TEST( (&*boost::next(testset.begin(), 0) == &values[2]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 1) == &values[1]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 2) == &values[0]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 3) == &values[3]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 4) == &values[4]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 5) == &values[5]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 6) == &values[6]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 0) == &values[2]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 1) == &values[1]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 2) == &values[0]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 3) == &values[3]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 4) == &values[4]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 5) == &values[5]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 6) == &values[6]) );
 
       node_algorithms_t::swap_nodes
          ( value_traits_t::to_node_ptr(values[0])
          , value_traits_t::to_node_ptr(values[2])
          );
 
-      BOOST_TEST( (&*boost::next(testset.begin(), 0) == &values[0]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 1) == &values[1]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 2) == &values[2]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 3) == &values[3]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 4) == &values[4]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 5) == &values[5]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 6) == &values[6]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 0) == &values[0]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 1) == &values[1]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 2) == &values[2]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 3) == &values[3]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 4) == &values[4]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 5) == &values[5]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 6) == &values[6]) );
       
       testset.check();
    }
@@ -262,26 +262,26 @@ void test_generic_assoc<ContainerDefiner>::test_swap_nodes()
          , value_traits_t::to_node_ptr(values[5])
          );
 
-      BOOST_TEST( (&*boost::next(testset.begin(), 0) == &values[0]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 1) == &values[5]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 2) == &values[2]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 3) == &values[3]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 4) == &values[4]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 5) == &values[1]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 6) == &values[6]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 0) == &values[0]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 1) == &values[5]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 2) == &values[2]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 3) == &values[3]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 4) == &values[4]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 5) == &values[1]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 6) == &values[6]) );
 
       node_algorithms_t::swap_nodes
          ( value_traits_t::to_node_ptr(values[1])
          , value_traits_t::to_node_ptr(values[5])
          );
 
-      BOOST_TEST( (&*boost::next(testset.begin(), 0) == &values[0]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 1) == &values[1]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 2) == &values[2]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 3) == &values[3]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 4) == &values[4]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 5) == &values[5]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 6) == &values[6]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 0) == &values[0]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 1) == &values[1]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 2) == &values[2]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 3) == &values[3]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 4) == &values[4]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 5) == &values[5]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 6) == &values[6]) );
       
       testset.check();
    }
@@ -296,26 +296,26 @@ void test_generic_assoc<ContainerDefiner>::test_swap_nodes()
          , value_traits_t::to_node_ptr(values[1])
          );
 
-      BOOST_TEST( (&*boost::next(testset.begin(), 0) == &values[1]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 1) == &values[0]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 2) == &values[2]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 3) == &values[3]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 4) == &values[4]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 5) == &values[5]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 6) == &values[6]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 0) == &values[1]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 1) == &values[0]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 2) == &values[2]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 3) == &values[3]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 4) == &values[4]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 5) == &values[5]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 6) == &values[6]) );
 
       node_algorithms_t::swap_nodes
          ( value_traits_t::to_node_ptr(values[0])
          , value_traits_t::to_node_ptr(values[1])
          );
 
-      BOOST_TEST( (&*boost::next(testset.begin(), 0) == &values[0]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 1) == &values[1]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 2) == &values[2]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 3) == &values[3]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 4) == &values[4]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 5) == &values[5]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 6) == &values[6]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 0) == &values[0]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 1) == &values[1]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 2) == &values[2]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 3) == &values[3]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 4) == &values[4]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 5) == &values[5]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 6) == &values[6]) );
       
       testset.check();
    }
@@ -330,26 +330,26 @@ void test_generic_assoc<ContainerDefiner>::test_swap_nodes()
          , value_traits_t::to_node_ptr(values[2])
          );
 
-      BOOST_TEST( (&*boost::next(testset.begin(), 0) == &values[0]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 1) == &values[2]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 2) == &values[1]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 3) == &values[3]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 4) == &values[4]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 5) == &values[5]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 6) == &values[6]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 0) == &values[0]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 1) == &values[2]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 2) == &values[1]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 3) == &values[3]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 4) == &values[4]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 5) == &values[5]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 6) == &values[6]) );
 
       node_algorithms_t::swap_nodes
          ( value_traits_t::to_node_ptr(values[1])
          , value_traits_t::to_node_ptr(values[2])
          );
 
-      BOOST_TEST( (&*boost::next(testset.begin(), 0) == &values[0]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 1) == &values[1]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 2) == &values[2]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 3) == &values[3]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 4) == &values[4]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 5) == &values[5]) );
-      BOOST_TEST( (&*boost::next(testset.begin(), 6) == &values[6]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 0) == &values[0]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 1) == &values[1]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 2) == &values[2]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 3) == &values[3]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 4) == &values[4]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 5) == &values[5]) );
+      BOOST_TEST( (&*iterator_next(testset.begin(), 6) == &values[6]) );
       
       testset.check();
    }
@@ -387,7 +387,7 @@ void test_generic_assoc<ContainerDefiner>::test_root(value_cont_type& values)
    BOOST_TEST( testset1.croot() == ctestset1.cend());
 
 
-   testset1.insert(values.begin(), values.begin() + values.size());
+   testset1.insert(values.begin(), values.end());
 
    iterator i = testset1.root();
    iterator i2(i);
@@ -411,7 +411,7 @@ void test_generic_assoc<ContainerDefiner>::test_clone(value_cont_type& values)
       typedef typename assoc_type::value_type value_type;
       typedef typename assoc_type::size_type size_type;
 
-      assoc_type testset1 (values.begin(), values.begin() + values.size());
+      assoc_type testset1 (values.begin(), values.end());
       assoc_type testset2;
 
 
@@ -436,7 +436,7 @@ void test_generic_assoc<ContainerDefiner>
 {
    typedef typename ContainerDefiner::template container
       <>::type assoc_type;
-   assoc_type testset (values.begin(), values.begin() + values.size());
+   assoc_type testset (values.begin(), values.end());
    BOOST_TEST (testset == assoc_type::container_from_end_iterator(testset.end()));
    BOOST_TEST (testset == assoc_type::container_from_end_iterator(testset.cend()));
 }
