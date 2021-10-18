@@ -19,10 +19,10 @@
 #  pragma once
 #endif
 
+#include <cstddef>
+
 namespace boost {
 namespace intrusive {
-
-#include <cstddef>
 
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
