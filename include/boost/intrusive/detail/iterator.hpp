@@ -278,9 +278,9 @@ BOOST_INTRUSIVE_FORCEINLINE InputIt iterator_next(InputIt it, typename iterator_
 }
 
 template<class InputIt>
-BOOST_INTRUSIVE_FORCEINLINE InputIt iterator_next(InputIt it, typename iterator_traits<InputIt>::size_type n)
+BOOST_INTRUSIVE_FORCEINLINE InputIt iterator_unext(InputIt it, typename iterator_traits<InputIt>::size_type n)
 {
-   (iterator_advance)(it, n);
+   (iterator_uadvance)(it, n);
    return it;
 }
 
