@@ -61,7 +61,7 @@ InputIt priv_algo_find(InputIt first, InputIt last, const T& value)
 {
    for (; first != last; ++first) {
       if (*first == value) {
-            return first;
+         return first;
       }
    }
    return last;
@@ -105,7 +105,7 @@ bool priv_algo_is_permutation(ForwardIterator1 first1, ForwardIterator1 last1, F
          continue;   //We've seen this one before.
       }
       distance_type matches = (priv_algo_count)(first2, last2, *scan);
-      if (0 == matches || (priv_algo_count)(scan, last1, *scan  != matches)){
+      if (0 == matches || (priv_algo_count)(scan, last1, *scan) != matches){
          return false;
       }
    }
@@ -2459,7 +2459,7 @@ class hashtable_impl
       siterator it = this->priv_find(key, hash_func, equal_func, bucket_num, h, prev);
       bool const success = it != this->priv_invalid_local_it();
 
-      size_type cnt(0);
+      std::size_t cnt(0);
       if(success){
          if(optimize_multikey){
             cnt = this->priv_erase_from_single_bucket
@@ -2480,7 +2480,7 @@ class hashtable_impl
          this->priv_erasure_update_cache();
       }
 
-      return cnt;
+      return static_cast<size_type>(cnt);
    }
 
    //! <b>Effects</b>: Erases all of the elements.
