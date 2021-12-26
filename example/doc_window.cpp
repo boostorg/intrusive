@@ -37,13 +37,13 @@ Window::win_list Window::all_windows;
 
 //Some Window derived classes
 class FrameWindow :  public Window
-{  void Paint(){/**/} };
+{  virtual void Paint() BOOST_OVERRIDE {/**/} };
 
 class EditWindow :  public Window
-{  void Paint(){/**/} };
+{  virtual void Paint() BOOST_OVERRIDE {/**/} };
 
 class CanvasWindow :  public Window
-{  void Paint(){/**/} };
+{  virtual void Paint() BOOST_OVERRIDE {/**/} };
 
 //A function that prints all windows stored in the intrusive list
 void paint_all_windows()
@@ -64,7 +64,7 @@ class MainWindow  :  public Window
    CanvasWindow  canvas_;
 
    public:
-   void Paint(){/**/}
+   void Paint() BOOST_OVERRIDE {/**/}
    //...
 };
 
