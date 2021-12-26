@@ -376,7 +376,7 @@ using:
    struct my_tag1;
    struct my_tag2;
 
-   typedef list_base_hook< tag<my_tag1>  > BaseHook;
+   typedef list_base_hook< tag<my_tag1> > BaseHook;
    typedef list_base_hook< tag<my_tag2> > BaseHook2;
    class Foo   :  public BaseHook, public BaseHook2
    { /**/ };
@@ -3886,11 +3886,19 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 [section:release_notes Release Notes]
 
+[section:release_notes_boost_1_79_00 Boost 1.79 Release]
+
+* Fixed bugs:
+   * [@https://github.com/boostorg/intrusive/pull/66   GitHub #66: ['Fix declaration of node shadowing member]]
+   * [@https://github.com/boostorg/intrusive/pull/70   GitHub #70: ['list: fix remove / remove_and_dispose]]
+
+[endsect]
+
 [section:release_notes_boost_1_77_00 Boost 1.77 Release]
 
 * Added `noexcept` support to the library to obtain better performance and diagnostics.
 
-*  Fixed bugs:
+* Fixed bugs:
    * [@https://github.com/boostorg/intrusive/pull/57   GitHub #57: ['UB: comparing unrelated pointers]]
    * [@https://github.com/boostorg/intrusive/issues/59 GitHub #59: ['Add noexcept support to the library]]
    * [@https://github.com/boostorg/intrusive/issues/60 GitHub #60: ['Licensing question for math.hpp]]
