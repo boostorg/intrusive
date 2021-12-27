@@ -39,8 +39,8 @@ struct DerivedPoly
 {
    int   derivedpoly_int_;
    float derivedpoly_float_;
-   virtual void virtual_func1(){}
-   virtual void virtual_func2(){}
+   virtual void virtual_func1() BOOST_OVERRIDE {}
+   virtual void virtual_func2() BOOST_OVERRIDE {}
    Abstract *abstract()             {  return this; }
    Abstract const *abstract() const {  return this; }
 } derivedpoly;
@@ -66,8 +66,8 @@ struct DerivedPoly2
 {
    int   derivedpoly2_int_;
    float derivedpoly2_float_;
-   virtual void virtual_func1(){}
-   virtual void virtual_func2(){}
+   virtual void virtual_func1() BOOST_OVERRIDE {}
+   virtual void virtual_func2() BOOST_OVERRIDE {}
    Abstract2 *abstract2()             {  return this; }
    Abstract2 const *abstract2() const {  return this; }
    virtual ~DerivedPoly2(){}
