@@ -483,9 +483,9 @@ class incremental_rehash_rollback
 
    public:
    incremental_rehash_rollback
-      (bucket_type &source_bucket, bucket_type &destiny_bucket, split_traits &split_traits)
+      (bucket_type &source_bucket, bucket_type &destiny_bucket, split_traits &split_tr)
       :  source_bucket_(source_bucket),  destiny_bucket_(destiny_bucket)
-      ,  split_traits_(split_traits),  released_(false)
+      ,  split_traits_(split_tr),  released_(false)
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE void release()
@@ -2586,9 +2586,9 @@ class hashtable_impl
    iterator find(const KeyType &key, KeyHasher hash_func, KeyEqual equal_func)
    {
       size_type bucket_n;
-      std::size_t hash;
+      std::size_t h;
       siterator prev;
-      return iterator( this->priv_find(key, hash_func, equal_func, bucket_n, hash, prev)
+      return iterator( this->priv_find(key, hash_func, equal_func, bucket_n, h, prev)
                      , &this->get_bucket_value_traits());
    }
 
