@@ -3888,6 +3888,7 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 [section:release_notes_boost_1_79_00 Boost 1.79 Release]
 
+* The library now compiles without warnings with GCC's -Wcast-align=strict
 * Fixed bugs:
    * [@https://github.com/boostorg/intrusive/pull/66   GitHub #66: ['Fix declaration of node shadowing member]]
    * [@https://github.com/boostorg/intrusive/pull/70   GitHub #70: ['list: fix remove / remove_and_dispose]]
