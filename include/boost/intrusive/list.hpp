@@ -638,7 +638,8 @@ class list_impl
    iterator erase(const_iterator b, const_iterator e, size_type n) BOOST_NOEXCEPT
    {
       BOOST_INTRUSIVE_INVARIANT_ASSERT(node_algorithms::distance(b.pointed_node(), e.pointed_node()) == n);
-      BOOST_IF_CONSTEXPR(safemode_or_autounlink || constant_time_size){
+      (void)n;
+      BOOST_IF_CONSTEXPR(safemode_or_autounlink){
          return this->erase_and_dispose(b, e, detail::null_disposer());
       }
       else{

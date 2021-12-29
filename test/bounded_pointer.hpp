@@ -31,6 +31,7 @@ class bounded_reference;
 template < typename T >
 class bounded_allocator;
 
+struct maintain_offset_t{};
 
 template < typename T >
 class bounded_pointer
@@ -41,6 +42,7 @@ class bounded_pointer
 
    public:
    typedef typename boost::intrusive::detail::remove_const< T >::type mut_val_t;
+   typedef bounded_pointer< mut_val_t > non_const_t;
    typedef const mut_val_t const_val_t;
 
    typedef bounded_reference<T>  reference;
@@ -59,6 +61,10 @@ class bounded_pointer
       :  m_offset(other.m_offset)
    {}
 
+   bounded_pointer(maintain_offset_t, unsigned char offset)
+      :  m_offset(offset)
+   {}
+
    bounded_pointer& operator = (const bounded_pointer& other)
    { m_offset = other.m_offset; return *this; }
 
@@ -67,11 +73,8 @@ class bounded_pointer
       operator= (const bounded_pointer<T2> & other)
    {  m_offset = other.m_offset;  return *this;  }
 
-   const bounded_pointer< typename boost::intrusive::detail::remove_const< T >::type >& unconst() const
-   { return *reinterpret_cast< const bounded_pointer< typename boost::intrusive::detail::remove_const< T >::type >* >(this); }
-
-   bounded_pointer< typename boost::intrusive::detail::remove_const< T >::type >& unconst()
-   { return *reinterpret_cast< bounded_pointer< typename boost::intrusive::detail::remove_const< T >::type >* >(this); }
+   non_const_t unconst() const
+   {  return non_const_t (maintain_offset_t(), this->m_offset);  }
 
    static mut_val_t* base()
    {

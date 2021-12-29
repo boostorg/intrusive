@@ -80,7 +80,7 @@ class circular_list_algorithms
    //! <b>Complexity</b>: Constant
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static bool inited(const const_node_ptr &this_node) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bool inited(const_node_ptr this_node) BOOST_NOEXCEPT
    {  return !NodeTraits::get_next(this_node); }
 
    //! <b>Effects</b>: Constructs an empty list, making this_node the only
@@ -105,7 +105,7 @@ class circular_list_algorithms
    //! <b>Complexity</b>: Constant
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static bool unique(const const_node_ptr &this_node) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bool unique(const_node_ptr this_node) BOOST_NOEXCEPT
    {
       node_ptr next = NodeTraits::get_next(this_node);
       return !next || next == this_node;
@@ -119,7 +119,7 @@ class circular_list_algorithms
    //! <b>Complexity</b>: Linear
    //!
    //! <b>Throws</b>: Nothing.
-   static std::size_t count(const const_node_ptr &this_node) BOOST_NOEXCEPT
+   static std::size_t count(const_node_ptr this_node) BOOST_NOEXCEPT
    {
       std::size_t result = 0;
       const_node_ptr p = this_node;
@@ -358,12 +358,11 @@ class circular_list_algorithms
    //! <b>Complexity</b>: Linear
    //!
    //! <b>Throws</b>: Nothing.
-   static std::size_t distance(const const_node_ptr &f, const const_node_ptr &l) BOOST_NOEXCEPT
+   static std::size_t distance(const_node_ptr f, const_node_ptr l) BOOST_NOEXCEPT
    {
-      const_node_ptr i(f);
       std::size_t result = 0;
-      while(i != l){
-         i = NodeTraits::get_next(i);
+      while(f != l){
+         f = NodeTraits::get_next(f);
          ++result;
       }
       return result;

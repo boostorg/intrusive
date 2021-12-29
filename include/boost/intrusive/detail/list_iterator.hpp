@@ -63,7 +63,7 @@ class list_iterator
    BOOST_INTRUSIVE_FORCEINLINE list_iterator()
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE explicit list_iterator(const node_ptr & nodeptr, const const_value_traits_ptr &traits_ptr)
+   BOOST_INTRUSIVE_FORCEINLINE explicit list_iterator(node_ptr nodeptr, const_value_traits_ptr traits_ptr)
       : members_(nodeptr, traits_ptr)
    {}
 
@@ -81,7 +81,7 @@ class list_iterator
    BOOST_INTRUSIVE_FORCEINLINE node_ptr pointed_node() const
    { return members_.nodeptr_; }
 
-   BOOST_INTRUSIVE_FORCEINLINE list_iterator &operator=(const node_ptr &nodeptr)
+   BOOST_INTRUSIVE_FORCEINLINE list_iterator &operator=(node_ptr nodeptr)
    {  members_.nodeptr_ = nodeptr;  return *this;  }
 
    BOOST_INTRUSIVE_FORCEINLINE const_value_traits_ptr get_value_traits() const

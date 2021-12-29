@@ -63,10 +63,10 @@ struct stateful_value_traits
    const_node_ptr to_node_ptr (const value_type &value) const
    {  return node_array_ + (&value - values_); }
 
-   pointer to_value_ptr(const node_ptr &n) const
+   pointer to_value_ptr(node_ptr n) const
    {  return values_ + (n - node_array_); }
 
-   const_pointer to_value_ptr(const const_node_ptr &n) const
+   const_pointer to_value_ptr(const_node_ptr n) const
    {  return values_ + (n - node_array_); }
 
    pointer  values_;

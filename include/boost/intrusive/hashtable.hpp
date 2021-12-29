@@ -426,7 +426,7 @@ struct group_functions
       }
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void erase_from_group(const slist_node_ptr&, const node_ptr&, detail::false_)
+   BOOST_INTRUSIVE_FORCEINLINE static void erase_from_group(slist_node_ptr, node_ptr, detail::false_)
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_last_in_group(node_ptr first_in_group, detail::true_)
@@ -455,7 +455,7 @@ struct group_functions
    BOOST_INTRUSIVE_FORCEINLINE static void insert_in_group(node_ptr first_in_group, node_ptr n, true_)
    {  group_algorithms::link_after(first_in_group, n);  }
 
-   static void insert_in_group(const node_ptr&, const node_ptr&, false_)
+   static void insert_in_group(node_ptr, node_ptr, false_)
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE static node_ptr split_group(node_ptr const new_first_in_group)
@@ -620,7 +620,7 @@ struct downcast_node_to_value_t
          template rebind_pointer
             <const ValueTraits>::type                   const_value_traits_ptr;
 
-   BOOST_INTRUSIVE_FORCEINLINE downcast_node_to_value_t(const const_value_traits_ptr &ptr)
+   BOOST_INTRUSIVE_FORCEINLINE downcast_node_to_value_t(const_value_traits_ptr ptr)
       :  base_t(ptr)
    {}
 
@@ -1159,7 +1159,7 @@ struct bucket_hash_equal_t
    BOOST_INTRUSIVE_FORCEINLINE bucket_ptr priv_get_cache()
    {  return this->bucket_hash_type::priv_bucket_pointer();   }
 
-   BOOST_INTRUSIVE_FORCEINLINE void priv_set_cache(const bucket_ptr &)
+   BOOST_INTRUSIVE_FORCEINLINE void priv_set_cache(bucket_ptr)
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE std::size_t priv_get_cache_bucket_num()
@@ -1229,13 +1229,10 @@ struct bucket_hash_equal_t<ValueTraits, VoidOrKeyOfValue, VoidOrKeyHash, VoidOrK
    typedef typename detail::unordered_bucket_ptr_impl
       <typename bucket_hash_type::value_traits>::type bucket_ptr;
 
-   BOOST_INTRUSIVE_FORCEINLINE bucket_ptr &priv_get_cache()
+   BOOST_INTRUSIVE_FORCEINLINE bucket_ptr priv_get_cache() const
    {  return cached_begin_;   }
 
-   BOOST_INTRUSIVE_FORCEINLINE const bucket_ptr &priv_get_cache() const
-   {  return cached_begin_;   }
-
-   BOOST_INTRUSIVE_FORCEINLINE void priv_set_cache(const bucket_ptr &p)
+   BOOST_INTRUSIVE_FORCEINLINE void priv_set_cache(bucket_ptr p)
    {  cached_begin_ = p;   }
 
    BOOST_INTRUSIVE_FORCEINLINE std::size_t priv_get_cache_bucket_num()
@@ -1291,8 +1288,8 @@ struct bucket_hash_equal_t<ValueTraits, VoidOrKeyOfValue, VoidOrKeyHash, VoidOrK
          std::size_t current_n = std::size_t(this->priv_get_cache() - this->bucket_hash_type::priv_bucket_pointer());
          for( const std::size_t num_buckets = this->bucket_hash_type::priv_bucket_count()
             ; current_n < num_buckets
-            ; ++current_n, ++this->priv_get_cache()){
-            if(!this->priv_get_cache()->empty()){
+            ; ++current_n, ++cached_begin_){
+            if(!cached_begin_->empty()){
                return;
             }
          }
