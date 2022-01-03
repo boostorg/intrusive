@@ -54,7 +54,7 @@ struct rbtree_node_cloner
       :  base_t(f)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE node_ptr operator()(node_ptr p)
+   node_ptr operator()(node_ptr p)
    {
       node_ptr n = base_t::get()(p);
       NodeTraits::set_color(n, NodeTraits::get_color(p));
@@ -273,7 +273,7 @@ class rbtree_algorithms
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::init_header(node_ptr)
-   BOOST_INTRUSIVE_FORCEINLINE static void init_header(node_ptr header) BOOST_NOEXCEPT
+   static void init_header(node_ptr header) BOOST_NOEXCEPT
    {
       bstree_algo::init_header(header);
       NodeTraits::set_color(header, NodeTraits::red());

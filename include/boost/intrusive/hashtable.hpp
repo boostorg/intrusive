@@ -130,7 +130,7 @@ struct prime_list_holder
    }
 
    template <class SizeType>  //sizeof(SizeType) > sizeof(std::size_t)
-   static BOOST_INTRUSIVE_FORCEINLINE SizeType suggested_upper_bucket_count_dispatch(SizeType n, detail::true_)
+   static SizeType suggested_upper_bucket_count_dispatch(SizeType n, detail::true_)
    {
       std::size_t const c = n > std::size_t(-1)
                             ? std::size_t(-1)
@@ -139,7 +139,7 @@ struct prime_list_holder
    }
 
    template <class SizeType>  //sizeof(SizeType) > sizeof(std::size_t)
-   static BOOST_INTRUSIVE_FORCEINLINE SizeType suggested_lower_bucket_count_dispatch(SizeType n, detail::true_)
+   static SizeType suggested_lower_bucket_count_dispatch(SizeType n, detail::true_)
    {
       std::size_t const c = n > std::size_t(-1)
                             ? std::size_t(-1)
@@ -148,7 +148,7 @@ struct prime_list_holder
    }
 
    template <class SizeType>
-   static BOOST_INTRUSIVE_FORCEINLINE SizeType suggested_upper_bucket_count_dispatch(SizeType n, detail::false_)
+   static SizeType suggested_upper_bucket_count_dispatch(SizeType n, detail::false_)
    {
       std::size_t const c = suggested_upper_bucket_count_impl(static_cast<std::size_t>(n));
       return truncate_size_type<SizeType>(c, detail::bool_<(sizeof(SizeType) < sizeof(std::size_t))>());
@@ -156,7 +156,7 @@ struct prime_list_holder
    }
 
    template <class SizeType>
-   static BOOST_INTRUSIVE_FORCEINLINE SizeType suggested_lower_bucket_count_dispatch(SizeType n, detail::false_)
+   static SizeType suggested_lower_bucket_count_dispatch(SizeType n, detail::false_)
    {
       std::size_t const c = suggested_lower_bucket_count_impl(static_cast<std::size_t>(n));
       return truncate_size_type<SizeType>(c, detail::bool_<(sizeof(SizeType) < sizeof(std::size_t))>());
@@ -445,9 +445,7 @@ struct group_functions
    }
 
    BOOST_INTRUSIVE_FORCEINLINE static node_ptr next_group_if_first_in_group(node_ptr ptr)
-   {
-      return node_traits::get_next(group_traits::get_next(ptr));
-   }
+   {  return node_traits::get_next(group_traits::get_next(ptr));  }
 
    BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_first_in_group(node_ptr n, detail::false_)
    {  return n;  }
@@ -458,7 +456,7 @@ struct group_functions
    static void insert_in_group(node_ptr, node_ptr, false_)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr split_group(node_ptr const new_first_in_group)
+   static node_ptr split_group(node_ptr const new_first_in_group)
    {
       node_ptr const first((get_first_in_group)(new_first_in_group, detail::true_()));
       if(first != new_first_in_group){
@@ -525,10 +523,10 @@ BOOST_INTRUSIVE_FORCEINLINE std::size_t hash_to_bucket(std::size_t hash_value, s
 {  return hash_value & (bucket_cnt - 1);   }
 
 template<bool Power2Buckets, bool Incremental>
-BOOST_INTRUSIVE_FORCEINLINE std::size_t hash_to_bucket_split(std::size_t hash_value, std::size_t bucket_cnt, std::size_t split)
+std::size_t hash_to_bucket_split(std::size_t hash_value, std::size_t bucket_cnt, std::size_t split)
 {
    std::size_t bucket_number = detail::hash_to_bucket(hash_value, bucket_cnt, detail::bool_<Power2Buckets>());
-   if(Incremental)
+   BOOST_IF_CONSTEXPR(Incremental)
       bucket_number -= static_cast<std::size_t>(bucket_number >= split)*(bucket_cnt/2);
    return bucket_number;
 }
@@ -1242,9 +1240,7 @@ struct bucket_hash_equal_t<ValueTraits, VoidOrKeyOfValue, VoidOrKeyHash, VoidOrK
    {  this->cached_begin_ = this->bucket_hash_type::priv_invalid_bucket();  }
 
    BOOST_INTRUSIVE_FORCEINLINE void priv_swap_cache(bucket_hash_equal_t &other)
-   {
-      ::boost::adl_move_swap(this->cached_begin_, other.cached_begin_);
-   }
+   {  ::boost::adl_move_swap(this->cached_begin_, other.cached_begin_);  }
 
    siterator priv_begin() const
    {
@@ -1476,9 +1472,7 @@ struct hashdata_internal
 
    //public functions
    BOOST_INTRUSIVE_FORCEINLINE SizeType split_count() const BOOST_NOEXCEPT
-   {
-      return this->priv_split_traits().get_size();
-   }
+   {  return this->priv_split_traits().get_size();  }
 
    BOOST_INTRUSIVE_FORCEINLINE iterator iterator_to(reference value) BOOST_NOEXCEPT
    {

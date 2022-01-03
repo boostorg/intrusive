@@ -46,14 +46,14 @@ struct avltree_node_cloner
       :  base_t(f)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE node_ptr operator()(node_ptr p)
+   node_ptr operator()(node_ptr p)
    {
       node_ptr n = base_t::get()(p);
       NodeTraits::set_balance(n, NodeTraits::get_balance(p));
       return n;
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE node_ptr operator()(node_ptr p) const
+   node_ptr operator()(node_ptr p) const
    {
       node_ptr n = base_t::get()(p);
       NodeTraits::set_balance(n, NodeTraits::get_balance(p));

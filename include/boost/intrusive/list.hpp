@@ -548,7 +548,7 @@ class list_impl
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Note</b>: Does not affect the validity of iterators and references.
-   BOOST_INTRUSIVE_FORCEINLINE void swap(list_impl& other) BOOST_NOEXCEPT
+   void swap(list_impl& other) BOOST_NOEXCEPT
    {
       node_algorithms::swap_nodes(this->get_root_node(), other.get_root_node());
       this->priv_size_traits().swap(other.priv_size_traits());
@@ -1363,7 +1363,7 @@ class list_impl
          BOOST_INTRUSIVE_INVARIANT_ASSERT(this->priv_size_traits().get_size() == node_count);
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE friend bool operator==(const list_impl &x, const list_impl &y)
+   friend bool operator==(const list_impl &x, const list_impl &y)
    {
       if(constant_time_size && x.size() != y.size()){
          return false;

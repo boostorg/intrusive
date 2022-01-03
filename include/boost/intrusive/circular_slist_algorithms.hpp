@@ -223,7 +223,7 @@ class circular_slist_algorithms
    //! <b>Complexity</b>: Linear to the number of elements in the circular list
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static void unlink(node_ptr this_node) BOOST_NOEXCEPT
+   static void unlink(node_ptr this_node) BOOST_NOEXCEPT
    {
       if(NodeTraits::get_next(this_node))
          base_t::unlink_after(get_previous_node(this_node));

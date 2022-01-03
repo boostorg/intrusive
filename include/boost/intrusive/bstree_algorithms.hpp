@@ -233,7 +233,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant time.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr root_node(const_node_ptr header)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr root_node(const_node_ptr header) BOOST_NOEXCEPT
    {
       node_ptr p = node_traits::get_parent(header);
       return p ? p : detail::uncast(header);
@@ -458,8 +458,6 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!   the node, since no rebalancing and comparison is needed. Experimental function
    BOOST_INTRUSIVE_FORCEINLINE static void replace_node(node_ptr node_to_be_replaced, node_ptr new_node) BOOST_NOEXCEPT
    {
-      if(node_to_be_replaced == new_node)
-         return;
       replace_node(node_to_be_replaced, base_type::get_header(node_to_be_replaced), new_node);
    }
 
@@ -479,8 +477,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!   the node, since no rebalancing or comparison is needed. Experimental function
    static void replace_node(node_ptr node_to_be_replaced, node_ptr header, node_ptr new_node) BOOST_NOEXCEPT
    {
-      if(node_to_be_replaced == new_node)
-         return;
+      BOOST_ASSERT(node_to_be_replaced != new_node);
 
       //Update header if necessary
       if(node_to_be_replaced == NodeTraits::get_left(header)){
@@ -567,7 +564,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Throws</b>: Nothing.
    //!
    //! <b>Nodes</b>: If node is inserted in a tree, this function corrupts the tree.
-   BOOST_INTRUSIVE_FORCEINLINE static void init(node_ptr node) BOOST_NOEXCEPT
+   static void init(node_ptr node) BOOST_NOEXCEPT
    {
       NodeTraits::set_parent(node, node_ptr());
       NodeTraits::set_left(node, node_ptr());
@@ -579,7 +576,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static bool inited(const_node_ptr node)
+   static bool inited(const_node_ptr node)
    {
       return !NodeTraits::get_parent(node) &&
              !NodeTraits::get_left(node)   &&
@@ -596,7 +593,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Throws</b>: Nothing.
    //!
    //! <b>Nodes</b>: If node is inserted in a tree, this function corrupts the tree.
-   BOOST_INTRUSIVE_FORCEINLINE static void init_header(node_ptr header) BOOST_NOEXCEPT
+   static void init_header(node_ptr header) BOOST_NOEXCEPT
    {
       NodeTraits::set_parent(header, node_ptr());
       NodeTraits::set_left(header, header);
