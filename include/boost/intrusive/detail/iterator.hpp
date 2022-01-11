@@ -49,6 +49,11 @@ namespace boost {
 namespace intrusive {
 
 using boost::movelib::iterator_traits;
+using boost::movelib::iter_difference;
+using boost::movelib::iter_value;
+using boost::movelib::iter_category;
+using boost::movelib::iter_size;
+
 
 ////////////////////
 //    iterator
@@ -115,7 +120,7 @@ struct get_std_category_from_tag
 
 template<class It>
 struct get_std_category_from_it
-   : get_std_category_from_tag< typename boost::intrusive::iterator_traits<It>::iterator_category >
+   : get_std_category_from_tag< typename boost::intrusive::iter_category<It>::type >
 {};
 
 ////////////////////////////////////////
@@ -163,12 +168,12 @@ struct iterator_enable_if_convertible_tag
 ////////////////////////////////////////
 template<class I, class Tag>
 struct iterator_enable_if_tag_difference_type
-   : iterator_enable_if_tag<I, Tag, typename boost::intrusive::iterator_traits<I>::difference_type>
+   : iterator_enable_if_tag<I, Tag, typename boost::intrusive::iter_difference<I>::type>
 {};
 
 template<class I, class Tag>
 struct iterator_disable_if_tag_difference_type
-   : iterator_disable_if_tag<I, Tag, typename boost::intrusive::iterator_traits<I>::difference_type>
+   : iterator_disable_if_tag<I, Tag, typename boost::intrusive::iter_difference<I>::type>
 {};
 
 ////////////////////
@@ -177,7 +182,7 @@ struct iterator_disable_if_tag_difference_type
 
 template<class InputIt>
 BOOST_INTRUSIVE_FORCEINLINE typename iterator_enable_if_tag<InputIt, std::input_iterator_tag>::type
-   iterator_advance(InputIt& it, typename iterator_traits<InputIt>::difference_type n)
+   iterator_advance(InputIt& it, typename iter_difference<InputIt>::type n)
 {
    while(n--)
       ++it;
@@ -185,7 +190,7 @@ BOOST_INTRUSIVE_FORCEINLINE typename iterator_enable_if_tag<InputIt, std::input_
 
 template<class InputIt>
 typename iterator_enable_if_tag<InputIt, std::forward_iterator_tag>::type
-   iterator_advance(InputIt& it, typename iterator_traits<InputIt>::difference_type n)
+   iterator_advance(InputIt& it, typename iter_difference<InputIt>::type n)
 {
    while(n--)
       ++it;
@@ -193,7 +198,7 @@ typename iterator_enable_if_tag<InputIt, std::forward_iterator_tag>::type
 
 template<class InputIt>
 BOOST_INTRUSIVE_FORCEINLINE typename iterator_enable_if_tag<InputIt, std::bidirectional_iterator_tag>::type
-   iterator_advance(InputIt& it, typename iterator_traits<InputIt>::difference_type n)
+   iterator_advance(InputIt& it, typename iter_difference<InputIt>::type n)
 {
    for (; 0 < n; --n)
       ++it;
@@ -210,7 +215,7 @@ BOOST_INTRUSIVE_FORCEINLINE typename iterator_enable_if_tag<InputIt, std::random
 
 template<class It>
 BOOST_INTRUSIVE_FORCEINLINE 
-   void iterator_uadvance(It& it, typename iterator_traits<It>::size_type n)
+   void iterator_uadvance(It& it, typename iter_size<It>::type n)
 {
    (iterator_advance)(it, (typename iterator_traits<It>::difference_type)n);
 }
@@ -223,7 +228,7 @@ typename iterator_disable_if_tag_difference_type
    <InputIt, std::random_access_iterator_tag>::type
       iterator_distance(InputIt first, InputIt last)
 {
-   typename iterator_traits<InputIt>::difference_type off = 0;
+   typename iter_difference<InputIt>::type off = 0;
    while(first != last){
       ++off;
       ++first;
@@ -236,7 +241,7 @@ BOOST_INTRUSIVE_FORCEINLINE typename iterator_enable_if_tag_difference_type
    <InputIt, std::random_access_iterator_tag>::type
       iterator_distance(InputIt first, InputIt last)
 {
-   typename iterator_traits<InputIt>::difference_type off = last - first;
+   typename iter_difference<InputIt>::type off = last - first;
    return off;
 }
 
@@ -245,10 +250,10 @@ BOOST_INTRUSIVE_FORCEINLINE typename iterator_enable_if_tag_difference_type
 ////////////////////////////////////////
 
 template<class It>
-BOOST_INTRUSIVE_FORCEINLINE typename iterator_traits<It>::size_type
+BOOST_INTRUSIVE_FORCEINLINE typename iter_size<It>::type
    iterator_udistance(It first, It last)
 {
-   return (typename iterator_traits<It>::size_type)(iterator_distance)(first, last);
+   return (typename iter_size<It>::type)(iterator_distance)(first, last);
 }
 
 ////////////////////////////////////////
@@ -256,7 +261,7 @@ BOOST_INTRUSIVE_FORCEINLINE typename iterator_traits<It>::size_type
 ////////////////////////////////////////
 
 template<class InputIt>
-BOOST_INTRUSIVE_FORCEINLINE InputIt iterator_next(InputIt it, typename iterator_traits<InputIt>::difference_type n)
+BOOST_INTRUSIVE_FORCEINLINE InputIt iterator_next(InputIt it, typename iter_difference<InputIt>::type n)
 {
    (iterator_advance)(it, n);
    return it;
