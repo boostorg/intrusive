@@ -65,9 +65,13 @@ class slist_iterator
    BOOST_INTRUSIVE_FORCEINLINE slist_iterator()
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE explicit slist_iterator(node_ptr nodeptr, const_value_traits_ptr traits_ptr)
+   BOOST_INTRUSIVE_FORCEINLINE slist_iterator(node_ptr nodeptr, const_value_traits_ptr traits_ptr)
       : members_(nodeptr, traits_ptr)
    {}
+
+   BOOST_INTRUSIVE_FORCEINLINE explicit slist_iterator(node_ptr nodeptr)
+      : members_(nodeptr, const_value_traits_ptr())
+   {  BOOST_STATIC_ASSERT((stateful_value_traits == false));  }
 
    BOOST_INTRUSIVE_FORCEINLINE slist_iterator(const slist_iterator &other)
       :  members_(other.pointed_node(), other.get_value_traits())
