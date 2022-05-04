@@ -3886,6 +3886,12 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 [section:release_notes Release Notes]
 
+[section:release_notes_boost_1_80_00 Boost 1.80 Release]
+
+* Semi-intrusive hash containers rewritten to reduce compilation times and improve runtime performance.
+
+[endsect]
+
 [section:release_notes_boost_1_79_00 Boost 1.79 Release]
 
 * The library now compiles without warnings with GCC's -Wcast-align=strict
