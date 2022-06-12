@@ -93,6 +93,9 @@ class slist_iterator
    BOOST_INTRUSIVE_FORCEINLINE const_value_traits_ptr get_value_traits() const
    {  return members_.get_ptr(); }
 
+   BOOST_INTRUSIVE_FORCEINLINE bool operator!() const
+   {  return !members_.nodeptr_; }
+
    public:
    BOOST_INTRUSIVE_FORCEINLINE slist_iterator& operator++()
    {
@@ -111,7 +114,7 @@ class slist_iterator
    {  return l.pointed_node() == r.pointed_node();   }
 
    BOOST_INTRUSIVE_FORCEINLINE friend bool operator!= (const slist_iterator& l, const slist_iterator& r)
-   {  return !(l == r);   }
+   {  return l.pointed_node() != r.pointed_node();   }
 
    BOOST_INTRUSIVE_FORCEINLINE reference operator*() const
    {  return *operator->();   }
