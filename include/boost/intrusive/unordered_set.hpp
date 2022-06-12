@@ -456,6 +456,7 @@ struct make_unordered_set
       |  (std::size_t(packed_options::compare_hash)*hash_bool_flags::compare_hash_pos)
       |  (std::size_t(packed_options::incremental)*hash_bool_flags::incremental_pos)
       |  (std::size_t(packed_options::linear_buckets)*hash_bool_flags::linear_buckets_pos)
+      |  (std::size_t(packed_options::fastmod_buckets)*hash_bool_flags::fastmod_buckets_pos)
       > implementation_defined;
 
    /// @endcond
@@ -910,6 +911,7 @@ struct make_unordered_multiset
       |  (std::size_t(packed_options::compare_hash)*hash_bool_flags::compare_hash_pos)
       |  (std::size_t(packed_options::incremental)*hash_bool_flags::incremental_pos)
       |  (std::size_t(packed_options::linear_buckets)*hash_bool_flags::linear_buckets_pos)
+      |  (std::size_t(packed_options::fastmod_buckets)*hash_bool_flags::fastmod_buckets_pos)
       > implementation_defined;
 
    /// @endcond

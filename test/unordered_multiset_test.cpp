@@ -28,7 +28,7 @@
 using namespace boost::intrusive;
 
 template < class ValueTraits, bool ConstantTimeSize, bool CacheBegin, bool CompareHash
-         , bool Incremental, bool Map, bool DefaultHolder, bool LinearBuckets>
+         , bool Incremental, bool Map, bool DefaultHolder, bool LinearBuckets, bool FastMod>
 struct rebinder
 {
    typedef unordered_rebinder_common<ValueTraits, DefaultHolder, Map> common_t;
@@ -47,6 +47,7 @@ struct rebinder
          , compare_hash<CompareHash>
          , incremental<Incremental>
          , linear_buckets<LinearBuckets>
+//         , fastmod_buckets<FastMod>
          , typename common_t::holder_opt
          , typename common_t::key_of_value_opt
          , Option1
@@ -90,7 +91,8 @@ class test_main_template<VoidPointer, ConstantTimeSize, DefaultHolder, Map, Base
       test::test_unordered
          <  //cache_begin, compare_hash, incremental
             rebinder< base_hook_t, ConstantTimeSize, ConstantTimeSize
-                    , !ConstantTimeSize, !!ConstantTimeSize, Map, DefaultHolder, LinearBuckets>
+                    , !ConstantTimeSize, !!ConstantTimeSize, Map, DefaultHolder
+                    , LinearBuckets, LinearBuckets && !ConstantTimeSize>
          >::test_all(data);
    }
 };
@@ -118,7 +120,8 @@ class test_main_template<VoidPointer, ConstantTimeSize, DefaultHolder, Map, Memb
       test::test_unordered
          < //cache_begin, compare_hash, incremental
            rebinder <member_hook_t, ConstantTimeSize, false
-                  , !ConstantTimeSize, false, !ConstantTimeSize, DefaultHolder, LinearBuckets>
+                  , !ConstantTimeSize, false, !ConstantTimeSize, DefaultHolder
+                  , LinearBuckets, LinearBuckets && !ConstantTimeSize>
          >::test_all(data);
    }
 };
@@ -142,7 +145,8 @@ class test_main_template<VoidPointer, ConstantTimeSize, DefaultHolder, Map, NonM
       test::test_unordered
          < //cache_begin, compare_hash, incremental
            rebinder< typename testval_traits_t::nonhook_value_traits
-                   , ConstantTimeSize, false, false, false, Map, DefaultHolder, LinearBuckets>
+                   , ConstantTimeSize, false, false, false, Map, DefaultHolder
+                   , LinearBuckets, LinearBuckets && !ConstantTimeSize>
          >::test_all(data);
    }
 };
@@ -160,6 +164,7 @@ int main()
    test_main_template<void*, false,  true, false, Member, true>::execute();
    test_main_template<void*,  true, false, false, NonMember, true>::execute();
    test_main_template<void*,  true,  true, false, Base, true>::execute();
+   test_main_template<void*,  false,  true, false, Base, true>::execute();
 
    //smart_ptr
    test_main_template<smart_ptr<void>, false, false, false, Member, false>::execute();

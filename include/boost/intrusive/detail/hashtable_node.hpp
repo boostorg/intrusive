@@ -201,16 +201,12 @@ class hashtable_iterator
    BOOST_INTRUSIVE_FORCEINLINE const value_traits &priv_value_traits() const
    {  return traitsptr_->priv_value_traits();  }
 
-   BOOST_INTRUSIVE_FORCEINLINE const bucket_traits &priv_bucket_traits() const
-   {  return traitsptr_->priv_bucket_traits();  }
-
    private:
 
    void increment()
    {
-      const bucket_traits &rbuck_traits = this->priv_bucket_traits();
-      bucket_type* const buckets = boost::movelib::to_raw_pointer(rbuck_traits.bucket_begin());
-      const std::size_t buckets_len = rbuck_traits.bucket_count();
+      bucket_type* const buckets = boost::movelib::to_raw_pointer(traitsptr_->priv_bucket_traits().bucket_begin());
+      const std::size_t buckets_len = traitsptr_->priv_bucket_traits().bucket_count();
 
       ++slist_it_;
       const slist_node_ptr n = slist_it_.pointed_node();
@@ -334,7 +330,7 @@ class hashtable_iterator<BucketValueTraits, true, IsConst>
    { return i.slist_it_ == i2.slist_it_; }
 
    BOOST_INTRUSIVE_FORCEINLINE friend bool operator!= (const hashtable_iterator& i, const hashtable_iterator& i2)
-   { return !(i == i2); }
+   { return i.slist_it_ != i2.slist_it_; }
 
    BOOST_INTRUSIVE_FORCEINLINE reference operator*() const
    { return *this->operator ->(); }
