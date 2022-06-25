@@ -1546,6 +1546,9 @@ struct bucket_hash_equal_t
    BOOST_INTRUSIVE_FORCEINLINE void priv_set_cache(bucket_ptr)
    {}
 
+   BOOST_INTRUSIVE_FORCEINLINE void priv_set_cache_bucket_num(std::size_t)
+   {}
+
    BOOST_INTRUSIVE_FORCEINLINE std::size_t priv_get_cache_bucket_num()
    {  return 0u;  }
 
@@ -1637,6 +1640,12 @@ struct bucket_hash_equal_t<ValueTraits, VoidOrKeyOfValue, VoidOrKeyHash, VoidOrK
 
    BOOST_INTRUSIVE_FORCEINLINE void priv_set_cache(bucket_ptr p)
    {  cached_begin_ = p;   }
+
+   BOOST_INTRUSIVE_FORCEINLINE void priv_set_cache_bucket_num(std::size_t insertion_bucket)
+   {
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(insertion_bucket <= this->priv_usable_bucket_count());
+      this->cached_begin_ = this->priv_bucket_pointer() + std::ptrdiff_t(insertion_bucket);
+   }
 
    BOOST_INTRUSIVE_FORCEINLINE std::size_t priv_get_cache_bucket_num()
    {  return std::size_t(this->cached_begin_ - this->priv_bucket_pointer());  }
@@ -3602,9 +3611,8 @@ class hashtable_impl
             slist_node_ptr old_bucket_node_ptr = old_buckets[difference_type(n)].get_node_ptr();
             slist_node_algorithms::transfer_after(new_bucket_nodeptr, old_bucket_node_ptr);
          }
-         //Put cache to safe position
-         this->priv_init_cache();
-         this->priv_insertion_update_cache(ini_n);
+         //Reset cache to safe position
+         this->priv_set_cache_bucket_num(ini_n);
       }
 
       this->priv_set_sentinel_bucket();
@@ -3759,7 +3767,6 @@ class hashtable_impl
       this->priv_size_traits().set_size(0);
       //Put cache to safe position
       this->priv_init_cache();
-      this->priv_insertion_update_cache(size_type(0u));
       this->priv_unset_sentinel_bucket();
 
       const size_type split = this->rehash_split_from_bucket_count(new_bucket_count);
@@ -3824,8 +3831,7 @@ class hashtable_impl
       if(&new_bucket_traits != &this->priv_bucket_traits())
          this->priv_bucket_traits() = new_bucket_traits;
       this->priv_set_sentinel_bucket();
-      this->priv_init_cache();
-      this->priv_insertion_update_cache(new_first_bucket_num);
+      this->priv_set_cache_bucket_num(new_first_bucket_num);
       rollback1.release();
       rollback2.release();
    }
@@ -3923,7 +3929,7 @@ class hashtable_impl
       rollback.release();
       this->priv_size_traits().set_size(src.priv_size_traits().get_size());
       this->priv_split_traits().set_size(dst_bucket_count);
-      this->priv_insertion_update_cache(0u);
+      this->priv_set_cache_bucket_num(0u);
       this->priv_erasure_update_cache();
    }
 

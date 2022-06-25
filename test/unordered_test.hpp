@@ -635,6 +635,14 @@ void test_unordered<ContainerDefiner>::test_rehash(value_cont_type& values, deta
    testset1.full_rehash();
    {  int init_values [] = { 1, 2, 2, 3, 4, 5 };
       TEST_INTRUSIVE_SEQUENCE_MAYBEUNIQUE( init_values, testset1 );  }
+
+   //Test empty rehash
+   testset1.clear();
+   testset1.rehash(bucket_traits(
+      pointer_traits<bucket_ptr>::pointer_to(buckets1[0]), sizeof(buckets1) / sizeof(*buckets1)));
+   BOOST_TEST(testset1.empty());
+   testset1.full_rehash();
+   BOOST_TEST(testset1.empty());
 }
 
 //test: find, equal_range (lower_bound, upper_bound):
