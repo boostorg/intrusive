@@ -3892,6 +3892,14 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 [endsect]
 
+[section:release_notes_boost_1_80_00 Boost 1.80 Release]
+
+* Unordered containers optimized for performance. Experimental `linear_buckets` and `fastmod_buckets` options.
+* Fixed bugs:
+   * [@https://github.com/boostorg/intrusive/issues/75 GitHub #75: ['Bug: Rehashing an empty unordered_set with cache_begin set to true hits an assert]]
+
+[endsect]
+
 [section:release_notes_boost_1_79_00 Boost 1.79 Release]
 
 * The library now compiles without warnings with GCC's -Wcast-align=strict
