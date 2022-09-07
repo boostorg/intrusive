@@ -40,6 +40,7 @@
 #include <boost/intrusive/detail/value_functors.hpp>
 #include <boost/intrusive/detail/node_cloner_disposer.hpp>
 
+#include <boost/core/ignore_unused.hpp>
 #include <boost/move/utility_core.hpp>
 #include <boost/static_assert.hpp>
 
@@ -1937,6 +1938,7 @@ class slist_impl
          return;
       }
       size_t node_count = 0;
+      boost::ignore_unused(node_count);
       const_node_ptr p = header_ptr;
       while (true)
       {

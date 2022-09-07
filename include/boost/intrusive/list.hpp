@@ -36,6 +36,7 @@
 #include <boost/intrusive/detail/size_holder.hpp>
 #include <boost/intrusive/detail/algorithm.hpp>
 
+#include <boost/core/ignore_unused.hpp>
 #include <boost/move/utility_core.hpp>
 #include <boost/static_assert.hpp>
 
@@ -1349,6 +1350,7 @@ class list_impl
          return;
       }
       size_t node_count = 0;
+      boost::ignore_unused(node_count);
       const_node_ptr p = header_ptr;
       while (true)
       {
