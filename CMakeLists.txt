@@ -1,4 +1,5 @@
 # Copyright 2019 Mike Dev
+# Copyright 2023 Ion Gaztanaga
 # Distributed under the Boost Software License, Version 1.0.
 # See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt
 
@@ -16,7 +17,6 @@ target_link_libraries( boost_intrusive
         Boost::assert
         Boost::config
         Boost::container_hash
-        Boost::core
         Boost::move
         Boost::static_assert
 )
