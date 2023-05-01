@@ -12,7 +12,13 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_INT_HOLDER_HPP
 #define BOOST_INTRUSIVE_DETAIL_INT_HOLDER_HPP
 
-#include <boost/functional/hash/hash.hpp>
+#include <boost/container_hash/hash.hpp>
+
+//GCC has some false array_bounds warnings starting in GCC 12
+#if defined(BOOST_CLANG) || (defined(BOOST_GCC) && (BOOST_GCC >= 120000))
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
 
 struct int_holder
 {
@@ -107,5 +113,10 @@ struct int_priority_of_value
    type operator()(const ValueType &tv) const
    {  return tv.int_value();  }
 };
+
+//GCC has some false array_bounds warnings starting in GCC 12
+#if defined(BOOST_CLANG) || (defined(BOOST_GCC) && (BOOST_GCC >= 120000))
+#pragma GCC diagnostic pop
+#endif
 
 #endif   //BOOST_INTRUSIVE_DETAIL_INT_HOLDER_HPP
