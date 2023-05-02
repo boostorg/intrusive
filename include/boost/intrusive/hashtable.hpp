@@ -591,7 +591,7 @@ inline typename pointer_traits<SlistNodePtr>::template rebind_pointer<Node>::typ
    dcast_bucket_ptr(const SlistNodePtr &p)
 {
    typedef typename pointer_traits<SlistNodePtr>::template rebind_pointer<Node>::type node_ptr;
-   return pointer_traits<node_ptr>::pointer_to(static_cast<Node&>(*p));
+   return pointer_traits<node_ptr>::static_cast_from(p);
 }
 
 template<class NodeTraits>
