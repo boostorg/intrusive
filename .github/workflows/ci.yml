@@ -24,15 +24,6 @@ jobs:
       matrix:
         include:
           # Linux, gcc
-          - toolset: gcc-4.4
-            cxxstd: "98,0x"
-            address-model: 32,64
-            os: ubuntu-latest
-            container: ubuntu:16.04
-            install:
-              - g++-4.4-multilib
-            sources:
-              - "ppa:ubuntu-toolchain-r/test"
           - toolset: gcc-4.6
             cxxstd: "03,0x"
             address-model: 32,64
