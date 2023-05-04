@@ -152,7 +152,7 @@ class linear_slist_algorithms
    //!
    //! <b>Throws</b>: Nothing.
    inline static void init_header(node_ptr this_node) BOOST_NOEXCEPT
-   {  NodeTraits::set_next(this_node, node_ptr ());  }
+   {  NodeTraits::set_next(this_node, node_ptr());  }
 
    //! <b>Requires</b>: 'p' is the first node of a list.
    //!
