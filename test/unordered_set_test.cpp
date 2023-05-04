@@ -149,25 +149,17 @@ int main()
    //VoidPointer x ConstantTimeSize x Map x DefaultHolder
 
    //void pointer
-   test_main_template<void*, false, false, false, Base, false>::execute();
-   test_main_template<void*, false,  true, false, Member, false>::execute();
-   test_main_template<void*,  true, false, false, NonMember, false>::execute();
-   test_main_template<void*,  true,  true, false, Base, false>::execute();
-
-   test_main_template<void*, false, false, false, Base, true>::execute();
-   test_main_template<void*, false, true, false, Member, true>::execute();
-   test_main_template<void*, true, false, false, NonMember, true>::execute();
-   test_main_template<void*, true, true, false, Base, true>::execute();
+   test_main_template<void*, true, true, true, Base, true>::execute();
+   test_main_template<void*,  false,  false, true, Member, true>::execute();
+   test_main_template<void*, true, true,  false, NonMember, true>::execute();
+   test_main_template<void*,  false,  false, true, Member, false>::execute();
+   test_main_template<void*, true, true,  false, NonMember, false>::execute();
+   test_main_template<void*,  false,  false, false, Base, false>::execute();
 
    //smart_ptr
-   test_main_template<smart_ptr<void>, false, false, false, Member, false>::execute();
-   test_main_template<smart_ptr<void>, false,  true, false, NonMember, false>::execute();
-   test_main_template<smart_ptr<void>,  true, false, false, Base, false>::execute();
-   test_main_template<smart_ptr<void>,  true,  true, false, Member, false>::execute();
-
-   test_main_template<smart_ptr<void>, false, false, false, Member, true>::execute();
-   test_main_template<smart_ptr<void>, false, true, false, NonMember, true>::execute();
-   test_main_template<smart_ptr<void>, true, false, false, Base, true>::execute();
+   test_main_template<smart_ptr<void>, true, true, true, Member, true>::execute();
+   test_main_template<smart_ptr<void>, true,  false,  false, NonMember, true>::execute();
+   test_main_template<smart_ptr<void>,  false,  false,  false, Base, false>::execute();
 
    ////bounded_ptr (bool ConstantTimeSize, bool Map)
    //test_main_template_bptr< false, false >::execute();
