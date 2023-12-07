@@ -277,7 +277,7 @@ class unordered_set_impl
    template<class KeyType, class KeyHasher, class KeyEqual>
    iterator find(const KeyType& key, KeyHasher hash_func, KeyEqual equal_func);
 
-   //! @copydoc ::boost::intrusive::hashtable::count(const key_type &)const
+   //! @copydoc ::boost::intrusive::hashtable::find(const key_type &)const
    const_iterator find(const key_type &key) const;
 
    //! @copydoc ::boost::intrusive::hashtable::find(const KeyType &,KeyHasher,KeyEqual)const
@@ -767,7 +767,7 @@ class unordered_multiset_impl
    template<class KeyType, class KeyHasher, class KeyEqual>
    iterator find(const KeyType& key, KeyHasher hash_func, KeyEqual equal_func);
 
-   //! @copydoc ::boost::intrusive::hashtable::count(const key_type &)const
+   //! @copydoc ::boost::intrusive::hashtable::find(const key_type &)const
    const_iterator find(const key_type &key) const;
 
    //! @copydoc ::boost::intrusive::hashtable::find(const KeyType &,KeyHasher,KeyEqual)const
