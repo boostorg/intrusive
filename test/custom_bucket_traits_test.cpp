@@ -11,7 +11,6 @@
 /////////////////////////////////////////////////////////////////////////////
 #include <boost/intrusive/unordered_set.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
-#include <boost/container_hash/hash.hpp>
 #include <boost/static_assert.hpp>
 #include <vector>
 
@@ -30,7 +29,7 @@ class MyClass : public unordered_set_base_hook<>
    {  return l.int_ == r.int_;   }
 
    friend std::size_t hash_value(const MyClass &v)
-   {  return boost::hash_value(v.int_); }
+   {  return std::size_t(v.int_);   }
 };
 
 struct uset_value_traits

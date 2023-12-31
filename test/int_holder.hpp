@@ -12,8 +12,6 @@
 #ifndef BOOST_INTRUSIVE_DETAIL_INT_HOLDER_HPP
 #define BOOST_INTRUSIVE_DETAIL_INT_HOLDER_HPP
 
-#include <boost/container_hash/hash.hpp>
-
 //GCC has some false array_bounds warnings starting in GCC 12
 #if defined(BOOST_CLANG) || (defined(BOOST_GCC) && (BOOST_GCC >= 120000))
 #pragma GCC diagnostic push
@@ -88,10 +86,7 @@ struct int_holder
    {  return int_ != i;   }
 
    friend std::size_t hash_value(const int_holder &t)
-   {
-      boost::hash<int> hasher;
-      return hasher((&t)->int_value());
-   }
+   {  return  std::size_t((&t)->int_value());  }
 
    int int_;
 };
