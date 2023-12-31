@@ -15,14 +15,18 @@
 #include <boost/intrusive/set.hpp>
 #include <boost/intrusive/unordered_set.hpp>
 #include <vector>
+
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 #include <cassert>
 
 using namespace boost::intrusive;
 
 class MyClass : public set_base_hook<>
-              , public unordered_set_base_hook<>
+   , public unordered_set_base_hook<>
 {
-   public:
+public:
    int first;
    explicit MyClass(int i) : first(i){}
 };
