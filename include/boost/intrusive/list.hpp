@@ -1187,14 +1187,14 @@ class list_impl
    //! <b>Effects</b>: Removes adjacent duplicate elements or adjacent
    //!   elements that are equal from the list. No destructors are called.
    //!
-   //! <b>Throws</b>: If std::equal_to<value_type throws. Basic guarantee.
+   //! <b>Throws</b>: If the comparison operator throws. Basic guarantee.
    //!
    //! <b>Complexity</b>: Linear time (size()-1 comparisons calls to pred()).
    //!
    //! <b>Note</b>: The relative order of elements that are not removed is unchanged,
    //!   and iterators to elements that are not removed remain valid.
    void unique()
-   {  this->unique_and_dispose(std::equal_to<value_type>(), detail::null_disposer());  }
+   {  this->unique_and_dispose(value_equal<value_type>(), detail::null_disposer());  }
 
    //! <b>Effects</b>: Removes adjacent duplicate elements or adjacent
    //!   elements that satisfy some binary predicate from the list.
@@ -1216,7 +1216,7 @@ class list_impl
    //!   elements that are equal from the list.
    //!   Disposer::operator()(pointer) is called for every removed element.
    //!
-   //! <b>Throws</b>: If std::equal_to<value_type throws. Basic guarantee.
+   //! <b>Throws</b>: If the equality operator throws. Basic guarantee.
    //!
    //! <b>Complexity</b>: Linear time (size()-1) comparisons equality comparisons.
    //!
@@ -1224,7 +1224,7 @@ class list_impl
    //!   and iterators to elements that are not removed remain valid.
    template<class Disposer>
    void unique_and_dispose(Disposer disposer)
-   {  this->unique_and_dispose(std::equal_to<value_type>(), disposer);  }
+   {  this->unique_and_dispose(value_equal<value_type>(), disposer);  }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!
