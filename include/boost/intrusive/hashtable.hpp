@@ -32,6 +32,8 @@
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 
+#include <boost/move/detail/meta_utils_core.hpp>
+
 //General intrusive utilities
 #include <boost/intrusive/detail/hashtable_node.hpp>
 #include <boost/intrusive/detail/transform_iterator.hpp>
@@ -57,7 +59,6 @@
 #include <boost/intrusive/linear_slist_algorithms.hpp>
 
 //boost
-#include <boost/container_hash/hash.hpp>
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/move/utility_core.hpp>
@@ -69,6 +70,9 @@
 #include <cstddef>      //std::size_t
 #include <boost/cstdint.hpp>      //std::uint64_t
 
+
+#include "detail/hash.hpp"
+
 #if defined(BOOST_HAS_PRAGMA_ONCE)
 #  pragma once
 #endif
@@ -79,7 +83,9 @@
 
 
 namespace boost {
+
 namespace intrusive {
+
 
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
@@ -1394,7 +1400,7 @@ struct get_hash
 template<class T>
 struct get_hash<void, T>
 {
-   typedef ::boost::hash<T> type;
+   typedef detail::internal_hash_functor<T> type;
 };
 
 template<class EqualTo, class>

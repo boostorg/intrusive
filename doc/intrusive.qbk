@@ -1304,7 +1304,11 @@ And they also can receive additional options:
    in containers. Default: `equal< std::equal_to<T> >`
 
 *  [*`hash<class Hash>`]: Hash function to be used in the container.
-   Default: `hash< boost::hash<T> >`
+   Default: internal hash functor that hashes scalar types, triggering unqualified call to
+           `hash_value`for non-scalar types (boost::hash<T> compatible protocol). If
+           the ADL call does not find a viable candidate a boost::hash<T>() call is tried
+           in case the user has included boost/container_hash/hash.hpp and a viable
+           candidate is found there. Fails otherwise.
 
 *  [*`bucket_traits<class BucketTraits>`]: A type that wraps the bucket vector to
    be used by the unordered container. Default: a type initialized by the address
