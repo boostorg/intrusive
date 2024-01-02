@@ -3890,6 +3890,25 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 [section:release_notes Release Notes]
 
+[section:release_notes_boost_1_85_00 Boost 1.85 Release]
+
+* Potentially breaking: Unordered containers use now by default an internal a `boost::hash`-protocol compatible internal hash functor.
+   * Reasons:
+      * Since Boost 1.84 Boost.ContainerHash requires C++11, breaking Boost.Intrusive C++03 users.
+      * To avoid header inclusion dependency on Boost.ContainerHash, which indirectly also brings other libraries (Boost.Describe, Boost.Mp11...).
+   * The new default hash function:
+       * Handles scalar types directly (in case scalar types are used with `key_of_value`) with trivial hashes (similar to `boost::hash`).
+       * For other types (most Boost.Intrusive users are here), uses ADL-based `hash_function` call, just like `boost::hash`.
+       * If that ADL lookup fails, forward declares `boost::hash` and calls through an object of that type. If the user has included `boost/container_hash/hash.hpp`
+         before or after including Boost.Intrusive, `boost::hash` will be properly called.
+   * It's possible that some Boost.Intrusive users were using Boost.ContainerHash functions/features without including the needed
+     `boost/container_hash/hash.hpp` header, since it was indirectly included through Boost.Intrusive. Those users will need to
+     explicitly include `boost/container_hash/hash.hpp`to obtain Boost.ContainerHash features.
+
+* Boost.Intrusive no longer depends on Boost.StaticCast.
+
+[endsect]
+
 [section:release_notes_boost_1_82_00 Boost 1.82 Release]
 
 * Fixed bugs:
