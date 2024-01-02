@@ -108,7 +108,7 @@ template<unsigned> struct static_assert_test {};
 #define BOOST_INTRUSIVE_STATIC_ASSERT(B) \
          typedef ::boost::intrusive::detail::static_assert_test<\
             (unsigned)sizeof(::boost::intrusive::detail::STATIC_ASSERTION_FAILURE<bool(B)>)>\
-               BOOST_JOIN(boost_static_assert_typedef_, __LINE__) BOOST_ATTRIBUTE_UNUSED
+               BOOST_JOIN(boost_intrusive_static_assert_typedef_, __LINE__) BOOST_ATTRIBUTE_UNUSED
 
 #endif
 
