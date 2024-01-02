@@ -17,5 +17,4 @@ target_link_libraries( boost_intrusive
         Boost::assert
         Boost::config
         Boost::move
-        Boost::static_assert
 )
