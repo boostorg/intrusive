@@ -17,7 +17,6 @@
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/hashtable.hpp>
 #include <boost/move/utility_core.hpp>
-#include <boost/static_assert.hpp>
 
 #if defined(BOOST_HAS_PRAGMA_ONCE)
 #  pragma once
@@ -488,7 +487,7 @@ class unordered_set
       >::type Base;
 
    //Assert if passed value traits are compatible with the type
-   BOOST_STATIC_ASSERT((detail::is_same<typename Base::value_traits::value_type, T>::value));
+   BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename Base::value_traits::value_type, T>::value));
    BOOST_MOVABLE_BUT_NOT_COPYABLE(unordered_set)
 
    public:
@@ -943,7 +942,7 @@ class unordered_multiset
          #endif
       >::type   Base;
    //Assert if passed value traits are compatible with the type
-   BOOST_STATIC_ASSERT((detail::is_same<typename Base::value_traits::value_type, T>::value));
+   BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename Base::value_traits::value_type, T>::value));
    BOOST_MOVABLE_BUT_NOT_COPYABLE(unordered_multiset)
 
    public:

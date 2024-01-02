@@ -27,7 +27,6 @@
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/intrusive/detail/node_holder.hpp>
 #include <boost/intrusive/detail/algo_type.hpp>
-#include <boost/static_assert.hpp>
 
 namespace boost {
 namespace intrusive {
@@ -202,13 +201,13 @@ class generic_hook
    inline bool is_linked() const BOOST_NOEXCEPT
    {
       //is_linked() can be only used in safe-mode or auto-unlink
-      BOOST_STATIC_ASSERT(( hooktags::safemode_or_autounlink ));
+      BOOST_INTRUSIVE_STATIC_ASSERT(( hooktags::safemode_or_autounlink ));
       return !node_algorithms::unique(this->this_ptr());
    }
 
    inline void unlink() BOOST_NOEXCEPT
    {
-      BOOST_STATIC_ASSERT(( (int)hooktags::link_mode == (int)auto_unlink ));
+      BOOST_INTRUSIVE_STATIC_ASSERT(( (int)hooktags::link_mode == (int)auto_unlink ));
       node_ptr n(this->this_ptr());
       if(!node_algorithms::inited(n)){
          node_algorithms::unlink(n);

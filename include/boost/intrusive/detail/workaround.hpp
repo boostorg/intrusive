@@ -84,4 +84,32 @@
 #    define BOOST_INTRUSIVE_CATCH_END }
 #endif
 
+#ifndef BOOST_NO_CXX11_STATIC_ASSERT
+#  ifndef BOOST_NO_CXX11_VARIADIC_MACROS
+#     define BOOST_INTRUSIVE_STATIC_ASSERT( ... ) static_assert(__VA_ARGS__, #__VA_ARGS__)
+#  else
+#     define BOOST_INTRUSIVE_STATIC_ASSERT( B ) static_assert(B, #B)
+#  endif
+#else
+namespace boost {
+namespace intrusive {
+namespace detail {
+
+template<bool B>
+struct STATIC_ASSERTION_FAILURE;
+
+template<>
+struct STATIC_ASSERTION_FAILURE<true>{};
+
+template<unsigned> struct static_assert_test {};
+
+}}}
+
+#define BOOST_INTRUSIVE_STATIC_ASSERT(B) \
+         typedef ::boost::intrusive::detail::static_assert_test<\
+            (unsigned)sizeof(::boost::intrusive::detail::STATIC_ASSERTION_FAILURE<bool(B)>)>\
+               BOOST_JOIN(boost_static_assert_typedef_, __LINE__) BOOST_ATTRIBUTE_UNUSED
+
+#endif
+
 #endif   //#ifndef BOOST_INTRUSIVE_DETAIL_WORKAROUND_HPP

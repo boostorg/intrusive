@@ -41,7 +41,6 @@
 #include <boost/intrusive/detail/node_cloner_disposer.hpp>
 
 #include <boost/move/utility_core.hpp>
-#include <boost/static_assert.hpp>
 
 #include <cstddef>   //std::size_t
 
@@ -166,11 +165,11 @@ class slist_impl
    static const bool safemode_or_autounlink = is_safe_autounlink<value_traits::link_mode>::value;
 
    //Constant-time size is incompatible with auto-unlink hooks!
-   BOOST_STATIC_ASSERT(!(constant_time_size && ((int)value_traits::link_mode == (int)auto_unlink)));
+   BOOST_INTRUSIVE_STATIC_ASSERT(!(constant_time_size && ((int)value_traits::link_mode == (int)auto_unlink)));
    //Linear singly linked lists are incompatible with auto-unlink hooks!
-   BOOST_STATIC_ASSERT(!(linear && ((int)value_traits::link_mode == (int)auto_unlink)));
+   BOOST_INTRUSIVE_STATIC_ASSERT(!(linear && ((int)value_traits::link_mode == (int)auto_unlink)));
    //A list with cached last node is incompatible with auto-unlink hooks!
-   BOOST_STATIC_ASSERT(!(cache_last && ((int)value_traits::link_mode == (int)auto_unlink)));
+   BOOST_INTRUSIVE_STATIC_ASSERT(!(cache_last && ((int)value_traits::link_mode == (int)auto_unlink)));
 
    inline node_ptr get_end_node()
    {  return node_algorithms::end_node(this->get_root_node());  }
@@ -449,7 +448,7 @@ class slist_impl
    //!   This function is only available is cache_last<> is true.
    void push_back(reference value) BOOST_NOEXCEPT
    {
-      BOOST_STATIC_ASSERT((cache_last));
+      BOOST_INTRUSIVE_STATIC_ASSERT((cache_last));
       node_ptr n = priv_value_traits().to_node_ptr(value);
       BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::inited(n));
       node_algorithms::link_after(this->get_last_node(), n);
@@ -522,7 +521,7 @@ class slist_impl
    //!   This function is only available is cache_last<> is true.
    reference back() BOOST_NOEXCEPT
    {
-      BOOST_STATIC_ASSERT((cache_last));
+      BOOST_INTRUSIVE_STATIC_ASSERT((cache_last));
       return *this->priv_value_traits().to_value_ptr(this->get_last_node());
    }
 
@@ -536,7 +535,7 @@ class slist_impl
    //!   This function is only available is cache_last<> is true.
    inline const_reference back() const BOOST_NOEXCEPT
    {
-      BOOST_STATIC_ASSERT((cache_last));
+      BOOST_INTRUSIVE_STATIC_ASSERT((cache_last));
       return *this->priv_value_traits().to_value_ptr(this->get_last_node());
    }
 
@@ -1061,7 +1060,7 @@ class slist_impl
 
    static iterator s_insert_after(const_iterator const prev_p, reference value) BOOST_NOEXCEPT
    {
-      BOOST_STATIC_ASSERT(((!cache_last)&&(!constant_time_size)&&(!stateful_value_traits)));
+      BOOST_INTRUSIVE_STATIC_ASSERT(((!cache_last)&&(!constant_time_size)&&(!stateful_value_traits)));
       node_ptr const n = value_traits::to_node_ptr(value);
       BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::inited(n));
       node_algorithms::link_after(prev_p.pointed_node(), n);
@@ -1071,7 +1070,7 @@ class slist_impl
    template<class Disposer>
    static iterator s_erase_after_and_dispose(const_iterator prev, Disposer disposer) BOOST_NOEXCEPT
    {
-      BOOST_STATIC_ASSERT(((!cache_last)&&(!constant_time_size)&&(!stateful_value_traits)));
+      BOOST_INTRUSIVE_STATIC_ASSERT(((!cache_last)&&(!constant_time_size)&&(!stateful_value_traits)));
       const_iterator it(prev);
       ++it;
       node_ptr to_erase(it.pointed_node());
@@ -1087,7 +1086,7 @@ class slist_impl
    template<class Disposer>
    static iterator s_erase_after_and_dispose(const_iterator before_f, const_iterator l, Disposer disposer) BOOST_NOEXCEPT
    {
-      BOOST_STATIC_ASSERT(((!cache_last)&&(!constant_time_size)&&(!stateful_value_traits)));
+      BOOST_INTRUSIVE_STATIC_ASSERT(((!cache_last)&&(!constant_time_size)&&(!stateful_value_traits)));
       node_ptr bfp(before_f.pointed_node()), lp(l.pointed_node());
       node_ptr fp(node_traits::get_next(bfp));
       node_algorithms::unlink_after(bfp, lp);
@@ -1754,7 +1753,7 @@ class slist_impl
    //!   is stateless.
    static iterator s_iterator_to(reference value) BOOST_NOEXCEPT
    {
-      BOOST_STATIC_ASSERT((!stateful_value_traits));
+      BOOST_INTRUSIVE_STATIC_ASSERT((!stateful_value_traits));
       return iterator (value_traits::to_node_ptr(value), const_value_traits_ptr());
    }
 
@@ -1771,7 +1770,7 @@ class slist_impl
    //!   is stateless.
    static const_iterator s_iterator_to(const_reference value) BOOST_NOEXCEPT
    {
-      BOOST_STATIC_ASSERT((!stateful_value_traits));
+      BOOST_INTRUSIVE_STATIC_ASSERT((!stateful_value_traits));
       reference r =*detail::uncast(pointer_traits<const_pointer>::pointer_to(value));
       return const_iterator(value_traits::to_node_ptr(r), const_value_traits_ptr());
    }
@@ -2112,8 +2111,8 @@ class slist_impl
    {
       //Obtaining the container from the end iterator is not possible with linear
       //singly linked lists (because "end" is represented by the null pointer)
-      BOOST_STATIC_ASSERT(!linear);
-      BOOST_STATIC_ASSERT((has_container_from_iterator));
+      BOOST_INTRUSIVE_STATIC_ASSERT(!linear);
+      BOOST_INTRUSIVE_STATIC_ASSERT((has_container_from_iterator));
       node_ptr p = end_iterator.pointed_node();
       header_holder_type* h = header_holder_type::get_holder(p);
       header_holder_plus_last_t* hpl = detail::parent_from_member< header_holder_plus_last_t, header_holder_type>
@@ -2185,7 +2184,7 @@ class slist
       #endif
       >::type   Base;
    //Assert if passed value traits are compatible with the type
-   BOOST_STATIC_ASSERT((detail::is_same<typename Base::value_traits::value_type, T>::value));
+   BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename Base::value_traits::value_type, T>::value));
    BOOST_MOVABLE_BUT_NOT_COPYABLE(slist)
 
    public:

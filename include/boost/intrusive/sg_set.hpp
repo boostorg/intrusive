@@ -16,7 +16,6 @@
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/sgtree.hpp>
-#include <boost/static_assert.hpp>
 #include <boost/move/utility_core.hpp>
 
 #if defined(BOOST_HAS_PRAGMA_ONCE)
@@ -532,7 +531,7 @@ class sg_set
    typedef typename Base::const_iterator     const_iterator;
 
    //Assert if passed value traits are compatible with the type
-   BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
+   BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
    inline sg_set()
       :  Base()
@@ -1039,7 +1038,7 @@ class sg_multiset
    typedef typename Base::const_iterator     const_iterator;
 
    //Assert if passed value traits are compatible with the type
-   BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
+   BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
    inline sg_multiset()
       :  Base()

@@ -16,7 +16,6 @@
 #include <boost/intrusive/intrusive_fwd.hpp>
 
 #include <boost/intrusive/detail/assert.hpp>
-#include <boost/static_assert.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/bs_set_hook.hpp>
 #include <boost/intrusive/detail/tree_node.hpp>
@@ -113,7 +112,7 @@ struct bstbase3
 
    static bstbase3 &get_tree_base_from_end_iterator(const const_iterator &end_iterator)
    {
-      BOOST_STATIC_ASSERT(has_container_from_iterator);
+      BOOST_INTRUSIVE_STATIC_ASSERT(has_container_from_iterator);
       node_ptr p = end_iterator.pointed_node();
       header_holder_type* h = header_holder_type::get_holder(p);
       holder_t *holder = get_parent_from_member<holder_t, header_holder_type>(h, &holder_t::root);
@@ -207,13 +206,13 @@ struct bstbase3
 
    static iterator s_iterator_to(reference value) BOOST_NOEXCEPT
    {
-      BOOST_STATIC_ASSERT((!stateful_value_traits));
+      BOOST_INTRUSIVE_STATIC_ASSERT((!stateful_value_traits));
       return iterator (value_traits::to_node_ptr(value), const_value_traits_ptr());
    }
 
    static const_iterator s_iterator_to(const_reference value) BOOST_NOEXCEPT
    {
-      BOOST_STATIC_ASSERT((!stateful_value_traits));
+      BOOST_INTRUSIVE_STATIC_ASSERT((!stateful_value_traits));
       return const_iterator (value_traits::to_node_ptr(*pointer_traits<pointer>::const_cast_from(pointer_traits<const_pointer>::pointer_to(value))), const_value_traits_ptr());
    }
 
@@ -666,7 +665,7 @@ class bstree_impl
    static const bool safemode_or_autounlink = is_safe_autounlink<value_traits::link_mode>::value;
 
    //Constant-time size is incompatible with auto-unlink hooks!
-   BOOST_STATIC_ASSERT(!(constant_time_size && ((int)value_traits::link_mode == (int)auto_unlink)));
+   BOOST_INTRUSIVE_STATIC_ASSERT(!(constant_time_size && ((int)value_traits::link_mode == (int)auto_unlink)));
 
 
    protected:
@@ -1961,7 +1960,7 @@ class bstree_impl
    //! functor a compilation error will be issued.
    static void remove_node(reference value) BOOST_NOEXCEPT
    {
-      BOOST_STATIC_ASSERT((!constant_time_size));
+      BOOST_INTRUSIVE_STATIC_ASSERT((!constant_time_size));
       node_ptr to_remove(value_traits::to_node_ptr(value));
       node_algorithms::unlink(to_remove);
       BOOST_IF_CONSTEXPR(safemode_or_autounlink)
@@ -2184,7 +2183,7 @@ class bstree
    typedef typename Base::const_iterator     const_iterator;
 
    //Assert if passed value traits are compatible with the type
-   BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
+   BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
    inline bstree()
       :  Base()

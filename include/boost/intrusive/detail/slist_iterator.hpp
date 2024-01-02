@@ -27,7 +27,6 @@
 #include <boost/intrusive/detail/std_fwd.hpp>
 #include <boost/intrusive/detail/iiterator.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
-#include <boost/static_assert.hpp>
 
 namespace boost {
 namespace intrusive {
@@ -72,7 +71,7 @@ class slist_iterator
 
    inline explicit slist_iterator(node_ptr nodeptr)
       : members_(nodeptr, const_value_traits_ptr())
-   {  BOOST_STATIC_ASSERT((stateful_value_traits == false));  }
+   {  BOOST_INTRUSIVE_STATIC_ASSERT((stateful_value_traits == false));  }
 
    inline slist_iterator(const slist_iterator &other)
       :  members_(other.pointed_node(), other.get_value_traits())

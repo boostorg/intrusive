@@ -29,7 +29,6 @@
 #include <boost/intrusive/detail/node_cloner_disposer.hpp>
 #include <boost/intrusive/detail/key_nodeptr_comp.hpp>
 
-#include <boost/static_assert.hpp>
 #include <boost/move/utility_core.hpp>
 #include <boost/move/adl_move_swap.hpp>
 
@@ -1313,7 +1312,7 @@ class treap
    typedef typename Base::const_reverse_iterator     const_reverse_iterator;
 
    //Assert if passed value traits are compatible with the type
-   BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
+   BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
    inline treap()
       :  Base()

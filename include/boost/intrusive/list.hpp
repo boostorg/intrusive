@@ -37,7 +37,6 @@
 #include <boost/intrusive/detail/algorithm.hpp>
 
 #include <boost/move/utility_core.hpp>
-#include <boost/static_assert.hpp>
 
 #include <boost/intrusive/detail/value_functors.hpp>
 #include <cstddef>   //std::size_t, etc.
@@ -123,7 +122,7 @@ class list_impl
    static const bool safemode_or_autounlink = is_safe_autounlink<value_traits::link_mode>::value;
 
    //Constant-time size is incompatible with auto-unlink hooks!
-   BOOST_STATIC_ASSERT(!(constant_time_size &&
+   BOOST_INTRUSIVE_STATIC_ASSERT(!(constant_time_size &&
                         ((int)value_traits::link_mode == (int)auto_unlink)
                       ));
 
@@ -1272,7 +1271,7 @@ class list_impl
    //!   is stateless.
    static iterator s_iterator_to(reference value) BOOST_NOEXCEPT
    {
-      BOOST_STATIC_ASSERT((!stateful_value_traits));
+      BOOST_INTRUSIVE_STATIC_ASSERT((!stateful_value_traits));
       BOOST_INTRUSIVE_INVARIANT_ASSERT(!node_algorithms::inited(value_traits::to_node_ptr(value)));
       return iterator(value_traits::to_node_ptr(value), const_value_traits_ptr());
    }
@@ -1290,7 +1289,7 @@ class list_impl
    //!   is stateless.
    static const_iterator s_iterator_to(const_reference value) BOOST_NOEXCEPT
    {
-      BOOST_STATIC_ASSERT((!stateful_value_traits));
+      BOOST_INTRUSIVE_STATIC_ASSERT((!stateful_value_traits));
       reference r =*detail::uncast(pointer_traits<const_pointer>::pointer_to(value));
       BOOST_INTRUSIVE_INVARIANT_ASSERT(!node_algorithms::inited(value_traits::to_node_ptr(r)));
       return const_iterator(value_traits::to_node_ptr(r), const_value_traits_ptr());
@@ -1394,7 +1393,7 @@ class list_impl
    private:
    static list_impl &priv_container_from_end_iterator(const const_iterator &end_iterator) BOOST_NOEXCEPT
    {
-      BOOST_STATIC_ASSERT((has_container_from_iterator));
+      BOOST_INTRUSIVE_STATIC_ASSERT((has_container_from_iterator));
       node_ptr p = end_iterator.pointed_node();
       header_holder_type* h = header_holder_type::get_holder(p);
       root_plus_size* r = detail::parent_from_member
@@ -1466,7 +1465,7 @@ class list
       #endif
       >::type      Base;
    //Assert if passed value traits are compatible with the type
-   BOOST_STATIC_ASSERT((detail::is_same<typename Base::value_traits::value_type, T>::value));
+   BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename Base::value_traits::value_type, T>::value));
    BOOST_MOVABLE_BUT_NOT_COPYABLE(list)
 
    public:

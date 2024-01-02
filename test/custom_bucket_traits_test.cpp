@@ -11,7 +11,6 @@
 /////////////////////////////////////////////////////////////////////////////
 #include <boost/intrusive/unordered_set.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
-#include <boost/static_assert.hpp>
 #include <vector>
 
 using namespace boost::intrusive;
@@ -98,14 +97,14 @@ typedef unordered_set
 
 int main()
 {
-   BOOST_STATIC_ASSERT((detail::is_same<BaseUset::bucket_type, BaseBucketType>::value));
-   BOOST_STATIC_ASSERT((detail::is_same<MemberUset::bucket_type, MemberBucketType>::value));
-   BOOST_STATIC_ASSERT((detail::is_same<TraitsUset::bucket_type, TraitsBucketType>::value));
-   BOOST_STATIC_ASSERT((detail::is_same<BaseBucketType, MemberBucketType>::value));
-   BOOST_STATIC_ASSERT((detail::is_same<BaseBucketType, TraitsBucketType>::value));
-   BOOST_STATIC_ASSERT((detail::is_same<BaseBucketPtrType, TraitsBucketPtrType>::value));
-   BOOST_STATIC_ASSERT((detail::is_same<BaseBucketPtrType, MemberBucketPtrType>::value));
-   BOOST_STATIC_ASSERT((detail::is_same<BaseBucketPtrType, BaseBucketType*>::value));
+   BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<BaseUset::bucket_type, BaseBucketType>::value));
+   BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<MemberUset::bucket_type, MemberBucketType>::value));
+   BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<TraitsUset::bucket_type, TraitsBucketType>::value));
+   BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<BaseBucketType, MemberBucketType>::value));
+   BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<BaseBucketType, TraitsBucketType>::value));
+   BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<BaseBucketPtrType, TraitsBucketPtrType>::value));
+   BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<BaseBucketPtrType, MemberBucketPtrType>::value));
+   BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<BaseBucketPtrType, BaseBucketType*>::value));
 
    typedef std::vector<MyClass>::iterator VectIt;
    typedef std::vector<MyClass>::reverse_iterator VectRit;

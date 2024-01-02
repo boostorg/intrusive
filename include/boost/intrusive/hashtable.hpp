@@ -60,7 +60,6 @@
 
 //boost
 #include <boost/intrusive/detail/assert.hpp>
-#include <boost/static_assert.hpp>
 #include <boost/move/utility_core.hpp>
 #include <boost/move/adl_move_swap.hpp>
 #include <boost/move/algo/detail/search.hpp>
@@ -2059,14 +2058,14 @@ struct hashdata_internal
 
    static local_iterator s_local_iterator_to(reference value) BOOST_NOEXCEPT
    {
-      BOOST_STATIC_ASSERT((!stateful_value_traits));
+      BOOST_INTRUSIVE_STATIC_ASSERT((!stateful_value_traits));
       siterator sit(value_traits::to_node_ptr(value));
       return local_iterator(sit, const_value_traits_ptr());
    }
 
    static const_local_iterator s_local_iterator_to(const_reference value) BOOST_NOEXCEPT
    {
-      BOOST_STATIC_ASSERT((!stateful_value_traits));
+      BOOST_INTRUSIVE_STATIC_ASSERT((!stateful_value_traits));
       siterator const sit = siterator
          ( pointer_traits<node_ptr>::const_cast_from
             (value_traits::to_node_ptr(value))
@@ -2329,11 +2328,11 @@ class hashtable_impl
 
    //Configuration error: compare_hash<> can't be specified without store_hash<>
    //See documentation for more explanations
-   BOOST_STATIC_ASSERT((!compare_hash || store_hash));
+   BOOST_INTRUSIVE_STATIC_ASSERT((!compare_hash || store_hash));
 
    //Configuration error: fasmod_buckets<> can't be specified with incremental<> or power_2_buckets<>
    //See documentation for more explanations
-   BOOST_STATIC_ASSERT(!(fastmod_buckets && power_2_buckets));
+   BOOST_INTRUSIVE_STATIC_ASSERT(!(fastmod_buckets && power_2_buckets));
 
    typedef typename internal_type::slist_node_ptr                    slist_node_ptr;
    typedef typename pointer_traits
@@ -2360,9 +2359,9 @@ class hashtable_impl
    static const bool safemode_or_autounlink = internal_type::safemode_or_autounlink;
 
    //Constant-time size is incompatible with auto-unlink hooks!
-   BOOST_STATIC_ASSERT(!(constant_time_size && ((int)value_traits::link_mode == (int)auto_unlink)));
+   BOOST_INTRUSIVE_STATIC_ASSERT(!(constant_time_size && ((int)value_traits::link_mode == (int)auto_unlink)));
    //Cache begin is incompatible with auto-unlink hooks!
-   BOOST_STATIC_ASSERT(!(cache_begin && ((int)value_traits::link_mode == (int)auto_unlink)));
+   BOOST_INTRUSIVE_STATIC_ASSERT(!(cache_begin && ((int)value_traits::link_mode == (int)auto_unlink)));
 
 
    /// @endcond
@@ -3571,7 +3570,7 @@ class hashtable_impl
    bool incremental_rehash(bool grow = true)
    {
       //This function is only available for containers with incremental hashing
-      BOOST_STATIC_ASSERT(( incremental && power_2_buckets ));
+      BOOST_INTRUSIVE_STATIC_ASSERT(( incremental && power_2_buckets ));
       const std::size_t split_idx  = this->split_count();
       const std::size_t bucket_cnt = this->bucket_count();
       bool ret = false;
@@ -3636,7 +3635,7 @@ class hashtable_impl
    bool incremental_rehash(const bucket_traits &new_bucket_traits) BOOST_NOEXCEPT
    {
       //This function is only available for containers with incremental hashing
-      BOOST_STATIC_ASSERT(( incremental && power_2_buckets ));
+      BOOST_INTRUSIVE_STATIC_ASSERT(( incremental && power_2_buckets ));
       const bucket_ptr new_buckets = new_bucket_traits.bucket_begin();
       const size_type new_bucket_count_stdszt = static_cast<SizeType>(new_bucket_traits.bucket_count() - bucket_overhead);
       BOOST_INTRUSIVE_INVARIANT_ASSERT(sizeof(size_type) >= sizeof(std::size_t) || new_bucket_count_stdszt <= size_type(-1));
@@ -4334,7 +4333,7 @@ class hashtable
    typedef typename Base::key_equal          key_equal;
 
    //Assert if passed value traits are compatible with the type
-   BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
+   BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
    inline explicit hashtable ( const bucket_traits &b_traits
              , const hasher & hash_func = hasher()
