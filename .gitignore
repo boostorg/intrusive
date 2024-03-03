@@ -3,3 +3,6 @@
 ################################################################################
 
 /proj/vc14.1ide
+/doc/html
+/doc/autodoc.xml
+callable_with_no_decltype
