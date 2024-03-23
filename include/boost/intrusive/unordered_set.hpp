@@ -222,6 +222,10 @@ class unordered_set_impl
    inline iterator insert_commit(reference value, const insert_commit_data &commit_data) BOOST_NOEXCEPT
    {  return table_type::insert_unique_commit(value, commit_data); }
 
+   //! @copydoc ::boost::intrusive::hashtable::insert_unique_fast_commit
+   inline iterator insert_fast_commit(reference value, const insert_commit_data &commit_data) BOOST_NOEXCEPT
+   {  return table_type::insert_unique_fast_commit(value, commit_data); }
+
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::hashtable::erase(const_iterator)

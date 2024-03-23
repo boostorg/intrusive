@@ -568,7 +568,6 @@ struct optimize_multikey_is_true
    static const bool value = sizeof(test<T>(0)) > sizeof(detail::yes_type)*2u;
 };
 
-template<bool StoreHash>
 struct insert_commit_data_impl
 {
    std::size_t hash;
@@ -578,17 +577,6 @@ struct insert_commit_data_impl
 
    inline void set_hash(std::size_t h)
    {  hash = h;  }
-};
-
-template<>
-struct insert_commit_data_impl<false>
-{
-   std::size_t bucket_idx;
-   inline std::size_t get_hash() const
-   {  return 0U; }
-
-   inline void set_hash(std::size_t)
-   {}
 };
 
 template<class Node, class SlistNodePtr>
@@ -2367,7 +2355,7 @@ class hashtable_impl
    /// @endcond
    
    public:
-   typedef insert_commit_data_impl<store_hash> insert_commit_data;
+   typedef insert_commit_data_impl insert_commit_data;
 
    private:
    void default_init_actions()
@@ -2729,7 +2717,7 @@ class hashtable_impl
       insert_commit_data commit_data;
       std::pair<iterator, bool> ret = this->insert_unique_check(key_of_value()(value), commit_data);
       if(ret.second){
-         ret.first = this->insert_unique_commit(value, commit_data);
+         ret.first = this->insert_unique_fast_commit(value, commit_data);
       }
       return ret;
    }
@@ -2856,7 +2844,43 @@ class hashtable_impl
    //!   erased between the "insert_check" and "insert_commit" calls.
    //!
    //!   After a successful rehashing insert_commit_data remains valid.
-   iterator insert_unique_commit(reference value, const insert_commit_data &commit_data) BOOST_NOEXCEPT
+   iterator insert_unique_commit(reference value, const insert_commit_data& commit_data) BOOST_NOEXCEPT
+   {
+      size_type bucket_num = this->priv_hash_to_nbucket(commit_data.get_hash());
+      bucket_type& b = this->priv_bucket(bucket_num);
+      this->priv_size_traits().increment();
+      node_ptr const n = pointer_traits<node_ptr>::pointer_to(this->priv_value_to_node(value));
+      BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || slist_node_algorithms::unique(n));
+      node_functions_t::store_hash(n, commit_data.get_hash(), store_hash_t());
+      this->priv_insertion_update_cache(bucket_num);
+      group_functions_t::insert_in_group(n, n, optimize_multikey_t());
+      slist_node_algorithms::link_after(b.get_node_ptr(), n);
+      return this->build_iterator(siterator(n), this->to_ptr(b));
+   }
+
+   //! <b>Requires</b>: value must be an lvalue of type value_type. commit_data
+   //!   must have been obtained from a previous call to "insert_check".
+   //!   No objects should have been inserted or erased from the unordered_set between
+   //!   the "insert_check" that filled "commit_data" and the call to "insert_commit".
+   //!
+   //!   No rehashing shall be performed between `insert_check` and `insert_fast_commit`.
+   //! 
+   //! <b>Effects</b>: Inserts the value in the unordered_set using the information obtained
+   //!   from the "commit_data" that a previous "insert_check" filled.
+   //!
+   //! <b>Returns</b>: An iterator to the newly inserted object.
+   //!
+   //! <b>Complexity</b>: Constant time.
+   //!
+   //! <b>Throws</b>: Nothing.
+   //!
+   //! <b>Notes</b>: This function has only sense if a "insert_check" has been
+   //!   previously executed to fill "commit_data". No value should be inserted or
+   //!   erased between the "insert_check" and "insert_commit" calls.
+   //!
+   //!   Since this commit operation does not support rehashing between the check
+   //!   and the commit, it's faster than `insert_commit`.
+   iterator insert_unique_fast_commit(reference value, const insert_commit_data &commit_data) BOOST_NOEXCEPT
    {
       this->priv_size_inc();
       node_ptr const n = this->priv_value_to_node_ptr(value);
