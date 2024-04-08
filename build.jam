@@ -9,9 +9,7 @@ project /boost/intrusive
     : common-requirements
         <library>/boost/assert//boost_assert
         <library>/boost/config//boost_config
-        <library>/boost/container_hash//boost_container_hash
         <library>/boost/move//boost_move
-        <library>/boost/static_assert//boost_static_assert
         <include>include
     ;
 
