@@ -3905,6 +3905,7 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 [section:release_notes_boost_1_85_00 Boost 1.85 Release]
 
 * Fixed bugs:
+   * [@https://github.com/boostorg/intrusive/issues/81 GitHub #81: ['unordered_set rehash breaks insert_commit_data]]
    * [@https://github.com/boostorg/intrusive/issues/83 GitHub #83: ['\[docs\] Index is missing]]
 
 * Potentially breaking: Unordered containers use now by default an internal a `boost::hash`-protocol compatible internal hash functor.
