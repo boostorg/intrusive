@@ -116,7 +116,7 @@ template<unsigned> struct static_assert_test {};
 //GCC has some false positives with some functions returning references.
 //This silences this warning in selected functions
 #if defined(BOOST_GCC) && (BOOST_GCC >= 140000)
-#  define BOOST_INTRUSIVE_NO_DANGLING [[gnu::no_dangling]]
+#  define BOOST_INTRUSIVE_NO_DANGLING __attribute__((no_dangling))
 #else
 #  define BOOST_INTRUSIVE_NO_DANGLING
 #endif
