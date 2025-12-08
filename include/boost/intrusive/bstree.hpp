@@ -585,6 +585,9 @@ struct bstbase
    //Detach all inserted nodes. This will add exception safety to bstree_impl
    //constructors inserting elements.
    ~bstbase()
+   #if defined(BOOST_INTRUSIVE_CONCEPTS_BASED_OVERLOADING)
+      requires (ValueTraits::link_mode != normal_link)
+   #endif
    {
       if(is_safe_autounlink<value_traits::link_mode>::value){
          node_algorithms::clear_and_dispose
@@ -594,6 +597,11 @@ struct bstbase
          node_algorithms::init(this->header_ptr());
       }
    }
+
+   #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && defined(BOOST_INTRUSIVE_CONCEPTS_BASED_OVERLOADING)
+   //Default destructor for normal links (allows conditional triviality)
+   ~bstbase() requires (ValueTraits::link_mode == normal_link) = default;
+   #endif
 };
 
 

@@ -367,12 +367,20 @@ class slist_impl
    //! <b>Complexity</b>: Linear to the number of elements in the list, if
    //!   it's a safe-mode or auto-unlink value. Otherwise constant.
    ~slist_impl()
+   #if defined(BOOST_INTRUSIVE_CONCEPTS_BASED_OVERLOADING)
+      requires (ValueTraits::link_mode != normal_link)
+   #endif
    {
       BOOST_IF_CONSTEXPR(is_safe_autounlink<ValueTraits::link_mode>::value){
          this->clear();
          node_algorithms::init(this->get_root_node());
       }
    }
+
+   #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && defined(BOOST_INTRUSIVE_CONCEPTS_BASED_OVERLOADING)
+   //Default destructor for normal links (allows conditional triviality)
+   ~slist_impl() requires (ValueTraits::link_mode == normal_link) = default;
+   #endif
 
    //! <b>Effects</b>: Erases all the elements of the container.
    //!

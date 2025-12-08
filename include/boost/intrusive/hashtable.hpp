@@ -1909,7 +1909,19 @@ struct hashdata_internal
    {  return this->priv_size_traits();  }
 
    ~hashdata_internal()
-   {  this->priv_clear_buckets();  }
+   #if defined(BOOST_INTRUSIVE_CONCEPTS_BASED_OVERLOADING)
+      requires (ValueTraits::link_mode != normal_link)
+   #endif
+   {
+      BOOST_IF_CONSTEXPR(safemode_or_autounlink){
+         this->priv_clear_buckets();
+      }
+   }
+
+   #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && defined(BOOST_INTRUSIVE_CONCEPTS_BASED_OVERLOADING)
+   //Default destructor for normal links (allows conditional triviality)
+   ~hashdata_internal() requires (ValueTraits::link_mode == normal_link) = default;
+   #endif
 
    using split_bucket_hash_equal_t::priv_clear_buckets;
 
@@ -2462,6 +2474,7 @@ class hashtable_impl
    hashtable_impl& operator=(BOOST_RV_REF(hashtable_impl) x)
    {  this->swap(x); return *this;  }
 
+   #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
    //! <b>Effects</b>: Detaches all elements from this. The objects in the unordered_set
    //!   are not deleted (i.e. no destructors are called).
    //!
@@ -2469,10 +2482,8 @@ class hashtable_impl
    //!   it's a safe-mode or auto-unlink value. Otherwise constant.
    //!
    //! <b>Throws</b>: Nothing.
-   ~hashtable_impl()
-   {}
+   ~hashtable_impl();
 
-   #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
    //! <b>Effects</b>: Returns an iterator pointing to the beginning of the unordered_set.
    //!
    //! <b>Complexity</b>: Amortized constant time.
