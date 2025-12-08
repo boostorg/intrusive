@@ -10,7 +10,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#include <boost/config.hpp>
+#include <boost/intrusive/detail/workaround.hpp>
 
 //Conditional triviality is based on destructor overloads based on concepts
 #if defined(BOOST_INTRUSIVE_CONCEPTS_BASED_OVERLOADING)
@@ -157,16 +157,9 @@ typedef unordered_multiset<MyType> unordered_multiset_t;
 BOOST_INTRUSIVE_STATIC_ASSERT(( std::is_trivially_destructible_v<unordered_set_t> ));
 BOOST_INTRUSIVE_STATIC_ASSERT(( std::is_trivially_destructible_v<unordered_multiset_t> ));
 
-int main()
-{
-   return 0;
-}
-
-#else
-
-int main()
-{
-   return 0;
-}
-
 #endif
+
+int main()
+{
+   return 0;
+}
