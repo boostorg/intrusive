@@ -3909,10 +3909,10 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 * Hooks and containers using `normal_link`s now have defaulted destructors if C++20 concepts are available. This allows
   trivially destructible hooks and containers if internally used nodes and comparison objects are trivially destructible.
-
 * Hooks using `normal_link`s now have defaulted constructors if C++20 concepts are available. This allows
   trivially default constructible hooks if internally used nodes are trivially destructible.
-
+* Updated `list` and `slist` member `remove_xx` and `unique_xxx` methods to return the number of removed elements, following
+  C++20 changes to `std::list`.
 * Fixed bugs:
    * [@https://github.com/boostorg/intrusive/issues/99 GitHub #92: ['some intrusive containers are not trivially destructible when possible]]
 
