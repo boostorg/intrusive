@@ -139,25 +139,37 @@ void test_list< ListType, ValueContainer >
 {
    {
       list_type list(values.begin(), values.end());
-      list.remove_if(is_even());
+      const std::size_t old_size = list.size();
+      const std::size_t removed  = list.remove_if(is_even());
+      const std::size_t new_size = list.size();
+      BOOST_TEST(removed == (old_size - new_size));
       int init_values [] = { 1, 3, 5 };
       TEST_INTRUSIVE_SEQUENCE( init_values, list.begin() );
    }
    {
       list_type list(values.begin(), values.end());
-      list.remove_if(is_odd());
+      const std::size_t old_size = list.size();
+      const std::size_t removed  = list.remove_if(is_odd());
+      const std::size_t new_size = list.size();
+      BOOST_TEST(removed == (old_size - new_size));
       int init_values [] = { 2, 4 };
       TEST_INTRUSIVE_SEQUENCE( init_values, list.begin() );
    }
    {
       list_type list(values.begin(), values.end());
-      list.remove_and_dispose_if(is_even(), test::empty_disposer());
+      const std::size_t old_size = list.size();
+      const std::size_t removed  = list.remove_and_dispose_if(is_even(), test::empty_disposer());
+      const std::size_t new_size = list.size();
+      BOOST_TEST(removed == (old_size - new_size));
       int init_values [] = { 1, 3, 5 };
       TEST_INTRUSIVE_SEQUENCE( init_values, list.begin() );
    }
    {
       list_type list(values.begin(), values.end());
-      list.remove_and_dispose_if(is_odd(), test::empty_disposer());
+      const std::size_t old_size = list.size();
+      const std::size_t removed  = list.remove_and_dispose_if(is_odd(), test::empty_disposer());
+      const std::size_t new_size = list.size();
+      BOOST_TEST(removed == (old_size - new_size));
       int init_values [] = { 2, 4 };
       TEST_INTRUSIVE_SEQUENCE( init_values, list.begin() );
    }

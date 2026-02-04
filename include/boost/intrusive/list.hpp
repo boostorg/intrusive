@@ -1126,13 +1126,15 @@ class list_impl
    //!
    //! <b>Note</b>: The relative order of elements that are not removed is unchanged,
    //!   and iterators to elements that are not removed remain valid.
-   void remove(const_reference value) BOOST_NOEXCEPT
-   {  this->remove_if(detail::equal_to_value<const_reference>(value));  }
+   size_type remove(const_reference value) BOOST_NOEXCEPT
+   {  return this->remove_if(detail::equal_to_value<const_reference>(value));  }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!
    //! <b>Effects</b>: Removes all the elements that compare equal to value.
    //!   Disposer::operator()(pointer) is called for every removed element.
+   //! 
+   //! <b>Returns</b>: The number of erased elements.
    //!
    //! <b>Throws</b>: If operator == throws. Basic guarantee.
    //!
@@ -1141,11 +1143,13 @@ class list_impl
    //! <b>Note</b>: The relative order of elements that are not removed is unchanged,
    //!   and iterators to elements that are not removed remain valid.
    template<class Disposer>
-   void remove_and_dispose(const_reference value, Disposer disposer) BOOST_NOEXCEPT
-   {  this->remove_and_dispose_if(detail::equal_to_value<const_reference>(value), disposer);  }
+   size_type remove_and_dispose(const_reference value, Disposer disposer) BOOST_NOEXCEPT
+   {  return this->remove_and_dispose_if(detail::equal_to_value<const_reference>(value), disposer);  }
 
    //! <b>Effects</b>: Removes all the elements for which a specified
    //!   predicate is satisfied. No destructors are called.
+   //!
+   //! <b>Returns</b>: The number of removed elements.
    //!
    //! <b>Throws</b>: If pred throws. Basic guarantee.
    //!
@@ -1154,7 +1158,7 @@ class list_impl
    //! <b>Note</b>: The relative order of elements that are not removed is unchanged,
    //!   and iterators to elements that are not removed remain valid.
    template<class Pred>
-   void remove_if(Pred pred)
+   size_type remove_if(Pred pred)
    {
       const node_ptr root_node = this->get_root_node();
       typename node_algorithms::stable_partition_info info;
@@ -1165,6 +1169,7 @@ class list_impl
       this->erase( const_iterator(node_traits::get_next(root_node), this->priv_value_traits_ptr())
                  , const_iterator(info.beg_2st_partition, this->priv_value_traits_ptr())
                  , info.num_1st_partition);
+      return info.num_1st_partition;
    }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
@@ -1173,6 +1178,8 @@ class list_impl
    //!   predicate is satisfied.
    //!   Disposer::operator()(pointer) is called for every removed element.
    //!
+   //! <b>Returns</b>: The number of removed elements.
+   //!
    //! <b>Throws</b>: If pred throws. Basic guarantee.
    //!
    //! <b>Complexity</b>: Linear time. It performs exactly size() comparisons for equality.
@@ -1180,7 +1187,7 @@ class list_impl
    //! <b>Note</b>: The relative order of elements that are not removed is unchanged,
    //!   and iterators to elements that are not removed remain valid.
    template<class Pred, class Disposer>
-   void remove_and_dispose_if(Pred pred, Disposer disposer)
+   size_type remove_and_dispose_if(Pred pred, Disposer disposer)
    {
       const node_ptr root_node = this->get_root_node();
       typename node_algorithms::stable_partition_info info;
@@ -1191,6 +1198,7 @@ class list_impl
       this->erase_and_dispose( const_iterator(node_traits::get_next(root_node), this->priv_value_traits_ptr())
                              , const_iterator(info.beg_2st_partition, this->priv_value_traits_ptr())
                              , disposer);
+      return info.num_1st_partition;
    }
 
    //! <b>Effects</b>: Removes adjacent duplicate elements or adjacent
