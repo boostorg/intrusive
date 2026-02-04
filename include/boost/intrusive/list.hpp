@@ -1204,18 +1204,22 @@ class list_impl
    //! <b>Effects</b>: Removes adjacent duplicate elements or adjacent
    //!   elements that are equal from the list. No destructors are called.
    //!
+   //! <b>Returns</b>: The number of removed elements.
+   //!
    //! <b>Throws</b>: If the comparison operator throws. Basic guarantee.
    //!
    //! <b>Complexity</b>: Linear time (size()-1 comparisons calls to pred()).
    //!
    //! <b>Note</b>: The relative order of elements that are not removed is unchanged,
    //!   and iterators to elements that are not removed remain valid.
-   void unique()
-   {  this->unique_and_dispose(value_equal<value_type>(), detail::null_disposer());  }
+   size_type unique()
+   {  return this->unique_and_dispose(value_equal<value_type>(), detail::null_disposer());  }
 
    //! <b>Effects</b>: Removes adjacent duplicate elements or adjacent
    //!   elements that satisfy some binary predicate from the list.
    //!   No destructors are called.
+   //!
+   //! <b>Returns</b>: The number of removed elements.
    //!
    //! <b>Throws</b>: If pred throws. Basic guarantee.
    //!
@@ -1224,14 +1228,16 @@ class list_impl
    //! <b>Note</b>: The relative order of elements that are not removed is unchanged,
    //!   and iterators to elements that are not removed remain valid.
    template<class BinaryPredicate>
-   void unique(BinaryPredicate pred)
-   {  this->unique_and_dispose(pred, detail::null_disposer());  }
+   size_type unique(BinaryPredicate pred)
+   {  return this->unique_and_dispose(pred, detail::null_disposer());  }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!
    //! <b>Effects</b>: Removes adjacent duplicate elements or adjacent
    //!   elements that are equal from the list.
    //!   Disposer::operator()(pointer) is called for every removed element.
+   //!
+   //! <b>Returns</b>: The number of removed elements.
    //!
    //! <b>Throws</b>: If the equality operator throws. Basic guarantee.
    //!
@@ -1240,14 +1246,16 @@ class list_impl
    //! <b>Note</b>: The relative order of elements that are not removed is unchanged,
    //!   and iterators to elements that are not removed remain valid.
    template<class Disposer>
-   void unique_and_dispose(Disposer disposer)
-   {  this->unique_and_dispose(value_equal<value_type>(), disposer);  }
+   size_type unique_and_dispose(Disposer disposer)
+   {  return this->unique_and_dispose(value_equal<value_type>(), disposer);  }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!
    //! <b>Effects</b>: Removes adjacent duplicate elements or adjacent
    //!   elements that satisfy some binary predicate from the list.
    //!   Disposer::operator()(pointer) is called for every removed element.
+   //!
+   //! <b>Returns</b>: The number of removed elements.
    //!
    //! <b>Throws</b>: If pred throws. Basic guarantee.
    //!
@@ -1256,10 +1264,11 @@ class list_impl
    //! <b>Note</b>: The relative order of elements that are not removed is unchanged,
    //!   and iterators to elements that are not removed remain valid.
    template<class BinaryPredicate, class Disposer>
-   void unique_and_dispose(BinaryPredicate pred, Disposer disposer)
+   size_type unique_and_dispose(BinaryPredicate pred, Disposer disposer)
    {
       const_iterator itend(this->cend());
       const_iterator cur(this->cbegin());
+      size_type n = 0;
 
       if(cur != itend){
          const_iterator after(cur);
@@ -1267,6 +1276,7 @@ class list_impl
          while(after != itend){
             if(pred(*cur, *after)){
                after = this->erase_and_dispose(after, disposer);
+               ++n;
             }
             else{
                cur = after;
@@ -1274,6 +1284,7 @@ class list_impl
             }
          }
       }
+      return n;
    }
 
    //! <b>Requires</b>: `value` must be a reference to a value inserted in an instance of this container type.

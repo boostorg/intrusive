@@ -197,7 +197,24 @@ void test_slist< ListType, ValueContainer >
       list.sort();
       int init_values [] = { 1, 1, 2, 2, 3, 3, 4, 4, 5, 5 };
       TEST_INTRUSIVE_SEQUENCE( init_values, list.begin() );
-      list.unique();
+      const std::size_t old_size = list.size();
+      const std::size_t removed  = list.unique();
+      const std::size_t new_size = list.size();
+      BOOST_TEST(removed == (old_size - new_size));
+      int init_values2 [] = { 1, 2, 3, 4, 5 };
+      TEST_INTRUSIVE_SEQUENCE( init_values2, list.begin() );
+   }
+   {
+      ValueContainer values2(values);
+      list_type list(values.begin(), values.end());
+      list.insert_after(list.before_begin(), values2.begin(), values2.end());
+      list.sort();
+      int init_values [] = { 1, 1, 2, 2, 3, 3, 4, 4, 5, 5 };
+      TEST_INTRUSIVE_SEQUENCE( init_values, list.begin() );
+      const std::size_t old_size = list.size();
+      const std::size_t removed  = list.unique_and_dispose(test::empty_disposer());
+      const std::size_t new_size = list.size();
+      BOOST_TEST(removed == (old_size - new_size));
       int init_values2 [] = { 1, 2, 3, 4, 5 };
       TEST_INTRUSIVE_SEQUENCE( init_values2, list.begin() );
    }

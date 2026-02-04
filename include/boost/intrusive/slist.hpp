@@ -1678,18 +1678,22 @@ class slist_impl
    //! <b>Effects</b>: Removes adjacent duplicate elements or adjacent
    //!   elements that are equal from the list. No destructors are called.
    //!
+   //! <b>Returns</b>: The number of removed elements.
+   //!
    //! <b>Throws</b>: If operator== throws. Basic guarantee.
    //!
    //! <b>Complexity</b>: Linear time (size()-1) comparisons calls to pred()).
    //!
    //! <b>Note</b>: The relative order of elements that are not removed is unchanged,
    //!   and iterators to elements that are not removed remain valid.
-   void unique()
-   {  this->unique_and_dispose(value_equal<value_type>(), detail::null_disposer());  }
+   size_type unique()
+   {  return this->unique_and_dispose(value_equal<value_type>(), detail::null_disposer());  }
 
    //! <b>Effects</b>: Removes adjacent duplicate elements or adjacent
    //!   elements that satisfy some binary predicate from the list.
    //!   No destructors are called.
+   //!
+   //! <b>Returns</b>: The number of removed elements.
    //!
    //! <b>Throws</b>: If the predicate throws. Basic guarantee.
    //!
@@ -1698,14 +1702,16 @@ class slist_impl
    //! <b>Note</b>: The relative order of elements that are not removed is unchanged,
    //!   and iterators to elements that are not removed remain valid.
    template<class BinaryPredicate>
-   void unique(BinaryPredicate pred)
-   {  this->unique_and_dispose(pred, detail::null_disposer());  }
+   size_type unique(BinaryPredicate pred)
+   {  return this->unique_and_dispose(pred, detail::null_disposer());  }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!
    //! <b>Effects</b>: Removes adjacent duplicate elements or adjacent
    //!   elements that satisfy some binary predicate from the list.
    //!   Disposer::operator()(pointer) is called for every removed element.
+   //!
+   //! <b>Returns</b>: The number of removed elements.
    //!
    //! <b>Throws</b>: If operator== throws. Basic guarantee.
    //!
@@ -1714,8 +1720,8 @@ class slist_impl
    //! <b>Note</b>: The relative order of elements that are not removed is unchanged,
    //!   and iterators to elements that are not removed remain valid.
    template<class Disposer>
-   void unique_and_dispose(Disposer disposer)
-   {  this->unique(value_equal<value_type>(), disposer);  }
+   size_type unique_and_dispose(Disposer disposer)
+   {  return this->unique_and_dispose(value_equal<value_type>(), disposer);  }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!
@@ -1730,16 +1736,19 @@ class slist_impl
    //! <b>Note</b>: The relative order of elements that are not removed is unchanged,
    //!   and iterators to elements that are not removed remain valid.
    template<class BinaryPredicate, class Disposer>
-   void unique_and_dispose(BinaryPredicate pred, Disposer disposer)
+   size_type unique_and_dispose(BinaryPredicate pred, Disposer disposer)
    {
       const_iterator end_n(this->cend());
       const_iterator bcur(this->cbegin());
+      size_type n = 0;
+
       if(bcur != end_n){
          const_iterator cur(bcur);
          ++cur;
          while(cur != end_n) {
             if (pred(*bcur, *cur)){
                cur = this->erase_after_and_dispose(bcur, disposer);
+               ++n;
             }
             else{
                bcur = cur;
@@ -1750,6 +1759,7 @@ class slist_impl
             this->set_last_node(bcur.pointed_node());
          }
       }
+      return n;
    }
 
    //! <b>Requires</b>: `value` must be a reference to a value inserted in an instance of this container type.
