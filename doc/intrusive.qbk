@@ -3915,6 +3915,7 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
   C++20 changes to `std::list`.
 * Fixed bugs:
    * [@https://github.com/boostorg/intrusive/issues/99 GitHub #92: ['some intrusive containers are not trivially destructible when possible]]
+   * [@https://github.com/boostorg/intrusive/issues/103 GitHub #103: ['C++17: compilation errors if dispose function has noexcept specifier]]
 
 [endsect]
 

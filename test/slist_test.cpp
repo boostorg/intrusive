@@ -184,7 +184,7 @@ void test_slist< ListType, ValueContainer >
    {
       list_type list(values.begin(), values.end());
       const std::size_t old_size = list.size();
-      const std::size_t removed  = list.remove_and_dispose_if(is_odd(), test::empty_disposer());
+      const std::size_t removed  = list.remove_and_dispose_if(is_odd(), test::empty_noexcept_disposer());
       const std::size_t new_size = list.size();
       BOOST_TEST(removed == (old_size - new_size));
       int init_values [] = { 2, 4 };
