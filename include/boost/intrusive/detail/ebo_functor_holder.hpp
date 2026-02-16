@@ -55,6 +55,18 @@ template <typename R>
 struct is_unary_or_binary_function_impl<R (*)(...)>
 {  static const bool value = true;  };
 
+#if 201703L <= BOOST_CXX_VERSION && !defined(BOOST_NO_CXX11_NOEXCEPT)
+
+template <typename R>
+struct is_unary_or_binary_function_impl<R (*)() noexcept>
+{  static const bool value = true; };
+
+template <typename R>
+struct is_unary_or_binary_function_impl<R (*)(...) noexcept>
+{  static const bool value = true; };
+
+#endif
+
 #else // BOOST_INTRUSIVE_TT_TEST_MSC_FUNC_SIGS
 
 template <typename R>
@@ -77,6 +89,30 @@ template <typename R>
 struct is_unary_or_binary_function_impl<R (__cdecl*)(...)>
 {  static const bool value = true;  };
 
+#if 201703L <= BOOST_CXX_VERSION && !defined(BOOST_NO_CXX11_NOEXCEPT)
+
+template <typename R>
+struct is_unary_or_binary_function_impl<R (__stdcall*)() noexcept>
+{  static const bool value = true; };
+
+#ifndef _MANAGED
+
+template <typename R>
+struct is_unary_or_binary_function_impl<R (__fastcall*)() noexcept>
+{  static const bool value = true; };
+
+#endif
+
+template <typename R>
+struct is_unary_or_binary_function_impl<R (__cdecl*)() noexcept>
+{  static const bool value = true; };
+
+template <typename R>
+struct is_unary_or_binary_function_impl<R (__cdecl*)(...) noexcept>
+{  static const bool value = true; };
+
+#endif
+
 #endif
 
 // see boost ticket #4094
@@ -90,6 +126,18 @@ struct is_unary_or_binary_function_impl<R (*)(T0)>
 template <typename R, class T0>
 struct is_unary_or_binary_function_impl<R (*)(T0, ...)>
 {  static const bool value = true;  };
+
+#if 201703L <= BOOST_CXX_VERSION && !defined(BOOST_NO_CXX11_NOEXCEPT)
+
+template <typename R, class T0>
+struct is_unary_or_binary_function_impl<R (*)(T0) noexcept>
+{  static const bool value = true; };
+
+template <typename R, class T0>
+struct is_unary_or_binary_function_impl<R (*)(T0, ...) noexcept>
+{  static const bool value = true; };
+
+#endif
 
 #else // BOOST_INTRUSIVE_TT_TEST_MSC_FUNC_SIGS
 
@@ -113,6 +161,30 @@ template <typename R, class T0>
 struct is_unary_or_binary_function_impl<R (__cdecl*)(T0, ...)>
 {  static const bool value = true;  };
 
+#if 201703L <= BOOST_CXX_VERSION && !defined(BOOST_NO_CXX11_NOEXCEPT)
+
+template <typename R, class T0>
+struct is_unary_or_binary_function_impl<R (__stdcall*)(T0) noexcept>
+{  static const bool value = true; };
+
+#ifndef _MANAGED
+
+template <typename R, class T0>
+struct is_unary_or_binary_function_impl<R (__fastcall*)(T0) noexcept>
+{  static const bool value = true; };
+
+#endif
+
+template <typename R, class T0>
+struct is_unary_or_binary_function_impl<R (__cdecl*)(T0) noexcept>
+{  static const bool value = true; };
+
+template <typename R, class T0>
+struct is_unary_or_binary_function_impl<R (__cdecl*)(T0, ...) noexcept>
+{  static const bool value = true; };
+
+#endif
+
 #endif
 
 // see boost ticket #4094
@@ -126,6 +198,18 @@ struct is_unary_or_binary_function_impl<R (*)(T0, T1)>
 template <typename R, class T0, class T1>
 struct is_unary_or_binary_function_impl<R (*)(T0, T1, ...)>
 {  static const bool value = true;  };
+
+#if 201703L <= BOOST_CXX_VERSION && !defined(BOOST_NO_CXX11_NOEXCEPT)
+
+template <typename R, class T0, class T1>
+struct is_unary_or_binary_function_impl<R (*)(T0, T1) noexcept>
+{  static const bool value = true; };
+
+template <typename R, class T0, class T1>
+struct is_unary_or_binary_function_impl<R (*)(T0, T1, ...) noexcept>
+{  static const bool value = true; };
+
+#endif
 
 #else // BOOST_INTRUSIVE_TT_TEST_MSC_FUNC_SIGS
 
@@ -148,6 +232,31 @@ struct is_unary_or_binary_function_impl<R (__cdecl*)(T0, T1)>
 template <typename R, class T0, class T1>
 struct is_unary_or_binary_function_impl<R (__cdecl*)(T0, T1, ...)>
 {  static const bool value = true;  };
+
+#if 201703L <= BOOST_CXX_VERSION && !defined(BOOST_NO_CXX11_NOEXCEPT)
+
+template <typename R, class T0, class T1>
+struct is_unary_or_binary_function_impl<R (__stdcall*)(T0, T1) noexcept>
+{  static const bool value = true; };
+
+#ifndef _MANAGED
+
+template <typename R, class T0, class T1>
+struct is_unary_or_binary_function_impl<R (__fastcall*)(T0, T1) noexcept>
+{  static const bool value = true; };
+
+#endif
+
+template <typename R, class T0, class T1>
+struct is_unary_or_binary_function_impl<R (__cdecl*)(T0, T1) noexcept>
+{  static const bool value = true; };
+
+template <typename R, class T0, class T1>
+struct is_unary_or_binary_function_impl<R (__cdecl*)(T0, T1, ...) noexcept>
+{  static const bool value = true; };
+
+#endif
+
 #endif
 
 template <typename T>
