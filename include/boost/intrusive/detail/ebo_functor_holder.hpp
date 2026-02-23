@@ -135,7 +135,6 @@ class ebo_functor_holder<T *, Tag>
    }
 
    inline T&       get(){return *t_;}
-   inline const T& get()const{return *t_;}
 
    private:
    T * t_;
