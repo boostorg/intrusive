@@ -174,7 +174,7 @@ class generic_hook
       requires (LinkMode != normal_link)
    #endif
    {
-      if(hooktags::safemode_or_autounlink){
+      BOOST_IF_CONSTEXPR(hooktags::safemode_or_autounlink){
          node_algorithms::init(this->this_ptr());
       }
    }
@@ -186,7 +186,7 @@ class generic_hook
 
    inline generic_hook(const generic_hook& ) BOOST_NOEXCEPT
    {
-      if(hooktags::safemode_or_autounlink){
+      BOOST_IF_CONSTEXPR(hooktags::safemode_or_autounlink){
          node_algorithms::init(this->this_ptr());
       }
    }

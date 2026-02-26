@@ -1988,11 +1988,8 @@ struct hashdata_internal
       else {
          BOOST_IF_CONSTEXPR(incremental) {
             BOOST_ASSERT(0 == (std::size_t(bc) & (std::size_t(bc) - 1u)));
-            return bc;
          }
-         else{         
-            return bc;
-         }
+         return bc;
       }
    }
 
@@ -2559,7 +2556,7 @@ class hashtable_impl
       BOOST_IF_CONSTEXPR(constant_time_size){
          return !this->size();
       }
-      else if(cache_begin){
+      else BOOST_IF_CONSTEXPR(cache_begin){
          return this->begin() == this->end();
       }
       else{

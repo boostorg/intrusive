@@ -589,7 +589,7 @@ struct bstbase
       requires (ValueTraits::link_mode != normal_link)
    #endif
    {
-      if(is_safe_autounlink<value_traits::link_mode>::value){
+      BOOST_IF_CONSTEXPR(is_safe_autounlink<value_traits::link_mode>::value){
          node_algorithms::clear_and_dispose
             ( this->header_ptr()
             , detail::node_disposer<detail::null_disposer, value_traits, AlgoType>
