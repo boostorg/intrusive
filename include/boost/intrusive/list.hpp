@@ -1393,7 +1393,8 @@ class list_impl
 
    friend bool operator==(const list_impl &x, const list_impl &y)
    {
-      if(constant_time_size && x.size() != y.size()){
+      BOOST_IF_CONSTEXPR(constant_time_size)
+      if(x.size() != y.size()){
          return false;
       }
       return ::boost::intrusive::algo_equal(x.cbegin(), x.cend(), y.cbegin(), y.cend());

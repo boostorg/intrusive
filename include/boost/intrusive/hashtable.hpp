@@ -3074,7 +3074,7 @@ class hashtable_impl
 
       std::size_t cnt(0);
       if(success){
-         if(optimize_multikey){
+         BOOST_IF_CONSTEXPR(optimize_multikey){
             siterator past_last_in_group = it;
             (priv_go_to_last_in_group)(past_last_in_group, optimize_multikey_t());
             ++past_last_in_group;
@@ -3749,7 +3749,8 @@ class hashtable_impl
    friend bool operator==(const hashtable_impl &x, const hashtable_impl &y)
    {
       //Taken from N3068
-      if(constant_time_size && x.size() != y.size()){
+      BOOST_IF_CONSTEXPR(constant_time_size)
+      if(x.size() != y.size()){
          return false;
       }
 

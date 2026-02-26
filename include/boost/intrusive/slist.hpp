@@ -828,7 +828,9 @@ class slist_impl
       BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::inited(n));
       node_ptr prev_n(prev_p.pointed_node());
       node_algorithms::link_after(prev_n, n);
-      if(cache_last && (this->get_last_node() == prev_n)){
+
+      BOOST_IF_CONSTEXPR(cache_last)
+      if(this->get_last_node() == prev_n){
          this->set_last_node(n);
       }
       this->priv_size_traits().increment();
@@ -860,7 +862,8 @@ class slist_impl
          prev_n = n;
       }
       //Now fix special cases if needed
-      if(cache_last && (this->get_last_node() == prev_p.pointed_node())){
+      BOOST_IF_CONSTEXPR(cache_last)
+      if(this->get_last_node() == prev_p.pointed_node()){
          this->set_last_node(prev_n);
       }
       BOOST_IF_CONSTEXPR(constant_time_size){
@@ -1056,7 +1059,9 @@ class slist_impl
       ++it;
       node_ptr prev_n(prev.pointed_node());
       node_algorithms::unlink_after(prev_n);
-      if(cache_last && (to_erase == this->get_last_node())){
+
+      BOOST_IF_CONSTEXPR(cache_last)
+      if(to_erase == this->get_last_node()){
          this->set_last_node(prev_n);
       }
       BOOST_IF_CONSTEXPR(safemode_or_autounlink)
@@ -1143,7 +1148,9 @@ class slist_impl
          disposer(priv_value_traits().to_value_ptr(to_erase));
          this->priv_size_traits().decrement();
       }
-      if(cache_last && (node_traits::get_next(bfp) == this->get_end_node())){
+
+      BOOST_IF_CONSTEXPR(cache_last)
+      if(node_traits::get_next(bfp) == this->get_end_node()){
          this->set_last_node(bfp);
       }
       return l.unconst();
@@ -1584,7 +1591,8 @@ class slist_impl
    //! <b>Note</b>: Iterators and references are not invalidated
    void reverse() BOOST_NOEXCEPT
    {
-      if(cache_last && !this->empty()){
+      BOOST_IF_CONSTEXPR(cache_last)
+      if(!this->empty()){
          this->set_last_node(node_traits::get_next(this->get_root_node()));
       }
       this->priv_reverse(detail::bool_<linear>());
@@ -1984,7 +1992,8 @@ class slist_impl
 
    friend bool operator==(const slist_impl &x, const slist_impl &y)
    {
-      if(constant_time_size && x.size() != y.size()){
+      BOOST_IF_CONSTEXPR(constant_time_size)
+      if(x.size() != y.size()){
          return false;
       }
       return ::boost::intrusive::algo_equal(x.cbegin(), x.cend(), y.cbegin(), y.cend());
@@ -2011,7 +2020,8 @@ class slist_impl
    private:
    void priv_splice_after(node_ptr prev_pos_n, slist_impl &x, node_ptr before_f_n, node_ptr before_l_n)
    {
-      if (cache_last && (before_f_n != before_l_n)){
+      BOOST_IF_CONSTEXPR(cache_last)
+      if(before_f_n != before_l_n){
          if(prev_pos_n == this->get_last_node()){
             this->set_last_node(before_l_n);
          }
@@ -2045,7 +2055,10 @@ class slist_impl
    void priv_shift_backwards(size_type n, detail::bool_<false>)
    {
       node_ptr l = node_algorithms::move_forward(this->get_root_node(), (std::size_t)n);
-      if(cache_last && l){
+      (void)l;
+
+      BOOST_IF_CONSTEXPR(cache_last)
+      if(l){
          this->set_last_node(l);
       }
    }
@@ -2066,7 +2079,10 @@ class slist_impl
    void priv_shift_forward(size_type n, detail::bool_<false>)
    {
       node_ptr l = node_algorithms::move_backwards(this->get_root_node(), (std::size_t)n);
-      if(cache_last && l){
+      (void)l;
+
+      BOOST_IF_CONSTEXPR(cache_last)
+      if(l){
          this->set_last_node(l);
       }
    }

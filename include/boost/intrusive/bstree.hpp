@@ -955,7 +955,7 @@ class bstree_impl
    //! <b>Throws</b>: Nothing.
    bool empty() const BOOST_NOEXCEPT
    {
-      if(ConstantTimeSize){
+      BOOST_IF_CONSTEXPR(constant_time_size){
          return !this->data_type::sz_traits().get_size();
       }
       else{
@@ -2081,7 +2081,8 @@ class bstree_impl
 
    friend bool operator==(const bstree_impl &x, const bstree_impl &y)
    {
-      if(constant_time_size && x.size() != y.size()){
+      BOOST_IF_CONSTEXPR(constant_time_size)
+      if(x.size() != y.size()){
          return false;
       }
       return boost::intrusive::algo_equal(x.cbegin(), x.cend(), y.cbegin(), y.cend());
