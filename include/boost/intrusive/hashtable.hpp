@@ -3609,7 +3609,8 @@ class hashtable_impl
 
       if(grow){
          //Test if the split variable can be changed
-         if((ret = split_idx < bucket_cnt)){
+         ret = split_idx < bucket_cnt;
+         if(ret){
             const std::size_t bucket_to_rehash = split_idx - bucket_cnt/2u;
             bucket_type &old_bucket = this->priv_bucket(bucket_to_rehash);
             this->inc_split_count();
@@ -3640,13 +3641,16 @@ class hashtable_impl
             this->priv_erasure_update_cache();
          }
       }
-      else if((ret = split_idx > bucket_cnt/2u)){   //!grow
-         const std::size_t target_bucket_num = split_idx - 1u - bucket_cnt/2u;
-         bucket_type &target_bucket = this->priv_bucket(target_bucket_num);
-         bucket_type &source_bucket = this->priv_bucket(split_idx-1u);
-         slist_node_algorithms::transfer_after(target_bucket.get_node_ptr(), source_bucket.get_node_ptr());
-         this->dec_split_count();
-         this->priv_insertion_update_cache(target_bucket_num);
+      else{   //!grow
+         ret = split_idx > bucket_cnt/2u;
+         if(ret){
+            const std::size_t target_bucket_num = split_idx - 1u - bucket_cnt/2u;
+            bucket_type &target_bucket = this->priv_bucket(target_bucket_num);
+            bucket_type &source_bucket = this->priv_bucket(split_idx-1u);
+            slist_node_algorithms::transfer_after(target_bucket.get_node_ptr(), source_bucket.get_node_ptr());
+            this->dec_split_count();
+            this->priv_insertion_update_cache(target_bucket_num);
+         }
       }
       return ret;
    }
