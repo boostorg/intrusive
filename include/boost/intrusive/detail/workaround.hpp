@@ -110,10 +110,20 @@ template<unsigned> struct static_assert_test {};
 
 
 //GCC has some false positives with some functions returning references.
-//This silences this warning in selected functions
-#if defined(BOOST_GCC) && (BOOST_GCC >= 140000)
+//This silences this warning in selected functions.
+//Test the attribute instead of the compiler version: other compilers, like
+//nvc++, define __GNUC__ (and hence BOOST_GCC, as boost/config/compiler/pgi.hpp
+//includes gcc.hpp) without supporting all of GCC's attributes, and would warn
+//about an unknown attribute on every use.
+#if defined(__has_attribute)
+#  if __has_attribute(no_dangling)
+#     define BOOST_INTRUSIVE_NO_DANGLING __attribute__((no_dangling))
+#  endif
+#elif defined(BOOST_GCC) && (BOOST_GCC >= 140000)
 #  define BOOST_INTRUSIVE_NO_DANGLING __attribute__((no_dangling))
-#else
+#endif
+
+#ifndef BOOST_INTRUSIVE_NO_DANGLING
 #  define BOOST_INTRUSIVE_NO_DANGLING
 #endif
 
