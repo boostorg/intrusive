@@ -92,6 +92,12 @@ boostbook standalone
         # This is highly recommended until you have got all the many details correct!
         <auto-index-verbose>on
 
+        # Raise xsltproc's template and parameter limits so large QuickBook
+        # documents do not abort with "potential infinite template recursion"
+        # in source-highlight.xsl.
+        <flags>"--maxdepth 100000"
+        <flags>"--maxvars 300000"
+
         # Choose the indexing method (separately for html and PDF) - see manual.
         # Choose indexing method for PDFs:
         <format>pdf:<auto-index-internal>off
