@@ -2179,6 +2179,35 @@ struct get_hashtable_size_wrapper_internal
 
 #endif   //#if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
+#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
+//! This metafunction will obtain the type of a bucket
+//! from the value_traits or hook option to be used with
+//! a hash container.
+template<class ValueTraitsOrHookOption>
+struct unordered_bucket
+{
+   typedef implementation_defined type;
+};
+
+//! This metafunction will obtain the type of a bucket pointer
+//! from the value_traits or hook option to be used with
+//! a hash container.
+template<class ValueTraitsOrHookOption>
+struct unordered_bucket_ptr
+{
+   typedef implementation_defined type;
+};
+
+//! This metafunction will obtain the type of the default bucket traits
+//! (when the user does not specify the bucket_traits<> option) from the
+//! value_traits or hook option to be used with a hash container.
+template<class ValueTraitsOrHookOption>
+struct unordered_default_bucket_traits
+{
+   typedef implementation_defined type;
+};
+#endif
+
 //! The class template hashtable is an intrusive hash table container, that
 //! is used to construct intrusive unordered_set and unordered_multiset containers. The
 //! no-throw guarantee holds only, if the VoidOrKeyEqual object and Hasher don't throw.
@@ -2234,11 +2263,10 @@ class hashtable_impl
       , VoidOrKeyOfValue
       >                                                              hash_types_base;
    public:
-   typedef ValueTraits  value_traits;
+   typedef BOOST_INTRUSIVE_IMPDEF(ValueTraits)                       value_traits;
+   typedef BOOST_INTRUSIVE_IMPDEF(BucketTraits)                      bucket_traits;
 
    /// @cond
-   typedef BucketTraits                                              bucket_traits;
-
    typedef bucket_plus_vtraits
          <ValueTraits, BucketTraits, linear_buckets_flag>            bucket_plus_vtraits_t;
    typedef typename bucket_plus_vtraits_t::const_value_traits_ptr    const_value_traits_ptr;
@@ -2265,31 +2293,31 @@ class hashtable_impl
 
    /// @endcond
 
-   typedef typename value_traits::pointer                            pointer;
-   typedef typename value_traits::const_pointer                      const_pointer;
-   typedef typename value_traits::value_type                         value_type;
-   typedef typename hash_types_base::key_type                        key_type;
-   typedef typename hash_types_base::key_of_value                    key_of_value;
-   typedef typename pointer_traits<pointer>::reference               reference;
-   typedef typename pointer_traits<const_pointer>::reference         const_reference;
-   typedef typename pointer_traits<pointer>::difference_type         difference_type;
-   typedef SizeType                                                  size_type;
-   typedef typename internal_type::key_equal                         key_equal;
-   typedef typename internal_type::hasher                            hasher;
-   typedef typename internal_type::bucket_type                       bucket_type;
-   typedef typename internal_type::bucket_ptr                        bucket_ptr;
-   typedef typename internal_type::iterator                          iterator;
-   typedef typename internal_type::const_iterator                    const_iterator;
-   typedef typename internal_type::local_iterator                    local_iterator;
-   typedef typename internal_type::const_local_iterator              const_local_iterator;
-   typedef typename value_traits::node_traits                        node_traits;
-   typedef typename node_traits::node                                node;
-   typedef typename pointer_traits
+   typedef BOOST_INTRUSIVE_IMPDEF(typename value_traits::pointer)                      pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename value_traits::const_pointer)                const_pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename value_traits::value_type)                   value_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename hash_types_base::key_type)                  key_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename hash_types_base::key_of_value)              key_of_value;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<pointer>::reference)         reference;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<const_pointer>::reference)   const_reference;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<pointer>::difference_type)   difference_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(SizeType)                                            size_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename internal_type::key_equal)                   key_equal;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename internal_type::hasher)                      hasher;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename internal_type::bucket_type)                 bucket_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename internal_type::bucket_ptr)                  bucket_ptr;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename internal_type::iterator)                    iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename internal_type::const_iterator)              const_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename internal_type::local_iterator)              local_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename internal_type::const_local_iterator)        const_local_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename value_traits::node_traits)                  node_traits;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename node_traits::node)                          node;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits
       <pointer>::template rebind_pointer
-         < node >::type                                              node_ptr;
-   typedef typename pointer_traits
+         < node >::type)                                                               node_ptr;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits
       <pointer>::template rebind_pointer
-         < const node >::type                                        const_node_ptr;
+         < const node >::type)                                                         const_node_ptr;
    typedef typename pointer_traits
       <node_ptr>::reference                                          node_reference;
    typedef typename pointer_traits
@@ -2355,7 +2383,7 @@ class hashtable_impl
    /// @endcond
    
    public:
-   typedef insert_commit_data_impl insert_commit_data;
+   typedef BOOST_INTRUSIVE_IMPDEF(insert_commit_data_impl) insert_commit_data;
 
    private:
    void default_init_actions()

@@ -97,7 +97,7 @@ class treap_impl
    /// @endcond
 {
    public:
-   typedef ValueTraits                                               value_traits;
+   typedef BOOST_INTRUSIVE_IMPDEF(ValueTraits)                                               value_traits;
    /// @cond
    typedef bstree_impl< ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, SizeType
                       , ConstantTimeSize, BsTreeAlgorithms
@@ -112,25 +112,25 @@ class treap_impl
 
    /// @endcond
 
-   typedef typename implementation_defined::pointer                  pointer;
-   typedef typename implementation_defined::const_pointer            const_pointer;
-   typedef typename implementation_defined::value_type               value_type;
-   typedef typename implementation_defined::key_type                 key_type;
-   typedef typename implementation_defined::key_of_value             key_of_value;
-   typedef typename implementation_defined::reference                reference;
-   typedef typename implementation_defined::const_reference          const_reference;
-   typedef typename implementation_defined::difference_type          difference_type;
-   typedef typename implementation_defined::size_type                size_type;
-   typedef typename implementation_defined::value_compare            value_compare;
-   typedef typename implementation_defined::key_compare              key_compare;
-   typedef typename implementation_defined::iterator                 iterator;
-   typedef typename implementation_defined::const_iterator           const_iterator;
-   typedef typename implementation_defined::reverse_iterator         reverse_iterator;
-   typedef typename implementation_defined::const_reverse_iterator   const_reverse_iterator;
-   typedef typename implementation_defined::node_traits              node_traits;
-   typedef typename implementation_defined::node                     node;
-   typedef typename implementation_defined::node_ptr                 node_ptr;
-   typedef typename implementation_defined::const_node_ptr           const_node_ptr;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::pointer)                  pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_pointer)            const_pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::value_type)               value_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::key_type)                 key_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::key_of_value)             key_of_value;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::reference)                reference;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_reference)          const_reference;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::difference_type)          difference_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::size_type)                size_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::value_compare)            value_compare;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::key_compare)              key_compare;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::iterator)                 iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_iterator)           const_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::reverse_iterator)         reverse_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_reverse_iterator)   const_reverse_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node_traits)              node_traits;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node)                     node;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node_ptr)                 node_ptr;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_node_ptr)           const_node_ptr;
    typedef BOOST_INTRUSIVE_IMPDEF(treap_algorithms<node_traits>)     node_algorithms;
    typedef BOOST_INTRUSIVE_IMPDEF
       (typename treap_prio_types_t::priority_type)                   priority_type;
@@ -164,7 +164,7 @@ class treap_impl
    /// @endcond
 
    public:
-   typedef typename node_algorithms::insert_commit_data insert_commit_data;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename node_algorithms::insert_commit_data) insert_commit_data;
 
    //! <b>Effects</b>: Constructs an empty container.
    //!
@@ -1057,7 +1057,7 @@ class treap_impl
    }
 
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-   //! @copydoc ::boost::intrusive::bstree::merge_equal(bstree<T, Options2...>&)
+   //! @copydoc ::boost::intrusive::bstree::merge_equal
    template<class T, class ...Options2> void merge_equal(sgtree<T, Options2...> &);
    #else
    template<class Compare2>
@@ -1250,6 +1250,7 @@ template<class T, class O1 = void, class O2 = void
 #endif
 struct make_treap
 {
+   /// @cond
    typedef typename pack_options
       < treap_defaults,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)

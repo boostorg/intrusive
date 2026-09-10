@@ -186,7 +186,7 @@ class rbtree_algorithms
 
    //! This type is the information that will be
    //! filled by insert_unique_check
-   typedef typename bstree_algo::insert_commit_data insert_commit_data;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename bstree_algo::insert_commit_data)   insert_commit_data;
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
@@ -262,10 +262,10 @@ class rbtree_algorithms
    //! @copydoc ::boost::intrusive::bstree_algorithms::size(const_node_ptr)
    static std::size_t size(const_node_ptr header) BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::bstree_algorithms::next_node(const_node_ptr)
+   //! @copydoc ::boost::intrusive::bstree_algorithms::next_node(node_ptr)
    static node_ptr next_node(node_ptr n) BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::bstree_algorithms::prev_node(const_node_ptr)
+   //! @copydoc ::boost::intrusive::bstree_algorithms::prev_node(node_ptr)
    static node_ptr prev_node(node_ptr n) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::init(node_ptr)
@@ -323,7 +323,7 @@ class rbtree_algorithms
    }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-   //! @copydoc ::boost::intrusive::bstree_algorithms::clear_and_dispose(const_node_ptr,Disposer)
+   //! @copydoc ::boost::intrusive::bstree_algorithms::clear_and_dispose(node_ptr,Disposer)
    template<class Disposer>
    static void clear_and_dispose(node_ptr header, Disposer disposer) BOOST_NOEXCEPT;
 
@@ -419,7 +419,7 @@ class rbtree_algorithms
       (const_node_ptr header,  const KeyType &key
       ,KeyNodePtrCompare comp, insert_commit_data &commit_data);
 
-   //! @copydoc ::boost::intrusive::bstree_algorithms::insert_unique_check(const_node_ptr,const_node_ptr,const KeyType&,KeyNodePtrCompare,insert_commit_data&)
+   //! @copydoc ::boost::intrusive::bstree_algorithms::insert_unique_check(const_node_ptr,node_ptr,const KeyType&,KeyNodePtrCompare,insert_commit_data&)
    template<class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, bool> insert_unique_check
       (const_node_ptr header, node_ptr hint, const KeyType &key

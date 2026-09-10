@@ -92,30 +92,30 @@ class unordered_set_impl
    /// @endcond
 
    public:
-   typedef typename implementation_defined::value_type                  value_type;
-   typedef typename implementation_defined::key_type                    key_type;
-   typedef typename implementation_defined::key_of_value                key_of_value;
-   typedef typename implementation_defined::value_traits                value_traits;
-   typedef typename implementation_defined::bucket_traits               bucket_traits;
-   typedef typename implementation_defined::pointer                     pointer;
-   typedef typename implementation_defined::const_pointer               const_pointer;
-   typedef typename implementation_defined::reference                   reference;
-   typedef typename implementation_defined::const_reference             const_reference;
-   typedef typename implementation_defined::difference_type             difference_type;
-   typedef typename implementation_defined::size_type                   size_type;
-   typedef typename implementation_defined::key_equal                   key_equal;
-   typedef typename implementation_defined::hasher                      hasher;
-   typedef typename implementation_defined::bucket_type                 bucket_type;
-   typedef typename implementation_defined::bucket_ptr                  bucket_ptr;
-   typedef typename implementation_defined::iterator                    iterator;
-   typedef typename implementation_defined::const_iterator              const_iterator;
-   typedef typename implementation_defined::insert_commit_data          insert_commit_data;
-   typedef typename implementation_defined::local_iterator              local_iterator;
-   typedef typename implementation_defined::const_local_iterator        const_local_iterator;
-   typedef typename implementation_defined::node_traits                 node_traits;
-   typedef typename implementation_defined::node                        node;
-   typedef typename implementation_defined::node_ptr                    node_ptr;
-   typedef typename implementation_defined::const_node_ptr              const_node_ptr;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::value_type)             value_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::key_type)               key_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::key_of_value)           key_of_value;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::value_traits)  value_traits;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::bucket_traits) bucket_traits;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::pointer)                pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_pointer)          const_pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::reference)              reference;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_reference)        const_reference;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::difference_type)        difference_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::size_type)              size_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::key_equal)     key_equal;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::hasher)        hasher;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::bucket_type)            bucket_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::bucket_ptr)             bucket_ptr;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::iterator)               iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_iterator)         const_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::insert_commit_data)     insert_commit_data;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::local_iterator)         local_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_local_iterator)   const_local_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node_traits)            node_traits;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node)                   node;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node_ptr)               node_ptr;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_node_ptr)         const_node_ptr;
 
    public:
 
@@ -592,37 +592,37 @@ class unordered_multiset_impl
    /// @cond
    private:
    typedef hashtable_impl<ValueTraits, VoidOrKeyOfValue, VoidOrKeyHash, VoidOrKeyEqual, BucketTraits, SizeType, BoolFlags> table_type;
-   /// @endcond
 
    //Movable
    BOOST_MOVABLE_BUT_NOT_COPYABLE(unordered_multiset_impl)
 
    typedef table_type implementation_defined;
+   /// @endcond
 
    public:
-   typedef typename implementation_defined::value_type                  value_type;
-   typedef typename implementation_defined::key_type                    key_type;
-   typedef typename implementation_defined::value_traits                value_traits;
-   typedef typename implementation_defined::bucket_traits               bucket_traits;
-   typedef typename implementation_defined::pointer                     pointer;
-   typedef typename implementation_defined::const_pointer               const_pointer;
-   typedef typename implementation_defined::reference                   reference;
-   typedef typename implementation_defined::const_reference             const_reference;
-   typedef typename implementation_defined::difference_type             difference_type;
-   typedef typename implementation_defined::size_type                   size_type;
-   typedef typename implementation_defined::key_equal                   key_equal;
-   typedef typename implementation_defined::hasher                      hasher;
-   typedef typename implementation_defined::bucket_type                 bucket_type;
-   typedef typename implementation_defined::bucket_ptr                  bucket_ptr;
-   typedef typename implementation_defined::iterator                    iterator;
-   typedef typename implementation_defined::const_iterator              const_iterator;
-   typedef typename implementation_defined::insert_commit_data          insert_commit_data;
-   typedef typename implementation_defined::local_iterator              local_iterator;
-   typedef typename implementation_defined::const_local_iterator        const_local_iterator;
-   typedef typename implementation_defined::node_traits                 node_traits;
-   typedef typename implementation_defined::node                        node;
-   typedef typename implementation_defined::node_ptr                    node_ptr;
-   typedef typename implementation_defined::const_node_ptr              const_node_ptr;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::value_type)             value_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::key_type)               key_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::value_traits)           value_traits;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::bucket_traits)          bucket_traits;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::pointer)                pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_pointer)          const_pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::reference)              reference;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_reference)        const_reference;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::difference_type)        difference_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::size_type)              size_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::key_equal)              key_equal;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::hasher)                 hasher;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::bucket_type)            bucket_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::bucket_ptr)             bucket_ptr;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::iterator)               iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_iterator)         const_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::insert_commit_data)     insert_commit_data;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::local_iterator)         local_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_local_iterator)   const_local_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node_traits)            node_traits;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node)                   node;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node_ptr)               node_ptr;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_node_ptr)         const_node_ptr;
 
    public:
 

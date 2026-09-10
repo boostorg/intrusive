@@ -311,7 +311,7 @@ struct bstbase2
    typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<pointer>::reference)                  reference;
    typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<const_pointer>::reference)            const_reference;
    typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<const_pointer>::difference_type)      difference_type;
-   typedef typename node_algorithms::insert_commit_data insert_commit_data;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename node_algorithms::insert_commit_data)   insert_commit_data;
 
    inline value_compare value_comp() const
    {  return this->get_comp();   }
@@ -628,7 +628,9 @@ template<class T, class ...Options>
 template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyComp, class SizeType, bool ConstantTimeSize, algo_types AlgoType, typename HeaderHolder>
 #endif
 class bstree_impl
+   /// @cond
    :  public bstbase<ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, ConstantTimeSize, SizeType, AlgoType, HeaderHolder>
+   /// @endcond
 {
    public:
    /// @cond
@@ -683,7 +685,7 @@ class bstree_impl
 
    public:
 
-   typedef typename node_algorithms::insert_commit_data insert_commit_data;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename node_algorithms::insert_commit_data)   insert_commit_data;
 
    //! <b>Effects</b>: Constructs an empty container.
    //!

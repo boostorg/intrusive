@@ -258,7 +258,7 @@ class sgtree_algorithms
       rebalance_after_insertion(new_node, depth, tree_size+1, h_alpha, max_tree_size);
    }
 
-   //! @copydoc ::boost::intrusive::bstree_algorithms::insert_unique_check(const_node_ptr,const KeyType&,KeyNodePtrCompare,insert_commit_data&)
+   //! @copydoc ::boost::intrusive::bstree_algorithms::insert_unique_check(const_node_ptr,const KeyType&,KeyNodePtrCompare,implementation_defined&)
    template<class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, bool> insert_unique_check
       (const_node_ptr header,  const KeyType &key
@@ -271,7 +271,7 @@ class sgtree_algorithms
       return ret;
    }
 
-   //! @copydoc ::boost::intrusive::bstree_algorithms::insert_unique_check(const_node_ptr,node_ptr,const KeyType&,KeyNodePtrCompare,insert_commit_data&)
+   //! @copydoc ::boost::intrusive::bstree_algorithms::insert_unique_check(const_node_ptr,node_ptr,const KeyType&,KeyNodePtrCompare,implementation_defined&)
    template<class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, bool> insert_unique_check
       (const_node_ptr header, node_ptr hint, const KeyType &key
@@ -285,7 +285,7 @@ class sgtree_algorithms
       return ret;
    }
 
-   //! @copydoc ::boost::intrusive::bstree_algorithms::insert_unique_commit(node_ptr,node_ptr,const insert_commit_data&)
+   //! @copydoc ::boost::intrusive::bstree_algorithms::insert_unique_commit(node_ptr,node_ptr,const implementation_defined&)
    template<class H_Alpha>
    inline static void insert_unique_commit
       (node_ptr header, node_ptr new_value, const insert_commit_data &commit_data

@@ -82,12 +82,13 @@ struct pointer_traits
       //!std::ptrdiff_t.
       typedef unspecified_type difference_type;
 
-      //!Ptr::rebind<U> if such a type exists; otherwise, SomePointer<U, Args> if Ptr is
-      //!a class template instantiation of the form SomePointer<T, Args>, where Args is zero or
+      //!Ptr::rebind\<U\> if such a type exists; otherwise, SomePointer\<U, Args\> if Ptr is
+      //!a class template instantiation of the form SomePointer\<T, Args\>, where Args is zero or
       //!more type arguments ; otherwise, the instantiation of rebind is ill-formed.
       //!
-      //!For portable code for C++03 and C++11, <pre>typename rebind_pointer<U>::type</pre>
-      //!shall be used instead of rebind<U> to obtain a pointer to U.
+      //!For portable code for C++03 and C++11, use
+      //!`typename rebind_pointer<U>::type` instead of `rebind<U>`
+      //!to obtain a pointer to U.
       template <class U> using rebind = unspecified;
 
       //!Ptr::reference if such a type exists (non-standard extension); otherwise, element_type &
@@ -279,10 +280,11 @@ struct pointer_traits<T*>
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
       typedef T &          reference;
-      //!typedef for <pre>U *</pre>
+      //!typedef for `U *`
       //!
-      //!For portable code for C++03 and C++11, <pre>typename rebind_pointer<U>::type</pre>
-      //!shall be used instead of rebind<U> to obtain a pointer to U.
+      //!For portable code for C++03 and C++11, use
+      //!`typename rebind_pointer<U>::type` instead of `rebind<U>`
+      //!to obtain a pointer to U.
       template <class U> using rebind = U*;
    #else
       typedef typename boost::intrusive::detail::unvoid_ref<element_type>::type reference;

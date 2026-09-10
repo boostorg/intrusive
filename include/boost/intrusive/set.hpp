@@ -61,28 +61,28 @@ class set_impl
    /// @endcond
 
    public:
-   typedef typename implementation_defined::value_type               value_type;
-   typedef typename implementation_defined::key_type                 key_type;
-   typedef typename implementation_defined::key_of_value             key_of_value;
-   typedef typename implementation_defined::value_traits             value_traits;
-   typedef typename implementation_defined::pointer                  pointer;
-   typedef typename implementation_defined::const_pointer            const_pointer;
-   typedef typename implementation_defined::reference                reference;
-   typedef typename implementation_defined::const_reference          const_reference;
-   typedef typename implementation_defined::difference_type          difference_type;
-   typedef typename implementation_defined::size_type                size_type;
-   typedef typename implementation_defined::value_compare            value_compare;
-   typedef typename implementation_defined::key_compare              key_compare;
-   typedef typename implementation_defined::iterator                 iterator;
-   typedef typename implementation_defined::const_iterator           const_iterator;
-   typedef typename implementation_defined::reverse_iterator         reverse_iterator;
-   typedef typename implementation_defined::const_reverse_iterator   const_reverse_iterator;
-   typedef typename implementation_defined::insert_commit_data       insert_commit_data;
-   typedef typename implementation_defined::node_traits              node_traits;
-   typedef typename implementation_defined::node                     node;
-   typedef typename implementation_defined::node_ptr                 node_ptr;
-   typedef typename implementation_defined::const_node_ptr           const_node_ptr;
-   typedef typename implementation_defined::node_algorithms          node_algorithms;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::value_type)               value_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::key_type)                 key_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::key_of_value)             key_of_value;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::value_traits)             value_traits;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::pointer)                  pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_pointer)            const_pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::reference)                reference;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_reference)          const_reference;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::difference_type)          difference_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::size_type)                size_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::value_compare)            value_compare;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::key_compare)              key_compare;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::iterator)                 iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_iterator)           const_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::reverse_iterator)         reverse_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_reverse_iterator)   const_reverse_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::insert_commit_data)       insert_commit_data;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node_traits)              node_traits;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node)                     node;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node_ptr)                 node_ptr;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_node_ptr)           const_node_ptr;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node_algorithms)          node_algorithms;
 
    static const bool constant_time_size = tree_type::constant_time_size;
 
@@ -602,28 +602,28 @@ class multiset_impl
    /// @endcond
 
    public:
-   typedef typename implementation_defined::value_type               value_type;
-   typedef typename implementation_defined::key_type                 key_type;
-   typedef typename implementation_defined::key_of_value             key_of_value;
-   typedef typename implementation_defined::value_traits             value_traits;
-   typedef typename implementation_defined::pointer                  pointer;
-   typedef typename implementation_defined::const_pointer            const_pointer;
-   typedef typename implementation_defined::reference                reference;
-   typedef typename implementation_defined::const_reference          const_reference;
-   typedef typename implementation_defined::difference_type          difference_type;
-   typedef typename implementation_defined::size_type                size_type;
-   typedef typename implementation_defined::value_compare            value_compare;
-   typedef typename implementation_defined::key_compare              key_compare;
-   typedef typename implementation_defined::iterator                 iterator;
-   typedef typename implementation_defined::const_iterator           const_iterator;
-   typedef typename implementation_defined::reverse_iterator         reverse_iterator;
-   typedef typename implementation_defined::const_reverse_iterator   const_reverse_iterator;
-   typedef typename implementation_defined::insert_commit_data       insert_commit_data;
-   typedef typename implementation_defined::node_traits              node_traits;
-   typedef typename implementation_defined::node                     node;
-   typedef typename implementation_defined::node_ptr                 node_ptr;
-   typedef typename implementation_defined::const_node_ptr           const_node_ptr;
-   typedef typename implementation_defined::node_algorithms          node_algorithms;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::value_type)               value_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::key_type)                 key_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::key_of_value)             key_of_value;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::value_traits)             value_traits;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::pointer)                  pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_pointer)            const_pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::reference)                reference;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_reference)          const_reference;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::difference_type)          difference_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::size_type)                size_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::value_compare)            value_compare;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::key_compare)              key_compare;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::iterator)                 iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_iterator)           const_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::reverse_iterator)         reverse_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_reverse_iterator)   const_reverse_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::insert_commit_data)       insert_commit_data;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node_traits)              node_traits;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node)                     node;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node_ptr)                 node_ptr;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_node_ptr)           const_node_ptr;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node_algorithms)          node_algorithms;
 
    static const bool constant_time_size = tree_type::constant_time_size;
 

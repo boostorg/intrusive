@@ -171,7 +171,7 @@ class splaytree_algorithms
 
    //! This type is the information that will be
    //! filled by insert_unique_check
-   typedef typename bstree_algo::insert_commit_data insert_commit_data;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename bstree_algo::insert_commit_data)   insert_commit_data;
 
    public:
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED

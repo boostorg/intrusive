@@ -812,7 +812,7 @@ it imposes is 1 pointer per node. The size of an empty, non constant-time size
 [classref boost::intrusive::slist slist] is the size of 1 pointer. This
 lightweight memory overhead comes with drawbacks, though: many operations have
 linear time complexity, even some that usually are constant time, like
-[classref boost::intrusive::slist::swap swap]. [classref boost::intrusive::slist slist]
+[memberref boost::intrusive::slist::swap swap]. [classref boost::intrusive::slist slist]
 only provides forward iterators.
 
 For most cases, a doubly linked list is preferable because it offers more
@@ -2306,7 +2306,7 @@ Member hooks are not suitable for recursive structures:
 
 Specifying `&Recursive::memhook` (that is, the offset between memhook and Recursive) provokes an early
 instantiation of `Recursive`. To define recursive structures using member hooks, a programmer should use
-[classref ::boost::interprocess::function_hook function_hook]:
+[classref ::boost::intrusive::function_hook function_hook]:
 
 [import ../example/doc_recursive_member.cpp]
 [doc_recursive_member]
@@ -2434,7 +2434,7 @@ container might be currently inserted. Additionally, these hooks don't support `
 `swap_nodes()` operations for the same reason.
 
 Here is an example that creates a class with two any hooks, and uses one to insert the
-class in a [classref slist] and the other one in a [classref list].
+class in a [classref boost::intrusive::slist slist] and the other one in a [classref boost::intrusive::list list].
 
 [import ../example/doc_any_hook.cpp]
 [doc_any_hook]

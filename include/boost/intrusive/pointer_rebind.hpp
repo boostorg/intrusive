@@ -31,6 +31,8 @@ namespace intrusive {
 #  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
+/// @cond
+
 ///////////////////////////
 //struct pointer_rebind_mode
 ///////////////////////////
@@ -178,9 +180,13 @@ struct pointer_rebinder<Ptr<A, P0, P1, P2, P3, P4, P5, P6, P7, P8>, U, 0u>
 
 #endif   //!defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
 
+   /// @endcond
+
 template <typename Ptr, typename U>
 struct pointer_rebind
+   /// @cond
    : public pointer_rebinder<Ptr, U, pointer_rebind_mode<Ptr, U>::mode>
+   /// @endcond
 {};
 
 template <typename T, typename U>

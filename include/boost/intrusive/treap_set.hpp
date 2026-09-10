@@ -60,30 +60,30 @@ class treap_set_impl
    /// @endcond
 
    public:
-   typedef typename implementation_defined::value_type               value_type;
-   typedef typename implementation_defined::value_traits             value_traits;
-   typedef typename implementation_defined::key_type                 key_type;
-   typedef typename implementation_defined::key_of_value             key_of_value;
-   typedef typename implementation_defined::pointer                  pointer;
-   typedef typename implementation_defined::const_pointer            const_pointer;
-   typedef typename implementation_defined::reference                reference;
-   typedef typename implementation_defined::const_reference          const_reference;
-   typedef typename implementation_defined::difference_type          difference_type;
-   typedef typename implementation_defined::size_type                size_type;
-   typedef typename implementation_defined::value_compare            value_compare;
-   typedef typename implementation_defined::key_compare              key_compare;
-   typedef typename implementation_defined::priority_type            priority_type;
-   typedef typename implementation_defined::priority_compare         priority_compare;
-   typedef typename implementation_defined::iterator                 iterator;
-   typedef typename implementation_defined::const_iterator           const_iterator;
-   typedef typename implementation_defined::reverse_iterator         reverse_iterator;
-   typedef typename implementation_defined::const_reverse_iterator   const_reverse_iterator;
-   typedef typename implementation_defined::insert_commit_data       insert_commit_data;
-   typedef typename implementation_defined::node_traits              node_traits;
-   typedef typename implementation_defined::node                     node;
-   typedef typename implementation_defined::node_ptr                 node_ptr;
-   typedef typename implementation_defined::const_node_ptr           const_node_ptr;
-   typedef typename implementation_defined::node_algorithms          node_algorithms;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::value_type)               value_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::value_traits)             value_traits;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::key_type)                 key_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::key_of_value)             key_of_value;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::pointer)                  pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_pointer)            const_pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::reference)                reference;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_reference)          const_reference;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::difference_type)          difference_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::size_type)                size_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::value_compare)            value_compare;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::key_compare)              key_compare;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::priority_type)            priority_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::priority_compare)         priority_compare;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::iterator)                 iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_iterator)           const_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::reverse_iterator)         reverse_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_reverse_iterator)   const_reverse_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::insert_commit_data)       insert_commit_data;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node_traits)              node_traits;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node)                     node;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node_ptr)                 node_ptr;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_node_ptr)           const_node_ptr;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node_algorithms)          node_algorithms;
 
    static const bool constant_time_size = implementation_defined::constant_time_size;
 
@@ -252,14 +252,14 @@ class treap_set_impl
       ( const_iterator hint, const key_type &key, const priority_type &prio, insert_commit_data &commit_data)
    {  return tree_type::insert_unique_check(hint, key, prio, commit_data); }
 
-   //! @copydoc ::boost::intrusive::treap::insert_unique_check(const KeyType&,KeyTypeKeyCompare,PrioValuePrioCompare,insert_commit_data&)
+   //! @copydoc ::boost::intrusive::treap::insert_unique_check(const KeyType&,KeyTypeKeyCompare,const PrioType&,PrioValuePrioCompare,insert_commit_data&)
    template<class KeyType, class KeyTypeKeyCompare, class PrioType, class PrioValuePrioCompare>
    std::pair<iterator, bool> insert_check
       ( const KeyType &key, KeyTypeKeyCompare comp, const PrioType &prio, PrioValuePrioCompare pcomp
       , insert_commit_data &commit_data)
    {  return tree_type::insert_unique_check(key, comp, prio, pcomp, commit_data); }
 
-   //! @copydoc ::boost::intrusive::treap::insert_unique_check(const_iterator,const KeyType&,KeyTypeKeyCompare,PrioValuePrioCompare,insert_commit_data&)
+   //! @copydoc ::boost::intrusive::treap::insert_unique_check(const_iterator,const KeyType&,KeyTypeKeyCompare,const PrioType&,PrioValuePrioCompare,insert_commit_data&)
    template<class KeyType, class KeyTypeKeyCompare, class PrioType, class PrioValuePrioCompare>
    std::pair<iterator, bool> insert_check
       ( const_iterator hint
@@ -479,6 +479,7 @@ template<class T, class O1 = void, class O2 = void
 #endif
 struct make_treap_set
 {
+   /// @cond
    typedef typename pack_options
       < treap_defaults,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
@@ -622,30 +623,30 @@ class treap_multiset_impl
    /// @endcond
 
    public:
-   typedef typename implementation_defined::value_type               value_type;
-   typedef typename implementation_defined::value_traits             value_traits;
-   typedef typename implementation_defined::key_type                 key_type;
-   typedef typename implementation_defined::key_of_value             key_of_value;
-   typedef typename implementation_defined::pointer                  pointer;
-   typedef typename implementation_defined::const_pointer            const_pointer;
-   typedef typename implementation_defined::reference                reference;
-   typedef typename implementation_defined::const_reference          const_reference;
-   typedef typename implementation_defined::difference_type          difference_type;
-   typedef typename implementation_defined::size_type                size_type;
-   typedef typename implementation_defined::value_compare            value_compare;
-   typedef typename implementation_defined::key_compare              key_compare;
-   typedef typename implementation_defined::priority_type            priority_type;
-   typedef typename implementation_defined::priority_compare         priority_compare;
-   typedef typename implementation_defined::iterator                 iterator;
-   typedef typename implementation_defined::const_iterator           const_iterator;
-   typedef typename implementation_defined::reverse_iterator         reverse_iterator;
-   typedef typename implementation_defined::const_reverse_iterator   const_reverse_iterator;
-   typedef typename implementation_defined::insert_commit_data       insert_commit_data;
-   typedef typename implementation_defined::node_traits              node_traits;
-   typedef typename implementation_defined::node                     node;
-   typedef typename implementation_defined::node_ptr                 node_ptr;
-   typedef typename implementation_defined::const_node_ptr           const_node_ptr;
-   typedef typename implementation_defined::node_algorithms          node_algorithms;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::value_type)               value_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::value_traits)             value_traits;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::key_type)                 key_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::key_of_value)             key_of_value;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::pointer)                  pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_pointer)            const_pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::reference)                reference;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_reference)          const_reference;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::difference_type)          difference_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::size_type)                size_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::value_compare)            value_compare;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::key_compare)              key_compare;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::priority_type)            priority_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::priority_compare)         priority_compare;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::iterator)                 iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_iterator)           const_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::reverse_iterator)         reverse_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_reverse_iterator)   const_reverse_iterator;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::insert_commit_data)       insert_commit_data;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node_traits)              node_traits;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node)                     node;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node_ptr)                 node_ptr;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::const_node_ptr)           const_node_ptr;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::node_algorithms)          node_algorithms;
 
    static const bool constant_time_size = implementation_defined::constant_time_size;
 
@@ -998,6 +999,7 @@ template<class T, class O1 = void, class O2 = void
 #endif
 struct make_treap_multiset
 {
+   /// @cond
    typedef typename pack_options
       < treap_defaults,
       #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
