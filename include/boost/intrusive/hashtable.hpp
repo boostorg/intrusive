@@ -88,8 +88,6 @@ namespace intrusive {
 
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
-/// @cond
-
 //We only support LLP64(Win64) or LP64(most Unix) data models
 #ifdef _WIN64  //In 64 bit windows sizeof(size_t) == sizeof(unsigned long long)
 #  define BOOST_INTRUSIVE_SIZE_C(NUMBER) NUMBER##ULL
@@ -369,10 +367,6 @@ struct prime_fmod_size : prime_list_holder<>
 #undef BOOST_INTRUSIVE_SIZE_C
 #undef BOOST_INTRUSIVE_64_BIT_SIZE_T
 
-#endif   //#if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-
-
-
 template<class InputIt, class T>
 InputIt priv_algo_find(InputIt first, InputIt last, const T& value)
 {
@@ -500,12 +494,9 @@ private:
    BOOST_COPYABLE_AND_MOVABLE(bucket_traits_impl)
 
 public:
-   /// @cond
 
    typedef BucketPtr bucket_ptr;
    typedef SizeType  size_type;
-
-   /// @endcond
 
    inline bucket_traits_impl(bucket_ptr buckets, size_type len)
       : buckets_(buckets), buckets_len_(len)
@@ -2186,7 +2177,7 @@ struct get_hashtable_size_wrapper_internal
       > type;
 };
 
-/// @endcond
+#endif   //#if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
 //! The class template hashtable is an intrusive hash table container, that
 //! is used to construct intrusive unordered_set and unordered_multiset containers. The
