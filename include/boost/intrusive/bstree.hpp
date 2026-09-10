@@ -1997,7 +1997,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: N log(a.size() + N) (N has the value source.size())
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-   template<class T, class ...Options2> void merge_unique(bstree<T, Options2...> &);
+   template<class T, class ...Options2> void merge_unique(bstree<T, Options2...> &)
    #else
    template<class Compare2>
    void merge_unique(bstree_impl
@@ -2033,7 +2033,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: N log(a.size() + N) (N has the value source.size())
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-   template<class T, class ...Options2> void merge_equal(bstree<T, Options2...> &);
+   template<class T, class ...Options2> void merge_equal(bstree<T, Options2...> &)
    #else
    template<class Compare2>
    void merge_equal(bstree_impl

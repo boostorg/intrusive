@@ -705,7 +705,7 @@ class sgtree_impl
 
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
    //! @copydoc ::boost::intrusive::bstree::merge_unique
-   template<class T, class ...Options2> void merge_unique(sgtree<T, Options2...> &);
+   template<class T, class ...Options2> void merge_unique(sgtree<T, Options2...> &)
    #else
    template<class Compare2>
    void merge_unique(sgtree_impl
@@ -736,7 +736,7 @@ class sgtree_impl
 
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
    //! @copydoc ::boost::intrusive::bstree::merge_equal
-   template<class T, class ...Options2> void merge_equal(sgtree<T, Options2...> &);
+   template<class T, class ...Options2> void merge_equal(sgtree<T, Options2...> &)
    #else
    template<class Compare2>
    void merge_equal(sgtree_impl

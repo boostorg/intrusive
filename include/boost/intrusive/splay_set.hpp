@@ -303,13 +303,6 @@ class splay_set_impl
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
-   //! @copydoc ::boost::intrusive::splaytree::count(const key_type &)const
-   size_type count(const key_type &key) const;
-
-   //! @copydoc ::boost::intrusive::splaytree::count(const KeyType&,KeyTypeKeyCompare)const
-   template<class KeyType, class KeyTypeKeyCompare>
-   size_type count(const KeyType& key, KeyTypeKeyCompare comp) const;
-
    //! @copydoc ::boost::intrusive::splaytree::lower_bound(const key_type &)
    iterator lower_bound(const key_type &key);
 

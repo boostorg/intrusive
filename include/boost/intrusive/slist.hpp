@@ -128,7 +128,7 @@ class slist_impl
    typedef ValueTraits                                               value_traits;
    typedef typename value_traits::pointer                            pointer;
    typedef typename value_traits::const_pointer                      const_pointer;
-   typedef typename pointer_traits<pointer>::element_type            value_type;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<pointer>::element_type)   value_type;
    typedef typename pointer_traits<pointer>::reference               reference;
    typedef typename pointer_traits<const_pointer>::reference         const_reference;
    typedef typename pointer_traits<pointer>::difference_type         difference_type;

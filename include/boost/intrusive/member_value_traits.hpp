@@ -47,10 +47,10 @@ struct member_value_traits
    typedef typename node_traits::node_ptr                               node_ptr;
    typedef typename node_traits::const_node_ptr                         const_node_ptr;
    typedef pointer_traits<node_ptr>                                     node_ptr_traits;
-   typedef typename pointer_traits<node_ptr>::template
-      rebind_pointer<T>::type                                           pointer;
-   typedef typename pointer_traits<node_ptr>::template
-      rebind_pointer<const T>::type                                     const_pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<node_ptr>::template
+      rebind_pointer<T>::type)                                          pointer;
+   typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<node_ptr>::template
+      rebind_pointer<const T>::type)                                    const_pointer;
    //typedef typename pointer_traits<pointer>::reference                  reference;
    //typedef typename pointer_traits<const_pointer>::reference            const_reference;
    typedef value_type &                                                 reference;

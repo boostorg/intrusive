@@ -240,10 +240,6 @@ class rbtree_impl
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
-   //! @copydoc ::boost::intrusive::bstree::clone_from(bstree&&,Cloner,Disposer)
-   template <class Cloner, class Disposer>
-   void clone_from(rbtree_impl &&src, Cloner cloner, Disposer disposer);
-
    //! @copydoc ::boost::intrusive::bstree::insert_equal(reference)
    iterator insert_equal(reference value);
 
