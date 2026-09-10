@@ -1367,6 +1367,52 @@ Now let's see a small example using both hooks and both containers:
 
 [endsect]
 
+[section:unordered_bucket_manager Managing the bucket array: unordered_bucket_manager]
+
+Intrusive containers never allocate memory, so the user must supply the bucket
+array and take care of the load factor. This makes the semi-intrusive unordered
+containers harder to use than the purely intrusive ones, because the array must be
+replaced with a bigger one (and the container rehashed) as elements are
+inserted.
+
+[classref boost::intrusive::unordered_bucket_manager unordered_bucket_manager]
+is a utility that does that work. Allocates and manages the bucket array of a
+single container, and offers the load factor operations needed to build a
+a higher order unordered [multi]set/map. The values are still
+supplied by the user, as in any intrusive container.
+
+The manager holds only the operations that need the bucket array or the load
+factor:
+
+*  [*`traits()`]: returns the bucket traits object that the container is
+   constructed from.
+
+*  [*`reserve(c, capacity)`] and [*`reserve_additional(c, n)`]: grow the array
+   and rehashing if needed, so that `capacity` elements (or `n` more elements)
+   fit without exceeding the maximum load factor. Call one of them before every
+   insertion. Optimization: A single call for a whole batch grows the array only once.
+
+*  [*`max_load_factor()`], [*`load_factor(c)`], [*`max_load()`] and
+   [*`bucket_count()`]: load factor observers and modifier.
+
+*  [*`rehash(c, hint)`] and [*`shrink_to_fit(c)`]: set the bucket count
+   explicitly. These operations can reduce the bucket array.
+
+Every other operation is performed on the container itself: insertions
+(`insert`, `insert_check`/`insert_commit`), lookups and erasures.
+
+Two rules must be respected: the manager shall be declared [*before] the
+container, so that it is destroyed after it, and the buckets shall be empty
+(e.g. after `clear_and_dispose`, of after the constainer is destroyed)
+when the manager is destroyed. Note also that
+a rehash invalidates all iterators into the container, but never pointers or
+references to the elements, since nodes are relinked and not moved.
+
+[import ../example/doc_unordered_bucket_manager.cpp]
+[doc_unordered_bucket_manager]
+
+[endsect]
+
 [section:custom_bucket_traits Custom bucket traits]
 
 Instead of using the default `bucket_traits` class to store the bucket array, a user
@@ -3904,6 +3950,12 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 [endsect]
 
 [section:release_notes Release Notes]
+
+[section:release_notes_boost_1_93_00 Boost 1.93 Release]
+
+* Added [classref boost::intrusive::unordered_bucket_manager unordered_bucket_manager] utility.
+
+[endsect]
 
 [section:release_notes_boost_1_91_00 Boost 1.91 Release]
 
