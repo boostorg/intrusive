@@ -170,9 +170,11 @@ class unordered_bucket_manager
    //Movable-only: the bucket array has a single owner
    BOOST_MOVABLE_BUT_NOT_COPYABLE(unordered_bucket_manager)
 
+   //bucket_type is not declared yet, so the container's type is used here
    typedef typename detail::if_c
       < detail::is_same<Allocator, void>::value
-      , typename detail::bucket_alloc_select<void, bucket_type>::type
+      , typename detail::bucket_alloc_select
+           <void, typename Hashtable::bucket_type>::type
       , Allocator
       >::type selected_allocator_type;
 
