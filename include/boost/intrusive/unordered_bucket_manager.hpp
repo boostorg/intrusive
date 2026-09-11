@@ -17,7 +17,6 @@
 #include <boost/intrusive/detail/ebo_functor_holder.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
-#include <boost/intrusive/pointer_traits.hpp>
 
 #include <boost/config.hpp>
 #include <boost/assert.hpp>
@@ -29,7 +28,6 @@
 #include <boost/move/detail/to_raw_pointer.hpp>
 
 #include <cstddef>   //std::size_t
-#include <memory>    //std::allocator, std::allocator_traits
 #include <new>       //placement new
 
 #if defined(BOOST_HAS_PRAGMA_ONCE)
@@ -40,33 +38,57 @@ namespace boost {
 namespace intrusive {
 namespace detail {
 
-//Rebinds `Allocator` to `T`. std::allocator_traits is used when available,
-//because C++20 removed std::allocator<T>::rebind, ::pointer and ::size_type,
-//and the nested rebind is used otherwise (C++03 allocators).
-template<class Allocator, class T>
-struct bucket_alloc_rebind
+//The allocator used when the manager is instantiated with `void`: it takes
+//the memory for the bucket array from the global operator new. It holds no
+//state, so the manager keeps the empty base optimization.
+template<class T>
+struct operator_new_allocator
 {
-   #if !defined(BOOST_NO_CXX11_ALLOCATOR)
-   typedef typename std::allocator_traits<Allocator>::
-      template rebind_alloc<T>                        type;
-   #else
-   typedef typename Allocator::template rebind<T>::other type;
-   #endif
+   typedef T                     value_type;
+   typedef T *                   pointer;
+   typedef std::size_t           size_type;
+
+   pointer allocate(size_type n)
+   {  return static_cast<pointer>(::operator new(n * sizeof(T)));  }
+
+   void deallocate(pointer p, size_type)
+   {  ::operator delete(static_cast<void *>(p));  }
 };
 
-//The pointer and size types of an allocator, from the same two sources
-template<class Allocator>
-struct bucket_alloc_types
+//Nested type detection, so that no std facility (and no <memory>) is needed
+template<class A>
+struct bucket_alloc_has_size_type
 {
-   #if !defined(BOOST_NO_CXX11_ALLOCATOR)
-   typedef std::allocator_traits<Allocator>           traits_t;
-   typedef typename traits_t::pointer                 pointer;
-   typedef typename traits_t::size_type               size_type;
-   #else
-   typedef typename Allocator::pointer                pointer;
-   typedef typename Allocator::size_type              size_type;
-   #endif
+   template<class X> static char test(int, typename X::size_type*);
+   template<class X> static int  test(...);
+   static const bool value = (1 == sizeof(test<A>(0, 0)));
 };
+
+template<class A> struct bucket_alloc_nested_size_type
+{  typedef typename A::size_type                type;  };
+
+struct bucket_alloc_std_size_type
+{  typedef std::size_t                          type;  };
+
+//The size type of an allocator, with the default that
+//std::allocator_traits would supply
+template<class Allocator>
+struct bucket_alloc_size_type
+   :  eval_if_c< bucket_alloc_has_size_type<Allocator>::value
+               , bucket_alloc_nested_size_type<Allocator>
+               , bucket_alloc_std_size_type >
+{};
+
+//Selects the allocator that the manager holds: `void` means the internal
+//operator new allocator, and any other type is used as it is, because it
+//must already be an allocator of T
+template<class Allocator, class T>
+struct bucket_alloc_select
+{  typedef Allocator                            type;  };
+
+template<class T>
+struct bucket_alloc_select<void, T>
+{  typedef operator_new_allocator<T>            type;  };
 
 }  //namespace detail
 
@@ -88,11 +110,12 @@ struct bucket_alloc_types
 //!    instantiation of unordered_set, unordered_multiset or hashtable) that
 //!    must use its default bucket traits, i.e. the \c bucket_traits option
 //!    must not be customized.
-//!  - \c Allocator: a C++03 conforming allocator. It is rebound internally to
-//!    allocate <tt>Hashtable::bucket_type</tt> objects. Its \c pointer type,
-//!    after rebinding, must be compatible with
-//!    <tt>Hashtable::bucket_ptr</tt> (both raw pointers, or fancy pointers of
-//!    the same family, e.g. when using Boost.Interprocess).
+//!  - \c Allocator: \c void (the default) means that the bucket array is
+//!    taken from the global <tt>operator new</tt>.
+//!    Any other type is used as the allocator of the bucket array, and it
+//!    shall be an allocator of buckets: <tt>Allocator::value_type</tt> shall
+//!    be <tt>Hashtable::bucket_type</tt> and <tt>Allocator::pointer</tt>
+//!    must be convertible to <tt>Hashtable::bucket_ptr</tt>.
 //!
 //! <b>Usage rules</b>:
 //!  - One manager manages the buckets of exactly one container. Declare the
@@ -138,39 +161,45 @@ struct bucket_alloc_types
 //! set.clear_and_dispose(Deleter());    //leave the buckets empty
 //! \endcode
 template < class Hashtable
-         , class Allocator = std::allocator<typename Hashtable::bucket_type> >
+         , class Allocator = void >
 class unordered_bucket_manager
-   //The rebound allocator is a private base class, so that an empty
-   //allocator (the usual case) adds no size to the manager (EBO)
    :  private detail::ebo_functor_holder
-         < typename detail::bucket_alloc_rebind
+         < typename detail::bucket_alloc_select
               <Allocator, typename Hashtable::bucket_type>::type >
 {
    //Movable-only: the bucket array has a single owner
    BOOST_MOVABLE_BUT_NOT_COPYABLE(unordered_bucket_manager)
+
+   typedef typename detail::if_c
+      < detail::is_same<Allocator, void>::value
+      , typename detail::bucket_alloc_select<void, bucket_type>::type
+      , Allocator
+      >::type selected_allocator_type;
 
    public:
    typedef Hashtable                                     hashtable_type;
    typedef typename hashtable_type::bucket_type          bucket_type;
    typedef typename hashtable_type::bucket_traits        bucket_traits_type;
    typedef typename hashtable_type::size_type            size_type;
-   typedef Allocator                                     allocator_type;
+   //With \c void, an internal allocator using operator new, Allocator otherwise
+   typedef BOOST_INTRUSIVE_IMPDEF(selected_allocator_type) allocator_type;
 
    #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    private:
-   typedef typename detail::bucket_alloc_rebind
-      <Allocator, bucket_type>::type                     bucket_allocator;
-   typedef typename hashtable_type::bucket_ptr           bucket_ptr;
-   typedef typename detail::bucket_alloc_types
-      <bucket_allocator>::pointer                        alloc_pointer;
-   typedef typename detail::bucket_alloc_types
-      <bucket_allocator>::size_type                      alloc_size_type;
-   typedef detail::ebo_functor_holder<bucket_allocator>  alloc_holder_t;
+   //The allocator allocates the container's buckets
+   BOOST_INTRUSIVE_STATIC_ASSERT
+      ((detail::is_same< typename allocator_type::value_type
+                       , bucket_type>::value));
 
-   BOOST_INTRUSIVE_FORCEINLINE bucket_allocator &       priv_alloc()
+   typedef typename hashtable_type::bucket_ptr           bucket_ptr;
+   typedef typename detail::bucket_alloc_size_type
+      <allocator_type>::type                             alloc_size_type;
+   typedef detail::ebo_functor_holder<allocator_type>    alloc_holder_t;
+
+   BOOST_INTRUSIVE_FORCEINLINE allocator_type &         priv_alloc()
    {  return alloc_holder_t::get();  }
 
-   BOOST_INTRUSIVE_FORCEINLINE const bucket_allocator & priv_alloc() const
+   BOOST_INTRUSIVE_FORCEINLINE const allocator_type &   priv_alloc() const
    {  return alloc_holder_t::get();  }
    #endif   //BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
@@ -192,7 +221,7 @@ class unordered_bucket_manager
    explicit unordered_bucket_manager
       ( size_type bucket_count_hint = 0u
       , const allocator_type &a = allocator_type())
-      :  alloc_holder_t(bucket_allocator(a))
+      :  alloc_holder_t(a)
       ,  m_buckets()
       ,  m_bucket_count(0u)
       ,  m_max_load_factor(1.0f)
@@ -215,7 +244,7 @@ class unordered_bucket_manager
       ,  m_bucket_count(x.m_bucket_count)
       ,  m_max_load_factor(x.m_max_load_factor)
    {
-      x.m_buckets      = alloc_pointer();
+      x.m_buckets      = bucket_ptr();
       x.m_bucket_count = 0u;
    }
 
@@ -235,7 +264,7 @@ class unordered_bucket_manager
          m_buckets         = mx.m_buckets;
          m_bucket_count    = mx.m_bucket_count;
          m_max_load_factor = mx.m_max_load_factor;
-         mx.m_buckets      = alloc_pointer();
+         mx.m_buckets      = bucket_ptr();
          mx.m_bucket_count = 0u;
       }
       return *this;
@@ -283,10 +312,7 @@ class unordered_bucket_manager
    //!
    //! <b>Throws</b>: Nothing.
    bucket_traits_type traits() const BOOST_NOEXCEPT
-   {
-      return bucket_traits_type
-         (this->priv_bucket_begin(), this->bucket_count());
-   }
+   {  return bucket_traits_type(m_buckets, this->bucket_count());  }
 
    //! <b>Effects</b>: Returns a copy of the stored allocator, converted back
    //!   to the original \c Allocator type.
@@ -337,7 +363,7 @@ class unordered_bucket_manager
    //!   throws during rehashing (see rehash() notes below).
    bool reserve(hashtable_type &c, size_type element_capacity)
    {
-      BOOST_ASSERT(c.bucket_pointer() == this->priv_bucket_begin());
+      BOOST_ASSERT(c.bucket_pointer() == m_buckets);
       const size_type target = this->priv_buckets_for(element_capacity);
       if(target <= m_bucket_count)
          return false;
@@ -419,16 +445,6 @@ class unordered_bucket_manager
    //
    //////////////////////////////////////////////
 
-   //Pointer to the first owned bucket. It is null only for a moved-from
-   //manager.
-   bucket_ptr priv_bucket_begin() const
-   {
-      return m_buckets
-         ?  pointer_traits<bucket_ptr>::pointer_to
-               (*::boost::movelib::to_raw_pointer(m_buckets))
-         :  bucket_ptr();
-   }
-
    //Rounds `n` up to a bucket count the container accepts. With
    //power_2_buckets (which incremental implies) the container requires a
    //power of two, and suggested_upper_bucket_count() returns a prime, so
@@ -466,9 +482,9 @@ class unordered_bucket_manager
 
    //Allocates and default-constructs `n` buckets.
    //bucket_type's default constructor is a no-throw operation.
-   alloc_pointer priv_create_buckets(size_type n)
+   bucket_ptr priv_create_buckets(size_type n)
    {
-      alloc_pointer p = this->priv_alloc().allocate(alloc_size_type(n));
+      bucket_ptr p = this->priv_alloc().allocate(alloc_size_type(n));
       bucket_type *raw = ::boost::movelib::to_raw_pointer(p);
       for(size_type i = 0; i != n; ++i){
          ::new(static_cast<void*>(raw + i)) bucket_type();
@@ -477,7 +493,7 @@ class unordered_bucket_manager
    }
 
    //Destroys and deallocates `n` buckets. Buckets must be empty.
-   void priv_destroy_buckets(alloc_pointer p, size_type n)
+   void priv_destroy_buckets(bucket_ptr p, size_type n)
    {
       if(p){
          bucket_type *raw = ::boost::movelib::to_raw_pointer(p);
@@ -496,11 +512,9 @@ class unordered_bucket_manager
    void priv_do_rehash(hashtable_type &c, size_type new_count)
    {
       BOOST_ASSERT(new_count != 0u);
-      alloc_pointer nb = this->priv_create_buckets(new_count);
-      const bucket_ptr nbp = pointer_traits<bucket_ptr>::pointer_to
-         (*::boost::movelib::to_raw_pointer(nb));
+      const bucket_ptr nb = this->priv_create_buckets(new_count);
       BOOST_INTRUSIVE_TRY{
-         c.rehash(bucket_traits_type(nbp, new_count));
+         c.rehash(bucket_traits_type(nb, new_count));
       }
       BOOST_INTRUSIVE_CATCH(...){
          this->priv_destroy_buckets(nb, new_count);
@@ -513,7 +527,7 @@ class unordered_bucket_manager
       m_bucket_count = new_count;
    }
 
-   alloc_pointer     m_buckets;
+   bucket_ptr        m_buckets;
    size_type         m_bucket_count;
    float             m_max_load_factor;
    #endif   //BOOST_INTRUSIVE_DOXYGEN_INVOKED

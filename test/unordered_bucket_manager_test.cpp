@@ -18,6 +18,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <functional>
+#include <memory>
 #include <vector>
 
 namespace bi = boost::intrusive;
@@ -144,6 +145,30 @@ void test_power_of_two(const char *name)
    mgr.shrink_to_fit(c);
    BOOST_TEST(is_power_of_two(mgr.bucket_count()));
    std::printf("%s: buckets=%u\n", name, unsigned(mgr.bucket_count()));
+}
+
+//Fills and empties a container whose manager holds the given allocator, so
+//that every allocator path is exercised
+template<class Mgr>
+void test_allocator_path(const char *name)
+{
+   umset_t::size_type buckets = 0;
+   {
+      Mgr      mgr;
+      umset_t  mset(mgr.traits());
+      mgr.reserve_additional(mset, umset_t::size_type(500));
+      for(int i = 0; i != 500; ++i)
+         mset.insert(*new item(i));
+      BOOST_TEST(mset.size() == 500u);
+      for(int i = 0; i != 500; ++i)
+         BOOST_TEST(mset.find(item(i)) != mset.end());
+      buckets = mgr.bucket_count();
+      BOOST_TEST(mset.bucket_count() == buckets);
+      mset.clear_and_dispose(delete_disposer());
+      mgr.shrink_to_fit(mset);
+      BOOST_TEST(mgr.bucket_count() < buckets);
+   }
+   std::printf("%s: buckets=%u\n", name, unsigned(buckets));
 }
 
 //Invariant checked after every phase: the container really uses the
@@ -450,6 +475,28 @@ int main()
 
       test_power_of_two<pow2_t>("power_2_buckets");
       test_power_of_two<incr_t>("incremental");
+   }
+
+   //////////////////////////////////////
+   // the allocator paths: void (the default, global operator new), a user
+   // allocator of buckets, and std::allocator, whose pointer and size_type
+   // members were removed in C++20
+   //////////////////////////////////////
+   {
+      typedef bi::unordered_bucket_manager<umset_t>          void_mgr_t;
+      typedef bi::unordered_bucket_manager
+         <umset_t, counting_allocator<umset_t::bucket_type> > user_mgr_t;
+      typedef bi::unordered_bucket_manager
+         <umset_t, std::allocator<umset_t::bucket_type> >     std_mgr_t;
+
+      //Every one of them is stateless, so the size stays the same
+      BOOST_STATIC_ASSERT((sizeof(void_mgr_t)   == sizeof(manager_layout)));
+      BOOST_STATIC_ASSERT((sizeof(user_mgr_t)   == sizeof(manager_layout)));
+      BOOST_STATIC_ASSERT((sizeof(std_mgr_t)    == sizeof(manager_layout)));
+
+      test_allocator_path<void_mgr_t>("void (operator new)");
+      test_allocator_path<user_mgr_t>("user allocator");
+      test_allocator_path<std_mgr_t>("std::allocator");
    }
 
    std::printf("All tests passed.\n");
