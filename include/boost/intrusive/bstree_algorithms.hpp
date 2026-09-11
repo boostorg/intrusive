@@ -110,7 +110,7 @@ struct bstree_node_checker
 //!   leftmost node in the tree and the right pointer to the rightmost one.
 //!   This node is used to represent the end-iterator.
 //!
-//! <pre>
+//! @cond
 //!                                            +---------+
 //!       header------------------------------>|         |
 //!                                            |         |
@@ -143,7 +143,7 @@ struct bstree_node_checker
 //!                       |    A    |   |    C    |   |    E    |   |    G    |
 //!                       |         |   |         |   |         |   |         |
 //!                       +---------+   +---------+   +---------+   +---------+
-//! </pre>
+//! @endcond
 //!
 //! bstree_algorithms is configured with a NodeTraits class, which encapsulates the
 //! information about the node to be manipulated. NodeTraits must support the
