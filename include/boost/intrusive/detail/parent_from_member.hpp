@@ -22,12 +22,12 @@
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/detail/workaround.hpp>
-#include <boost/move/detail/launder.hpp>
+#include <boost/intrusive/detail/assert.hpp>
 #include <cstddef>
 
 #if defined(_MSC_VER)
-   #define BOOST_INTRUSIVE_MSVC_ABI_PTR_TO_MEMBER
-   #endif
+#  define BOOST_INTRUSIVE_MSVC_ABI_PTR_TO_MEMBER
+#endif
 
 namespace boost {
 namespace intrusive {
@@ -39,36 +39,38 @@ BOOST_INTRUSIVE_FORCEINLINE std::ptrdiff_t offset_from_pointer_to_member(const M
    //The implementation of a pointer to member is compiler dependent.
    #if defined(BOOST_INTRUSIVE_MSVC_ABI_PTR_TO_MEMBER)
 
-   //MSVC compliant compilers use their the first 32 bits as offset (even in 64 bit mode)
+   //MSVC ABI represents a pointer to data member as 1, 2 or 3 32-bit ints
+   //(even in 64 bit mode) depending on the inheritance model of Parent:
+   //
+   // - single/multiple inheritance:  4 bytes: { field_offset }
+   // - virtual inheritance:          8 bytes: { field_offset, vbtable_offset }
+   // - unspecified (incomplete Parent, /vmg): 12 bytes: { field_offset, vbptr_offset, vbtable_offset }
+   //
+   //and the compiler obtains the member address from the parent as:
+   //
+   //   vbase  = vbtable_offset == 0 ? 0 : vbptr_offset + *(int*)(*(char**)(parent + vbptr_offset) + vbtable_offset)
+   //   member = parent + vbase + field_offset
+   //
+   //field_offset is always the first int and vbtable_offset, when present, is always the last int.
+   //vbtable_offset is zero unless the member is located in a virtual base of Parent. In that case
+   //the distance from Parent to the member is not a constant, as it depends on the most derived type
+   //(the vbtable is stored in the object, so it can't be read without knowing the parent address),
+   //and the parent address can't be recovered. Note that ISO C++ ([conv.mem]) does not allow
+   //converting a pointer to member of a virtual base to a pointer to member of the derived class,
+   //MSVC accepts it as an extension, so this function asserts to detect that non-standard case.
+   typedef const Member Parent::* ptr_to_member_t;
    union caster_union
    {
-      const Member Parent::* ptr_to_member;
-      int offset;
+      ptr_to_member_t ptr_to_member;
+      int offsets[sizeof(ptr_to_member_t)/sizeof(int)];
    } caster;
-
-   //MSVC ABI can use up to 3 int32 to represent pointer to member data
-   //with virtual base classes, in those cases there is no simple to
-   //obtain the address of the parent. So static assert to avoid runtime errors
-   BOOST_INTRUSIVE_STATIC_ASSERT( sizeof(caster) == sizeof(int) );
+   //Note: sizeof(caster) can be bigger than sizeof(ptr_to_member_t) due to alignment (x86 12-byte pointers to member have 8 byte alignment)
+   BOOST_INTRUSIVE_STATIC_ASSERT( sizeof(caster.offsets) == sizeof(ptr_to_member_t) && sizeof(caster.offsets) <= 3u*sizeof(int) );
 
    caster.ptr_to_member = ptr_to_member;
-   return std::ptrdiff_t(caster.offset);
-   //Additional info on MSVC behaviour for the future. For 2/3 int ptr-to-member
-   //types dereference seems to be:
-   //
-   // vboffset = [compile_time_offset if 2-int ptr2memb] /
-   //            [ptr2memb.i32[2] if 3-int ptr2memb].
-   // vbtable = *(this + vboffset);
-   // adj = vbtable[ptr2memb.i32[1]];
-   // var = adj + (this + vboffset) + ptr2memb.i32[0];
-   //
-   //To reverse the operation we need to
-   // - obtain vboffset (in 2-int ptr2memb implementation only)
-   // - Go to Parent's vbtable and obtain adjustment at index ptr2memb.i32[1]
-   // - parent = member - adj - vboffset - ptr2memb.i32[0]
-   //
-   //Even accessing to RTTI we might not be able to obtain this information
-   //so anyone who thinks it's possible, please send a patch.
+   //Members located in virtual bases are not supported (vbtable_offset != 0)
+   BOOST_INTRUSIVE_INVARIANT_ASSERT( sizeof(caster.offsets) == sizeof(int) || caster.offsets[sizeof(caster.offsets)/sizeof(int) - 1u] == 0 );
+   return std::ptrdiff_t(caster.offsets[0]);
 
    //This works with gcc, msvc, ac++, ibmcpp
    #elif defined(__GNUC__)   || defined(__HP_aCC) || defined(BOOST_INTEL) || \

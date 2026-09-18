@@ -110,9 +110,36 @@ struct VirtualDerived
    virtual ~VirtualDerived(){}
 } virtualderived;
 
-using namespace boost::intrusive;
+struct VirtualMixed
+   : public Derived, public virtual DerivedPoly2
+{
+   int   virtualmixed_int_;
+   float virtualmixed_float_;
+   virtual ~VirtualMixed(){}
+} virtualmixed;
 
-//Add new test with https://svn.boost.org/trac/boost/attachment/ticket/8512/Source1.cpp
+#ifdef BOOST_INTRUSIVE_MSVC_ABI_PTR_TO_MEMBER
+//Force the most general (12 byte) pointer to data member representation for the following classes
+#pragma pointers_to_members(full_generality, virtual_inheritance)
+
+struct FullGenerality
+   : public Derived, public DerivedPoly
+{
+   int   fullgenerality_int_;
+   float fullgenerality_float_;
+} fullgenerality;
+
+struct FullGeneralityVirtual
+   : public virtual Derived, public DerivedPoly
+{
+   int   fullgeneralityvirtual_int_;
+   float fullgeneralityvirtual_float_;
+   virtual ~FullGeneralityVirtual(){}
+} fullgeneralityvirtual;
+
+#endif
+
+using namespace boost::intrusive;
 
 int main()
 {
@@ -155,8 +182,16 @@ int main()
    BOOST_TEST(&multiinheritance2 == get_parent_from_member(&multiinheritance2.derivedpoly2_int_,   &MultiInheritance2::derivedpoly2_int_));
    BOOST_TEST(&multiinheritance2 == get_parent_from_member(&multiinheritance2.derivedpoly2_float_, &MultiInheritance2::derivedpoly2_float_));
 
-   //MSVC pointer to member data uses RTTI info even when not crossing virtual base boundaries
-   #ifndef BOOST_INTRUSIVE_MSVC_ABI_PTR_TO_MEMBER
+   //Parents with virtual bases, members not located in virtual bases
+   //(MSVC ABI: 8 byte pointer to member representation)
+   #ifdef BOOST_INTRUSIVE_MSVC_ABI_PTR_TO_MEMBER
+   //(unless compiling with /vmg, where all pointer to members use the 12 byte representation)
+   const bool vmg = sizeof(&POD::int_) != sizeof(int);
+   BOOST_TEST(vmg || sizeof(&VirtualDerived::virtualderived_int_) == 2*sizeof(int));
+   BOOST_TEST(vmg || sizeof(&VirtualMultipleDerivedPoly::virtualmultiplederivedpoly_int_) == 2*sizeof(int));
+   BOOST_TEST(vmg || sizeof(&VirtualMixed::virtualmixed_int_) == 2*sizeof(int));
+   BOOST_TEST(vmg || sizeof(static_cast<int VirtualMixed::*>(&VirtualMixed::derived_int_)) == 2*sizeof(int));
+   #endif
    BOOST_TEST(&virtualderived == get_parent_from_member(&virtualderived.virtualderived_int_,   &VirtualDerived::virtualderived_int_));
    BOOST_TEST(&virtualderived == get_parent_from_member(&virtualderived.virtualderived_float_, &VirtualDerived::virtualderived_float_));
 
@@ -166,6 +201,28 @@ int main()
    BOOST_TEST(&virtualmultiplederivedpoly == get_parent_from_member(&virtualmultiplederivedpoly.virtualmultiplederivedpoly_int_,   &VirtualMultipleDerivedPoly::virtualmultiplederivedpoly_int_));
    BOOST_TEST(&virtualmultiplederivedpoly == get_parent_from_member(&virtualmultiplederivedpoly.derivedpoly_float_, &VirtualMultipleDerivedPoly::derivedpoly_float_));
    BOOST_TEST(&virtualmultiplederivedpoly == get_parent_from_member(&virtualmultiplederivedpoly.derivedpoly_int_,   &VirtualMultipleDerivedPoly::derivedpoly_int_));
+
+   BOOST_TEST(&virtualmixed == get_parent_from_member(&virtualmixed.virtualmixed_int_,   &VirtualMixed::virtualmixed_int_));
+   BOOST_TEST(&virtualmixed == get_parent_from_member(&virtualmixed.virtualmixed_float_, &VirtualMixed::virtualmixed_float_));
+   //Members of non-virtual bases, explicitly converted to pointer to members of the class with virtual bases
+   BOOST_TEST(&virtualmixed == (get_parent_from_member<VirtualMixed, int>  (&virtualmixed.derived_int_,   &VirtualMixed::derived_int_)));
+   BOOST_TEST(&virtualmixed == (get_parent_from_member<VirtualMixed, float>(&virtualmixed.derived_float_, &VirtualMixed::derived_float_)));
+   BOOST_TEST(&virtualmixed == (get_parent_from_member<VirtualMixed, int>  (&virtualmixed.int_,   &VirtualMixed::int_)));
+   BOOST_TEST(&virtualmixed == (get_parent_from_member<VirtualMixed, float>(&virtualmixed.float_, &VirtualMixed::float_)));
+
+   //MSVC ABI: full generality (12 byte) pointer to member representation
+   #ifdef BOOST_INTRUSIVE_MSVC_ABI_PTR_TO_MEMBER
+   BOOST_TEST(sizeof(&FullGenerality::fullgenerality_int_) == 3*sizeof(int));
+   BOOST_TEST(sizeof(&FullGeneralityVirtual::fullgeneralityvirtual_int_) == 3*sizeof(int));
+   BOOST_TEST(&fullgenerality == get_parent_from_member(&fullgenerality.fullgenerality_int_,   &FullGenerality::fullgenerality_int_));
+   BOOST_TEST(&fullgenerality == get_parent_from_member(&fullgenerality.fullgenerality_float_, &FullGenerality::fullgenerality_float_));
+   BOOST_TEST(&fullgenerality == get_parent_from_member(&fullgenerality.derived_int_,   &FullGenerality::derived_int_));
+   BOOST_TEST(&fullgenerality == get_parent_from_member(&fullgenerality.derivedpoly_float_, &FullGenerality::derivedpoly_float_));
+   BOOST_TEST(&fullgeneralityvirtual == get_parent_from_member(&fullgeneralityvirtual.fullgeneralityvirtual_int_,   &FullGeneralityVirtual::fullgeneralityvirtual_int_));
+   BOOST_TEST(&fullgeneralityvirtual == get_parent_from_member(&fullgeneralityvirtual.fullgeneralityvirtual_float_, &FullGeneralityVirtual::fullgeneralityvirtual_float_));
+   BOOST_TEST(&fullgeneralityvirtual == get_parent_from_member(&fullgeneralityvirtual.derivedpoly_float_, &FullGeneralityVirtual::derivedpoly_float_));
+   BOOST_TEST(&fullgenerality == (get_parent_from_member<FullGenerality, int>(&fullgenerality.derivedpoly_int_, &FullGenerality::derivedpoly_int_)));
+   BOOST_TEST(&fullgeneralityvirtual == (get_parent_from_member<FullGeneralityVirtual, int>(&fullgeneralityvirtual.derivedpoly_int_, &FullGeneralityVirtual::derivedpoly_int_)));
    #endif
 
    return boost::report_errors();

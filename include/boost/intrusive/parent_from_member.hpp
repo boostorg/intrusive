@@ -27,16 +27,20 @@ namespace intrusive {
 
 //! Given a pointer to a member and its corresponding pointer to data member,
 //! this function returns the pointer of the parent containing that member.
-//! Note: this function does not work with pointer to members that rely on
-//! virtual inheritance.
+//! Note: this function does not work with pointer to members located in
+//! a virtual base of Parent, as the distance between the parent and the member
+//! is not a compile-time constant (the parent can have virtual bases, as long
+//! as the member is not located in one of them).
 template<class Parent, class Member>
 BOOST_INTRUSIVE_FORCEINLINE Parent *get_parent_from_member(Member *member, const Member Parent::* ptr_to_member) BOOST_NOEXCEPT
 {  return ::boost::intrusive::detail::parent_from_member(member, ptr_to_member);  }
 
 //! Given a const pointer to a member and its corresponding const pointer to data member,
 //! this function returns the const pointer of the parent containing that member.
-//! Note: this function does not work with pointer to members that rely on
-//! virtual inheritance.
+//! Note: this function does not work with pointer to members located in
+//! a virtual base of Parent, as the distance between the parent and the member
+//! is not a compile-time constant (the parent can have virtual bases, as long
+//! as the member is not located in one of them).
 template<class Parent, class Member>
 BOOST_INTRUSIVE_FORCEINLINE const Parent *get_parent_from_member(const Member *member, const Member Parent::* ptr_to_member) BOOST_NOEXCEPT
 {  return ::boost::intrusive::detail::parent_from_member(member, ptr_to_member);  }

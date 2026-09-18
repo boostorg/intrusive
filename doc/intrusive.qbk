@@ -453,13 +453,15 @@ Now we can use the container:
 
 [endsect]
 
-However, member hooks have some implementation limitations: If there is a virtual inheritance
-relationship between the parent and the member hook, then the distance between the parent
-and the hook is not a compile-time fixed value so obtaining the address of
-the parent from the member hook is not possible without reverse engineering compiler
-produced RTTI. Apart from this, the non-standard pointer to member implementation for classes
-with complex inheritance relationships in MSVC ABI compatible-compilers is not supported
-by member hooks since it also depends on compiler-produced RTTI information.
+However, member hooks have one limitation: the hook can not be located in a virtual base of the
+parent. A virtual base is placed at a different offset depending on the most derived type of the
+object, so the distance between the parent and the hook is not a compile-time constant and the
+address of the parent can not be obtained from the address of the hook. Standard C++ does not allow
+forming a pointer to member that points into a virtual base ([conv.mem]), so GCC and Clang reject
+such `member_hook` at compile time. MSVC accepts this conversion as an extension: the code compiles,
+but the parent can not be recovered and an assertion is triggered in debug builds. Multiple
+inheritance, and parents with virtual bases where the hook is declared outside those virtual bases,
+are supported in all compilers.
 
 [section:usage_both_hooks Using both hooks]
 
@@ -1373,7 +1375,7 @@ Intrusive containers never allocate memory, so the user must supply the bucket
 array and take care of the load factor. This makes the semi-intrusive unordered
 containers harder to use than the purely intrusive ones, because the array must be
 replaced with a bigger one (and the container rehashed) as elements are
-inserted.
+inserted if we want to maintain the load factor.
 
 [classref boost::intrusive::unordered_bucket_manager unordered_bucket_manager]
 is a utility that does that work. Allocates and manages the bucket array of a
@@ -3954,6 +3956,9 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 [section:release_notes_boost_1_93_00 Boost 1.93 Release]
 
 * Added [classref boost::intrusive::unordered_bucket_manager unordered_bucket_manager] utility.
+* [funcref boost::intrusive::get_parent_from_member get_parent_from_member] and member hooks now support
+  parents with virtual bases (as long as the member is not located in a virtual base) and the
+  `/vmg` (full generality pointer to member representation) compiler option in MSVC ABI compatible compilers.
 
 [endsect]
 
