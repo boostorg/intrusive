@@ -67,16 +67,10 @@ class list_iterator
       : members_(nodeptr, traits_ptr)
    {}
 
-   inline list_iterator(const list_iterator &other)
-      :  members_(other.pointed_node(), other.get_value_traits())
-   {}
-
+   //Implicit copy operations: keeps the iterator trivially copyable (passed in registers)
    inline list_iterator(const nonconst_iterator &other)
       :  members_(other.pointed_node(), other.get_value_traits())
    {}
-
-   inline list_iterator &operator=(const list_iterator &other)
-   {  members_.nodeptr_ = other.members_.nodeptr_;  return *this;  }
 
    inline node_ptr pointed_node() const
    { return members_.nodeptr_; }

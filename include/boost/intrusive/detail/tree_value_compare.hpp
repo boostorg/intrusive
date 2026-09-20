@@ -67,12 +67,7 @@ struct tree_value_compare
       :  base_t(kcomp)
    {}
 
-   inline tree_value_compare (const tree_value_compare &x)
-      :  base_t(x.base_t::get())
-   {}
-
-   inline tree_value_compare &operator=(const tree_value_compare &x)
-   {  this->base_t::get() = x.base_t::get();   return *this;  }
+   //Implicit copy operations: keeps the comparator trivially copyable (passed in registers)
 
    inline tree_value_compare &operator=(const key_compare &x)
    {  this->base_t::get() = x;   return *this;  }
@@ -145,12 +140,7 @@ struct tree_value_compare<ValuePtr, KeyCompare, KeyOfValue, Ret, true>
       :  base_t(kcomp)
    {}
 
-   inline tree_value_compare (const tree_value_compare &x)
-      :  base_t(x.base_t::get())
-   {}
-
-   inline tree_value_compare &operator=(const tree_value_compare &x)
-   {  this->base_t::get() = x.base_t::get();   return *this;  }
+   //Implicit copy operations: keeps the comparator trivially copyable (passed in registers)
 
    inline tree_value_compare &operator=(const key_compare &x)
    {  this->base_t::get() = x;   return *this;  }

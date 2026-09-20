@@ -73,16 +73,10 @@ class slist_iterator
       : members_(nodeptr, const_value_traits_ptr())
    {  BOOST_INTRUSIVE_STATIC_ASSERT((stateful_value_traits == false));  }
 
-   inline slist_iterator(const slist_iterator &other)
-      :  members_(other.pointed_node(), other.get_value_traits())
-   {}
-
+   //Implicit copy operations: keeps the iterator trivially copyable (passed in registers)
    inline slist_iterator(const nonconst_iterator &other)
       :  members_(other.pointed_node(), other.get_value_traits())
    {}
-
-   inline slist_iterator &operator=(const slist_iterator &other)
-   {  members_.nodeptr_ = other.members_.nodeptr_;  return *this;  }
 
    inline node_ptr pointed_node() const
    { return members_.nodeptr_; }

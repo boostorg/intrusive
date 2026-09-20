@@ -75,16 +75,10 @@ class tree_iterator
       : members_(nodeptr, traits_ptr)
    {}
 
-   inline tree_iterator(const tree_iterator &other)
-      :  members_(other.pointed_node(), other.get_value_traits())
-   {}
-
+   //Implicit copy operations: keeps the iterator trivially copyable (passed in registers)
    inline tree_iterator(const nonconst_iterator &other)
       :  members_(other.pointed_node(), other.get_value_traits())
    {}
-
-   inline tree_iterator &operator=(const tree_iterator &other)
-   {  members_.nodeptr_ = other.members_.nodeptr_;  return *this;  }
 
    inline tree_iterator &operator=(node_ptr nodeptr)
    {  members_.nodeptr_ = nodeptr;  return *this;  }

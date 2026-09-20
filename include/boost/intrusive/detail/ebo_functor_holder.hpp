@@ -55,6 +55,13 @@ class ebo_functor_holder
       : T(::boost::forward<Arg1>(arg1), ::boost::forward<Arg2>(arg2))
    {}
 
+   #if !defined(BOOST_NO_CXX11_DEFAULTED_FUNCTIONS) && !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
+   //Defaulted: keeps the holder trivially copyable (passed in registers)
+   inline ebo_functor_holder(const ebo_functor_holder &x) = default;
+   inline ebo_functor_holder(ebo_functor_holder &&x) = default;
+   inline ebo_functor_holder& operator=(const ebo_functor_holder &x) = default;
+   inline ebo_functor_holder& operator=(ebo_functor_holder &&x) = default;
+   #else
    inline ebo_functor_holder(const ebo_functor_holder &x)
       : T(static_cast<const T&>(x))
    {}
@@ -75,6 +82,7 @@ class ebo_functor_holder
       this->get() = ::boost::move(x.get());
       return *this;
    }
+   #endif
 
    inline ebo_functor_holder& operator=(const T &t)
    {
@@ -108,6 +116,13 @@ class ebo_functor_holder<T *, Tag>
       : t_(t)
    {}
 
+   #if !defined(BOOST_NO_CXX11_DEFAULTED_FUNCTIONS) && !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
+   //Defaulted: keeps the holder trivially copyable (passed in registers)
+   inline ebo_functor_holder(const ebo_functor_holder &x) = default;
+   inline ebo_functor_holder(ebo_functor_holder &&x) = default;
+   inline ebo_functor_holder& operator=(const ebo_functor_holder &x) = default;
+   inline ebo_functor_holder& operator=(ebo_functor_holder &&x) = default;
+   #else
    inline ebo_functor_holder(const ebo_functor_holder &x)
       : t_(x.t_)
    {}
@@ -127,6 +142,7 @@ class ebo_functor_holder<T *, Tag>
       this->t_ = ::boost::move(x.t_);
       return *this;
    }
+   #endif
 
    inline ebo_functor_holder& operator=(T * t)
    {

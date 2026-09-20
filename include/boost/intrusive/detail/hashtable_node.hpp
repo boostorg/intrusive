@@ -153,10 +153,7 @@ class hashtable_iterator
       , traitsptr_ (cont ? pointer_traits<const_bucketvaltraits_ptr>::pointer_to(*cont) : const_bucketvaltraits_ptr() )
    {}
 
-   inline hashtable_iterator(const hashtable_iterator &other)
-      :  slist_it_(other.slist_it()), traitsptr_(other.get_bucket_value_traits())
-   {}
-
+   //Implicit copy operations: keeps the iterator trivially copyable (passed in registers)
    inline hashtable_iterator(const nonconst_iterator &other)
       :  slist_it_(other.slist_it()), traitsptr_(other.get_bucket_value_traits())
    {}
@@ -169,9 +166,6 @@ class hashtable_iterator
 
    inline hashtable_iterator& operator++()
    {  this->increment();   return *this;   }
-
-   inline hashtable_iterator &operator=(const hashtable_iterator &other)
-   {  slist_it_ = other.slist_it(); traitsptr_ = other.get_bucket_value_traits();   return *this;  }
 
    inline hashtable_iterator operator++(int)
    {
@@ -299,10 +293,7 @@ class hashtable_iterator<BucketValueTraits, true, IsConst>
       , members_ (bp, traits_ptr)
    {}
 
-   inline hashtable_iterator(const hashtable_iterator &other)
-      :  slist_it_(other.slist_it()), members_(other.get_bucket_ptr(), other.get_value_traits())
-   {}
-
+   //Implicit copy operations: keeps the iterator trivially copyable (passed in registers)
    inline hashtable_iterator(const nonconst_iterator &other)
       :  slist_it_(other.slist_it()), members_(other.get_bucket_ptr(), other.get_value_traits())
    {}
@@ -315,9 +306,6 @@ class hashtable_iterator<BucketValueTraits, true, IsConst>
 
    inline hashtable_iterator& operator++()
    {  this->increment();   return *this;   }
-
-   inline hashtable_iterator &operator=(const hashtable_iterator &other)
-   {  slist_it_ = other.slist_it(); members_ = other.members_;  return *this;  }
 
    inline hashtable_iterator operator++(int)
    {

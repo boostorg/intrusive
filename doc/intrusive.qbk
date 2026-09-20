@@ -3959,6 +3959,9 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 * [funcref boost::intrusive::get_parent_from_member get_parent_from_member] and member hooks now support
   parents with virtual bases (as long as the member is not located in a virtual base) and the
   `/vmg` (full generality pointer to member representation) compiler option in MSVC ABI compatible compilers.
+* Iterators and comparator holders no longer declare user-provided copy operations, so they are trivially
+  copyable when their members are. This way, compilers can pass and return them in registers instead of
+  by hidden reference.
 
 [endsect]
 
