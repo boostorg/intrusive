@@ -12,6 +12,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 #include <boost/container/vector.hpp> //vector
+#include <algorithm> //std::next_permutation
 #include <boost/intrusive/detail/config_begin.hpp>
 #include "common_functors.hpp"
 #include <boost/intrusive/options.hpp>
@@ -427,6 +428,36 @@ void test_generic_assoc<ContainerDefiner>::test_clone(value_cont_type& values)
       BOOST_TEST (testset2 == testset1);
       testset2.clear_and_dispose(test::delete_noexcept_disposer<value_type>());
       BOOST_TEST (testset2.empty());
+   }
+   {  //In non-balanced trees the shape
+      //depends on the insertion order, so test all insertion orders
+      typedef typename ContainerDefiner::template container
+         <>::type assoc_type;
+      typedef typename assoc_type::value_type value_type;
+
+      const std::size_t NumValues = 5;
+      value_cont_type vals(NumValues);
+      std::size_t order[NumValues];
+      for(std::size_t i = 0; i != NumValues; ++i){
+         (&vals[i])->value_ = (int)i;
+         order[i] = i;
+      }
+
+      do{
+         assoc_type testset1;
+         for(std::size_t i = 0; i != NumValues; ++i){
+            testset1.insert(vals[order[i]]);
+         }
+         assoc_type testset2;
+         testset2.clone_from(testset1, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+         BOOST_TEST (testset2 == testset1);
+         BOOST_TEST (testset2.size() == NumValues);
+         BOOST_TEST (*testset2.begin()  == *testset1.begin());
+         BOOST_TEST (*testset2.rbegin() == *testset1.rbegin());
+         testset2.check();
+         testset2.clear_and_dispose(test::delete_noexcept_disposer<value_type>());
+         testset1.clear();
+      }while(std::next_permutation(order, order + NumValues));
    }
 }
 

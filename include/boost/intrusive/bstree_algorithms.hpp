@@ -1973,8 +1973,8 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
                //Insert left
                NodeTraits::set_parent(insertion_point, temp);
                NodeTraits::set_left  (temp, insertion_point);
-               //Update leftmost
-               if(rightmost == target_sub_root)
+               //Update leftmost only if the parent was the current leftmost
+               if(leftmost == temp)
                   leftmost = insertion_point;
             }
             //Then clone right nodes
@@ -1989,8 +1989,9 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
                //Insert right
                NodeTraits::set_parent(insertion_point, temp);
                NodeTraits::set_right (temp, insertion_point);
-               //Update rightmost
-               rightmost = insertion_point;
+               //Update rightmost only if the parent was the current rightmost
+               if(rightmost == temp)
+                  rightmost = insertion_point;
             }
             //If not, go up
             else if(current == source_root){
