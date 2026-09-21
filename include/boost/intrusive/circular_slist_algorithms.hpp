@@ -300,11 +300,18 @@ class circular_slist_algorithms
       const bool this_empty  = this_next == this_node;
       const bool other_empty = other_next == other_node;
 
-      if(!(other_null || other_empty)){
-         NodeTraits::set_next(this_next == other_node ? other_node : get_previous_node(other_node), this_node );
+      //Obtain both previous nodes before modifying any link. If the nodes are adjacent,
+      //the previous node of one of them is the other node, which will be relinked below.
+      const node_ptr other_prev = (other_null || other_empty) ? node_ptr()
+         : (this_next == other_node ? this_node : get_previous_node(other_node));
+      const node_ptr this_prev  = (this_null  || this_empty)  ? node_ptr()
+         : (other_next == this_node ? other_node : get_previous_node(this_node));
+
+      if(other_prev){
+         NodeTraits::set_next(other_prev == this_node ? other_node : other_prev, this_node);
       }
-      if(!(this_null | this_empty)){
-         NodeTraits::set_next(other_next == this_node ? this_node  : get_previous_node(this_node), other_node );
+      if(this_prev){
+         NodeTraits::set_next(this_prev == other_node ? this_node : this_prev, other_node);
       }
       NodeTraits::set_next(this_node,  other_empty ? this_node  : (other_next == this_node ? other_node : other_next) );
       NodeTraits::set_next(other_node, this_empty  ? other_node : (this_next == other_node ? this_node :  this_next ) );

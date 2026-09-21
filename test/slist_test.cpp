@@ -423,6 +423,47 @@ void test_slist< ListType, ValueContainer >
          TEST_INTRUSIVE_SEQUENCE( init_values, testlist2.begin() );  }
    }
    if(!list_type::linear)
+   {  //Swap adjacent nodes of the same list, in both orders
+      list_type testlist1 (values.begin(), values.begin() + 3);
+
+      //this_node (values[0]) precedes other_node (values[1])
+      swap_nodes< node_algorithms >(values[0], values[1]);
+      {  int init_values [] = { 2, 1, 3 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
+      BOOST_TEST(testlist1.size() == 3u);
+
+      //other_node (values[1]) now precedes this_node (values[0])
+      swap_nodes< node_algorithms >(values[0], values[1]);
+      {  int init_values [] = { 1, 2, 3 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
+      BOOST_TEST(testlist1.size() == 3u);
+
+      //Adjacent nodes at the end of the list
+      swap_nodes< node_algorithms >(values[1], values[2]);
+      {  int init_values [] = { 1, 3, 2 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
+      BOOST_TEST(testlist1.size() == 3u);
+
+      swap_nodes< node_algorithms >(values[2], values[1]);
+      {  int init_values [] = { 1, 2, 3 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
+      BOOST_TEST(testlist1.size() == 3u);
+   }
+   if(!list_type::linear)
+   {  //Regression test: swap the only two nodes of a list
+      list_type testlist1 (values.begin(), values.begin() + 2);
+
+      swap_nodes< node_algorithms >(values[0], values[1]);
+      {  int init_values [] = { 2, 1 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
+      BOOST_TEST(testlist1.size() == 2u);
+
+      swap_nodes< node_algorithms >(values[1], values[0]);
+      {  int init_values [] = { 1, 2 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
+      BOOST_TEST(testlist1.size() == 2u);
+   }
+   if(!list_type::linear)
    {
       list_type testlist1 (values.begin(), values.begin()+1);
       if(testlist1.size() != 1){
