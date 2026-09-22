@@ -40,7 +40,7 @@ struct uncast_types
 };
 
 template<class ConstNodePtr>
-static typename uncast_types<ConstNodePtr>::non_const_pointer
+typename uncast_types<ConstNodePtr>::non_const_pointer
    uncast(const ConstNodePtr & ptr)
 {
    return uncast_types<ConstNodePtr>::non_const_traits::const_cast_from(ptr);
