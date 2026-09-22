@@ -72,21 +72,25 @@ BOOST_INTRUSIVE_FORCEINLINE std::ptrdiff_t offset_from_pointer_to_member(const M
    BOOST_INTRUSIVE_INVARIANT_ASSERT( sizeof(caster.offsets) == sizeof(int) || caster.offsets[sizeof(caster.offsets)/sizeof(int) - 1u] == 0 );
    return std::ptrdiff_t(caster.offsets[0]);
 
-   //This works with gcc, msvc, ac++, ibmcpp
-   #elif defined(__GNUC__)   || defined(__HP_aCC) || defined(BOOST_INTEL) || \
-         defined(__IBMCPP__) || defined(__DECCXX)
-   const Parent * const parent = 0;
-   const char *const member = static_cast<const char*>(static_cast<const void*>(&(parent->*ptr_to_member)));
-   return std::ptrdiff_t(member - static_cast<const char*>(static_cast<const void*>(parent)));
-   #else
-   //This is the traditional C-front approach: __MWERKS__, __DMC__, __SUNPRO_CC
+   #else // !BOOST_INTRUSIVE_MSVC_ABI_PTR_TO_MEMBER
+   //Itanium C++ ABI compilers (gcc, clang, ac++, ibmcpp, intel...) represent a pointer to data member
+   //as the offset of the member stored in a ptrdiff_t. The traditional C-front representation
+   //(__MWERKS__, __DMC__, __SUNPRO_CC) stores the offset plus one, so that zero is the null pointer to member.
+   typedef const Member Parent::* ptr_to_member_t;
    union caster_union
    {
-      const Member Parent::* ptr_to_member;
+      ptr_to_member_t ptr_to_member;
       std::ptrdiff_t offset;
    } caster;
+   BOOST_INTRUSIVE_STATIC_ASSERT( sizeof(std::ptrdiff_t) == sizeof(ptr_to_member_t) );
+
    caster.ptr_to_member = ptr_to_member;
+   #if defined(__GNUC__)   || defined(__HP_aCC) || defined(BOOST_INTEL) || \
+       defined(__IBMCPP__) || defined(__DECCXX)
+   return caster.offset;
+   #else
    return caster.offset - 1;
+   #endif
    #endif
 }
 
