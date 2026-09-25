@@ -55,19 +55,13 @@ class ebo_functor_holder
       : T(::boost::forward<Arg1>(arg1), ::boost::forward<Arg2>(arg2))
    {}
 
-   #if !defined(BOOST_NO_CXX11_DEFAULTED_FUNCTIONS) && !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
    //Defaulted: keeps the holder trivially copyable (passed in registers)
+   #if !defined(BOOST_NO_CXX11_DEFAULTED_FUNCTIONS)
    inline ebo_functor_holder(const ebo_functor_holder &x) = default;
-   inline ebo_functor_holder(ebo_functor_holder &&x) = default;
    inline ebo_functor_holder& operator=(const ebo_functor_holder &x) = default;
-   inline ebo_functor_holder& operator=(ebo_functor_holder &&x) = default;
    #else
    inline ebo_functor_holder(const ebo_functor_holder &x)
       : T(static_cast<const T&>(x))
-   {}
-
-   inline ebo_functor_holder(BOOST_RV_REF(ebo_functor_holder) x)
-      : T(BOOST_MOVE_BASE(T, x))
    {}
 
    inline ebo_functor_holder& operator=(BOOST_COPY_ASSIGN_REF(ebo_functor_holder) x)
@@ -76,6 +70,15 @@ class ebo_functor_holder
       this->get() = r;
       return *this;
    }
+   #endif
+
+   #if !defined(BOOST_NO_CXX11_DEFAULTED_MOVES)
+   inline ebo_functor_holder(ebo_functor_holder &&x) = default;
+   inline ebo_functor_holder& operator=(ebo_functor_holder &&x) = default;
+   #else
+   inline ebo_functor_holder(BOOST_RV_REF(ebo_functor_holder) x)
+      : T(BOOST_MOVE_BASE(T, x))
+   {}
 
    inline ebo_functor_holder& operator=(BOOST_RV_REF(ebo_functor_holder) x)
    {
@@ -116,18 +119,12 @@ class ebo_functor_holder<T *, Tag>
       : t_(t)
    {}
 
-   #if !defined(BOOST_NO_CXX11_DEFAULTED_FUNCTIONS) && !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
    //Defaulted: keeps the holder trivially copyable (passed in registers)
+   #if !defined(BOOST_NO_CXX11_DEFAULTED_FUNCTIONS)
    inline ebo_functor_holder(const ebo_functor_holder &x) = default;
-   inline ebo_functor_holder(ebo_functor_holder &&x) = default;
    inline ebo_functor_holder& operator=(const ebo_functor_holder &x) = default;
-   inline ebo_functor_holder& operator=(ebo_functor_holder &&x) = default;
    #else
    inline ebo_functor_holder(const ebo_functor_holder &x)
-      : t_(x.t_)
-   {}
-
-   inline ebo_functor_holder(BOOST_RV_REF(ebo_functor_holder) x)
       : t_(x.t_)
    {}
 
@@ -136,6 +133,15 @@ class ebo_functor_holder<T *, Tag>
       this->t_ = x.t_;
       return *this;
    }
+   #endif
+
+   #if !defined(BOOST_NO_CXX11_DEFAULTED_MOVES)
+   inline ebo_functor_holder(ebo_functor_holder &&x) = default;
+   inline ebo_functor_holder& operator=(ebo_functor_holder &&x) = default;
+   #else
+   inline ebo_functor_holder(BOOST_RV_REF(ebo_functor_holder) x)
+      : t_(x.t_)
+   {}
 
    inline ebo_functor_holder& operator=(BOOST_RV_REF(ebo_functor_holder) x)
    {
