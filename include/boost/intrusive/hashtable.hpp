@@ -4195,7 +4195,8 @@ class hashtable_impl
       , KeyHasher hash_func
       , KeyEqual equal_func) const
    {
-      size_type n_bucket;
+      //Avoid false GCC -Wmaybe-uninitialized warning
+      size_type n_bucket = 0;
       size_type cnt;
 
       //Let's see if the element is present
