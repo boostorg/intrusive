@@ -211,11 +211,8 @@ class treap_algorithms
    template<class NodePtrPriorityCompare>
    static void unlink(node_ptr n, NodePtrPriorityCompare pcomp)
    {
-      node_ptr x = NodeTraits::get_parent(n);
-      if(x){
-         while(!bstree_algo::is_header(x))
-            x = NodeTraits::get_parent(x);
-         erase(x, n, pcomp);
+      if(NodeTraits::get_parent(n)){
+         erase(bstree_algo::get_header(n), n, pcomp);
       }
    }
 

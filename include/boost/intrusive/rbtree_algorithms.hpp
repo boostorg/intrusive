@@ -244,11 +244,8 @@ class rbtree_algorithms
    //! @copydoc ::boost::intrusive::bstree_algorithms::unlink(node_ptr)
    static void unlink(node_ptr n) BOOST_NOEXCEPT
    {
-      node_ptr x = NodeTraits::get_parent(n);
-      if(x){
-         while(!is_header(x))
-            x = NodeTraits::get_parent(x);
-         erase(x, n);
+      if(NodeTraits::get_parent(n)){
+         erase(bstree_algo::get_header(n), n);
       }
    }
 

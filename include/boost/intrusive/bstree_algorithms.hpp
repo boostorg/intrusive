@@ -1376,11 +1376,8 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Throws</b>: Nothing.
    static void unlink(node_ptr n) BOOST_NOEXCEPT
    {
-      node_ptr x = NodeTraits::get_parent(n);
-      if(x){
-         while(!base_type::is_header(x))
-            x = NodeTraits::get_parent(x);
-         erase(x, n);
+      if(NodeTraits::get_parent(n)){
+         erase(base_type::get_header(n), n);
       }
    }
 

@@ -167,8 +167,11 @@ class bstree_algorithms_base
             nn = p;
          }
          //Check if nn is root or header when size() > 0
-         else if(!bstree_algorithms_base::is_header(nn)){
-            nn = p;
+         else{
+            node_ptr const l(NodeTraits::get_left(nn));
+            //nn is the header if leftmost is the root or is not nn's child
+            if(!l || (l != p && NodeTraits::get_parent(l) == nn))
+               nn = p;
          }
       }
       return nn;
