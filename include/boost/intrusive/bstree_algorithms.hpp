@@ -1911,28 +1911,6 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       }
    }
 
-   //! <b>Requires</b>: "n" must be a node inserted in a tree.
-   //!
-   //! <b>Effects</b>: Returns a pointer to the header node of the tree.
-   //!
-   //! <b>Complexity</b>: Logarithmic.
-   //!
-   //! <b>Throws</b>: Nothing.
-   static node_ptr get_root(node_ptr n) BOOST_NOEXCEPT
-   {
-      BOOST_INTRUSIVE_INVARIANT_ASSERT((!inited(n)));
-      node_ptr x = NodeTraits::get_parent(n);
-      if(x){
-         while(!base_type::is_header(x)){
-            x = NodeTraits::get_parent(x);
-         }
-         return x;
-      }
-      else{
-         return n;
-      }
-   }
-
    template <class Cloner, class Disposer>
    static node_ptr clone_subtree
       (const_node_ptr source_parent, node_ptr target_parent
