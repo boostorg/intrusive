@@ -247,16 +247,16 @@ class linear_slist_algorithms
    //! <b>Complexity</b>: This function is linear to the contained elements.
    static node_ptr reverse(node_ptr p) BOOST_NOEXCEPT
    {
-      if(!p) return node_ptr();
+      if(BOOST_UNLIKELY(!p)) return p;
       node_ptr i = NodeTraits::get_next(p);
       node_ptr first(p);
       while(i){
          node_ptr nxti(NodeTraits::get_next(i));
-         base_t::unlink_after(p);
          NodeTraits::set_next(i, first);
          first = i;
          i = nxti;
       }
+      NodeTraits::set_next(p, node_ptr());
       return first;
    }
 
