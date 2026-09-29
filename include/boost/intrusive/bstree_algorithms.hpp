@@ -1091,7 +1091,8 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       if(hint == header || comp(key, hint)){
          node_ptr prev(hint);
          //Previous value should be less than the key
-         if(hint == begin_node(header) || comp((prev = base_type::prev_node(hint)), key)){
+         if(hint == begin_node(header) ||
+            comp((prev = hint == header ? NodeTraits::get_right(header) : base_type::prev_node(hint)), key)){
             commit_data.link_left = unique(header) || !NodeTraits::get_left(hint);
             commit_data.node      = commit_data.link_left ? hint : prev;
             if(pdepth){
@@ -1708,7 +1709,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       if(hint == header || !comp(hint, new_node)){
          node_ptr prev(hint);
          if(hint == NodeTraits::get_left(header) ||
-            !comp(new_node, (prev = base_type::prev_node(hint)))){
+            !comp(new_node, (prev = hint == header ? NodeTraits::get_right(header) : base_type::prev_node(hint)))){
             bool link_left = unique(header) || !NodeTraits::get_left(hint);
             commit_data.link_left = link_left;
             commit_data.node = link_left ? hint : prev;
