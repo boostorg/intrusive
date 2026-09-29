@@ -321,10 +321,9 @@ class splaytree_algorithms
    static node_ptr lower_bound
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {
-      splay_down(detail::uncast(header), key, comp);
-      node_ptr y = bstree_algo::lower_bound(header, key, comp);
-      //splay_up(y, detail::uncast(header));
-      return y;
+      bool found;
+      node_ptr const r = splay_down(detail::uncast(header), key, comp, &found);
+      return found ? bstree_algo::lower_bound(header, key, comp) : priv_bound_from_root(header, r, key, comp);
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::lower_bound(const_node_ptr,const KeyType&,KeyNodePtrCompare)
@@ -340,10 +339,9 @@ class splaytree_algorithms
    static node_ptr upper_bound
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {
-      splay_down(detail::uncast(header), key, comp);
-      node_ptr y = bstree_algo::upper_bound(header, key, comp);
-      //splay_up(y, detail::uncast(header));
-      return y;
+      bool found;
+      node_ptr const r = splay_down(detail::uncast(header), key, comp, &found);
+      return found ? bstree_algo::upper_bound(header, key, comp) : priv_bound_from_root(header, r, key, comp);
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::upper_bound(const_node_ptr,const KeyType&,KeyNodePtrCompare)
@@ -359,8 +357,9 @@ class splaytree_algorithms
    static node_ptr find
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {
-      splay_down(detail::uncast(header), key, comp);
-      return bstree_algo::find(header, key, comp);
+      bool found;
+      splay_down(detail::uncast(header), key, comp, &found);
+      return found ? bstree_algo::find(header, key, comp) : header;
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::find(const_node_ptr, const KeyType&,KeyNodePtrCompare)
@@ -376,10 +375,12 @@ class splaytree_algorithms
    static std::pair<node_ptr, node_ptr> equal_range
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {
-      splay_down(detail::uncast(header), key, comp);
-      std::pair<node_ptr, node_ptr> ret = bstree_algo::equal_range(header, key, comp);
-      //splay_up(ret.first, detail::uncast(header));
-      return ret;
+      bool found;
+      node_ptr const r = splay_down(detail::uncast(header), key, comp, &found);
+      if(found)
+         return bstree_algo::equal_range(header, key, comp);
+      node_ptr const b = priv_bound_from_root(header, r, key, comp);
+      return std::pair<node_ptr, node_ptr>(b, b);
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::equal_range(const_node_ptr,const KeyType&,KeyNodePtrCompare)
@@ -395,10 +396,12 @@ class splaytree_algorithms
    static std::pair<node_ptr, node_ptr> lower_bound_range
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {
-      splay_down(detail::uncast(header), key, comp);
-      std::pair<node_ptr, node_ptr> ret = bstree_algo::lower_bound_range(header, key, comp);
-      //splay_up(ret.first, detail::uncast(header));
-      return ret;
+      bool found;
+      node_ptr const r = splay_down(detail::uncast(header), key, comp, &found);
+      if(found)
+         return bstree_algo::lower_bound_range(header, key, comp);
+      node_ptr const b = priv_bound_from_root(header, r, key, comp);
+      return std::pair<node_ptr, node_ptr>(b, b);
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::lower_bound_range(const_node_ptr,const KeyType&,KeyNodePtrCompare)
@@ -493,8 +496,12 @@ class splaytree_algorithms
       (node_ptr header, const KeyType &key
       ,KeyNodePtrCompare comp, insert_commit_data &commit_data)
    {
-      splay_down(header, key, comp);
-      return bstree_algo::insert_unique_check(header, key, comp, commit_data);
+      bool found;
+      node_ptr const r = splay_down(header, key, comp, &found);
+      if(found)
+         return std::pair<node_ptr, bool>(r, false);
+      priv_insert_commit_data_from_root(header, r, key, comp, commit_data);
+      return std::pair<node_ptr, bool>(node_ptr(), true);
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::insert_unique_check(const_node_ptr,node_ptr,const KeyType&,KeyNodePtrCompare,insert_commit_data&)
@@ -504,8 +511,8 @@ class splaytree_algorithms
       (node_ptr header, node_ptr hint, const KeyType &key
       ,KeyNodePtrCompare comp, insert_commit_data &commit_data)
    {
-      splay_down(header, key, comp);
-      return bstree_algo::insert_unique_check(header, hint, key, comp, commit_data);
+      (void)hint;
+      return insert_unique_check(header, key, comp, commit_data);
    }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -536,6 +543,34 @@ class splaytree_algorithms
    private:
 
    /// @cond
+
+   //After a splay_down that did not find key, root r is its predecessor or successor
+   //(or header if the tree is empty), so lower_bound(key) == upper_bound(key)
+   template<class KeyType, class KeyNodePtrCompare>
+   static node_ptr priv_bound_from_root(node_ptr header, node_ptr r, const KeyType &key, KeyNodePtrCompare comp)
+   {  return (r == header || comp(key, r)) ? r : bstree_algo::next_node(r);  }
+
+   //After a splay_down that did not find key, key must be linked
+   //immediately before or after the root r
+   template<class KeyType, class KeyNodePtrCompare>
+   static void priv_insert_commit_data_from_root
+      (node_ptr header, node_ptr r, const KeyType &key, KeyNodePtrCompare comp, insert_commit_data &commit_data)
+   {
+      if(r == header){
+         commit_data.link_left = true;
+         commit_data.node      = header;
+      }
+      else if(comp(key, r)){
+         node_ptr const r_left(NodeTraits::get_left(r));
+         commit_data.link_left = !r_left;
+         commit_data.node      = r_left ? bstree_algo::maximum(r_left) : r;
+      }
+      else{
+         node_ptr const r_right(NodeTraits::get_right(r));
+         commit_data.link_left = !!r_right;
+         commit_data.node      = r_right ? bstree_algo::minimum(r_right) : r;
+      }
+   }
 
    // bottom-up splay, use data_ as parent for n    | complexity : logarithmic    | exception : nothrow
    template<bool SimpleSplay>
