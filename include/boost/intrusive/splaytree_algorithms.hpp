@@ -230,8 +230,12 @@ class splaytree_algorithms
    static void erase(node_ptr header, node_ptr z) BOOST_NOEXCEPT
    {
       //posibility 1
-      if(NodeTraits::get_left(z)){
-         splay_up(bstree_algo::prev_node(z), header);
+
+      //z is not header, so when z has a left child maximum(get_left(z)) is
+      //the previous node so we can avoid the more expensive prev_node()
+      node_ptr const z_left(NodeTraits::get_left(z));
+      if(z_left){
+         splay_up(bstree_algo::maximum(z_left), header);
       }
 
       //possibility 2
@@ -555,19 +559,19 @@ class splaytree_algorithms
 
          if( g == t ){
             // zig
-            rotate(n);
+            rotate(n, t);
          }
          else if ((NodeTraits::get_left(p) == n && NodeTraits::get_left(g) == p)    ||
                   (NodeTraits::get_right(p) == n && NodeTraits::get_right(g) == p)  ){
             // zig-zig
-            rotate(p);
-            rotate(n);
+            rotate(p, t);
+            rotate(n, t);
          }
          else {
             // zig-zag
-            rotate(n);
+            rotate(n, t);
             if(!SimpleSplay){
-               rotate(n);
+               rotate(n, t);
             }
          }
       }
@@ -686,16 +690,14 @@ class splaytree_algorithms
    }
 
    // rotate n with its parent                     | complexity : constant    | exception : nothrow
-   static void rotate(node_ptr n) BOOST_NOEXCEPT
+   static void rotate(node_ptr n, node_ptr header) BOOST_NOEXCEPT
    {
       //procedure rotate_left;
       //    t, right(t), left(right(t)) := right(t), left(right(t)), t
       //end rotate_left;
       node_ptr p = NodeTraits::get_parent(n);
       node_ptr g = NodeTraits::get_parent(p);
-      //Test if g is header before breaking tree
-      //invariants that would make is_header invalid
-      bool g_is_header = bstree_algo::is_header(g);
+      bool const g_is_header = g == header;
 
       if(NodeTraits::get_left(p) == n){
          NodeTraits::set_left(p, NodeTraits::get_right(n));
