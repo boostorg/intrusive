@@ -491,9 +491,7 @@ class avltree_algorithms
 
    static void rebalance_after_erasure_restore_invariants(node_ptr header, node_ptr x, node_ptr x_parent) BOOST_NOEXCEPT
    {
-      for ( node_ptr root = NodeTraits::get_parent(header)
-          ; x != root
-          ; root = NodeTraits::get_parent(header), x_parent = NodeTraits::get_parent(x)) {
+      for ( ; x_parent != header; x_parent = NodeTraits::get_parent(x)) {
          const balance x_parent_balance = NodeTraits::get_balance(x_parent);
          //Don't cache x_is_leftchild or similar because x can be null and
          //equal to both x_parent_left and x_parent_right
@@ -561,8 +559,7 @@ class avltree_algorithms
    {
       NodeTraits::set_balance(x, NodeTraits::zero());
       // Rebalance.
-      for(node_ptr root = NodeTraits::get_parent(header); x != root; root = NodeTraits::get_parent(header)){
-         node_ptr const x_parent(NodeTraits::get_parent(x));
+      for(node_ptr x_parent = NodeTraits::get_parent(x); x_parent != header; x_parent = NodeTraits::get_parent(x)){
          node_ptr const x_parent_left(NodeTraits::get_left(x_parent));
          const balance x_parent_balance = NodeTraits::get_balance(x_parent);
          const bool x_is_leftchild(x == x_parent_left);
