@@ -67,17 +67,19 @@ class bstree_algorithms_base
    //! <b>Throws</b>: Nothing.
    static node_ptr prev_node(node_ptr n) BOOST_NOEXCEPT
    {
-      if(is_header(n)){
+      node_ptr x(NodeTraits::get_parent(n));
+      node_ptr const l(NodeTraits::get_left(n));
+      //Only the header and the root satisfy parent(parent(n)) == n.
+      //Then n is the header if its left node (leftmost) is the root or is not its child
+      if(!x || (NodeTraits::get_parent(x) == n && l && (l == x || NodeTraits::get_parent(l) != n))){
          return NodeTraits::get_right(n);
       }
-      else if(NodeTraits::get_left(n)){
-         return maximum(NodeTraits::get_left(n));
+      else if(l){
+         return maximum(l);
       }
       else {
-         node_ptr p(n);
-         node_ptr x = NodeTraits::get_parent(p);
-         while(p == NodeTraits::get_left(x)){
-            p = x;
+         while(n == NodeTraits::get_left(x)){
+            n = x;
             x = NodeTraits::get_parent(x);
          }
          return x;
