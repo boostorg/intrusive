@@ -324,13 +324,14 @@ class circular_slist_algorithms
    //! <b>Complexity</b>: This function is linear to the contained elements.
    static void reverse(node_ptr p) BOOST_NOEXCEPT
    {
-      node_ptr i = NodeTraits::get_next(p), e(p);
-      for (;;) {
-         node_ptr nxt(NodeTraits::get_next(i));
-         if (nxt == e)
-            break;
-         base_t::transfer_after(e, i, nxt);
+      node_ptr prev(p), i(NodeTraits::get_next(p));
+      while(i != p){
+         node_ptr const nxt(NodeTraits::get_next(i));
+         NodeTraits::set_next(i, prev);
+         prev = i;
+         i = nxt;
       }
+      NodeTraits::set_next(p, prev);
    }
 
    //! <b>Effects</b>: Moves the node p n positions towards the end of the list.

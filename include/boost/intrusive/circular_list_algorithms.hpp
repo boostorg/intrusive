@@ -309,15 +309,13 @@ class circular_list_algorithms
    //! <b>Complexity</b>: This function is linear time.
    static void reverse(node_ptr p) BOOST_NOEXCEPT
    {
-      node_ptr f(NodeTraits::get_next(p));
-      node_ptr i(NodeTraits::get_next(f)), e(p);
-
-      while(i != e) {
-         node_ptr n = i;
-         i = NodeTraits::get_next(i);
-         transfer(f, n, i);
-         f = n;
-      }
+      node_ptr i(p);
+      do{
+         node_ptr const n(NodeTraits::get_next(i));
+         NodeTraits::set_next(i, NodeTraits::get_previous(i));
+         NodeTraits::set_previous(i, n);
+         i = n;
+      }while(i != p);
    }
 
    //! <b>Effects</b>: Moves the node p n positions towards the end of the list.
