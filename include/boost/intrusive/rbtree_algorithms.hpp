@@ -437,8 +437,11 @@ class rbtree_algorithms
    //! @copydoc ::boost::intrusive::bstree_algorithms::is_header
    static bool is_header(const_node_ptr p) BOOST_NOEXCEPT
    {
-      return NodeTraits::get_color(p) == NodeTraits::red() &&
-            bstree_algo::is_header(p);
+      if(NodeTraits::get_color(p) != NodeTraits::red())
+         return false;
+      //The root is black, so only the header satisfies parent(parent(p)) == p
+      const_node_ptr const p_parent(NodeTraits::get_parent(p));
+      return !p_parent || NodeTraits::get_parent(p_parent) == p;
    }
 
    /// @cond
