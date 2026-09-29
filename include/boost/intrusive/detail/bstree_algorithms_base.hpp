@@ -129,19 +129,16 @@ class bstree_algorithms_base
    //! <b>Throws</b>: Nothing.
    static bool is_header(const_node_ptr p) BOOST_NOEXCEPT
    {
-      node_ptr p_left (NodeTraits::get_left(p));
-      node_ptr p_right(NodeTraits::get_right(p));
-      if(!NodeTraits::get_parent(p) || //Header condition when empty tree
-         (p_left && p_right &&         //Header always has leftmost and rightmost
-            (p_left == p_right ||      //Header condition when only node
-               (NodeTraits::get_parent(p_left)  != p ||
-                NodeTraits::get_parent(p_right) != p ))
-               //When tree size > 1 headers can't be leftmost's
-               //and rightmost's parent
-          )){
-         return true;
-      }
-      return false;
+      node_ptr const p_parent(NodeTraits::get_parent(p));
+      if(!p_parent)
+         return true;   //Header condition when empty tree
+      node_ptr const p_left(NodeTraits::get_left(p));
+      if(!p_left || !NodeTraits::get_right(p))
+         return false;  //Header always has leftmost and rightmost
+      //Header and the root satisfy parent(parent(p)) == p
+      return NodeTraits::get_parent(p_parent) == p &&
+            //p is the header if leftmost is the root or is not p's child
+             (p_left == p_parent || NodeTraits::get_parent(p_left) != p);
    }
 
    //! <b>Requires</b>: 'n' is a node of the tree or a header node.
