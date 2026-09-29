@@ -491,7 +491,7 @@ class avltree_algorithms
 
    static void rebalance_after_erasure_restore_invariants(node_ptr header, node_ptr x, node_ptr x_parent) BOOST_NOEXCEPT
    {
-      for ( ; x_parent != header; x_parent = NodeTraits::get_parent(x)) {
+      while(x_parent != header){
          const balance x_parent_balance = NodeTraits::get_balance(x_parent);
          //Don't cache x_is_leftchild or similar because x can be null and
          //equal to both x_parent_left and x_parent_right
@@ -506,17 +506,19 @@ class avltree_algorithms
             if (x == x_parent_left) {  ////x is left child or x and sibling are null
                NodeTraits::set_balance(x_parent, NodeTraits::zero()); // balanced
                x = x_parent;
+               x_parent = NodeTraits::get_parent(x);
             }
             else {
                // x is right child (x_parent_left is the left child)
                BOOST_INTRUSIVE_INVARIANT_ASSERT(x_parent_left);
+               const node_ptr x_grandparent(NodeTraits::get_parent(x_parent));
                if (NodeTraits::get_balance(x_parent_left) == NodeTraits::positive()) {
                   // x_parent_left MUST have a right child
                   BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_right(x_parent_left));
-                  x = avl_rotate_left_right(x_parent, x_parent_left, header);
+                  x = avl_rotate_left_right(x_parent, x_parent_left, x_grandparent, header);
                }
                else {
-                  avl_rotate_right(x_parent, x_parent_left, header);
+                  avl_rotate_right(x_parent, x_parent_left, x_grandparent, header);
                   x = x_parent_left;
                }
 
@@ -524,29 +526,33 @@ class avltree_algorithms
                if (NodeTraits::get_balance(x) == NodeTraits::positive()){
                   break;
                }
+               x_parent = x_grandparent;
             }
          }
          else if(x_parent_balance == NodeTraits::positive()){
             if (x == x_parent_right) { //x is right child or x and sibling are null
                NodeTraits::set_balance(x_parent, NodeTraits::zero()); // balanced
                x = x_parent;
+               x_parent = NodeTraits::get_parent(x);
             }
             else {
                // x is left child (x_parent_right is the right child)
                BOOST_INTRUSIVE_INVARIANT_ASSERT(x_parent_right);
+               const node_ptr x_grandparent(NodeTraits::get_parent(x_parent));
                if (NodeTraits::get_balance(x_parent_right) == NodeTraits::negative()) {
                   // x_parent_right MUST have then a left child
                   BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_left(x_parent_right));
-                  x = avl_rotate_right_left(x_parent, x_parent_right, header);
+                  x = avl_rotate_right_left(x_parent, x_parent_right, x_grandparent, header);
                }
                else {
-                  avl_rotate_left(x_parent, x_parent_right, header);
+                  avl_rotate_left(x_parent, x_parent_right, x_grandparent, header);
                   x = x_parent_right;
                }
                // if changed from NodeTraits::positive() to negative, no need to check above
                if (NodeTraits::get_balance(x) == NodeTraits::negative()){
                   break;
                }
+               x_parent = x_grandparent;
             }
          }
          else{
@@ -575,9 +581,9 @@ class avltree_algorithms
                NodeTraits::set_balance(x_parent, NodeTraits::zero());
             else{        // x is a right child, needs rebalancing
                if (NodeTraits::get_balance(x) == NodeTraits::negative())
-                  avl_rotate_right_left(x_parent, x, header);
+                  avl_rotate_right_left(x_parent, x, NodeTraits::get_parent(x_parent), header);
                else
-                  avl_rotate_left(x_parent, x, header);
+                  avl_rotate_left(x_parent, x, NodeTraits::get_parent(x_parent), header);
             }
             break;
          }
@@ -585,9 +591,9 @@ class avltree_algorithms
             // if x is a left child, needs rebalancing
             if (x_is_leftchild) {
                if (NodeTraits::get_balance(x) == NodeTraits::positive())
-                  avl_rotate_left_right(x_parent, x, header);
+                  avl_rotate_left_right(x_parent, x, NodeTraits::get_parent(x_parent), header);
                else
-                  avl_rotate_right(x_parent, x, header);
+                  avl_rotate_right(x_parent, x, NodeTraits::get_parent(x_parent), header);
             }
             else
                NodeTraits::set_balance(x_parent, NodeTraits::zero());
@@ -624,7 +630,7 @@ class avltree_algorithms
       }
    }
 
-   static node_ptr avl_rotate_left_right(const node_ptr a, const node_ptr a_oldleft, node_ptr hdr) BOOST_NOEXCEPT
+   static node_ptr avl_rotate_left_right(const node_ptr a, const node_ptr a_oldleft, const node_ptr a_parent, node_ptr hdr) BOOST_NOEXCEPT
    {  // [note: 'a_oldleft' is 'b']
       //             |                               |         //
       //             a(-2)                           c         //
@@ -639,12 +645,12 @@ class avltree_algorithms
       bstree_algo::rotate_left_no_parent_fix(a_oldleft, c);
       //No need to link c with a [NodeTraits::set_parent(c, a) + NodeTraits::set_left(a, c)]
       //as c is not root and another rotation is coming
-      bstree_algo::rotate_right(a, c, NodeTraits::get_parent(a), hdr);
+      bstree_algo::rotate_right(a, c, a_parent, hdr);
       left_right_balancing(a, a_oldleft, c);
       return c;
    }
 
-   static node_ptr avl_rotate_right_left(const node_ptr a, const node_ptr a_oldright, node_ptr hdr) BOOST_NOEXCEPT
+   static node_ptr avl_rotate_right_left(const node_ptr a, const node_ptr a_oldright, const node_ptr a_parent, node_ptr hdr) BOOST_NOEXCEPT
    {  // [note: 'a_oldright' is 'b']
       //              |                               |           //
       //              a(pos)                          c           //
@@ -659,14 +665,14 @@ class avltree_algorithms
       bstree_algo::rotate_right_no_parent_fix(a_oldright, c);
       //No need to link c with a [NodeTraits::set_parent(c, a) + NodeTraits::set_right(a, c)]
       //as c is not root and another rotation is coming.
-      bstree_algo::rotate_left(a, c, NodeTraits::get_parent(a), hdr);
+      bstree_algo::rotate_left(a, c, a_parent, hdr);
       left_right_balancing(a_oldright, a, c);
       return c;
    }
 
-   static void avl_rotate_left(node_ptr x, node_ptr x_oldright, node_ptr hdr) BOOST_NOEXCEPT
+   static void avl_rotate_left(node_ptr x, node_ptr x_oldright, node_ptr x_parent, node_ptr hdr) BOOST_NOEXCEPT
    {
-      bstree_algo::rotate_left(x, x_oldright, NodeTraits::get_parent(x), hdr);
+      bstree_algo::rotate_left(x, x_oldright, x_parent, hdr);
 
       // reset the balancing factor
       if (NodeTraits::get_balance(x_oldright) == NodeTraits::positive()) {
@@ -679,9 +685,9 @@ class avltree_algorithms
       }
    }
 
-   static void avl_rotate_right(node_ptr x, node_ptr x_oldleft, node_ptr hdr) BOOST_NOEXCEPT
+   static void avl_rotate_right(node_ptr x, node_ptr x_oldleft, node_ptr x_parent, node_ptr hdr) BOOST_NOEXCEPT
    {
-      bstree_algo::rotate_right(x, x_oldleft, NodeTraits::get_parent(x), hdr);
+      bstree_algo::rotate_right(x, x_oldleft, x_parent, hdr);
 
       // reset the balancing factor
       if (NodeTraits::get_balance(x_oldleft) == NodeTraits::negative()) {
