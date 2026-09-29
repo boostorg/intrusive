@@ -222,30 +222,6 @@ class common_slist_algorithms
       node_traits::set_next(bb, node_traits::get_next(i));
       disposer(i);
    }
-
-   //! <b>Requires</b>: "disposer" must be an object function
-   //!   taking a node_ptr parameter and shouldn't throw.
-   //!
-   //! <b>Effects</b>: Unlinks all nodes reachable from p (but not p) and calls
-   //!   <tt>void disposer::operator()(node_ptr)</tt> for every node of the list
-   //!    where p is linked.
-   //!
-   //! <b>Complexity</b>: Linear to the number of element of the list.
-   //!
-   //! <b>Throws</b>: Nothing.
-   template<class Disposer>
-   static std::size_t detach_and_dispose(node_ptr p, Disposer disposer) BOOST_NOEXCEPT
-   {
-      std::size_t n = 0;
-      node_ptr i = node_traits::get_next(p);
-      while ( i != p || i != node_ptr() ) {
-         node_ptr to_erase(i);
-         i = node_traits::get_next(i);
-         disposer(to_erase);
-      }
-      node_traits::set_next(p, i);
-      return n;
-   }
 };
 
 /// @endcond
