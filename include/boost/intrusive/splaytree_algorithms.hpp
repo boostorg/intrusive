@@ -583,19 +583,52 @@ class splaytree_algorithms
       node_ptr const r = splay_down(header, key, comp, &found);
       if(found)
          return std::pair<node_ptr, bool>(r, false);
-      priv_insert_commit_data_from_root(header, r, key, comp, commit_data);
+      priv_insert_commit_data_from_root(header, r, r != header && comp(key, r), commit_data);
       return std::pair<node_ptr, bool>(node_ptr(), true);
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::insert_unique_check(const_node_ptr,node_ptr,const KeyType&,KeyNodePtrCompare,insert_commit_data&)
    //!
-   //! <b>Note</b>: Nodes with the given key are splayed.
+   //! <b>Note</b>: If "hint" is correct, "hint" (or its previous node if "hint" is the header)
+   //!   is splayed. If "hint" or its previous node are equivalent to "key", that node is splayed.
+   //!   Otherwise nodes with the given key are splayed.
    template<class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, bool> insert_unique_check
       (node_ptr header, node_ptr hint, const KeyType &key
       ,KeyNodePtrCompare comp, insert_commit_data &commit_data)
    {
-      (void)hint;
+      //The hint is correct if prev(hint) < key < hint (header acts as +infinity for hint
+      //and as -infinity for prev). First check key < hint.
+      if(hint == header || comp(key, hint)){
+         //Obtain prev(hint), header if there is no previous node (hint is the leftmost node
+         //or the tree is empty). Avoid prev_node's climb for the leftmost node and the header.
+         node_ptr const prev = hint == NodeTraits::get_left(header) ? header
+                             : hint == header ? NodeTraits::get_right(header)
+                             : bstree_algo::prev_node(hint);
+         if(prev == header || comp(prev, key)){
+            //Correct hint: prev < key < hint. key's insertion point is between prev & hint.
+            //Splaying hint makes that node root without comparisons.
+            //splay_up(header) splays the rightmost node (prev) or does nothing if the tree is empty.
+            splay_up(hint, header);
+            //r is now the root (or header if the tree is empty). key goes before r if
+            //r is hint and after r if r is prev.
+            node_ptr const r = hint != header ? hint : prev;
+            priv_insert_commit_data_from_root(header, r, r == hint, commit_data);
+            return std::pair<node_ptr, bool>(node_ptr(), true);
+         }
+         else if(!comp(key, prev)){
+            //prev is equivalent to key, no insertion but splay it as it is the accessed node
+            splay_up(prev, header);
+            return std::pair<node_ptr, bool>(prev, false);
+         }
+         //key < prev: wrong hint, fallthrough to hintless insertion
+      }
+      else if(!comp(hint, key)){
+         //hint is equivalent to key, no insertion but splay it as it is the accessed node
+         splay_up(hint, header);
+         return std::pair<node_ptr, bool>(hint, false);
+      }
+      //Wrong hint, search from the root
       return insert_unique_check(header, key, comp, commit_data);
    }
 
@@ -640,17 +673,26 @@ class splaytree_algorithms
       return r_right ? bstree_algo::minimum(r_right) : header;
    }
 
-   //After a splay_down that did not find key, key must be linked
-   //immediately before or after the root r
-   template<class KeyType, class KeyNodePtrCompare>
+   //Fills commit_data so that insert_commit links a new node immediately before
+   //(if before_r) or immediately after (otherwise) the root r in the in-order sequence.
+   //This requires no comparisons:
+   //
+   // - Empty tree (r == header): the new node becomes the root (insert_commit links
+   //   it as the left child of the header).
+   // - Before r: the new node goes between prev(r) and r. If r has no left child, it is
+   //   the left child of r. Otherwise prev(r) = maximum(left(r)), which has no right
+   //   child, so the new node is the right child of prev(r).
+   // - After r: the new node goes between r and next(r). If r has no right child, it is
+   //   the right child of r. Otherwise next(r) = minimum(right(r)), which has no left
+   //   child, so the new node is the left child of next(r).
    static void priv_insert_commit_data_from_root
-      (node_ptr header, node_ptr r, const KeyType &key, KeyNodePtrCompare comp, insert_commit_data &commit_data)
+      (node_ptr header, node_ptr r, bool before_r, insert_commit_data &commit_data) BOOST_NOEXCEPT
    {
       if(r == header){
          commit_data.link_left = true;
          commit_data.node      = header;
       }
-      else if(comp(key, r)){
+      else if(before_r){
          node_ptr const r_left(NodeTraits::get_left(r));
          commit_data.link_left = !r_left;
          commit_data.node      = r_left ? bstree_algo::maximum(r_left) : r;
