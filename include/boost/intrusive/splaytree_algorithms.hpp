@@ -226,7 +226,8 @@ class splaytree_algorithms
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::erase(node_ptr,node_ptr)
-   //! Additional notes: the previous node of z is splayed to speed up range deletions.
+   //!
+   //! <b>Note</b>: The previous node of z is splayed to speed up range deletions.
    static void erase(node_ptr header, node_ptr z) BOOST_NOEXCEPT
    {
       //posibility 1
@@ -294,7 +295,8 @@ class splaytree_algorithms
 
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::bstree_algorithms::count(const_node_ptr,const KeyType&,KeyNodePtrCompare)
-   //! Additional notes: an element with key `key` is splayed.
+   //!
+   //! <b>Note</b>: An element with key `key` is splayed.
    template<class KeyType, class KeyNodePtrCompare>
    static std::size_t count
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
@@ -309,14 +311,16 @@ class splaytree_algorithms
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::count(const_node_ptr,const KeyType&,KeyNodePtrCompare)
-   //! Additional note: no splaying is performed
+   //!
+   //! <b>Note</b>: No splaying is performed.
    template<class KeyType, class KeyNodePtrCompare>
    static std::size_t count
       (const_node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {  return bstree_algo::count(header, key, comp);  }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::lower_bound(const_node_ptr,const KeyType&,KeyNodePtrCompare)
-   //! Additional notes: the first node of the range is splayed.
+   //!
+   //! <b>Note</b>: The first node of the range is splayed.
    template<class KeyType, class KeyNodePtrCompare>
    static node_ptr lower_bound
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
@@ -327,14 +331,16 @@ class splaytree_algorithms
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::lower_bound(const_node_ptr,const KeyType&,KeyNodePtrCompare)
-   //! Additional note: no splaying is performed
+   //!
+   //! <b>Note</b>: No splaying is performed.
    template<class KeyType, class KeyNodePtrCompare>
    static node_ptr lower_bound
       (const_node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {  return bstree_algo::lower_bound(header, key, comp);  }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::upper_bound(const_node_ptr,const KeyType&,KeyNodePtrCompare)
-   //! Additional notes: the first node of the range is splayed.
+   //!
+   //! <b>Note</b>: The first node of the range is splayed.
    template<class KeyType, class KeyNodePtrCompare>
    static node_ptr upper_bound
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
@@ -345,14 +351,16 @@ class splaytree_algorithms
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::upper_bound(const_node_ptr,const KeyType&,KeyNodePtrCompare)
-   //! Additional note: no splaying is performed
+   //!
+   //! <b>Note</b>: No splaying is performed.
    template<class KeyType, class KeyNodePtrCompare>
    static node_ptr upper_bound
       (const_node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {  return bstree_algo::upper_bound(header, key, comp);  }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::find(const_node_ptr, const KeyType&,KeyNodePtrCompare)
-   //! Additional notes: the found node of the lower bound is splayed.
+   //!
+   //! <b>Note</b>: The found node of the lower bound is splayed.
    template<class KeyType, class KeyNodePtrCompare>
    static node_ptr find
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
@@ -363,14 +371,16 @@ class splaytree_algorithms
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::find(const_node_ptr, const KeyType&,KeyNodePtrCompare)
-   //! Additional note: no splaying is performed
+   //!
+   //! <b>Note</b>: No splaying is performed.
    template<class KeyType, class KeyNodePtrCompare>
    static node_ptr find
       (const_node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {  return bstree_algo::find(header, key, comp);  }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::equal_range(const_node_ptr,const KeyType&,KeyNodePtrCompare)
-   //! Additional notes: the first node of the range is splayed.
+   //!
+   //! <b>Note</b>: The first node of the range is splayed.
    template<class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, node_ptr> equal_range
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
@@ -384,14 +394,16 @@ class splaytree_algorithms
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::equal_range(const_node_ptr,const KeyType&,KeyNodePtrCompare)
-   //! Additional note: no splaying is performed
+   //!
+   //! <b>Note</b>: No splaying is performed.
    template<class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, node_ptr> equal_range
       (const_node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {  return bstree_algo::equal_range(header, key, comp);  }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::lower_bound_range(const_node_ptr,const KeyType&,KeyNodePtrCompare)
-   //! Additional notes: the first node of the range is splayed.
+   //!
+   //! <b>Note</b>: The first node of the range is splayed.
    template<class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, node_ptr> lower_bound_range
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
@@ -405,14 +417,16 @@ class splaytree_algorithms
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::lower_bound_range(const_node_ptr,const KeyType&,KeyNodePtrCompare)
-   //! Additional note: no splaying is performed
+   //!
+   //! <b>Note</b>: No splaying is performed.
    template<class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, node_ptr> lower_bound_range
       (const_node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {  return bstree_algo::lower_bound_range(header, key, comp);  }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::bounded_range(const_node_ptr,const KeyType&,const KeyType&,KeyNodePtrCompare,bool,bool)
-   //! Additional notes: the first node of the range is splayed.
+   //!
+   //! <b>Note</b>: The first node of the range is splayed.
    template<class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, node_ptr> bounded_range
       (node_ptr header, const KeyType &lower_key, const KeyType &upper_key, KeyNodePtrCompare comp
@@ -426,7 +440,8 @@ class splaytree_algorithms
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::bounded_range(const_node_ptr,const KeyType&,const KeyType&,KeyNodePtrCompare,bool,bool)
-   //! Additional note: no splaying is performed
+   //!
+   //! <b>Note</b>: No splaying is performed.
    template<class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, node_ptr> bounded_range
       (const_node_ptr header, const KeyType &lower_key, const KeyType &upper_key, KeyNodePtrCompare comp
@@ -434,7 +449,8 @@ class splaytree_algorithms
    {  return bstree_algo::bounded_range(header, lower_key, upper_key, comp, left_closed, right_closed);  }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::insert_equal_upper_bound(node_ptr,node_ptr,NodePtrCompare)
-   //! Additional note: the inserted node is splayed
+   //!
+   //! <b>Note</b>: The inserted node is splayed.
    template<class NodePtrCompare>
    static node_ptr insert_equal_upper_bound
       (node_ptr header, node_ptr new_node, NodePtrCompare comp)
@@ -444,7 +460,8 @@ class splaytree_algorithms
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::insert_equal_lower_bound(node_ptr,node_ptr,NodePtrCompare)
-   //! Additional note: the inserted node is splayed
+   //!
+   //! <b>Note</b>: The inserted node is splayed.
    template<class NodePtrCompare>
    static node_ptr insert_equal_lower_bound
       (node_ptr header, node_ptr new_node, NodePtrCompare comp)
@@ -454,7 +471,8 @@ class splaytree_algorithms
    }  
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::insert_equal(node_ptr,node_ptr,node_ptr,NodePtrCompare)
-   //! Additional note: the inserted node is splayed
+   //!
+   //! <b>Note</b>: The inserted node is splayed.
    template<class NodePtrCompare>
    static node_ptr insert_equal
       (node_ptr header, node_ptr hint, node_ptr new_node, NodePtrCompare comp)
@@ -464,7 +482,8 @@ class splaytree_algorithms
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::insert_before(node_ptr,node_ptr,node_ptr)
-   //! Additional note: the inserted node is splayed
+   //!
+   //! <b>Note</b>: The inserted node is splayed.
    static node_ptr insert_before
       (node_ptr header, node_ptr pos, node_ptr new_node) BOOST_NOEXCEPT
    {
@@ -474,7 +493,8 @@ class splaytree_algorithms
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::push_back(node_ptr,node_ptr)
-   //! Additional note: the inserted node is splayed
+   //!
+   //! <b>Note</b>: The inserted node is splayed.
    static void push_back(node_ptr header, node_ptr new_node) BOOST_NOEXCEPT
    {
       bstree_algo::push_back(header, new_node);
@@ -482,7 +502,8 @@ class splaytree_algorithms
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::push_front(node_ptr,node_ptr)
-   //! Additional note: the inserted node is splayed
+   //!
+   //! <b>Note</b>: The inserted node is splayed.
    static void push_front(node_ptr header, node_ptr new_node) BOOST_NOEXCEPT
    {
       bstree_algo::push_front(header, new_node);
@@ -490,7 +511,8 @@ class splaytree_algorithms
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::insert_unique_check(const_node_ptr,const KeyType&,KeyNodePtrCompare,insert_commit_data&)
-   //! Additional note: nodes with the given key are splayed
+   //!
+   //! <b>Note</b>: Nodes with the given key are splayed.
    template<class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, bool> insert_unique_check
       (node_ptr header, const KeyType &key
@@ -505,7 +527,8 @@ class splaytree_algorithms
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::insert_unique_check(const_node_ptr,node_ptr,const KeyType&,KeyNodePtrCompare,insert_commit_data&)
-   //! Additional note: nodes with the given key are splayed
+   //!
+   //! <b>Note</b>: Nodes with the given key are splayed.
    template<class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, bool> insert_unique_check
       (node_ptr header, node_ptr hint, const KeyType &key

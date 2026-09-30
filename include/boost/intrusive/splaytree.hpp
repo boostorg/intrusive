@@ -219,7 +219,6 @@ class splaytree_impl
    void swap(splaytree_impl& other);
 
    //! @copydoc ::boost::intrusive::bstree::clone_from(const bstree&,Cloner,Disposer)
-   //! Additional notes: it also copies the alpha factor from the source container.
    template <class Cloner, class Disposer>
    void clone_from(const splaytree_impl &src, Cloner cloner, Disposer disposer);
 
@@ -324,99 +323,119 @@ class splaytree_impl
    void clear_and_dispose(Disposer disposer) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree::count(const key_type &)const
-   //! Additional note: non-const function, splaying is performed.
+   //!
+   //! <b>Note</b>: Non-const function, splaying is performed.
    size_type count(const key_type &key);
 
    //! @copydoc ::boost::intrusive::bstree::count(const KeyType&,KeyTypeKeyCompare)const
-   //! Additional note: non-const function, splaying is performed.
+   //!
+   //! <b>Note</b>: Non-const function, splaying is performed.
    template<class KeyType, class KeyTypeKeyCompare>
    size_type count(const KeyType &key, KeyTypeKeyCompare comp);
 
    //! @copydoc ::boost::intrusive::bstree::count(const key_type &)const
-   //! Additional note: const function, no splaying is performed
+   //!
+   //! <b>Note</b>: Const function, no splaying is performed.
    size_type count(const key_type &key) const;
 
    //! @copydoc ::boost::intrusive::bstree::count(const KeyType&,KeyTypeKeyCompare)const
-   //! Additional note: const function, no splaying is performed
+   //!
+   //! <b>Note</b>: Const function, no splaying is performed.
    template<class KeyType, class KeyTypeKeyCompare>
    size_type count(const KeyType &key, KeyTypeKeyCompare comp) const;
 
    //! @copydoc ::boost::intrusive::bstree::lower_bound(const key_type &)
-   //! Additional note: non-const function, splaying is performed.
+   //!
+   //! <b>Note</b>: Non-const function, splaying is performed.
    iterator lower_bound(const key_type &key);
 
    //! @copydoc ::boost::intrusive::bstree::lower_bound(const key_type &)const
-   //! Additional note: const function, no splaying is performed
+   //!
+   //! <b>Note</b>: Const function, no splaying is performed.
    const_iterator lower_bound(const key_type &key) const;
 
    //! @copydoc ::boost::intrusive::bstree::lower_bound(const KeyType&,KeyTypeKeyCompare)
-   //! Additional note: non-const function, splaying is performed for the first
-   //! element of the equal range of "key"
+   //!
+   //! <b>Note</b>: Non-const function, splaying is performed for the first
+   //!   element of the equal range of "key".
    template<class KeyType, class KeyTypeKeyCompare>
    iterator lower_bound(const KeyType &key, KeyTypeKeyCompare comp);
 
    //! @copydoc ::boost::intrusive::bstree::lower_bound(const KeyType&,KeyTypeKeyCompare)const
-   //! Additional note: const function, no splaying is performed
+   //!
+   //! <b>Note</b>: Const function, no splaying is performed.
    template<class KeyType, class KeyTypeKeyCompare>
    const_iterator lower_bound(const KeyType &key, KeyTypeKeyCompare comp) const;
 
    //! @copydoc ::boost::intrusive::bstree::upper_bound(const key_type &)
-   //! Additional note: non-const function, splaying is performed for the first
-   //! element of the equal range of "value"
+   //!
+   //! <b>Note</b>: Non-const function, splaying is performed for the first
+   //!   element of the equal range of "value".
    iterator upper_bound(const key_type &key);
 
    //! @copydoc ::boost::intrusive::bstree::upper_bound(const key_type &)const
-   //! Additional note: const function, no splaying is performed
+   //!
+   //! <b>Note</b>: Const function, no splaying is performed.
    const_iterator upper_bound(const key_type &key) const;
 
    //! @copydoc ::boost::intrusive::bstree::upper_bound(const KeyType&,KeyTypeKeyCompare)
-   //! Additional note: non-const function, splaying is performed for the first
-   //! element of the equal range of "key"
+   //!
+   //! <b>Note</b>: Non-const function, splaying is performed for the first
+   //!   element of the equal range of "key".
    template<class KeyType, class KeyTypeKeyCompare>
    iterator upper_bound(const KeyType &key, KeyTypeKeyCompare comp);
 
    //! @copydoc ::boost::intrusive::bstree::upper_bound(const KeyType&,KeyTypeKeyCompare)const
-   //! Additional note: const function, no splaying is performed
+   //!
+   //! <b>Note</b>: Const function, no splaying is performed.
    template<class KeyType, class KeyTypeKeyCompare>
    const_iterator upper_bound(const KeyType &key, KeyTypeKeyCompare comp) const;
 
    //! @copydoc ::boost::intrusive::bstree::find(const key_type &)
-   //! Additional note: non-const function, splaying is performed for the first
-   //! element of the equal range of "value"
+   //!
+   //! <b>Note</b>: Non-const function, splaying is performed for the first
+   //!   element of the equal range of "value".
    iterator find(const key_type &key);
 
    //! @copydoc ::boost::intrusive::bstree::find(const key_type &)const
-   //! Additional note: const function, no splaying is performed
+   //!
+   //! <b>Note</b>: Const function, no splaying is performed.
    const_iterator find(const key_type &key) const;
 
    //! @copydoc ::boost::intrusive::bstree::find(const KeyType&,KeyTypeKeyCompare)
-   //! Additional note: non-const function, splaying is performed for the first
-   //! element of the equal range of "key"
+   //!
+   //! <b>Note</b>: Non-const function, splaying is performed for the first
+   //!   element of the equal range of "key".
    template<class KeyType, class KeyTypeKeyCompare>
    iterator find(const KeyType &key, KeyTypeKeyCompare comp);
 
    //! @copydoc ::boost::intrusive::bstree::find(const KeyType&,KeyTypeKeyCompare)const
-   //! Additional note: const function, no splaying is performed
+   //!
+   //! <b>Note</b>: Const function, no splaying is performed.
    template<class KeyType, class KeyTypeKeyCompare>
    const_iterator find(const KeyType &key, KeyTypeKeyCompare comp) const;
 
    //! @copydoc ::boost::intrusive::bstree::equal_range(const key_type &)
-   //! Additional note: non-const function, splaying is performed for the first
-   //! element of the equal range of "value"
+   //!
+   //! <b>Note</b>: Non-const function, splaying is performed for the first
+   //!   element of the equal range of "value".
    std::pair<iterator, iterator> equal_range(const key_type &key);
 
    //! @copydoc ::boost::intrusive::bstree::equal_range(const key_type &)const
-   //! Additional note: const function, no splaying is performed
+   //!
+   //! <b>Note</b>: Const function, no splaying is performed.
    std::pair<const_iterator, const_iterator> equal_range(const key_type &key) const;
 
    //! @copydoc ::boost::intrusive::bstree::equal_range(const KeyType&,KeyTypeKeyCompare)
-   //! Additional note: non-const function, splaying is performed for the first
-   //! element of the equal range of "key"
+   //!
+   //! <b>Note</b>: Non-const function, splaying is performed for the first
+   //!   element of the equal range of "key".
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<iterator, iterator> equal_range(const KeyType &key, KeyTypeKeyCompare comp);
 
    //! @copydoc ::boost::intrusive::bstree::equal_range(const KeyType&,KeyTypeKeyCompare)const
-   //! Additional note: const function, no splaying is performed
+   //!
+   //! <b>Note</b>: Const function, no splaying is performed.
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<const_iterator, const_iterator> equal_range(const KeyType &key, KeyTypeKeyCompare comp) const;
 
