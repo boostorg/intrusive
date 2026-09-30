@@ -533,13 +533,28 @@ class splaytree_algorithms
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::insert_equal(node_ptr,node_ptr,node_ptr,NodePtrCompare)
    //!
-   //! <b>Note</b>: The inserted node is splayed.
+   //! <b>Note</b>: If "hint" is correct, "hint" (or its previous node if "hint" is the header)
+   //!   is splayed. Otherwise nodes with the key of "new_node" are splayed.
    template<class NodePtrCompare>
    static node_ptr insert_equal
       (node_ptr header, node_ptr hint, node_ptr new_node, NodePtrCompare comp)
    {
-      splay_down(header, new_node, comp);
-      return bstree_algo::insert_equal(header, hint, new_node, comp);
+      //The hint is correct if prev(hint) <= new_node <= hint (header acts as +infinity for hint
+      //and as -infinity for prev). First check new_node <= hint.
+      if(hint == header || !comp(hint, new_node)){
+         node_ptr const prev = priv_prev_of_hint(header, hint);
+         if(prev == header || !comp(new_node, prev)){
+            //Correct hint: link new_node between prev and hint without new comparisons
+            insert_commit_data commit_data;
+            priv_splay_hint_and_commit_data(header, hint, prev, commit_data);
+            bstree_algo::insert_commit(header, new_node, commit_data);
+            return new_node;
+         }
+         //new_node < prev: wrong hint. The nearest position to hint is the upper bound
+         return insert_equal_upper_bound(header, new_node, comp);
+      }
+      //hint < new_node: wrong hint. The nearest position to hint is the lower bound
+      return insert_equal_lower_bound(header, new_node, comp);
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::insert_before(node_ptr,node_ptr,node_ptr)
@@ -600,20 +615,10 @@ class splaytree_algorithms
       //The hint is correct if prev(hint) < key < hint (header acts as +infinity for hint
       //and as -infinity for prev). First check key < hint.
       if(hint == header || comp(key, hint)){
-         //Obtain prev(hint), header if there is no previous node (hint is the leftmost node
-         //or the tree is empty). Avoid prev_node's climb for the leftmost node and the header.
-         node_ptr const prev = hint == NodeTraits::get_left(header) ? header
-                             : hint == header ? NodeTraits::get_right(header)
-                             : bstree_algo::prev_node(hint);
+         node_ptr const prev = priv_prev_of_hint(header, hint);
          if(prev == header || comp(prev, key)){
-            //Correct hint: prev < key < hint. key's insertion point is between prev & hint.
-            //Splaying hint makes that node root without comparisons.
-            //splay_up(header) splays the rightmost node (prev) or does nothing if the tree is empty.
-            splay_up(hint, header);
-            //r is now the root (or header if the tree is empty). key goes before r if
-            //r is hint and after r if r is prev.
-            node_ptr const r = hint != header ? hint : prev;
-            priv_insert_commit_data_from_root(header, r, r == hint, commit_data);
+            //Correct hint: prev < key < hint
+            priv_splay_hint_and_commit_data(header, hint, prev, commit_data);
             return std::pair<node_ptr, bool>(node_ptr(), true);
          }
          else if(!comp(key, prev)){
@@ -671,6 +676,28 @@ class splaytree_algorithms
    {
       node_ptr const r_right(NodeTraits::get_right(r));
       return r_right ? bstree_algo::minimum(r_right) : header;
+   }
+
+   //Returns prev(hint), or header if there is no previous node (hint is the leftmost node
+   //or the tree is empty). Avoids prev_node's climb for the leftmost node and the header.
+   static node_ptr priv_prev_of_hint(node_ptr header, node_ptr hint) BOOST_NOEXCEPT
+   {
+      return hint == NodeTraits::get_left(header) ? header
+           : hint == header ? NodeTraits::get_right(header)
+           : bstree_algo::prev_node(hint);
+   }
+
+   //For a correct hint, the new node's insertion point is between prev & hint.
+   //Splaying hint makes that node root, so commit_data is filled without comparisons.
+   //splay_up(header) splays the rightmost node (prev) or does nothing if the tree is empty.
+   static void priv_splay_hint_and_commit_data
+      (node_ptr header, node_ptr hint, node_ptr prev, insert_commit_data &commit_data) BOOST_NOEXCEPT
+   {
+      splay_up(hint, header);
+      //r is now the root (or header if the tree is empty). The new node goes before r
+      //if r is hint and after r if r is prev.
+      node_ptr const r = hint != header ? hint : prev;
+      priv_insert_commit_data_from_root(header, r, r == hint, commit_data);
    }
 
    //Fills commit_data so that insert_commit links a new node immediately before
