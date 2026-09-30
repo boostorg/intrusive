@@ -1478,6 +1478,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       }
    }
 
+   /// @cond
    protected:
 
    template<class NodePtrCompare>
@@ -2005,6 +2006,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       }
    }
 
+   protected:
    template<class KeyType, class KeyNodePtrCompare>
    static node_ptr lower_bound_loop
       (node_ptr x, node_ptr y, const KeyType &key, KeyNodePtrCompare comp)
@@ -2037,6 +2039,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       return y;
    }
 
+   private:
    template<class Checker>
    static void check_subtree(const_node_ptr n, Checker checker, typename Checker::return_type& check_return)
    {
@@ -2056,6 +2059,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       }
       checker(n, check_return_left, check_return_right, check_return);
    }
+   /// @endcond
 };
 
 /// @cond
