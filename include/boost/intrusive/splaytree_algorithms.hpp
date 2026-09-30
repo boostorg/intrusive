@@ -327,7 +327,8 @@ class splaytree_algorithms
    {
       bool found;
       node_ptr const r = splay_down(detail::uncast(header), key, comp, &found);
-      return found ? bstree_algo::lower_bound(header, key, comp) : priv_bound_from_root(header, r, key, comp);
+      return found ? bstree_algo::lower_bound_loop(NodeTraits::get_left(r), r, key, comp)
+                   : priv_bound_from_root(header, r, key, comp);
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::lower_bound(const_node_ptr,const KeyType&,KeyNodePtrCompare)
@@ -347,7 +348,8 @@ class splaytree_algorithms
    {
       bool found;
       node_ptr const r = splay_down(detail::uncast(header), key, comp, &found);
-      return found ? bstree_algo::upper_bound(header, key, comp) : priv_bound_from_root(header, r, key, comp);
+      return found ? bstree_algo::upper_bound_loop(NodeTraits::get_right(r), header, key, comp)
+                   : priv_bound_from_root(header, r, key, comp);
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::upper_bound(const_node_ptr,const KeyType&,KeyNodePtrCompare)
@@ -366,8 +368,8 @@ class splaytree_algorithms
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {
       bool found;
-      splay_down(detail::uncast(header), key, comp, &found);
-      return found ? bstree_algo::find(header, key, comp) : header;
+      node_ptr const r = splay_down(detail::uncast(header), key, comp, &found);
+      return found ? bstree_algo::lower_bound_loop(NodeTraits::get_left(r), r, key, comp) : header;
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::find(const_node_ptr, const KeyType&,KeyNodePtrCompare)
@@ -388,7 +390,9 @@ class splaytree_algorithms
       bool found;
       node_ptr const r = splay_down(detail::uncast(header), key, comp, &found);
       if(found)
-         return bstree_algo::equal_range(header, key, comp);
+         return std::pair<node_ptr, node_ptr>
+            ( bstree_algo::lower_bound_loop(NodeTraits::get_left(r), r, key, comp)
+            , bstree_algo::upper_bound_loop(NodeTraits::get_right(r), header, key, comp));
       node_ptr const b = priv_bound_from_root(header, r, key, comp);
       return std::pair<node_ptr, node_ptr>(b, b);
    }
@@ -410,8 +414,10 @@ class splaytree_algorithms
    {
       bool found;
       node_ptr const r = splay_down(detail::uncast(header), key, comp, &found);
-      if(found)
-         return bstree_algo::lower_bound_range(header, key, comp);
+      if(found){
+         node_ptr const lb = bstree_algo::lower_bound_loop(NodeTraits::get_left(r), r, key, comp);
+         return std::pair<node_ptr, node_ptr>(lb, lb == r ? priv_next_of_root(header, r) : next_node(lb));
+      }
       node_ptr const b = priv_bound_from_root(header, r, key, comp);
       return std::pair<node_ptr, node_ptr>(b, b);
    }
@@ -423,6 +429,61 @@ class splaytree_algorithms
    static std::pair<node_ptr, node_ptr> lower_bound_range
       (const_node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {  return bstree_algo::lower_bound_range(header, key, comp);  }
+
+   //! @copydoc ::boost::intrusive::bstree_algorithms::find(const_node_ptr, const KeyType&,KeyNodePtrCompare)
+   //!
+   //! <b>Note</b>: The tree must not contain equivalent keys. The found node is splayed.
+   //!   This function can be more efficient than find.
+   template<class KeyType, class KeyNodePtrCompare>
+   static node_ptr find_unique
+      (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
+   {
+      bool found;
+      node_ptr const r = splay_down(header, key, comp, &found);
+      return found ? r : header;
+   }
+
+   //! @copydoc ::boost::intrusive::bstree_algorithms::lower_bound(const_node_ptr,const KeyType&,KeyNodePtrCompare)
+   //!
+   //! <b>Note</b>: The tree must not contain equivalent keys. The first node of the range is splayed.
+   //!   This function can be more efficient than lower_bound.
+   template<class KeyType, class KeyNodePtrCompare>
+   static node_ptr lower_bound_unique
+      (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
+   {
+      bool found;
+      node_ptr const r = splay_down(header, key, comp, &found);
+      return found ? r : priv_bound_from_root(header, r, key, comp);
+   }
+
+   //! @copydoc ::boost::intrusive::bstree_algorithms::upper_bound(const_node_ptr,const KeyType&,KeyNodePtrCompare)
+   //!
+   //! <b>Note</b>: The tree must not contain equivalent keys. The first node of the range is splayed.
+   //!   This function can be more efficient than upper_bound.
+   template<class KeyType, class KeyNodePtrCompare>
+   static node_ptr upper_bound_unique
+      (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
+   {
+      bool found;
+      node_ptr const r = splay_down(header, key, comp, &found);
+      return found ? priv_next_of_root(header, r) : priv_bound_from_root(header, r, key, comp);
+   }
+
+   //! @copydoc ::boost::intrusive::bstree_algorithms::equal_range(const_node_ptr,const KeyType&,KeyNodePtrCompare)
+   //!
+   //! <b>Note</b>: The tree must not contain equivalent keys. The first node of the range is splayed.
+   //!   This function can be more efficient than equal_range.
+   template<class KeyType, class KeyNodePtrCompare>
+   static std::pair<node_ptr, node_ptr> equal_range_unique
+      (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
+   {
+      bool found;
+      node_ptr const r = splay_down(header, key, comp, &found);
+      if(found)
+         return std::pair<node_ptr, node_ptr>(r, priv_next_of_root(header, r));
+      node_ptr const b = priv_bound_from_root(header, r, key, comp);
+      return std::pair<node_ptr, node_ptr>(b, b);
+   }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::bounded_range(const_node_ptr,const KeyType&,const KeyType&,KeyNodePtrCompare,bool,bool)
    //!
@@ -571,7 +632,13 @@ class splaytree_algorithms
    //(or header if the tree is empty), so lower_bound(key) == upper_bound(key)
    template<class KeyType, class KeyNodePtrCompare>
    static node_ptr priv_bound_from_root(node_ptr header, node_ptr r, const KeyType &key, KeyNodePtrCompare comp)
-   {  return (r == header || comp(key, r)) ? r : bstree_algo::next_node(r);  }
+   {  return (r == header || comp(key, r)) ? r : priv_next_of_root(header, r);  }
+
+   static node_ptr priv_next_of_root(node_ptr header, node_ptr r) BOOST_NOEXCEPT
+   {
+      node_ptr const r_right(NodeTraits::get_right(r));
+      return r_right ? bstree_algo::minimum(r_right) : header;
+   }
 
    //After a splay_down that did not find key, key must be linked
    //immediately before or after the root r

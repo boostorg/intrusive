@@ -345,11 +345,70 @@ class splay_set_impl
    template<class KeyType, class KeyTypeKeyCompare>
    const_iterator find(const KeyType& key, KeyTypeKeyCompare comp) const;
 
+   #else
+
+   //Only key_comp() guarantees one equivalent element: a KeyTypeKeyCompare can be coarser
+   iterator lower_bound(const key_type &key)
+   {
+      return iterator(node_algorithms::lower_bound_unique
+         (this->header_ptr(), key, this->key_node_comp(this->key_comp())), this->priv_value_traits_ptr());
+   }
+
+   template<class KeyType, class KeyTypeKeyCompare>
+   iterator lower_bound(const KeyType& key, KeyTypeKeyCompare comp)
+   {  return this->tree_type::lower_bound(key, comp);   }
+
+   const_iterator lower_bound(const key_type &key) const
+   {  return this->tree_type::lower_bound(key);   }
+
+   template<class KeyType, class KeyTypeKeyCompare>
+   const_iterator lower_bound(const KeyType& key, KeyTypeKeyCompare comp) const
+   {  return this->tree_type::lower_bound(key, comp);   }
+
+   iterator upper_bound(const key_type &key)
+   {
+      return iterator(node_algorithms::upper_bound_unique
+         (this->header_ptr(), key, this->key_node_comp(this->key_comp())), this->priv_value_traits_ptr());
+   }
+
+   template<class KeyType, class KeyTypeKeyCompare>
+   iterator upper_bound(const KeyType& key, KeyTypeKeyCompare comp)
+   {  return this->tree_type::upper_bound(key, comp);   }
+
+   const_iterator upper_bound(const key_type &key) const
+   {  return this->tree_type::upper_bound(key);   }
+
+   template<class KeyType, class KeyTypeKeyCompare>
+   const_iterator upper_bound(const KeyType& key, KeyTypeKeyCompare comp) const
+   {  return this->tree_type::upper_bound(key, comp);   }
+
+   iterator find(const key_type &key)
+   {
+      return iterator(node_algorithms::find_unique
+         (this->header_ptr(), key, this->key_node_comp(this->key_comp())), this->priv_value_traits_ptr());
+   }
+
+   template<class KeyType, class KeyTypeKeyCompare>
+   iterator find(const KeyType& key, KeyTypeKeyCompare comp)
+   {  return this->tree_type::find(key, comp);   }
+
+   const_iterator find(const key_type &key) const
+   {  return this->tree_type::find(key);   }
+
+   template<class KeyType, class KeyTypeKeyCompare>
+   const_iterator find(const KeyType& key, KeyTypeKeyCompare comp) const
+   {  return this->tree_type::find(key, comp);   }
+
    #endif   //   #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::rbtree::equal_range(const key_type &)
    std::pair<iterator,iterator> equal_range(const key_type &key)
-   {  return this->tree_type::lower_bound_range(key); }
+   {
+      std::pair<node_ptr, node_ptr> const ret = node_algorithms::equal_range_unique
+         (this->header_ptr(), key, this->key_node_comp(this->key_comp()));
+      return std::pair<iterator, iterator>( iterator(ret.first, this->priv_value_traits_ptr())
+                                          , iterator(ret.second, this->priv_value_traits_ptr()));
+   }
 
    //! @copydoc ::boost::intrusive::rbtree::equal_range(const KeyType&,KeyTypeKeyCompare)
    template<class KeyType, class KeyTypeKeyCompare>
