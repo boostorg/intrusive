@@ -17,7 +17,7 @@
 #include <boost/intrusive/detail/ebo_functor_holder.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
-#include <boost/intrusive/hashtable.hpp>   //prime_list_holder
+#include <boost/intrusive/detail/prime_holder.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 
 #include <boost/config.hpp>
