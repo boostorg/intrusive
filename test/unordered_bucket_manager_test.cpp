@@ -181,6 +181,64 @@ void check_sync(const Mgr &mgr, const Cont &c)
    BOOST_TEST(float(c.size()) <= mgr.max_load_factor() * float(mgr.bucket_count()));
 }
 
+//Checks that the bucket count is accepted by the container: a power of two
+//with power_2_buckets, a value of the prime table otherwise
+//(suggested_lower_bucket_count returns n only if n is in the table)
+template<class Cont>
+bool is_valid_bucket_count(typename Cont::size_type n)
+{
+   BOOST_IF_CONSTEXPR(Cont::power_2_buckets)
+      return is_power_of_two(n);
+   else
+      return Cont::suggested_lower_bucket_count(n) == n;
+}
+
+//Grows, rehashes and shrinks a container with the given options. The
+//manager's bucket count must be the container's bucket count (without the
+//additional sentinel bucket of linear_buckets) and a valid bucket count.
+template<class Cont>
+void test_bucket_options(const char *name)
+{
+   typedef bi::unordered_bucket_manager<Cont>   mgr_t;
+   typedef typename Cont::size_type             size_type;
+
+   const int n = 2000;
+   mgr_t  mgr;
+   Cont   c(mgr.traits());
+   check_sync(mgr, c);
+   BOOST_TEST(is_valid_bucket_count<Cont>(mgr.bucket_count()));
+
+   for(int i = 0; i != n; ++i){
+      mgr.reserve_additional(c);
+      c.insert(*new item(i));
+      check_sync(mgr, c);
+      BOOST_TEST(is_valid_bucket_count<Cont>(mgr.bucket_count()));
+   }
+   BOOST_TEST(c.size() == size_type(n));
+
+   mgr.reserve(c, size_type(10 * n));
+   check_sync(mgr, c);
+   BOOST_TEST(is_valid_bucket_count<Cont>(mgr.bucket_count()));
+
+   mgr.rehash(c, size_type(3 * n));
+   check_sync(mgr, c);
+   BOOST_TEST(is_valid_bucket_count<Cont>(mgr.bucket_count()));
+   for(int i = 0; i != n; ++i)
+      BOOST_TEST(c.find(item(i)) != c.end());
+
+   //Erase half of the elements and release buckets
+   for(int i = 0; i < n; i += 2)
+      c.erase_and_dispose(item(i), delete_disposer());
+   mgr.shrink_to_fit(c);
+   check_sync(mgr, c);
+   BOOST_TEST(is_valid_bucket_count<Cont>(mgr.bucket_count()));
+   for(int i = 0; i != n; ++i)
+      BOOST_TEST((c.find(item(i)) != c.end()) == (i % 2 != 0));
+
+   c.clear_and_dispose(delete_disposer());
+   std::printf("%s: buckets=%u\n", name, unsigned(mgr.bucket_count()));
+}
+
 int main()
 {
    const int N = 10000;
@@ -497,6 +555,54 @@ int main()
       test_allocator_path<void_mgr_t>("void (operator new)");
       test_allocator_path<user_mgr_t>("user allocator");
       test_allocator_path<std_mgr_t>("std::allocator");
+   }
+
+   //////////////////////////////////////
+   // Bucket options that change the accepted bucket counts or need an
+   // additional sentinel bucket (linear_buckets)
+   //////////////////////////////////////
+   {
+      typedef bi::unordered_multiset
+         < item, bi::hash<item_hash>, bi::linear_buckets<true> >  lin_t;
+      typedef bi::unordered_multiset
+         < item, bi::hash<item_hash>, bi::linear_buckets<true>
+         , bi::power_2_buckets<true> >                             lin_pow2_t;
+      typedef bi::unordered_multiset
+         < item, bi::hash<item_hash>, bi::linear_buckets<true>
+         , bi::incremental<true> >                                 lin_incr_t;
+      typedef bi::unordered_multiset
+         < item, bi::hash<item_hash>, bi::fastmod_buckets<true> >  fmod_t;
+      typedef bi::unordered_multiset
+         < item, bi::hash<item_hash>, bi::linear_buckets<true>
+         , bi::fastmod_buckets<true> >                             lin_fmod_t;
+
+      test_bucket_options<lin_t>("linear_buckets");
+      test_bucket_options<lin_pow2_t>("linear_buckets + power_2_buckets");
+      test_bucket_options<lin_incr_t>("linear_buckets + incremental");
+      test_bucket_options<fmod_t>("fastmod_buckets");
+      test_bucket_options<lin_fmod_t>("linear_buckets + fastmod_buckets");
+   }
+
+   //////////////////////////////////////
+   // A bucket count for the requested capacity that does not fit in
+   // size_type is limited to the maximum value of size_type
+   //////////////////////////////////////
+   {
+      typedef bi::unordered_multiset
+         < item, bi::hash<item_hash>, bi::size_type<unsigned short> > small_t;
+      typedef bi::unordered_bucket_manager<small_t>                  small_mgr_t;
+
+      small_mgr_t mgr;
+      small_t     mset(mgr.traits());
+      mgr.max_load_factor(0.001f);
+      //1000 elements need 1000000 buckets, more than unsigned short can hold
+      BOOST_TEST(mgr.reserve(mset, small_t::size_type(1000u)));
+      BOOST_TEST(mgr.bucket_count() == small_t::size_type(-1));
+      check_sync(mgr, mset);
+      item x(1);
+      mset.insert(x);
+      BOOST_TEST(mset.find(item(1)) != mset.end());
+      mset.clear();
    }
 
    std::printf("All tests passed.\n");

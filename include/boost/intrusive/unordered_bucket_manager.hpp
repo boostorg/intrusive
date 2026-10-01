@@ -198,6 +198,10 @@ class unordered_bucket_manager
       <allocator_type>::type                             alloc_size_type;
    typedef detail::ebo_functor_holder<allocator_type>    alloc_holder_t;
 
+   //Extra buckets (e.g. the sentinel bucket of linear_buckets) that the
+   //container needs after the usable ones. m_bucket_count does not include them.
+   static const size_type bucket_overhead = size_type(hashtable_type::bucket_overhead);
+
    BOOST_INTRUSIVE_FORCEINLINE allocator_type &         priv_alloc()
    {  return alloc_holder_t::get();  }
 
@@ -302,7 +306,11 @@ class unordered_bucket_manager
    //
    //////////////////////////////////////////////
 
-   //! <b>Effects</b>: Returns the length of the owned bucket array.
+   //! <b>Effects</b>: Returns the number of usable buckets of the owned array,
+   //!   that is, the bucket count of the associated container.
+   //!
+   //! <b>Note</b>: With linear_buckets, the array holds an additional sentinel bucket
+   //!              not counted by this function.
    //!
    //! <b>Throws</b>: Nothing.
    size_type bucket_count() const BOOST_NOEXCEPT
@@ -314,7 +322,7 @@ class unordered_bucket_manager
    //!
    //! <b>Throws</b>: Nothing.
    bucket_traits_type traits() const BOOST_NOEXCEPT
-   {  return bucket_traits_type(m_buckets, this->bucket_count());  }
+   {  return bucket_traits_type(m_buckets, size_type(m_bucket_count + bucket_overhead));  }
 
    //! <b>Effects</b>: Returns a copy of the stored allocator, converted back
    //!   to the original \c Allocator type.
@@ -471,38 +479,58 @@ class unordered_bucket_manager
    }
 
    static size_type priv_suggested_count(size_type n, detail::bool_<false>)
-   {  return hashtable_type::suggested_upper_bucket_count(n);  }
+   {
+      const size_type max_count = priv_max_count();
+      const size_type r = hashtable_type::suggested_upper_bucket_count(n);
+      return r > max_count ? max_count : r;
+   }
 
-   //Smallest bucket count `b` such that element_count <= max_load_factor*b
+   //Maximum number of usable buckets limited by what's representable by size_type
+   static size_type priv_max_count()
+   {
+      const std::size_t max_alloc = (std::size_t(-1) >> 1u) / sizeof(bucket_type);
+      const std::size_t max_size  = std::size_t(size_type(-1));
+      return size_type((max_alloc < max_size ? max_alloc : max_size) - bucket_overhead);
+   }
+
+   //Smallest bucket count such that element_count <= max_load_factor*b.
    size_type priv_buckets_for(size_type element_count) const
    {
-      size_type b = size_type(float(element_count) / m_max_load_factor);
-      while(float(b) * m_max_load_factor < float(element_count))
+      const size_type max_count = priv_max_count();
+      //Use double to be able to support big integers
+      const double d = double(element_count) / double(m_max_load_factor);
+      if(d >= double(max_count))
+         return max_count;
+      size_type b = size_type(d);
+      if(double(b) < d)
          ++b;
       return b;
    }
 
-   //Allocates and default-constructs `n` buckets.
+   //Allocates and default-constructs `n` usable buckets plus the overhead buckets.
    //bucket_type's default constructor is a no-throw operation.
    bucket_ptr priv_create_buckets(size_type n)
    {
-      bucket_ptr p = this->priv_alloc().allocate(alloc_size_type(n));
+      const size_type len = size_type(n + bucket_overhead);
+      bucket_ptr p = this->priv_alloc().allocate(alloc_size_type(len));
       bucket_type *raw = ::boost::movelib::to_raw_pointer(p);
-      for(size_type i = 0; i != n; ++i){
+      for(size_type i = 0; i != len; ++i){
          ::new(static_cast<void*>(raw + i)) bucket_type();
       }
       return p;
    }
 
-   //Destroys and deallocates `n` buckets. Buckets must be empty.
+   //Destroys and deallocates `n` usable buckets plus the overhead buckets.
+   //Buckets must be empty.
    void priv_destroy_buckets(bucket_ptr p, size_type n)
    {
       if(p){
+         const size_type len = size_type(n + bucket_overhead);
          bucket_type *raw = ::boost::movelib::to_raw_pointer(p);
-         for(size_type i = n; i-- != 0u; ){
+         for(size_type i = len; i-- != 0u; ){
             (raw + i)->~bucket_type();
          }
-         this->priv_alloc().deallocate(p, alloc_size_type(n));
+         this->priv_alloc().deallocate(p, alloc_size_type(len));
       }
    }
 
@@ -516,7 +544,7 @@ class unordered_bucket_manager
       BOOST_ASSERT(new_count != 0u);
       const bucket_ptr nb = this->priv_create_buckets(new_count);
       BOOST_INTRUSIVE_TRY{
-         c.rehash(bucket_traits_type(nb, new_count));
+         c.rehash(bucket_traits_type(nb, size_type(new_count + bucket_overhead)));
       }
       BOOST_INTRUSIVE_CATCH(...){
          this->priv_destroy_buckets(nb, new_count);
