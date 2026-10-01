@@ -305,7 +305,7 @@ class splaytree_algorithms
       std::size_t n = 0;
       while(ret.first != ret.second){
          ++n;
-         ret.first = next_node(ret.first);
+         ret.first = bstree_algo::next_node(ret.first);
       }
       return n;
    }
@@ -416,7 +416,7 @@ class splaytree_algorithms
       node_ptr const r = splay_down(detail::uncast(header), key, comp, &found);
       if(found){
          node_ptr const lb = bstree_algo::lower_bound_loop(NodeTraits::get_left(r), r, key, comp);
-         return std::pair<node_ptr, node_ptr>(lb, lb == r ? priv_next_of_root(header, r) : next_node(lb));
+         return std::pair<node_ptr, node_ptr>(lb, lb == r ? priv_next_of_root(header, r) : bstree_algo::next_node(lb));
       }
       node_ptr const b = priv_bound_from_root(header, r, key, comp);
       return std::pair<node_ptr, node_ptr>(b, b);
