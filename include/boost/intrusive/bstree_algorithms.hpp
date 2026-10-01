@@ -1999,7 +1999,6 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
          }
          else {
             save = NodeTraits::get_right(x);
-            init(x);
             disposer(x);
          }
          x = save;

@@ -3966,6 +3966,7 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
    * `reverse` operations for lists.
    * splay tree algorithms/containers, taking advantage of splaying operations to reduce comparisons for unique keys and insertions with hints.
    * tree iteration primitives and some other operations like `is_header`.
+   * `clear_and_dispose` for tree containers, as nodes are no longer initialized twice in safe and auto-unlink modes.
 
 [endsect]
 
