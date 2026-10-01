@@ -4056,7 +4056,7 @@ class hashtable_impl
       this->priv_equal()  = src.priv_equal();
       rollback.release();
       this->priv_size_count(src.priv_size_count());
-      this->split_count(dst_bucket_count);
+      //split_count is not modified as it depends on this bucket array
       this->priv_set_cache_bucket_num(0u);
       this->priv_erasure_update_cache();
    }
