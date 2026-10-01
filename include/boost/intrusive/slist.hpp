@@ -1457,8 +1457,10 @@ class slist_impl
    template<class Predicate>
    void sort(Predicate p)
    {
-      if (node_traits::get_next(node_traits::get_next(this->get_root_node()))
-         != this->get_root_node()) {
+      //Lists with less than two elements are already sorted
+      const node_ptr first_node = node_traits::get_next(this->get_root_node());
+      const node_ptr end_node   = this->get_end_node();
+      if (first_node != end_node && node_traits::get_next(first_node) != end_node) {
 
          slist_impl carry(this->priv_value_traits());
          detail::array_initializer<slist_impl, 64> counter(this->priv_value_traits());
@@ -1491,6 +1493,11 @@ class slist_impl
          for (int i = 1; i < fill; ++i)
             counter[i].merge(counter[i-1], p, &last_inserted);
          --fill;
+         //merge() sets last_inserted to end() when the merged list is empty
+         //and linear lists can't be traversed from end()
+         BOOST_IF_CONSTEXPR(linear)
+         if(last_inserted == counter[fill].cend())
+            last_inserted = counter[fill].cbefore_begin();
          const_iterator last_element(counter[fill].previous(last_inserted, counter[fill].end()));
          BOOST_IF_CONSTEXPR(constant_time_size){
             this->splice_after( cbefore_begin(), counter[fill], counter[fill].cbefore_begin()

@@ -225,6 +225,45 @@ template < typename ListType, typename ValueContainer >
 void test_slist< ListType, ValueContainer >
    ::test_sort(ValueContainer& values)
 {
+   //Lists with less than two elements
+   {
+      list_type emptylist;
+      emptylist.sort();
+      emptylist.sort(even_odd());
+      BOOST_TEST(emptylist.empty());
+      BOOST_TEST(emptylist.begin() == emptylist.end());
+
+      list_type onelist;
+      onelist.push_front(values[0]);
+      onelist.sort();
+      onelist.sort(even_odd());
+      BOOST_TEST(onelist.size() == 1u);
+      BOOST_TEST(&onelist.front() == &values[0]);
+      BOOST_TEST(++onelist.begin() == onelist.end());
+      //The list is still usable after sorting
+      onelist.push_front(values[1]);
+      onelist.sort();
+      {  int init_values [] = { 1, 2 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, onelist.begin() );  }
+      onelist.clear();
+   }
+   //A power of two number of elements (the last merge of the sort
+   //algorithm merges an empty list)
+   {
+      list_type fourlist(values.begin(), values.begin() + 4);
+      fourlist.reverse();
+      {  int init_values [] = { 4, 3, 2, 1 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, fourlist.begin() );  }
+      fourlist.sort();
+      {  int init_values [] = { 1, 2, 3, 4 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, fourlist.begin() );  }
+      fourlist.sort(even_odd());
+      {  int init_values [] = { 2, 4, 1, 3 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, fourlist.begin() );  }
+      BOOST_TEST(fourlist.size() == 4u);
+      fourlist.clear();
+   }
+
    list_type testlist (values.begin(), values.end());
 
    {  int init_values [] = { 1, 2, 3, 4, 5 };
