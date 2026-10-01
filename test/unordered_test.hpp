@@ -27,6 +27,26 @@ namespace test{
 
 static const std::size_t BucketSize = 8;
 
+//Bucket counts used in tests. fastmod_buckets only supports
+//bucket counts from its prime table, so use values from that table.
+template<class UnorderedType, bool FastMod = UnorderedType::fastmod_buckets>
+struct bucket_sizes
+{
+   static const std::size_t Single = 1u;
+   static const std::size_t Small  = BucketSize/4u;
+   static const std::size_t Normal = BucketSize;
+   static const std::size_t Big    = BucketSize*2u;
+};
+
+template<class UnorderedType>
+struct bucket_sizes<UnorderedType, true>
+{
+   static const std::size_t Single = 3u;
+   static const std::size_t Small  = 3u;
+   static const std::size_t Normal = 7u;
+   static const std::size_t Big    = 17u;
+};
+
 //Hash function with a modifiable seed, used to test full_rehash
 template<class Dummy = void>
 struct seeded_hash_t
@@ -73,12 +93,13 @@ void test_unordered<ContainerDefiner>::test_all (value_cont_type& values)
    typedef typename ContainerDefiner::template container
       <>::type unordered_type;
    const std::size_t ExtraBuckets = unordered_type::bucket_overhead;
+   typedef bucket_sizes<unordered_type> sizes;
 
    typedef typename unordered_type::bucket_traits bucket_traits;
    typedef typename unordered_type::bucket_ptr    bucket_ptr;
 
    {
-      typename unordered_type::bucket_type buckets [BucketSize + ExtraBuckets];
+      typename unordered_type::bucket_type buckets [sizes::Normal + ExtraBuckets];
       unordered_type testset
          (bucket_traits(pointer_traits<bucket_ptr>::pointer_to(buckets[0]), sizeof(buckets)/sizeof(*buckets)));
       testset.insert(values.begin(), values.end());
@@ -96,10 +117,10 @@ void test_unordered<ContainerDefiner>::test_all (value_cont_type& values)
       test::test_maybe_unique_container(testset, values, select_t());
    }
    {
-      value_cont_type vals(BucketSize);
-      for (std::size_t i = 0; i < BucketSize; ++i)
+      value_cont_type vals(sizes::Normal);
+      for (std::size_t i = 0; i < sizes::Normal; ++i)
          (&vals[i])->value_ = (int)i;
-      typename unordered_type::bucket_type buckets[BucketSize + ExtraBuckets];
+      typename unordered_type::bucket_type buckets[sizes::Normal + ExtraBuckets];
       unordered_type testset(bucket_traits(
          pointer_traits<bucket_ptr>::pointer_to(buckets[0]), sizeof(buckets)/sizeof(*buckets)));
       testset.insert(vals.begin(), vals.end());
@@ -123,6 +144,7 @@ void test_unordered<ContainerDefiner>::test_impl()
    typedef typename ContainerDefiner::template container
       <>::type unordered_type;
    const std::size_t ExtraBuckets = unordered_type::bucket_overhead;
+   typedef bucket_sizes<unordered_type> sizes;
 
    typedef typename unordered_type::bucket_traits bucket_traits;
    typedef typename unordered_type::bucket_ptr    bucket_ptr;
@@ -131,7 +153,7 @@ void test_unordered<ContainerDefiner>::test_impl()
    for (std::size_t i = 0u; i < 5u; ++i)
       values[i].value_ = (int)i;
 
-   typename unordered_type::bucket_type buckets[BucketSize + ExtraBuckets];
+   typename unordered_type::bucket_type buckets[sizes::Normal + ExtraBuckets];
    unordered_type testset(bucket_traits(
       pointer_traits<bucket_ptr>::pointer_to(buckets[0]), sizeof(buckets)/sizeof(*buckets)));
 
@@ -153,11 +175,12 @@ void test_unordered<ContainerDefiner>::test_sort(value_cont_type& values)
    typedef typename ContainerDefiner::template container
       <>::type unordered_type;
    const std::size_t ExtraBuckets = unordered_type::bucket_overhead;
+   typedef bucket_sizes<unordered_type> sizes;
 
    typedef typename unordered_type::bucket_traits bucket_traits;
    typedef typename unordered_type::bucket_ptr    bucket_ptr;
 
-   typename unordered_type::bucket_type buckets[BucketSize + ExtraBuckets];
+   typename unordered_type::bucket_type buckets[sizes::Normal + ExtraBuckets];
    unordered_type testset1
       (values.begin(), values.end(), bucket_traits
          (pointer_traits<bucket_ptr>::pointer_to(buckets[0]), sizeof(buckets)/sizeof(*buckets)));
@@ -185,7 +208,8 @@ void test_unordered<ContainerDefiner>::test_insert(value_cont_type& values, deta
    typedef typename unordered_set_type::bucket_ptr bucket_ptr;
 
    const std::size_t ExtraBuckets = unordered_set_type::bucket_overhead;
-   typename unordered_set_type::bucket_type buckets[BucketSize + ExtraBuckets];
+   typedef bucket_sizes<unordered_set_type> sizes;
+   typename unordered_set_type::bucket_type buckets[sizes::Normal + ExtraBuckets];
    const bucket_traits orig_bucket_traits( pointer_traits<bucket_ptr>::pointer_to(buckets[0])
                                          , sizeof(buckets) / sizeof(*buckets));
    unordered_set_type testset(orig_bucket_traits);
@@ -208,10 +232,10 @@ void test_unordered<ContainerDefiner>::test_insert(value_cont_type& values, deta
    BOOST_IF_CONSTEXPR(!unordered_set_type::incremental)
    {
       BOOST_TEST((testset.insert_check(key_of_value()(values[0]), commit_data).second));
-      typename unordered_set_type::bucket_type buckets2[2U + ExtraBuckets];
+      typename unordered_set_type::bucket_type buckets2[sizes::Small + ExtraBuckets];
       //Two rehashes to be compatible with incremental hashing
       testset.rehash(bucket_traits(
-         pointer_traits<bucket_ptr>::pointer_to(buckets2[0]), 2U + ExtraBuckets));
+         pointer_traits<bucket_ptr>::pointer_to(buckets2[0]), sizes::Small + ExtraBuckets));
       testset.insert_commit(values[0], commit_data);
       BOOST_TEST(testset.find(key_of_value()(values[0])) != testset.end());
       testset.erase(key_of_value()(values[0]));
@@ -266,13 +290,14 @@ void test_unordered<ContainerDefiner>::test_insert(value_cont_type& values, deta
    typedef typename ContainerDefiner::template container
       <>::type unordered_type;
    const std::size_t ExtraBuckets = unordered_type::bucket_overhead;
+   typedef bucket_sizes<unordered_type> sizes;
 
    typedef typename unordered_type::bucket_traits bucket_traits;
    typedef typename unordered_type::bucket_ptr bucket_ptr;
    typedef typename unordered_type::iterator iterator;
    typedef typename unordered_type::key_type key_type;
    {
-      typename unordered_type::bucket_type buckets[BucketSize + ExtraBuckets];
+      typename unordered_type::bucket_type buckets[sizes::Normal + ExtraBuckets];
       unordered_type testset(bucket_traits(
          pointer_traits<bucket_ptr>::pointer_to(buckets[0]), sizeof(buckets)/sizeof(*buckets)));
 
@@ -311,7 +336,7 @@ void test_unordered<ContainerDefiner>::test_insert(value_cont_type& values, deta
             BOOST_TEST (testset.empty() == true);
 
             //Now with a single bucket
-            typename unordered_type::bucket_type single_bucket[1u + ExtraBuckets];
+            typename unordered_type::bucket_type single_bucket[sizes::Single + ExtraBuckets];
             unordered_type testset2(bucket_traits(
                pointer_traits<bucket_ptr>::pointer_to(single_bucket[0]), sizeof(single_bucket)/sizeof(*single_bucket)));
             testset2.insert(&values[0], &values[0] + values.size());
@@ -354,7 +379,7 @@ void test_unordered<ContainerDefiner>::test_insert(value_cont_type& values, deta
             BOOST_TEST (testset.empty() == true);
 
             //Now with a single bucket
-            typename unordered_type::bucket_type single_bucket[1u + ExtraBuckets];
+            typename unordered_type::bucket_type single_bucket[sizes::Single + ExtraBuckets];
             unordered_type testset2(bucket_traits(
                pointer_traits<bucket_ptr>::pointer_to(single_bucket[0]), sizeof(single_bucket)/sizeof(*single_bucket)));
             testset2.insert(&values[0], &values[0] + values.size());
@@ -370,7 +395,7 @@ void test_unordered<ContainerDefiner>::test_insert(value_cont_type& values, deta
          //Now erase just one per loop
          const int random_init[] = { 3, 2, 4, 1, 5, 2, 2 };
          const std::size_t random_size = sizeof(random_init)/sizeof(random_init[0]);
-         typename unordered_type::bucket_type single_bucket[1u + ExtraBuckets];
+         typename unordered_type::bucket_type single_bucket[sizes::Single + ExtraBuckets];
          for(std::size_t i = 0u, max = random_size; i != max; ++i){
             value_cont_type data (random_size);
             for (std::size_t j = 0; j < random_size; ++j)
@@ -385,7 +410,7 @@ void test_unordered<ContainerDefiner>::test_insert(value_cont_type& values, deta
    }
    {
       const std::size_t LoadFactor    = 3;
-      const std::size_t NumIterations = BucketSize*LoadFactor;
+      const std::size_t NumIterations = sizes::Normal*LoadFactor;
       value_cont_type random_init(NumIterations);//Preserve memory
 
       //Initialize values
@@ -393,7 +418,7 @@ void test_unordered<ContainerDefiner>::test_insert(value_cont_type& values, deta
          random_init[i].value_ = (int)i*2;
       }
 
-      typename unordered_type::bucket_type buckets[BucketSize + ExtraBuckets];
+      typename unordered_type::bucket_type buckets[sizes::Normal + ExtraBuckets];
       bucket_traits btraits(pointer_traits<bucket_ptr>::pointer_to(buckets[0]), sizeof(buckets)/sizeof(*buckets));
 
       for(std::size_t initial_pos = 0; initial_pos != (NumIterations+1u); ++initial_pos){
@@ -459,12 +484,13 @@ void test_unordered<ContainerDefiner>::test_swap(value_cont_type& values)
    typedef typename ContainerDefiner::template container
       <>::type unordered_type;
    const std::size_t ExtraBuckets = unordered_type::bucket_overhead;
+   typedef bucket_sizes<unordered_type> sizes;
 
    typedef typename unordered_type::bucket_traits bucket_traits;
    typedef typename unordered_type::bucket_ptr    bucket_ptr;
-   typename unordered_type::bucket_type buckets[BucketSize + ExtraBuckets];
+   typename unordered_type::bucket_type buckets[sizes::Normal + ExtraBuckets];
 
-   typename unordered_type::bucket_type buckets2[BucketSize + ExtraBuckets];
+   typename unordered_type::bucket_type buckets2[sizes::Normal + ExtraBuckets];
    unordered_type testset1(&values[0], &values[0] + 2,
       bucket_traits(pointer_traits<bucket_ptr>::pointer_to(buckets[0]), sizeof(buckets)/sizeof(*buckets)));
    unordered_type testset2(bucket_traits(
@@ -508,12 +534,13 @@ void test_unordered<ContainerDefiner>::test_rehash(value_cont_type& values, deta
       <>::type unordered_type;
 
    const std::size_t ExtraBuckets = unordered_type::bucket_overhead;
+   typedef bucket_sizes<unordered_type> sizes;
 
    typedef typename unordered_type::bucket_traits bucket_traits;
    typedef typename unordered_type::bucket_ptr bucket_ptr;
    //Build a uset
-   typename unordered_type::bucket_type buckets1[BucketSize + ExtraBuckets];
-   typename unordered_type::bucket_type buckets2[BucketSize*2u + ExtraBuckets];
+   typename unordered_type::bucket_type buckets1[sizes::Normal + ExtraBuckets];
+   typename unordered_type::bucket_type buckets2[sizes::Big + ExtraBuckets];
    unordered_type testset1(&values[0], &values[0] + values.size(),
       bucket_traits(pointer_traits<bucket_ptr>::
          pointer_to(buckets1[0]), sizeof(buckets1)/sizeof(*buckets1)));
@@ -647,13 +674,14 @@ void test_unordered<ContainerDefiner>::test_rehash(value_cont_type& values, deta
    typedef typename ContainerDefiner::template container
       <>::type unordered_type;
    const std::size_t ExtraBuckets = unordered_type::bucket_overhead;
+   typedef bucket_sizes<unordered_type> sizes;
 
    typedef typename unordered_type::bucket_traits bucket_traits;
    typedef typename unordered_type::bucket_ptr    bucket_ptr;
 
-   typename unordered_type::bucket_type buckets1[BucketSize + ExtraBuckets];
-   typename unordered_type::bucket_type buckets2 [BucketSize / 4 + ExtraBuckets];
-   typename unordered_type::bucket_type buckets3[BucketSize*2 + ExtraBuckets];
+   typename unordered_type::bucket_type buckets1[sizes::Normal + ExtraBuckets];
+   typename unordered_type::bucket_type buckets2 [sizes::Small + ExtraBuckets];
+   typename unordered_type::bucket_type buckets3[sizes::Big + ExtraBuckets];
 
    unordered_type testset1(&values[0], &values[0] + 6, bucket_traits(
       pointer_traits<bucket_ptr>::
@@ -662,9 +690,15 @@ void test_unordered<ContainerDefiner>::test_rehash(value_cont_type& values, deta
       TEST_INTRUSIVE_SEQUENCE_MAYBEUNIQUE( init_values, testset1 );  }
 
    testset1.rehash(bucket_traits(
-      pointer_traits<bucket_ptr>::pointer_to(buckets2[0]), BucketSize/4 + ExtraBuckets));
-   {  int init_values [] = { 4, 2, 2, 5, 3, 1 };
-      TEST_INTRUSIVE_SEQUENCE_MAYBEUNIQUE( init_values, testset1 );  }
+      pointer_traits<bucket_ptr>::pointer_to(buckets2[0]), sizes::Small + ExtraBuckets));
+   BOOST_IF_CONSTEXPR(unordered_type::fastmod_buckets){
+      int init_values [] = { 3, 4, 1, 5, 2, 2 };
+      TEST_INTRUSIVE_SEQUENCE_MAYBEUNIQUE( init_values, testset1 );
+   }
+   else{
+      int init_values [] = { 4, 2, 2, 5, 3, 1 };
+      TEST_INTRUSIVE_SEQUENCE_MAYBEUNIQUE( init_values, testset1 );
+   }
 
    testset1.rehash(bucket_traits(
       pointer_traits<bucket_ptr>::pointer_to(buckets3[0]), sizeof(buckets3) / sizeof(*buckets3)));
@@ -673,9 +707,15 @@ void test_unordered<ContainerDefiner>::test_rehash(value_cont_type& values, deta
 
    //Now rehash reducing the buckets
    testset1.rehash(bucket_traits(
-      pointer_traits<bucket_ptr>::pointer_to(buckets3[0]), BucketSize / 4 + ExtraBuckets));
-   {  int init_values [] = { 4, 2, 2, 5, 3, 1 };
-      TEST_INTRUSIVE_SEQUENCE_MAYBEUNIQUE( init_values, testset1 );  }
+      pointer_traits<bucket_ptr>::pointer_to(buckets3[0]), sizes::Small + ExtraBuckets));
+   BOOST_IF_CONSTEXPR(unordered_type::fastmod_buckets){
+      int init_values [] = { 3, 4, 1, 5, 2, 2 };
+      TEST_INTRUSIVE_SEQUENCE_MAYBEUNIQUE( init_values, testset1 );
+   }
+   else{
+      int init_values [] = { 4, 2, 2, 5, 3, 1 };
+      TEST_INTRUSIVE_SEQUENCE_MAYBEUNIQUE( init_values, testset1 );
+   }
 
    //Now rehash increasing the buckets
    testset1.rehash(bucket_traits(
@@ -710,6 +750,7 @@ void test_unordered<ContainerDefiner>::test_rehash_groups(detail::true_)   //mul
    typedef typename unordered_type::bucket_ptr     bucket_ptr;
    typedef typename unordered_type::key_of_value   key_of_value;
    const std::size_t ExtraBuckets = unordered_type::bucket_overhead;
+   typedef bucket_sizes<unordered_type> sizes;
 
    //A group of more than two equivalent elements is needed to detect broken groups
    value_cont_type values(5);
@@ -721,8 +762,8 @@ void test_unordered<ContainerDefiner>::test_rehash_groups(detail::true_)   //mul
    cmp_val.value_ = 9;
    seeded_hash::seed = 0u;
 
-   typename unordered_type::bucket_type buckets1[BucketSize + ExtraBuckets];
-   typename unordered_type::bucket_type buckets2[BucketSize*2 + ExtraBuckets];
+   typename unordered_type::bucket_type buckets1[sizes::Normal + ExtraBuckets];
+   typename unordered_type::bucket_type buckets2[sizes::Big + ExtraBuckets];
    unordered_type testset(values.begin(), values.end(), bucket_traits(
       pointer_traits<bucket_ptr>::pointer_to(buckets1[0]), sizeof(buckets1)/sizeof(*buckets1)));
 
@@ -771,6 +812,7 @@ bool test_unordered<ContainerDefiner>::test_equal
    typedef typename unordered_type::bucket_traits  bucket_traits;
    typedef typename unordered_type::bucket_ptr     bucket_ptr;
    const std::size_t ExtraBuckets = unordered_type::bucket_overhead;
+   typedef bucket_sizes<unordered_type> sizes;
 
    value_cont_type xvalues(xn);
    for (std::size_t i = 0u; i < xn; ++i)
@@ -780,8 +822,8 @@ bool test_unordered<ContainerDefiner>::test_equal
       (&yvalues[i])->value_ = yv[i];
 
    //Use different bucket counts so that iteration order can differ
-   typename unordered_type::bucket_type xbuckets[BucketSize + ExtraBuckets];
-   typename unordered_type::bucket_type ybuckets[BucketSize*2u + ExtraBuckets];
+   typename unordered_type::bucket_type xbuckets[sizes::Normal + ExtraBuckets];
+   typename unordered_type::bucket_type ybuckets[sizes::Big + ExtraBuckets];
    unordered_type x(xvalues.begin(), xvalues.end(), bucket_traits(
       pointer_traits<bucket_ptr>::pointer_to(xbuckets[0]), sizeof(xbuckets)/sizeof(*xbuckets)));
    unordered_type y(yvalues.begin(), yvalues.end(), bucket_traits(
@@ -800,16 +842,18 @@ void test_unordered<ContainerDefiner>::test_equal()
 {
    typedef typename ContainerDefiner::template container
       <>::type unordered_type;
+   typedef bucket_sizes<unordered_type> sizes;
    const bool is_multikey = boost::intrusive::test::is_multikey_true<unordered_type>::value;
+   const int N = int(sizes::Normal);
 
    const int empty[] = { 0 };
    const int a[] = { 1, 2, 3 };
    const int b[] = { 3, 1, 2 };
    const int c[] = { 1, 3, 4 };
    const int d[] = { 1, 2, 3, 9 };
-   //Same values, first element of the next group (9) is next to the last element of the previous one (1)
-   const int e[] = { 1, 9, 17 };
-   const int f[] = { 1, 9, 18 };
+   //Values in the same bucket of x
+   const int e[] = { 1, 1 + N, 1 + 2*N };
+   const int f[] = { 1, 1 + N, 2 + 2*N };
 
    BOOST_TEST(( test_equal(empty, 0u, empty, 0u)));
    BOOST_TEST((!test_equal(a, 3u, empty, 0u)));
@@ -849,8 +893,9 @@ void test_unordered<ContainerDefiner>::test_find(value_cont_type& values)
    typedef typename unordered_type::key_of_value   key_of_value;
    const bool is_multikey = boost::intrusive::test::is_multikey_true<unordered_type>::value;
    const std::size_t ExtraBuckets = unordered_type::bucket_overhead;
+   typedef bucket_sizes<unordered_type> sizes;
 
-   typename unordered_type::bucket_type buckets[BucketSize + ExtraBuckets];
+   typename unordered_type::bucket_type buckets[sizes::Normal + ExtraBuckets];
    unordered_type testset(values.begin(), values.end(), bucket_traits(
       pointer_traits<bucket_ptr>::pointer_to(buckets[0]), sizeof(buckets)/sizeof(*buckets)));
 
@@ -882,6 +927,7 @@ void test_unordered<ContainerDefiner>::test_clone(value_cont_type& values)
    typedef typename ContainerDefiner::template container
       <>::type unordered_type;
    const std::size_t ExtraBuckets = unordered_type::bucket_overhead;
+   typedef bucket_sizes<unordered_type> sizes;
 
    typedef typename unordered_type::value_type value_type;
    typedef std::multiset<value_type> std_multiset_t;
@@ -891,14 +937,17 @@ void test_unordered<ContainerDefiner>::test_clone(value_cont_type& values)
 
    {
       //Test with equal bucket arrays
-      typename unordered_type::bucket_type buckets1[BucketSize + ExtraBuckets];
-      typename unordered_type::bucket_type buckets2[BucketSize + ExtraBuckets];
+      typename unordered_type::bucket_type buckets1[sizes::Normal + ExtraBuckets];
+      typename unordered_type::bucket_type buckets2[sizes::Normal + ExtraBuckets];
       unordered_type testset1 (values.begin(), values.end(), bucket_traits(
          pointer_traits<bucket_ptr>::pointer_to(buckets1[0]), sizeof(buckets1)/sizeof(*buckets1)));
       unordered_type testset2 (bucket_traits(
          pointer_traits<bucket_ptr>::pointer_to(buckets2[0]), sizeof(buckets2)/sizeof(*buckets2)));
+      //clone_from must not modify split_count as the bucket array of the target does not change
+      const typename unordered_type::size_type split = testset2.split_count();
 
       testset2.clone_from(testset1, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST(testset2.split_count() == split);
       BOOST_TEST(testset1 == testset2);
       //Ordering is not guarantee in the cloning so insert data in a set and test
       std_multiset_t src(testset1.begin(), testset1.end());
@@ -908,6 +957,7 @@ void test_unordered<ContainerDefiner>::test_clone(value_cont_type& values)
       BOOST_TEST (testset2.empty());
 
       testset2.clone_from(boost::move(testset1), test::new_nonconst_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST(testset2.split_count() == split);
       BOOST_TEST(testset1 == testset2);
       //Ordering is not guarantee in the cloning so insert data in a set and test
       std_multiset_t(testset1.begin(), testset1.end()).swap(src);
@@ -918,14 +968,17 @@ void test_unordered<ContainerDefiner>::test_clone(value_cont_type& values)
    }
    {
       //Test with bigger source bucket arrays
-      typename unordered_type::bucket_type buckets1[BucketSize*2u + ExtraBuckets];
-      typename unordered_type::bucket_type buckets2[BucketSize + ExtraBuckets];
+      typename unordered_type::bucket_type buckets1[sizes::Big + ExtraBuckets];
+      typename unordered_type::bucket_type buckets2[sizes::Normal + ExtraBuckets];
       unordered_type testset1 (values.begin(), values.end(), bucket_traits(
          pointer_traits<bucket_ptr>::pointer_to(buckets1[0]), sizeof(buckets1)/sizeof(*buckets1)));
       unordered_type testset2 (bucket_traits(
          pointer_traits<bucket_ptr>::pointer_to(buckets2[0]), sizeof(buckets2)/sizeof(*buckets2)));
+      //clone_from must not modify split_count as the bucket array of the target does not change
+      const typename unordered_type::size_type split = testset2.split_count();
 
       testset2.clone_from(testset1, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST(testset2.split_count() == split);
       BOOST_TEST(testset1 == testset2);
       //Ordering is not guarantee in the cloning so insert data in a set and test
       std_multiset_t src(testset1.begin(), testset1.end());
@@ -935,6 +988,7 @@ void test_unordered<ContainerDefiner>::test_clone(value_cont_type& values)
       BOOST_TEST (testset2.empty());
 
       testset2.clone_from(boost::move(testset1), test::new_nonconst_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST(testset2.split_count() == split);
       BOOST_TEST(testset1 == testset2);
       //Ordering is not guarantee in the cloning so insert data in a set and test
       std_multiset_t(testset1.begin(), testset1.end()).swap(src);
@@ -945,14 +999,17 @@ void test_unordered<ContainerDefiner>::test_clone(value_cont_type& values)
    }
    {
       //Test with smaller source bucket arrays
-      typename unordered_type::bucket_type buckets1[BucketSize + ExtraBuckets];
-      typename unordered_type::bucket_type buckets2[BucketSize*2u + ExtraBuckets];
+      typename unordered_type::bucket_type buckets1[sizes::Normal + ExtraBuckets];
+      typename unordered_type::bucket_type buckets2[sizes::Big + ExtraBuckets];
       unordered_type testset1 (values.begin(), values.end(), bucket_traits(
          pointer_traits<bucket_ptr>::pointer_to(buckets1[0]), sizeof(buckets1)/sizeof(*buckets1)));
       unordered_type testset2 (bucket_traits(
          pointer_traits<bucket_ptr>::pointer_to(buckets2[0]), sizeof(buckets2)/sizeof(*buckets2)));
+      //clone_from must not modify split_count as the bucket array of the target does not change
+      const typename unordered_type::size_type split = testset2.split_count();
 
       testset2.clone_from(testset1, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST(testset2.split_count() == split);
       BOOST_TEST(testset1 == testset2);
       //Ordering is not guaranteed in the cloning so insert data in a set and test
       std_multiset_t src(testset1.begin(), testset1.end());
@@ -962,6 +1019,7 @@ void test_unordered<ContainerDefiner>::test_clone(value_cont_type& values)
       BOOST_TEST (testset2.empty());
 
       testset2.clone_from(boost::move(testset1), test::new_nonconst_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST(testset2.split_count() == split);
       BOOST_TEST(testset1 == testset2);
       //Ordering is not guaranteed in the cloning so insert data in a set and test
       std_multiset_t(testset1.begin(), testset1.end()).swap(src);

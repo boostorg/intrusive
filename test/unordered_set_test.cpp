@@ -26,15 +26,13 @@
 using namespace boost::intrusive;
 
 template < class ValueTraits, bool ConstantTimeSize, bool CacheBegin, bool CompareHash
-         , bool Incremental, bool Map, bool DefaultHolder, bool LinearBuckets >
+         , bool Incremental, bool Map, bool DefaultHolder, bool LinearBuckets, bool FastMod>
 struct rebinder
 {
    typedef unordered_rebinder_common<ValueTraits, DefaultHolder, Map> common_t;
    typedef typename ValueContainer< typename ValueTraits::value_type >::type value_cont_type;
 
-   template < class Option1 =void
-            , class Option2 =void
-            >
+   template < class Option1 =void >
    struct container
    {
       typedef unordered_set
@@ -45,11 +43,11 @@ struct rebinder
          , compare_hash<CompareHash>
          , incremental<Incremental>
          , linear_buckets<LinearBuckets>
+         , fastmod_buckets<FastMod>
          , typename common_t::holder_opt
          , typename common_t::key_of_value_opt
          , size_type<unsigned short>
          , Option1
-         , Option2
          > type;
       BOOST_INTRUSIVE_STATIC_ASSERT((key_type_tester<typename common_t::key_of_value_opt, type>::value));
       BOOST_INTRUSIVE_STATIC_ASSERT((!boost::intrusive::test::is_multikey_true<type>::value));
@@ -89,7 +87,8 @@ class test_main_template<VoidPointer, ConstantTimeSize, DefaultHolder, Map, Base
       test::test_unordered
          < //cache_begin, compare_hash, incremental
            rebinder< base_hook_t, ConstantTimeSize, ConstantTimeSize
-                   , !ConstantTimeSize, !!ConstantTimeSize, Map, DefaultHolder, LinearBuckets>
+                   , !ConstantTimeSize, !!ConstantTimeSize, Map, DefaultHolder
+                   , LinearBuckets, !LinearBuckets && !ConstantTimeSize>
          >::test_all(data);
    }
 };
@@ -116,7 +115,8 @@ class test_main_template<VoidPointer, ConstantTimeSize, DefaultHolder, Map, Memb
          >::type member_hook_t;
       test::test_unordered
          < //cache_begin, compare_hash, incremental
-           rebinder<member_hook_t, ConstantTimeSize, false, !ConstantTimeSize, false, Map, DefaultHolder, LinearBuckets>
+           rebinder<member_hook_t, ConstantTimeSize, false, !ConstantTimeSize, false, Map, DefaultHolder
+                  , LinearBuckets, !LinearBuckets && !ConstantTimeSize>
          >::test_all(data);
    }
 };
@@ -139,7 +139,8 @@ class test_main_template<VoidPointer, ConstantTimeSize, DefaultHolder, Map, NonM
       //nonmember
       test::test_unordered
          < //cache_begin, compare_hash, incremental
-           rebinder<typename testval_traits_t::nonhook_value_traits, ConstantTimeSize, false, false, false, Map, DefaultHolder, LinearBuckets>
+           rebinder<typename testval_traits_t::nonhook_value_traits, ConstantTimeSize, false, false, false, Map, DefaultHolder
+                  , LinearBuckets, !LinearBuckets && !ConstantTimeSize>
          >::test_all(data);
    }
 };

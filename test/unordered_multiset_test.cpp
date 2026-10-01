@@ -47,7 +47,7 @@ struct rebinder
          , compare_hash<CompareHash>
          , incremental<Incremental>
          , linear_buckets<LinearBuckets>
-//         , fastmod_buckets<FastMod>
+         , fastmod_buckets<FastMod>
          , typename common_t::holder_opt
          , typename common_t::key_of_value_opt
          , Option1
