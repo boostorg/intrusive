@@ -654,6 +654,16 @@ void test_associative_container_invariants(Container & c, Data & d)
       std::pair<const_iterator, const_iterator> er = c.equal_range(key_of_value()(*di));
       BOOST_TEST( cil == er.first );
       BOOST_TEST( ciu == er.second );
+      const_iterator const ci_comp  = c.find(key_of_value()(*di), c.key_comp());
+      const_iterator const cil_comp = c.lower_bound(key_of_value()(*di), c.key_comp());
+      const_iterator const ciu_comp = c.upper_bound(key_of_value()(*di), c.key_comp());
+      std::pair<const_iterator, const_iterator> const er_comp = c.equal_range(key_of_value()(*di), c.key_comp());
+      BOOST_TEST( ci_comp == ci );
+      BOOST_TEST( cil_comp == cil );
+      BOOST_TEST( ciu_comp == ciu );
+      BOOST_TEST( er_comp.first == er.first );
+      BOOST_TEST( er_comp.second == er.second );
+      BOOST_TEST( c.count(key_of_value()(*di), c.key_comp()) == c.count(key_of_value()(*di)) );
       if(ciu != c.end()){
          BOOST_TEST( c.value_comp()(*cil, *ciu) );
          BOOST_TEST( c.key_comp()(key_of_value()(*cil), key_of_value()(*ciu)) );
