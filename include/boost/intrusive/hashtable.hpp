@@ -3772,25 +3772,26 @@ class hashtable_impl
    friend bool operator==(const hashtable_impl &x, const hashtable_impl &y)
    {
       //Taken from N3068
+      //Sizes are compared at the end if they are not constant time,
+      //as y might hold additional elements not found in x.
       BOOST_IF_CONSTEXPR(constant_time_size)
       if(x.size() != y.size()){
          return false;
       }
 
-      if (boost::intrusive::iterator_udistance(x.begin(), x.end()) != x.size())
-         return false;
-         
-      for (const_iterator ix = x.cbegin(), ex = x.cend(); ix != ex; ++ix){
+      size_type x_size = 0u;
+      for (const_iterator ix = x.cbegin(), ex = x.cend(); ix != ex;){
          std::pair<const_iterator, const_iterator> eqx(x.equal_range(key_of_value()(*ix))),
                                                    eqy(y.equal_range(key_of_value()(*ix)));
-         if (boost::intrusive::iterator_distance(eqx.first, eqx.second) !=
-             boost::intrusive::iterator_distance(eqy.first, eqy.second) ||
+         const std::size_t x_group_size = boost::intrusive::iterator_udistance(eqx.first, eqx.second);
+         if (x_group_size != boost::intrusive::iterator_udistance(eqy.first, eqy.second) ||
                !(priv_algo_is_permutation)(eqx.first, eqx.second, eqy.first)      ){
             return false;
          }
+         x_size += size_type(x_group_size);
          ix = eqx.second;
       }
-      return true;
+      return constant_time_size || x_size == y.size();
    }
 
    friend bool operator!=(const hashtable_impl &x, const hashtable_impl &y)

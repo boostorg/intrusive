@@ -61,6 +61,8 @@ struct test_unordered
    static void test_rehash_groups(detail::true_);
    static void test_rehash_groups(detail::false_);
    static void test_find(value_cont_type& values);
+   static bool test_equal(const int *xv, std::size_t xn, const int *yv, std::size_t yn);
+   static void test_equal();
    static void test_impl();
    static void test_clone(value_cont_type& values);
 };
@@ -109,6 +111,7 @@ void test_unordered<ContainerDefiner>::test_all (value_cont_type& values)
    test_rehash(values, detail::bool_<unordered_type::incremental>());
    test_rehash_groups(detail::bool_<boost::intrusive::test::is_multikey_true<unordered_type>::value>());
    test_find(values);
+   test_equal();
    test_impl();
    test_clone(values);
 }
@@ -756,6 +759,82 @@ void test_unordered<ContainerDefiner>::test_rehash_groups(detail::true_)   //mul
 template<class ContainerDefiner>
 void test_unordered<ContainerDefiner>::test_rehash_groups(detail::false_)   //not multikey
 {}
+
+//Builds two containers from the "xv" and "yv" arrays, compares them
+//and checks that operator== and operator!= are consistent and symmetric
+template<class ContainerDefiner>
+bool test_unordered<ContainerDefiner>::test_equal
+   (const int *xv, std::size_t xn, const int *yv, std::size_t yn)
+{
+   typedef typename ContainerDefiner::template container
+      <>::type unordered_type;
+   typedef typename unordered_type::bucket_traits  bucket_traits;
+   typedef typename unordered_type::bucket_ptr     bucket_ptr;
+   const std::size_t ExtraBuckets = unordered_type::bucket_overhead;
+
+   value_cont_type xvalues(xn);
+   for (std::size_t i = 0u; i < xn; ++i)
+      (&xvalues[i])->value_ = xv[i];
+   value_cont_type yvalues(yn);
+   for (std::size_t i = 0u; i < yn; ++i)
+      (&yvalues[i])->value_ = yv[i];
+
+   //Use different bucket counts so that iteration order can differ
+   typename unordered_type::bucket_type xbuckets[BucketSize + ExtraBuckets];
+   typename unordered_type::bucket_type ybuckets[BucketSize*2u + ExtraBuckets];
+   unordered_type x(xvalues.begin(), xvalues.end(), bucket_traits(
+      pointer_traits<bucket_ptr>::pointer_to(xbuckets[0]), sizeof(xbuckets)/sizeof(*xbuckets)));
+   unordered_type y(yvalues.begin(), yvalues.end(), bucket_traits(
+      pointer_traits<bucket_ptr>::pointer_to(ybuckets[0]), sizeof(ybuckets)/sizeof(*ybuckets)));
+
+   const bool equal = x == y;
+   BOOST_TEST(equal == (y == x));
+   BOOST_TEST(equal == !(x != y));
+   BOOST_TEST(equal == !(y != x));
+   return equal;
+}
+
+//test: operator==, operator!=
+template<class ContainerDefiner>
+void test_unordered<ContainerDefiner>::test_equal()
+{
+   typedef typename ContainerDefiner::template container
+      <>::type unordered_type;
+   const bool is_multikey = boost::intrusive::test::is_multikey_true<unordered_type>::value;
+
+   const int empty[] = { 0 };
+   const int a[] = { 1, 2, 3 };
+   const int b[] = { 3, 1, 2 };
+   const int c[] = { 1, 3, 4 };
+   const int d[] = { 1, 2, 3, 9 };
+   //Same values, first element of the next group (9) is next to the last element of the previous one (1)
+   const int e[] = { 1, 9, 17 };
+   const int f[] = { 1, 9, 18 };
+
+   BOOST_TEST(( test_equal(empty, 0u, empty, 0u)));
+   BOOST_TEST((!test_equal(a, 3u, empty, 0u)));
+   BOOST_TEST(( test_equal(a, 3u, a, 3u)));
+   BOOST_TEST(( test_equal(a, 3u, b, 3u)));
+   BOOST_TEST((!test_equal(a, 3u, c, 3u)));
+   BOOST_TEST((!test_equal(a, 3u, d, 4u)));
+   BOOST_TEST((!test_equal(a, 2u, a, 3u)));
+   BOOST_TEST(( test_equal(e, 3u, e, 3u)));
+   BOOST_TEST((!test_equal(e, 3u, f, 3u)));
+
+   BOOST_IF_CONSTEXPR(is_multikey){
+      const int g[] = { 2, 2, 3 };
+      const int h[] = { 3, 2, 2 };
+      const int i[] = { 2, 3, 3 };
+      const int j[] = { 2, 2, 2, 3, 10, 10 };
+      const int k[] = { 10, 2, 3, 2, 10, 2 };
+      const int l[] = { 10, 2, 3, 2, 3, 2 };
+      BOOST_TEST(( test_equal(g, 3u, h, 3u)));
+      BOOST_TEST((!test_equal(g, 3u, i, 3u)));
+      BOOST_TEST((!test_equal(g, 3u, j, 6u)));
+      BOOST_TEST(( test_equal(j, 6u, k, 6u)));
+      BOOST_TEST((!test_equal(j, 6u, l, 6u)));
+   }
+}
 
 //test: find, equal_range (lower_bound, upper_bound):
 template<class ContainerDefiner>

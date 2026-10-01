@@ -386,18 +386,21 @@ class unordered_set_impl
 
    friend bool operator==(const unordered_set_impl &x, const unordered_set_impl &y)
    {
+      //Sizes are compared at the end if they are not constant time,
+      //as y might hold additional elements not found in x.
       BOOST_IF_CONSTEXPR(table_type::constant_time_size)
       if(x.size() != y.size()){
          return false;
       }
 
       //Find each element of x in y
-      for (const_iterator ix = x.cbegin(), ex = x.cend(), ey = y.cend(); ix != ex; ++ix){
+      size_type x_size = 0u;
+      for (const_iterator ix = x.cbegin(), ex = x.cend(), ey = y.cend(); ix != ex; ++ix, ++x_size){
          const_iterator iy = y.find(key_of_value()(*ix));
          if (iy == ey || !(*ix == *iy))
             return false;
       }
-      return true;
+      return table_type::constant_time_size || x_size == y.size();
    }
 
    friend bool operator!=(const unordered_set_impl &x, const unordered_set_impl &y)
