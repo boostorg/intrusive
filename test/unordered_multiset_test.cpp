@@ -120,7 +120,7 @@ class test_main_template<VoidPointer, ConstantTimeSize, DefaultHolder, Map, Memb
       test::test_unordered
          < //cache_begin, compare_hash, incremental
            rebinder <member_hook_t, ConstantTimeSize, false
-                  , !ConstantTimeSize, false, !ConstantTimeSize, DefaultHolder
+                  , !ConstantTimeSize, false, Map, DefaultHolder
                   , LinearBuckets, LinearBuckets && !ConstantTimeSize>
          >::test_all(data);
    }
@@ -153,26 +153,21 @@ class test_main_template<VoidPointer, ConstantTimeSize, DefaultHolder, Map, NonM
 
 int main()
 {
-   //VoidPointer x ConstantTimeSize x Map x DefaultHolder
+   //Combinations: VoidPointer x ConstantTimeSize x DefaultHolder x Map x HookType x LinearBuckets
+   //Minimize them selecting different combinations for raw and smart pointers
 
    //void pointer
-   test_main_template<void*, false, false, false, Base, false>::execute();
-   test_main_template<void*,  true,  true, false, Member, false>::execute();
-   test_main_template<void*, false, false,  true, NonMember, false>::execute();
-   test_main_template<void*,  true,  true, false, Member, true>::execute();
-   test_main_template<void*, false, false,  true, NonMember, true>::execute();
-   test_main_template<void*,  true,  true, true, Base, true>::execute();
+   test_main_template<void*, false, false,  true, Base, true>::execute();
+   test_main_template<void*,  true,  true, false, Base, false>::execute();
+   test_main_template<void*,  true, false,  true, Member, false>::execute();
+   test_main_template<void*, false,  true, false, NonMember, true>::execute();
 
    //smart_ptr
-   test_main_template<smart_ptr<void>, false, false, false, Member, false>::execute();
-   test_main_template<smart_ptr<void>, false,  true,  true, NonMember, false>::execute();
-   test_main_template<smart_ptr<void>,  true,  true,  true, Base, true>::execute();
+   test_main_template<smart_ptr<void>, false, false, false, Member, true>::execute();
+   test_main_template<smart_ptr<void>,  true,  true,  true, NonMember, false>::execute();
 
-   ////bounded_ptr (bool ConstantTimeSize, bool Map)
-   //test_main_template_bptr< false, false >::execute();
-   //test_main_template_bptr< false,  true >::execute();
-   //test_main_template_bptr<  true, false >::execute();
-   //test_main_template_bptr<  true,  true >::execute();
+   //bounded_ptr is not supported
+
 
    return boost::report_errors();
 }
