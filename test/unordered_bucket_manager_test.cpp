@@ -57,7 +57,27 @@ struct int_item_equal
 
 struct delete_disposer
 {
-   void operator()(item *p) const {  delete p;  }
+   template<class T>
+   void operator()(T *p) const {  delete p;  }
+};
+
+//Value whose hook stores the hash and groups equivalent elements, as both
+//options change how a rehash relinks the nodes into the new bucket array
+struct grouped_item
+   : public bi::unordered_set_base_hook< bi::store_hash<true>, bi::optimize_multikey<true> >
+{
+   int key_;
+
+   explicit grouped_item(int k) : key_(k) {}
+
+   friend bool operator==(const grouped_item &a, const grouped_item &b)
+   {  return a.key_ == b.key_;  }
+};
+
+struct grouped_item_hash
+{
+   std::size_t operator()(const grouped_item &i) const
+   {  return std::size_t(i.key_) * 2654435761u;  }
 };
 
 template<class SizeType>
@@ -108,6 +128,7 @@ struct manager_layout
    uset_t::bucket_ptr   buckets_;
    uset_t::size_type    bucket_count_;
    float                max_load_factor_;
+   uset_t::size_type    max_elements_;
 };
 
 BOOST_STATIC_ASSERT((sizeof(uset_mgr_t) == sizeof(manager_layout)));
@@ -193,47 +214,72 @@ bool is_valid_bucket_count(typename Cont::size_type n)
       return Cont::suggested_lower_bucket_count(n) == n;
 }
 
-//Grows, rehashes and shrinks a container with the given options. The
-//manager's bucket count must be the container's bucket count (without the
-//additional sentinel bucket of linear_buckets) and a valid bucket count.
+//Checks that every key in [0, n) is found `count` times, or only odd keys
+//when `odd_only` is true (even keys are then not found)
+template<class Cont>
+void check_keys(const Cont &c, int n, typename Cont::size_type count, bool odd_only)
+{
+   typedef typename Cont::value_type   value_type;
+   for(int i = 0; i != n; ++i){
+      const bool present = !odd_only || (i % 2 != 0);
+      BOOST_TEST(c.count(value_type(i)) == (present ? count : 0u));
+   }
+}
+
+//Grows, rehashes and shrinks a multiset with the given options. Each key is
+//inserted twice so that groups of equivalent elements are relinked by every
+//rehash. The manager's bucket count must be the container's bucket count
+//(without the additional sentinel bucket of linear_buckets) and a valid
+//bucket count.
 template<class Cont>
 void test_bucket_options(const char *name)
 {
    typedef bi::unordered_bucket_manager<Cont>   mgr_t;
    typedef typename Cont::size_type             size_type;
+   typedef typename Cont::value_type            value_type;
 
-   const int n = 2000;
+   const int n = 1000;
    mgr_t  mgr;
    Cont   c(mgr.traits());
    check_sync(mgr, c);
    BOOST_TEST(is_valid_bucket_count<Cont>(mgr.bucket_count()));
 
-   for(int i = 0; i != n; ++i){
-      mgr.reserve_additional(c);
-      c.insert(*new item(i));
-      check_sync(mgr, c);
-      BOOST_TEST(is_valid_bucket_count<Cont>(mgr.bucket_count()));
+   for(int rep = 0; rep != 2; ++rep){
+      for(int i = 0; i != n; ++i){
+         mgr.reserve_additional(c);
+         c.insert(*new value_type(i));
+         check_sync(mgr, c);
+         BOOST_TEST(is_valid_bucket_count<Cont>(mgr.bucket_count()));
+      }
    }
-   BOOST_TEST(c.size() == size_type(n));
+   BOOST_TEST(c.size() == size_type(2 * n));
+   check_keys(c, n, 2u, false);
 
    mgr.reserve(c, size_type(10 * n));
    check_sync(mgr, c);
    BOOST_TEST(is_valid_bucket_count<Cont>(mgr.bucket_count()));
+   check_keys(c, n, 2u, false);
 
    mgr.rehash(c, size_type(3 * n));
    check_sync(mgr, c);
    BOOST_TEST(is_valid_bucket_count<Cont>(mgr.bucket_count()));
-   for(int i = 0; i != n; ++i)
-      BOOST_TEST(c.find(item(i)) != c.end());
+   check_keys(c, n, 2u, false);
 
-   //Erase half of the elements and release buckets
+   //Erase half of the keys and release buckets
    for(int i = 0; i < n; i += 2)
-      c.erase_and_dispose(item(i), delete_disposer());
+      BOOST_TEST(c.erase_and_dispose(value_type(i), delete_disposer()) == 2u);
+   BOOST_TEST(c.size() == size_type(n));
    mgr.shrink_to_fit(c);
    check_sync(mgr, c);
    BOOST_TEST(is_valid_bucket_count<Cont>(mgr.bucket_count()));
-   for(int i = 0; i != n; ++i)
-      BOOST_TEST((c.find(item(i)) != c.end()) == (i % 2 != 0));
+   check_keys(c, n, 2u, true);
+
+   //A smaller maximum load factor applies to the next growth
+   mgr.max_load_factor(0.25f);
+   BOOST_TEST(mgr.reserve_additional(c));
+   check_sync(mgr, c);
+   BOOST_TEST(is_valid_bucket_count<Cont>(mgr.bucket_count()));
+   check_keys(c, n, 2u, true);
 
    c.clear_and_dispose(delete_disposer());
    std::printf("%s: buckets=%u\n", name, unsigned(mgr.bucket_count()));
@@ -581,6 +627,35 @@ int main()
       test_bucket_options<lin_incr_t>("linear_buckets + incremental");
       test_bucket_options<fmod_t>("fastmod_buckets");
       test_bucket_options<lin_fmod_t>("linear_buckets + fastmod_buckets");
+   }
+
+   //////////////////////////////////////
+   // Options that change how the container uses the bucket array when it
+   // is rehashed into a new one: the cached first bucket, a size that is
+   // not stored (reserve_additional calls size()), the stored hash and the
+   // groups of equivalent elements
+   //////////////////////////////////////
+   {
+      typedef bi::unordered_multiset
+         < item, bi::hash<item_hash>, bi::cache_begin<true>
+         , bi::constant_time_size<false> >                         cache_t;
+      typedef bi::unordered_multiset
+         < item, bi::hash<item_hash>, bi::cache_begin<true>
+         , bi::constant_time_size<false>, bi::linear_buckets<true> > lin_cache_t;
+      typedef bi::unordered_multiset
+         < grouped_item, bi::hash<grouped_item_hash> >               grouped_t;
+      typedef bi::unordered_multiset
+         < grouped_item, bi::hash<grouped_item_hash>, bi::linear_buckets<true>
+         , bi::fastmod_buckets<true>, bi::cache_begin<true> >        lin_fmod_grouped_t;
+      typedef bi::unordered_multiset
+         < grouped_item, bi::hash<grouped_item_hash>
+         , bi::incremental<true> >                                   incr_grouped_t;
+
+      test_bucket_options<cache_t>("cache_begin + !constant_time_size");
+      test_bucket_options<lin_cache_t>("cache_begin + !constant_time_size + linear_buckets");
+      test_bucket_options<grouped_t>("store_hash + optimize_multikey");
+      test_bucket_options<lin_fmod_grouped_t>("store_hash + optimize_multikey + linear_buckets + fastmod_buckets + cache_begin");
+      test_bucket_options<incr_grouped_t>("store_hash + optimize_multikey + incremental");
    }
 
    //////////////////////////////////////
