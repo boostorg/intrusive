@@ -27,6 +27,22 @@ namespace test{
 
 static const std::size_t BucketSize = 8;
 
+//Hash function with a modifiable seed, used to test full_rehash
+template<class Dummy = void>
+struct seeded_hash_t
+{
+   static std::size_t seed;
+
+   template<class T>
+   std::size_t operator()(const T &t) const
+   {  return hash_value(t) ^ seed;  }
+};
+
+template<class Dummy>
+std::size_t seeded_hash_t<Dummy>::seed = 0u;
+
+typedef seeded_hash_t<> seeded_hash;
+
 template<class ContainerDefiner>
 struct test_unordered
 {
@@ -40,6 +56,10 @@ struct test_unordered
    static void test_swap(value_cont_type& values);
    static void test_rehash(value_cont_type& values, detail::true_);
    static void test_rehash(value_cont_type& values, detail::false_);
+   template<bool FullRehash>
+   static void test_rehash_groups(detail::true_);
+   static void test_rehash_groups(detail::true_);
+   static void test_rehash_groups(detail::false_);
    static void test_find(value_cont_type& values);
    static void test_impl();
    static void test_clone(value_cont_type& values);
@@ -87,6 +107,7 @@ void test_unordered<ContainerDefiner>::test_all (value_cont_type& values)
    test_insert(values, detail::bool_<boost::intrusive::test::is_multikey_true<unordered_type>::value>());
    test_swap(values);
    test_rehash(values, detail::bool_<unordered_type::incremental>());
+   test_rehash_groups(detail::bool_<boost::intrusive::test::is_multikey_true<unordered_type>::value>());
    test_find(values);
    test_impl();
    test_clone(values);
@@ -672,6 +693,69 @@ void test_unordered<ContainerDefiner>::test_rehash(value_cont_type& values, deta
    testset1.full_rehash();
    BOOST_TEST(testset1.empty());
 }
+
+//test: rehash and full_rehash must keep groups of equivalent elements
+//correctly linked (e.g. when optimize_multikey is activated)
+template<class ContainerDefiner>
+template<bool FullRehash>
+void test_unordered<ContainerDefiner>::test_rehash_groups(detail::true_)   //multikey
+{
+   typedef typename ContainerDefiner::template container
+      <hash<seeded_hash> >::type unordered_type;
+   typedef typename unordered_type::value_type     value_type;
+   typedef typename unordered_type::bucket_traits  bucket_traits;
+   typedef typename unordered_type::bucket_ptr     bucket_ptr;
+   typedef typename unordered_type::key_of_value   key_of_value;
+   const std::size_t ExtraBuckets = unordered_type::bucket_overhead;
+
+   //A group of more than two equivalent elements is needed to detect broken groups
+   value_cont_type values(5);
+   for (std::size_t i = 0u; i < 4u; ++i)
+      (&values[i])->value_ = 9;
+   (&values[4])->value_ = 1;
+
+   value_type cmp_val;
+   cmp_val.value_ = 9;
+   seeded_hash::seed = 0u;
+
+   typename unordered_type::bucket_type buckets1[BucketSize + ExtraBuckets];
+   typename unordered_type::bucket_type buckets2[BucketSize*2 + ExtraBuckets];
+   unordered_type testset(values.begin(), values.end(), bucket_traits(
+      pointer_traits<bucket_ptr>::pointer_to(buckets1[0]), sizeof(buckets1)/sizeof(*buckets1)));
+
+   if(FullRehash){
+      //Change the hash function so that the group goes to another bucket
+      seeded_hash::seed = 6u;
+      testset.full_rehash();
+   }
+   else{
+      testset.rehash(bucket_traits(
+         pointer_traits<bucket_ptr>::pointer_to(buckets2[0]), sizeof(buckets2)/sizeof(*buckets2)));
+   }
+   BOOST_TEST(testset.size() == 5u);
+   BOOST_TEST(testset.count(key_of_value()(cmp_val)) == 4u);
+   BOOST_TEST(testset.count(key_of_value()(values[4])) == 1u);
+
+   //Erase by iterator, as it uses the stored hash (if any) to obtain the bucket
+   for(std::size_t i = 0; i != 4u; ++i){
+      testset.erase(testset.iterator_to(values[i]));
+      BOOST_TEST(testset.count(key_of_value()(cmp_val)) == 3u - i);
+   }
+   BOOST_TEST(testset.size() == 1u);
+   testset.clear();
+   seeded_hash::seed = 0u;
+}
+
+template<class ContainerDefiner>
+void test_unordered<ContainerDefiner>::test_rehash_groups(detail::true_)   //multikey
+{
+   test_rehash_groups<false>(detail::true_());
+   test_rehash_groups<true>(detail::true_());
+}
+
+template<class ContainerDefiner>
+void test_unordered<ContainerDefiner>::test_rehash_groups(detail::false_)   //not multikey
+{}
 
 //test: find, equal_range (lower_bound, upper_bound):
 template<class ContainerDefiner>

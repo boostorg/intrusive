@@ -3920,7 +3920,18 @@ class hashtable_impl
 
                //If the target bucket is new, transfer the whole group
                siterator last = i;
-               (priv_go_to_last_in_group)(i, optimize_multikey_t());
+               (priv_go_to_last_in_group)(last, optimize_multikey_t());
+
+               //All nodes of the group have the same key, so store the new hash in the rest of the group
+               BOOST_IF_CONSTEXPR(store_hash && optimize_multikey){
+                  if(do_full_rehash){
+                     for(siterator it = i; it != last;){
+                        ++it;
+                        node_functions_t::store_hash
+                           (dcast_bucket_ptr<node>(it.pointed_node()), hash_value, store_hash_t());
+                     }
+                  }
+               }
 
                if(same_buffer && new_n == n){
                   before_i = last;
