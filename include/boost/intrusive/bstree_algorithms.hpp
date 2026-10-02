@@ -1735,14 +1735,17 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       node_ptr y(h);
       node_ptr x(NodeTraits::get_parent(y));
 
+      //Empty tree: link as the left child of the header
+      bool link_left = true;
       while(x){
          ++depth;
          y = x;
-         x = comp(new_node, x) ?
-               NodeTraits::get_left(x) : NodeTraits::get_right(x);
+         //Save the result, as the last comparison decides the side of the insertion
+         link_left = comp(new_node, x);
+         x = link_left ? NodeTraits::get_left(x) : NodeTraits::get_right(x);
       }
       if(pdepth)  *pdepth = depth;
-      commit_data.link_left = (y == h) || comp(new_node, y);
+      commit_data.link_left = link_left;
       commit_data.node = y;
    }
 
@@ -1754,14 +1757,17 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       node_ptr y(h);
       node_ptr x(NodeTraits::get_parent(y));
 
+      //Empty tree: link as the left child of the header
+      bool link_left = true;
       while(x){
          ++depth;
          y = x;
-         x = !comp(x, new_node) ?
-               NodeTraits::get_left(x) : NodeTraits::get_right(x);
+         //Save the result, as the last comparison decides the side of the insertion
+         link_left = !comp(x, new_node);
+         x = link_left ? NodeTraits::get_left(x) : NodeTraits::get_right(x);
       }
       if(pdepth)  *pdepth = depth;
-      commit_data.link_left = (y == h) || !comp(y, new_node);
+      commit_data.link_left = link_left;
       commit_data.node = y;
    }
 
