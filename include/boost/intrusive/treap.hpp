@@ -82,6 +82,10 @@ struct treap_tag;
 //! \c base_hook<>/member_hook<>/value_traits<>,
 //! \c constant_time_size<>, \c size_type<>,
 //! \c compare<>, \c priority<> and \c priority_of_value<>
+//!
+//! The hooks can't use the \c auto_unlink link mode: an auto-unlink hook unlinks the
+//! node without the priority comparison, so the heap order of the priorities would
+//! be broken.
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
@@ -154,6 +158,10 @@ class treap_impl
 
    //noncopyable
    BOOST_MOVABLE_BUT_NOT_COPYABLE(treap_impl)
+
+   //auto_unlink hooks unlink nodes without the priority comparator,
+   //so the heap order of the priorities would be broken
+   BOOST_INTRUSIVE_STATIC_ASSERT(((int)value_traits::link_mode != (int)auto_unlink));
 
    const priority_compare &priv_pcomp() const
    {  return static_cast<const prio_base&>(*this).get();  }

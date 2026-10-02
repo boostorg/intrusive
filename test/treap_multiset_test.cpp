@@ -62,11 +62,8 @@ class test_main_template<VoidPointer, ConstantTimeSize, DefaultHolder, Map, Base
    {
       typedef testvalue_traits< bs_hooks<VoidPointer> > testval_traits_t;
       //base
-      typedef typename detail::if_c
-         < ConstantTimeSize
-         , typename testval_traits_t::base_value_traits
-         , typename testval_traits_t::auto_base_value_traits
-         >::type base_hook_t;
+      //treaps don't support auto_unlink hooks
+      typedef typename testval_traits_t::base_value_traits  base_hook_t;
       test::test_generic_multiset
          < rebinder<base_hook_t, ConstantTimeSize, DefaultHolder, Map>
          >::test_all();
@@ -81,11 +78,8 @@ class test_main_template<VoidPointer, ConstantTimeSize, DefaultHolder, Map, Memb
    {
       typedef testvalue_traits< bs_hooks<VoidPointer> > testval_traits_t;
       //member
-      typedef typename detail::if_c
-         < ConstantTimeSize
-         , typename testval_traits_t::member_value_traits
-         , typename testval_traits_t::auto_member_value_traits
-         >::type member_hook_t;
+      //treaps don't support auto_unlink hooks
+      typedef typename testval_traits_t::member_value_traits  member_hook_t;
       test::test_generic_multiset
          < rebinder<member_hook_t, ConstantTimeSize, DefaultHolder, Map>
          >::test_all();

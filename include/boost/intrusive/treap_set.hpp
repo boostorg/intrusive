@@ -41,6 +41,10 @@ class treap_multiset_impl;
 //! \c base_hook<>/member_hook<>/value_traits<>,
 //! \c constant_time_size<>, \c size_type<>,
 //! \c compare<>, \c priority<> and \c priority_of_value<>
+//!
+//! The hooks can't use the \c auto_unlink link mode: an auto-unlink hook unlinks the
+//! node without the priority comparison, so the heap order of the priorities would
+//! be broken.
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
@@ -605,6 +609,10 @@ class treap_set
 //! \c base_hook<>/member_hook<>/value_traits<>,
 //! \c constant_time_size<>, \c size_type<>,
 //! \c compare<>, \c priority<> and \c priority_of_value<>
+//!
+//! The hooks can't use the \c auto_unlink link mode: an auto-unlink hook unlinks the
+//! node without the priority comparison, so the heap order of the priorities would
+//! be broken.
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else

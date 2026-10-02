@@ -1874,6 +1874,9 @@ comparison and constant-time size).
 See [link intrusive.bst_hooks Binary search tree hooks: bs_set_base_hook and bs_set_member_hook] section for more
 information about these hooks.
 
+`auto_unlink` hooks are not supported: an `auto_unlink` hook unlinks the node without the
+priority comparison, so the priorities of the remaining nodes would not obey the heap order.
+
 [section:treap_set_multiset_containers treap_set, treap_multiset and treap containers]
 
 [c++]
@@ -3963,6 +3966,8 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
   copyable when their members are. This way, compilers can pass and return them in registers instead of
   by hidden reference.
 * Fixed functions calling predicates and/or hashes that were incorrectly marked as `noexcept`.
+* [*Breaking change]: treap containers no longer accept `auto_unlink` hooks (a static assertion is raised),
+  as unlinking a node through the hook broke the heap order of the priorities.
 * Optimized:
    * `reverse` operations for lists.
    * splay tree algorithms/containers, taking advantage of splaying operations to reduce comparisons for unique keys and insertions with hints.
