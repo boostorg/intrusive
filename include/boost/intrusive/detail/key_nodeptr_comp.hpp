@@ -77,8 +77,11 @@ public:
       static const bool value = same_type || is_convertible<P1, const_node_ptr>::value;
    };
 
-   inline base_t base() const
-   {  return static_cast<const base_t&>(*this); }
+   inline const base_t &base() const
+   {  return *this; }
+
+   inline base_t &base()
+   {  return *this; }
 
    inline key_nodeptr_comp(KeyTypeKeyCompare kcomp, const ValueTraits *traits)
       :  base_t(kcomp), traits_(traits)
