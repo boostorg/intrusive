@@ -152,6 +152,31 @@ struct hash_bool_flags
    static const std::size_t fastmod_buckets_pos    = 128u;
 };
 
+//Sets the sentinel bucket of linear bucket arrays again
+//if an exception is thrown while it is unset.
+template<class Table>
+class exception_sentinel_bucket_restorer
+{
+   const Table *table_;
+
+   exception_sentinel_bucket_restorer(const exception_sentinel_bucket_restorer&);
+   exception_sentinel_bucket_restorer &operator=(const exception_sentinel_bucket_restorer&);
+
+   public:
+   explicit exception_sentinel_bucket_restorer(const Table &table)
+      :  table_(&table)
+   {}
+
+   inline void release()
+   {  table_ = 0;  }
+
+   ~exception_sentinel_bucket_restorer()
+   {
+      if(table_)
+         table_->priv_set_sentinel_bucket();
+   }
+};
+
 template<class Bucket, class Algo, class Disposer, class SizeType>
 class exception_bucket_disposer
 {
@@ -3608,6 +3633,10 @@ class hashtable_impl
       typedef typename internal_type::template typeof_node_disposer<detail::null_disposer>::type NodeDisposer;
       typedef exception_bucket_disposer<bucket_type, slist_node_algorithms, NodeDisposer, size_type> ArrayDisposer;
       NodeDisposer nd(this->make_node_disposer(detail::null_disposer()));
+      //The sentinel bucket of the old array is unset before the hasher is called. It must be
+      //destroyed after the rollback functions, as with a bigger new bucket array in the same
+      //buffer the old sentinel bucket is a bucket of the new array.
+      exception_sentinel_bucket_restorer<internal_type> rollback_sentinel(*this);
       ArrayDisposer rollback1(new_buckets[0], nd, new_bucket_count);
       ArrayDisposer rollback2(old_buckets[0], nd, old_bucket_count);
 
@@ -3694,6 +3723,7 @@ class hashtable_impl
       this->priv_set_cache_bucket_num(new_first_bucket_num);
       rollback1.release();
       rollback2.release();
+      rollback_sentinel.release();
    }
 
    template <class MaybeConstHashtableImpl, class Cloner, class Disposer>
