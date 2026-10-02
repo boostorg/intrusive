@@ -1571,6 +1571,10 @@ class slist_impl
             } while(++(ibx_next = ibx) != ex && p(*ibx_next, *bb_next));
             this->splice_after(bb, x, x.before_begin(), ibx, n);
             if(l) *l = ibx;
+            //Transferred elements are now between bb and bb_next. If x is not empty,
+            //the last comparison was false: bb_next goes before the next element of x,
+            //so the next search starts after bb_next without comparing them again
+            bb = bb_next;
          }
       }
    }

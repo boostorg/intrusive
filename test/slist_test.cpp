@@ -147,6 +147,29 @@ void test_slist< ListType, ValueContainer >
 
    int init_values [] = { 1, 3, 4, 5 };
    TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );
+   testlist1.clear();
+
+   //The merge performs at most size() + x.size() - 1 comparisons
+   {
+      static const int first [4][4] = { {0, 2, 4, -1}, {1, 3, -1, -1}, {0, 1, -1, -1}, {2, 3, 4, -1} };
+      static const int second[4][4] = { {1, 3, -1, -1}, {0, 2, 4, -1}, {2, 3, 4, -1}, {0, 1, -1, -1} };
+      for(int c = 0; c != 4; ++c){
+         list_type l1, l2;
+         for(int i = 0; first[c][i] >= 0; ++i)
+            l1.insert(l1.end(), values[std::size_t(first[c][i])]);
+         for(int i = 0; second[c][i] >= 0; ++i)
+            l2.insert(l2.end(), values[std::size_t(second[c][i])]);
+         const std::size_t bound = l1.size() + l2.size() - 1u;
+         std::size_t count = 0;
+         test::counting_less less = { &count };
+         l1.merge(l2, less);
+         BOOST_TEST(count <= bound);
+         BOOST_TEST(l2.empty());
+         int merged_values [] = { 1, 2, 3, 4, 5 };
+         TEST_INTRUSIVE_SEQUENCE( merged_values, l1.begin() );
+         l1.clear();
+      }
+   }
 }
 
 //test: merge due to error in merge implementation:

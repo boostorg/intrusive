@@ -1103,6 +1103,9 @@ class list_impl
                ++ix; ++n;
             } while(ix != ex && p(*ix, *b));
             this->splice(b, x, x.begin(), ix, n);
+            //If x is not empty, the last comparison was false: *b goes before *ix,
+            //so the next search starts after b without comparing them again
+            ++b;
          }
       }
    }

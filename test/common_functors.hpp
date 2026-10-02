@@ -17,6 +17,7 @@
 #include<boost/intrusive/detail/mpl.hpp>
 #include<boost/static_assert.hpp>
 #include<boost/move/detail/to_raw_pointer.hpp>
+#include <cstddef>
 
 namespace boost      {
 namespace intrusive  {
@@ -93,6 +94,16 @@ struct any_less
    template<class T, class U>
    bool operator()(const T &t, const U &u) const
    {  return t < u;  }
+};
+
+//Like any_less, but counts the comparisons in *count_
+struct counting_less
+{
+   std::size_t *count_;
+
+   template<class T, class U>
+   bool operator()(const T &t, const U &u) const
+   {  ++*count_; return t < u;  }
 };
 
 struct any_greater
