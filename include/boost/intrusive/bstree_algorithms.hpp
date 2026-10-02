@@ -1917,10 +1917,11 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       , node_ptr &leftmost_out, node_ptr &rightmost_out
       )
    {
-      node_ptr target_sub_root = target_parent;
+      node_ptr target_sub_root = node_ptr();
       node_ptr source_root = NodeTraits::get_parent(source_parent);
       if(!source_root){
-         leftmost_out = rightmost_out = source_root;
+         //Empty source: no root, leftmost and rightmost are the header
+         leftmost_out = rightmost_out = target_parent;
       }
       else{
          //We'll calculate leftmost and rightmost nodes while iterating

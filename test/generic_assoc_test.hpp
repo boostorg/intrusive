@@ -13,6 +13,7 @@
 /////////////////////////////////////////////////////////////////////////////
 #include <boost/container/vector.hpp> //vector
 #include <algorithm> //std::next_permutation
+#include <cstddef>   //std::size_t
 #include <boost/intrusive/detail/config_begin.hpp>
 #include "common_functors.hpp"
 #include <boost/intrusive/options.hpp>
@@ -403,6 +404,25 @@ void test_generic_assoc<ContainerDefiner>::test_root(value_cont_type& values)
    BOOST_TEST( ci.go_parent().go_parent() == ci2);
 }
 
+//Node cloner for node algorithms: it must not be called when the source is empty
+template<class NodePtr>
+struct unused_node_cloner
+{
+   NodePtr operator()(const NodePtr &) const
+   {  BOOST_TEST(false); return NodePtr();  }
+};
+
+//Node disposer for node algorithms: unlinks the node (the values are not
+//allocated) and counts the calls
+template<class NodeAlgorithms>
+struct counting_node_disposer
+{
+   std::size_t *count_;
+
+   void operator()(const typename NodeAlgorithms::node_ptr &n) const
+   {  NodeAlgorithms::init(n); ++*count_;  }
+};
+
 template<class ContainerDefiner>
 void test_generic_assoc<ContainerDefiner>::test_clone(value_cont_type& values)
 {
@@ -428,6 +448,53 @@ void test_generic_assoc<ContainerDefiner>::test_clone(value_cont_type& values)
       BOOST_TEST (testset2 == testset1);
       testset2.clear_and_dispose(test::delete_noexcept_disposer<value_type>());
       BOOST_TEST (testset2.empty());
+
+      //Empty source
+      assoc_type empty_set;
+      testset2.clone_from(empty_set, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST (testset2.empty());
+      testset2.clone_from(testset1, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+      testset2.clone_from(empty_set, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST (testset2.empty());
+      testset2.clone_from(boost::move(empty_set), test::new_nonconst_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST (testset2.empty());
+   }
+   {  //Empty source with the node algorithms: the containers don't call
+      //them with an empty source, so call them directly
+      typedef typename ContainerDefiner::template container
+         <>::type assoc_type;
+      typedef typename assoc_type::node_algorithms node_algorithms;
+      typedef typename assoc_type::node_ptr node_ptr;
+
+      assoc_type empty_set, testset;
+      const node_ptr empty_header = empty_set.end().pointed_node();
+      const node_ptr header = testset.end().pointed_node();
+      std::size_t disposed = 0;
+      counting_node_disposer<node_algorithms> disposer = { &disposed };
+
+      //Empty target: the header must stay empty
+      node_algorithms::clone(empty_header, header, unused_node_cloner<node_ptr>(), disposer);
+      BOOST_TEST (testset.begin() == testset.end());
+      BOOST_TEST (node_algorithms::unique(header));
+      BOOST_TEST (disposed == 0u);
+      testset.insert(values.begin(), values.end());
+      testset.check();
+      //Sets don't insert the values with duplicated keys
+      const std::size_t inserted = testset.size();
+      BOOST_TEST (inserted != 0u);
+
+      //Non-empty target: the nodes are disposed and the header must be empty
+      node_algorithms::clone(empty_header, header, unused_node_cloner<node_ptr>(), disposer);
+      BOOST_TEST (disposed == inserted);
+      BOOST_TEST (node_algorithms::unique(header));
+      BOOST_TEST (node_algorithms::begin_node(header) == node_algorithms::end_node(header));
+      //Reset the size of the container, the nodes were erased by the algorithm
+      testset.clear();
+      BOOST_TEST (testset.begin() == testset.end());
+      testset.insert(values.begin(), values.end());
+      testset.check();
+      BOOST_TEST (testset.size() == inserted);
+      testset.clear();
    }
    {  //In non-balanced trees the shape
       //depends on the insertion order, so test all insertion orders
