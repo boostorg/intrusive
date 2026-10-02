@@ -801,7 +801,7 @@ class slist_impl
       this->clear_and_dispose(disposer);
       detail::exception_disposer<slist_impl, Disposer>
          rollback(*this, disposer);
-      iterator prev(this->cbefore_begin());
+      iterator prev(this->before_begin());
       iterator b(src.begin()), e(src.end());
       for(; b != e; ++b){
          prev = this->insert_after(prev, *cloner(*b));
