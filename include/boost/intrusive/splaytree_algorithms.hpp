@@ -910,12 +910,9 @@ class splaytree_algorithms
       NodeTraits::set_parent(n, g);
 
       if(g_is_header){
-         if(NodeTraits::get_parent(g) == p)
-            NodeTraits::set_parent(g, n);
-         else{//must be ( g->right == p )
-            BOOST_INTRUSIVE_INVARIANT_ASSERT(false);
-            NodeTraits::set_right(g, n);
-         }
+         //p was the root, so it's the parent of the header
+         BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_parent(g) == p);
+         NodeTraits::set_parent(g, n);
       }
       else{
          if(NodeTraits::get_left(g) == p)
