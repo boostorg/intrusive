@@ -1028,6 +1028,45 @@ void test_unordered<ContainerDefiner>::test_clone(value_cont_type& values)
       testset2.clear_and_dispose(test::delete_disposer<value_type>());
       BOOST_TEST (testset2.empty());
    }
+   {
+      //Empty source with equal, bigger and smaller source bucket arrays,
+      //with an empty and a non-empty target
+      const std::size_t src_sizes[] = { sizes::Normal, sizes::Big,    sizes::Normal };
+      const std::size_t dst_sizes[] = { sizes::Normal, sizes::Normal, sizes::Big    };
+      for(std::size_t i = 0; i != sizeof(src_sizes)/sizeof(src_sizes[0]); ++i){
+         typename unordered_type::bucket_type buckets1[sizes::Normal + ExtraBuckets];
+         typename unordered_type::bucket_type buckets2[sizes::Big + ExtraBuckets];
+         typename unordered_type::bucket_type buckets3[sizes::Big + ExtraBuckets];
+         unordered_type testset1 (values.begin(), values.end(), bucket_traits(
+            pointer_traits<bucket_ptr>::pointer_to(buckets1[0]), sizeof(buckets1)/sizeof(*buckets1)));
+         unordered_type empty_set (bucket_traits(
+            pointer_traits<bucket_ptr>::pointer_to(buckets2[0]), src_sizes[i] + ExtraBuckets));
+         unordered_type testset2 (bucket_traits(
+            pointer_traits<bucket_ptr>::pointer_to(buckets3[0]), dst_sizes[i] + ExtraBuckets));
+         //clone_from must not modify split_count as the bucket array of the target does not change
+         const typename unordered_type::size_type split = testset2.split_count();
+
+         testset2.clone_from(empty_set, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+         BOOST_TEST(testset2.split_count() == split);
+         BOOST_TEST (testset2.empty());
+         BOOST_TEST (testset2.begin() == testset2.end());
+         testset2.clone_from(testset1, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+         testset2.clone_from(empty_set, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+         BOOST_TEST(testset2.split_count() == split);
+         BOOST_TEST (testset2.empty());
+         BOOST_TEST (testset2.begin() == testset2.end());
+         testset2.clone_from(testset1, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+         testset2.clone_from(boost::move(empty_set), test::new_nonconst_cloner<value_type>(), test::delete_disposer<value_type>());
+         BOOST_TEST(testset2.split_count() == split);
+         BOOST_TEST (testset2.empty());
+         BOOST_TEST (testset2.begin() == testset2.end());
+         //The target is still usable
+         testset2.clone_from(testset1, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+         BOOST_TEST(testset1 == testset2);
+         testset2.clear_and_dispose(test::delete_disposer<value_type>());
+         BOOST_TEST (testset2.empty());
+      }
+   }
 }
 
 }  //namespace test{

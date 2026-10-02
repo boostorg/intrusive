@@ -519,6 +519,25 @@ void test_list< ListType, ValueContainer >
       BOOST_TEST (testlist2 == testlist1);
       testlist2.clear_and_dispose(test::delete_disposer<value_type>());
       BOOST_TEST (testlist2.empty());
+
+      //Empty source, with an empty and a non-empty target
+      list_type empty_list;
+      testlist2.clone_from(empty_list, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST (testlist2.empty());
+      BOOST_TEST (testlist2.begin() == testlist2.end());
+      testlist2.clone_from(testlist1, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+      testlist2.clone_from(empty_list, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST (testlist2.empty());
+      BOOST_TEST (testlist2.begin() == testlist2.end());
+      testlist2.clone_from(testlist1, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+      testlist2.clone_from(boost::move(empty_list), test::new_nonconst_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST (testlist2.empty());
+      BOOST_TEST (testlist2.begin() == testlist2.end());
+      //The target is still usable
+      testlist2.clone_from(testlist1, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST (testlist2 == testlist1);
+      testlist2.clear_and_dispose(test::delete_disposer<value_type>());
+      BOOST_TEST (testlist2.empty());
 }
 
 template < typename ValueTraits, bool ConstantTimeSize, bool Default_Holder, typename ValueContainer >
