@@ -16,6 +16,7 @@
 #include <boost/intrusive/intrusive_fwd.hpp>
 
 #include <boost/intrusive/detail/assert.hpp>
+#include <boost/assert.hpp>   //BOOST_ASSERT, BOOST_ASSERT_IS_VOID
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/bs_set_hook.hpp>
 #include <boost/intrusive/detail/tree_node.hpp>
@@ -1330,16 +1331,20 @@ class bstree_impl
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
       BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::unique(to_insert));
 
-      #if !(defined(BOOST_DISABLE_ASSERTS) || ( defined(BOOST_ENABLE_ASSERT_DEBUG_HANDLER) && defined(NDEBUG) ))
-      //Test insertion position is correct
-      iterator p(commit_data.node, this->priv_value_traits_ptr());
-      if(!commit_data.link_left){
-         ++p;
+      #if !defined(BOOST_ASSERT_IS_VOID)
+      //Check if the insertion point is correct
+      //The comparison could throw and this function is noexcept
+      BOOST_INTRUSIVE_TRY{
+         iterator p(commit_data.node, this->priv_value_traits_ptr());
+         if(!commit_data.link_left){
+            ++p;
+         }
+         BOOST_ASSERT(( p == this->end()   || !this->get_comp()(*p, value)   ));
+         BOOST_ASSERT(( p == this->begin() || !this->get_comp()(value, *--p) ));
       }
-      //Check if the insertion point is correct to detect wrong
-      //uses insert_unique_check
-      BOOST_ASSERT(( p == this->end()   || !this->get_comp()(*p, value)   ));
-      BOOST_ASSERT(( p == this->begin() || !this->get_comp()(value, *--p) ));
+      BOOST_INTRUSIVE_CATCH(...){
+      }
+      BOOST_INTRUSIVE_CATCH_END
       #endif
 
       node_algorithms::insert_unique_commit
@@ -1454,11 +1459,11 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: O(log(size() + N).
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If the internal key_compare throws. Strong guarantee.
    //!
    //! <b>Note</b>: Invalidates the iterators (but not the references)
    //!    to the erased elements. No destructors are called.
-   size_type erase(const key_type &key) BOOST_NOEXCEPT
+   size_type erase(const key_type &key)
    {  return this->erase(key, this->key_comp());   }
 
    //! <b>Requires</b>: key is a value such that `*this` is partitioned with respect to

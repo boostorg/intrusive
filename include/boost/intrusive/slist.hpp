@@ -1615,7 +1615,7 @@ class slist_impl
    //! <b>Note</b>: The relative order of elements that are not removed is unchanged,
    //!   and iterators to elements that are not removed remain valid. This function is
    //!   linear time: it performs exactly size() comparisons for equality.
-   size_type remove(const_reference value) BOOST_NOEXCEPT
+   size_type remove(const_reference value)
    {  return this->remove_if(detail::equal_to_value<const_reference>(value));  }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
@@ -1630,7 +1630,7 @@ class slist_impl
    //! <b>Note</b>: The relative order of elements that are not removed is unchanged,
    //!   and iterators to elements that are not removed remain valid.
    template<class Disposer>
-   size_type remove_and_dispose(const_reference value, Disposer disposer) BOOST_NOEXCEPT
+   size_type remove_and_dispose(const_reference value, Disposer disposer)
    {  return this->remove_and_dispose_if(detail::equal_to_value<const_reference>(value), disposer);  }
 
    //! <b>Effects</b>: Removes all the elements for which a specified

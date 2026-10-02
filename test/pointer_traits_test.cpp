@@ -201,6 +201,15 @@ int main()
    CompleteSmartPtrStats::reset_stats();
    BOOST_TEST(boost::intrusive::pointer_traits< CompleteSmartPtr<DD> >::dynamic_cast_from(CompleteSmartPtr<B>()) == CompleteSmartPtr<DD>());
    BOOST_TEST(CompleteSmartPtrStats::dynamic_cast_called == 1);
+   //dynamic_cast_from with non-null pointers: a failed conversion returns a null pointer
+   {
+      D  d;
+      DD dd;
+      CompleteSmartPtrStats::reset_stats();
+      BOOST_TEST(boost::intrusive::pointer_traits< CompleteSmartPtr<DD> >::dynamic_cast_from(CompleteSmartPtr<B>(d))  == CompleteSmartPtr<DD>());
+      BOOST_TEST(boost::intrusive::pointer_traits< CompleteSmartPtr<DD> >::dynamic_cast_from(CompleteSmartPtr<B>(dd)) == CompleteSmartPtr<DD>(dd));
+      BOOST_TEST(CompleteSmartPtrStats::dynamic_cast_called == 2);
+   }
 
    //Simple smart pointer
    BOOST_INTRUSIVE_STATIC_ASSERT(( boost::intrusive::detail::is_same<boost::intrusive::pointer_traits
@@ -217,6 +226,14 @@ int main()
    BOOST_TEST(boost::intrusive::pointer_traits< SimpleSmartPtr<D> >  ::static_cast_from(SimpleSmartPtr<B>()) == SimpleSmartPtr<D>());
    BOOST_TEST(boost::intrusive::pointer_traits< SimpleSmartPtr<D> >  ::const_cast_from(SimpleSmartPtr<const D>()) == SimpleSmartPtr<D>());
    BOOST_TEST(boost::intrusive::pointer_traits< SimpleSmartPtr<DD> >::dynamic_cast_from(SimpleSmartPtr<B>()) == SimpleSmartPtr<DD>());
+   //dynamic_cast_from with non-null pointers: a failed conversion returns a null
+   //pointer, as with raw pointers, instead of throwing std::bad_cast
+   {
+      D  d;
+      DD dd;
+      BOOST_TEST(boost::intrusive::pointer_traits< SimpleSmartPtr<DD> >::dynamic_cast_from(SimpleSmartPtr<B>(&d))  == SimpleSmartPtr<DD>());
+      BOOST_TEST(boost::intrusive::pointer_traits< SimpleSmartPtr<DD> >::dynamic_cast_from(SimpleSmartPtr<B>(&dd)) == SimpleSmartPtr<DD>(&dd));
+   }
 
    return boost::report_errors();
 }

@@ -777,7 +777,7 @@ class treap_impl
    //! the successor of "value" container ordering invariant will be broken.
    //! This is a low-level function to be used only for performance reasons
    //! by advanced users.
-   iterator insert_before(const_iterator pos, reference value) BOOST_NOEXCEPT
+   iterator insert_before(const_iterator pos, reference value)
    {
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
       BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::unique(to_insert));
@@ -807,7 +807,7 @@ class treap_impl
    //!   This function is slightly more efficient than using "insert_before".
    //!   This is a low-level function to be used only for performance reasons
    //!   by advanced users.
-   void push_back(reference value) BOOST_NOEXCEPT
+   void push_back(reference value)
    {
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
       BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::unique(to_insert));
@@ -830,7 +830,7 @@ class treap_impl
    //!   This function is slightly more efficient than using "insert_before".
    //!   This is a low-level function to be used only for performance reasons
    //!   by advanced users.
-   void push_front(reference value) BOOST_NOEXCEPT
+   void push_front(reference value)
    {
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
       BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::unique(to_insert));
@@ -847,7 +847,7 @@ class treap_impl
    //!
    //! <b>Note</b>: Invalidates the iterators (but not the references)
    //!    to the erased elements. No destructors are called.
-   iterator erase(const_iterator i) BOOST_NOEXCEPT
+   iterator erase(const_iterator i)
    {
       const_iterator ret(i);
       ++ret;
@@ -870,7 +870,7 @@ class treap_impl
    //!
    //! <b>Note</b>: Invalidates the iterators (but not the references)
    //!    to the erased elements. No destructors are called.
-   iterator erase(const_iterator b, const_iterator e) BOOST_NOEXCEPT
+   iterator erase(const_iterator b, const_iterator e)
    {  size_type n;   return private_erase(b, e, n);   }
 
    //! <b>Effects</b>: Erases all the elements with the given value.
@@ -921,7 +921,7 @@ class treap_impl
    //! <b>Note</b>: Invalidates the iterators
    //!    to the erased elements.
    template<class Disposer>
-   iterator erase_and_dispose(const_iterator i, Disposer disposer) BOOST_NOEXCEPT
+   iterator erase_and_dispose(const_iterator i, Disposer disposer)
    {
       node_ptr to_erase(i.pointed_node());
       iterator ret(this->erase(i));
@@ -931,7 +931,7 @@ class treap_impl
 
    #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
    template<class Disposer>
-   iterator erase_and_dispose(iterator i, Disposer disposer) BOOST_NOEXCEPT
+   iterator erase_and_dispose(iterator i, Disposer disposer)
    {  return this->erase_and_dispose(const_iterator(i), disposer);   }
    #endif
 
@@ -948,7 +948,7 @@ class treap_impl
    //! <b>Note</b>: Invalidates the iterators
    //!    to the erased elements.
    template<class Disposer>
-   iterator erase_and_dispose(const_iterator b, const_iterator e, Disposer disposer) BOOST_NOEXCEPT
+   iterator erase_and_dispose(const_iterator b, const_iterator e, Disposer disposer)
    {  size_type n;   return private_erase(b, e, n, disposer);   }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
@@ -1031,7 +1031,23 @@ class treap_impl
    }
 
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-   //! @copydoc ::boost::intrusive::bstree::merge_unique
+   //! <b>Requires</b>: "source" container's Options can only can differ in the comparison
+   //!   function from *this.
+   //!
+   //! <b>Effects</b>: Attempts to extract each element in source and insert it into a using
+   //!   the comparison and priority objects of *this. If there is an element in a with key
+   //!   equivalent to the key of an element from source, then that element is not extracted
+   //!   from source.
+   //!
+   //! <b>Postcondition</b>: Pointers and references to the transferred elements of source refer
+   //!   to those same elements but as members of *this. Iterators referring to the transferred
+   //!   elements will continue to refer to their elements, but they now behave as iterators into *this,
+   //!   not into source.
+   //!
+   //! <b>Throws</b>: If the comparison or priority_compare functions throw. Basic guarantee:
+   //!   the elements already transferred stay in *this, the others stay in source.
+   //!
+   //! <b>Complexity</b>: N log(a.size() + N) (N has the value source.size())
    template<class T, class ...Options2> void merge_unique(treap<T, Options2...> &)
    #else
    template<class Compare2>
@@ -1057,7 +1073,21 @@ class treap_impl
    }
 
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
-   //! @copydoc ::boost::intrusive::bstree::merge_equal
+   //! <b>Requires</b>: "source" container's Options can only can differ in the comparison
+   //!   function from *this.
+   //!
+   //! <b>Effects</b>: Extracts each element in source and insert it into a using
+   //!   the comparison and priority objects of *this.
+   //!
+   //! <b>Postcondition</b>: Pointers and references to the transferred elements of source refer
+   //!   to those same elements but as members of *this. Iterators referring to the transferred
+   //!   elements will continue to refer to their elements, but they now behave as iterators into *this,
+   //!   not into source.
+   //!
+   //! <b>Throws</b>: If the comparison or priority_compare functions throw. Basic guarantee:
+   //!   the elements already transferred stay in *this, the others stay in source.
+   //!
+   //! <b>Complexity</b>: N log(a.size() + N) (N has the value source.size())
    template<class T, class ...Options2> void merge_equal(treap<T, Options2...> &)
    #else
    template<class Compare2>
@@ -1196,7 +1226,20 @@ class treap_impl
    //! @copydoc ::boost::intrusive::bstree::unlink_leftmost_without_rebalance
    pointer unlink_leftmost_without_rebalance() BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::bstree::replace_node
+   //! <b>Requires</b>: replace_this must be a valid iterator of *this
+   //!   and with_this must not be inserted in any container.
+   //!
+   //! <b>Effects</b>: Replaces replace_this in its position in the
+   //!   container with with_this. The container does not need to be rebalanced.
+   //!
+   //! <b>Complexity</b>: Constant.
+   //!
+   //! <b>Throws</b>: Nothing.
+   //!
+   //! <b>Note</b>: This function will break container ordering invariants if
+   //!   with_this is not equivalent to *replace_this according to the
+   //!   ordering and priority rules. This function is faster than erasing and inserting
+   //!   the node, since no rebalancing or comparison is needed.
    void replace_node(iterator replace_this, reference with_this) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree::remove_node

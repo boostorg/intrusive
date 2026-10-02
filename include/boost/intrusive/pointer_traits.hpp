@@ -249,7 +249,11 @@ struct pointer_traits
 
    template<class UPtr>
    BOOST_INTRUSIVE_FORCEINLINE static pointer priv_dynamic_cast_from(boost::intrusive::detail::false_, const UPtr &uptr) BOOST_NOEXCEPT
-   {  return uptr ? pointer_to(dynamic_cast<element_type&>(*uptr)) : pointer();  }
+   {
+      //Use the pointer form of dynamic_cast to avoid exceptions
+      element_type *const p = uptr ? dynamic_cast<element_type*>(to_raw_pointer(uptr)) : 0;
+      return p ? pointer_to(*p) : pointer();
+   }
    ///@endcond
 };
 

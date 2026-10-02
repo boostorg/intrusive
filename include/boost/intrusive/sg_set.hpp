@@ -423,11 +423,11 @@ class sg_set_impl
    //! @copydoc ::boost::intrusive::sgtree::balance_factor(float)
    void balance_factor(float new_alpha) BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::rbtree::merge_unique
+   //! @copydoc ::boost::intrusive::sgtree::merge_unique
    template<class ...Options2>
    void merge(sg_set<T, Options2...> &source);
 
-   //! @copydoc ::boost::intrusive::rbtree::merge_unique
+   //! @copydoc ::boost::intrusive::sgtree::merge_unique
    template<class ...Options2>
    void merge(sg_multiset<T, Options2...> &source);
 
@@ -933,11 +933,11 @@ class sg_multiset_impl
    //! @copydoc ::boost::intrusive::sgtree::balance_factor(float)
    void balance_factor(float new_alpha) BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::treap::merge_unique
+   //! @copydoc ::boost::intrusive::sgtree::merge_equal
    template<class ...Options2>
    void merge(sg_multiset<T, Options2...> &source);
 
-   //! @copydoc ::boost::intrusive::treap::merge_unique
+   //! @copydoc ::boost::intrusive::sgtree::merge_equal
    template<class ...Options2>
    void merge(sg_set<T, Options2...> &source);
 

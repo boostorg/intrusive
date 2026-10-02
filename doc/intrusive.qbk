@@ -3962,6 +3962,7 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 * Iterators and comparator holders no longer declare user-provided copy operations, so they are trivially
   copyable when their members are. This way, compilers can pass and return them in registers instead of
   by hidden reference.
+* Fixed functions calling predicates and/or hashes that were incorrectly marked as `noexcept`.
 * Optimized:
    * `reverse` operations for lists.
    * splay tree algorithms/containers, taking advantage of splaying operations to reduce comparisons for unique keys and insertions with hints.

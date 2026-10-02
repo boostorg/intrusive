@@ -279,19 +279,19 @@ class treap_set_impl
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::treap::insert_before
-   iterator insert_before(const_iterator pos, reference value) BOOST_NOEXCEPT;
+   iterator insert_before(const_iterator pos, reference value);
 
    //! @copydoc ::boost::intrusive::treap::push_back
-   void push_back(reference value) BOOST_NOEXCEPT;
+   void push_back(reference value);
 
    //! @copydoc ::boost::intrusive::treap::push_front
-   void push_front(reference value) BOOST_NOEXCEPT;
+   void push_front(reference value);
 
    //! @copydoc ::boost::intrusive::treap::erase(const_iterator)
-   iterator erase(const_iterator i) BOOST_NOEXCEPT;
+   iterator erase(const_iterator i);
 
    //! @copydoc ::boost::intrusive::treap::erase(const_iterator,const_iterator)
-   iterator erase(const_iterator b, const_iterator e) BOOST_NOEXCEPT;
+   iterator erase(const_iterator b, const_iterator e);
 
    //! @copydoc ::boost::intrusive::treap::erase(const key_type &)
    size_type erase(const key_type &key);
@@ -302,11 +302,11 @@ class treap_set_impl
 
    //! @copydoc ::boost::intrusive::treap::erase_and_dispose(const_iterator,Disposer)
    template<class Disposer>
-   iterator erase_and_dispose(const_iterator i, Disposer disposer) BOOST_NOEXCEPT;
+   iterator erase_and_dispose(const_iterator i, Disposer disposer);
 
    //! @copydoc ::boost::intrusive::treap::erase_and_dispose(const_iterator,const_iterator,Disposer)
    template<class Disposer>
-   iterator erase_and_dispose(const_iterator b, const_iterator e, Disposer disposer) BOOST_NOEXCEPT;
+   iterator erase_and_dispose(const_iterator b, const_iterator e, Disposer disposer);
 
    //! @copydoc ::boost::intrusive::treap::erase_and_dispose(const key_type &, Disposer)
    template<class Disposer>
@@ -814,19 +814,19 @@ class treap_multiset_impl
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::treap::insert_before
-   iterator insert_before(const_iterator pos, reference value) BOOST_NOEXCEPT;
+   iterator insert_before(const_iterator pos, reference value);
 
    //! @copydoc ::boost::intrusive::treap::push_back
-   void push_back(reference value) BOOST_NOEXCEPT;
+   void push_back(reference value);
 
    //! @copydoc ::boost::intrusive::treap::push_front
-   void push_front(reference value) BOOST_NOEXCEPT;
+   void push_front(reference value);
 
    //! @copydoc ::boost::intrusive::treap::erase(const_iterator)
-   iterator erase(const_iterator i) BOOST_NOEXCEPT;
+   iterator erase(const_iterator i);
 
    //! @copydoc ::boost::intrusive::treap::erase(const_iterator,const_iterator)
-   iterator erase(const_iterator b, const_iterator e) BOOST_NOEXCEPT;
+   iterator erase(const_iterator b, const_iterator e);
 
    //! @copydoc ::boost::intrusive::treap::erase(const key_type &)
    size_type erase(const key_type &key);
@@ -837,11 +837,11 @@ class treap_multiset_impl
 
    //! @copydoc ::boost::intrusive::treap::erase_and_dispose(const_iterator,Disposer)
    template<class Disposer>
-   iterator erase_and_dispose(const_iterator i, Disposer disposer) BOOST_NOEXCEPT;
+   iterator erase_and_dispose(const_iterator i, Disposer disposer);
 
    //! @copydoc ::boost::intrusive::treap::erase_and_dispose(const_iterator,const_iterator,Disposer)
    template<class Disposer>
-   iterator erase_and_dispose(const_iterator b, const_iterator e, Disposer disposer) BOOST_NOEXCEPT;
+   iterator erase_and_dispose(const_iterator b, const_iterator e, Disposer disposer);
 
    //! @copydoc ::boost::intrusive::treap::erase_and_dispose(const key_type &, Disposer)
    template<class Disposer>
@@ -965,11 +965,11 @@ class treap_multiset_impl
    //! @copydoc ::boost::intrusive::treap::remove_node
    void remove_node(reference value) BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::treap::merge_unique
+   //! @copydoc ::boost::intrusive::treap::merge_equal
    template<class ...Options2>
    void merge(treap_multiset<T, Options2...> &source);
 
-   //! @copydoc ::boost::intrusive::treap::merge_unique
+   //! @copydoc ::boost::intrusive::treap::merge_equal
    template<class ...Options2>
    void merge(treap_set<T, Options2...> &source);
 

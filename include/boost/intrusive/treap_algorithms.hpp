@@ -207,7 +207,16 @@ class treap_algorithms
    static void replace_node(node_ptr node_to_be_replaced, node_ptr header, node_ptr new_node) BOOST_NOEXCEPT;
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
-   //! @copydoc ::boost::intrusive::bstree_algorithms::unlink(node_ptr)
+   //! <b>Requires</b>: 'n' is a tree node but not the header.
+   //!   NodePtrPriorityCompare is a priority function object that induces a strict weak
+   //!   ordering compatible with the one used to create the
+   //!   the tree. NodePtrPriorityCompare compares two node_ptrs.
+   //!
+   //! <b>Effects</b>: Unlinks the node and rotates the tree according to "pcomp".
+   //!
+   //! <b>Complexity</b>: Average complexity is constant time.
+   //!
+   //! <b>Throws</b>: If "pcomp" throws.
    template<class NodePtrPriorityCompare>
    static void unlink(node_ptr n, NodePtrPriorityCompare pcomp)
    {
@@ -239,7 +248,20 @@ class treap_algorithms
    static void init_header(node_ptr header) BOOST_NOEXCEPT;
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
-   //! @copydoc ::boost::intrusive::bstree_algorithms::erase(node_ptr,node_ptr)
+   //! <b>Requires</b>: header must be the header of a tree, z a node
+   //!    of that tree and z != header.
+   //!   NodePtrPriorityCompare is a priority function object that induces a strict weak
+   //!   ordering compatible with the one used to create the
+   //!   the tree. NodePtrPriorityCompare compares two node_ptrs.
+   //!
+   //! <b>Effects</b>: Erases node "z" from the tree with header "header"
+   //!   and rotates the tree according to "pcomp".
+   //!
+   //! <b>Returns</b>: z.
+   //!
+   //! <b>Complexity</b>: Average complexity is constant time.
+   //!
+   //! <b>Throws</b>: If "pcomp" throws.
    template<class NodePtrPriorityCompare>
    static node_ptr erase(node_ptr header, node_ptr z, NodePtrPriorityCompare pcomp)
    {
@@ -329,7 +351,7 @@ class treap_algorithms
    //! <b>Complexity</b>: Average complexity for insert element is at
    //!   most logarithmic.
    //!
-   //! <b>Throws</b>: If "comp" throws.
+   //! <b>Throws</b>: If "comp" throw or "pcomp" throw.
    template<class NodePtrCompare, class NodePtrPriorityCompare>
    static node_ptr insert_equal_lower_bound
       (node_ptr h, node_ptr new_node, NodePtrCompare comp, NodePtrPriorityCompare pcomp)
@@ -464,7 +486,7 @@ class treap_algorithms
    //!
    //! <b>Complexity</b>: Average complexity is at most logarithmic.
    //!
-   //! <b>Throws</b>: If "comp" throws.
+   //! <b>Throws</b>: If "comp" throw or "pcomp" throw.
    //!
    //! <b>Notes</b>: This function is used to improve performance when constructing
    //!   a node is expensive and the user does not want to have two equivalent nodes
@@ -517,7 +539,7 @@ class treap_algorithms
    //! <b>Complexity</b>: Average complexity is at most logarithmic, but it is
    //!   amortized constant time if new_node should be inserted immediately before "hint".
    //!
-   //! <b>Throws</b>: If "comp" throws.
+   //! <b>Throws</b>: If "comp" throw or "pcomp" throw.
    //!
    //! <b>Notes</b>: This function is used to improve performance when constructing
    //!   a node is expensive and the user does not want to have two equivalent nodes
@@ -571,7 +593,18 @@ class treap_algorithms
       rotate_up_n(header, new_node, commit_data.rotations);
    }
 
-   //! @copydoc ::boost::intrusive::bstree_algorithms::transfer_unique
+   //! <b>Requires</b>: header1 and header2 must be the headers of trees tree1 and tree2
+   //!   respectively, z a non-header node of tree2. NodePtrCompare is the comparison
+   //!   function of tree1. PrioNodePtrPrioCompare is the priority function of both trees.
+   //!
+   //! <b>Effects</b>: Transfers node "z" from tree2 to tree1 if tree1 does not contain
+   //!   a node that is equivalent to z. Rotates both trees according to "pcomp".
+   //!
+   //! <b>Returns</b>: True if the node was trasferred, false otherwise.
+   //!
+   //! <b>Complexity</b>: Logarithmic.
+   //!
+   //! <b>Throws</b>: If "comp" throw or "pcomp" throw. Strong guarantee.
    template<class NodePtrCompare, class PrioNodePtrPrioCompare>
    static bool transfer_unique
       (node_ptr header1, NodePtrCompare comp, PrioNodePtrPrioCompare pcomp, node_ptr header2, node_ptr z)
@@ -585,7 +618,16 @@ class treap_algorithms
       return transferable;
    }
 
-   //! @copydoc ::boost::intrusive::bstree_algorithms::transfer_equal
+   //! <b>Requires</b>: header1 and header2 must be the headers of trees tree1 and tree2
+   //!   respectively, z a non-header node of tree2. NodePtrCompare is the comparison
+   //!   function of tree1. PrioNodePtrPrioCompare is the priority function of both trees.
+   //!
+   //! <b>Effects</b>: Transfers node "z" from tree2 to tree1.
+   //!   Rotates both trees according to "pcomp".
+   //!
+   //! <b>Complexity</b>: Logarithmic.
+   //!
+   //! <b>Throws</b>: If "comp" throw or "pcomp" throw. Strong guarantee.
    template<class NodePtrCompare, class PrioNodePtrPrioCompare>
    static void transfer_equal
       (node_ptr header1, NodePtrCompare comp, PrioNodePtrPrioCompare pcomp, node_ptr header2, node_ptr z)
