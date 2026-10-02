@@ -310,10 +310,10 @@ class unordered_set_impl
 
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
    //! @copydoc ::boost::intrusive::hashtable::iterator_to(reference)
-   iterator iterator_to(reference value) BOOST_NOEXCEPT;
+   iterator iterator_to(reference value);
 
    //! @copydoc ::boost::intrusive::hashtable::iterator_to(const_reference)const
-   const_iterator iterator_to(const_reference value) const BOOST_NOEXCEPT;
+   const_iterator iterator_to(const_reference value) const;
 
    //! @copydoc ::boost::intrusive::hashtable::s_local_iterator_to(reference)
    static local_iterator s_local_iterator_to(reference value) BOOST_NOEXCEPT;
@@ -799,10 +799,10 @@ class unordered_multiset_impl
       equal_range(const KeyType& key, KeyHasher hash_func, KeyEqual equal_func) const;
 
    //! @copydoc ::boost::intrusive::hashtable::iterator_to(reference)
-   iterator iterator_to(reference value) BOOST_NOEXCEPT;
+   iterator iterator_to(reference value);
 
    //! @copydoc ::boost::intrusive::hashtable::iterator_to(const_reference)const
-   const_iterator iterator_to(const_reference value) const BOOST_NOEXCEPT;
+   const_iterator iterator_to(const_reference value) const;
 
    //! @copydoc ::boost::intrusive::hashtable::s_local_iterator_to(reference)
    static local_iterator s_local_iterator_to(reference value) BOOST_NOEXCEPT;

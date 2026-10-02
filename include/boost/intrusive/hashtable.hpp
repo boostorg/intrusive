@@ -3076,8 +3076,9 @@ class hashtable_impl
    //!
    //! <b>Complexity</b>: Constant.
    //!
-   //! <b>Throws</b>: If the internal hash function throws.
-   iterator iterator_to(reference value) BOOST_NOEXCEPT;
+   //! <b>Throws</b>: If linear_buckets<true> is set and store_hash<true> is not set,
+   //!   if the internal hasher throws. Otherwise, nothing.
+   iterator iterator_to(reference value);
 
    //! <b>Requires</b>: value must be an lvalue and shall be in a unordered_set of
    //!   appropriate type. Otherwise the behavior is undefined.
@@ -3087,8 +3088,9 @@ class hashtable_impl
    //!
    //! <b>Complexity</b>: Constant.
    //!
-   //! <b>Throws</b>: If the internal hash function throws.
-   const_iterator iterator_to(const_reference value) const BOOST_NOEXCEPT;
+   //! <b>Throws</b>: If linear_buckets<true> is set and store_hash<true> is not set,
+   //!   if the internal hasher throws. Otherwise, nothing.
+   const_iterator iterator_to(const_reference value) const;
 
    //! <b>Requires</b>: value must be an lvalue and shall be in a unordered_set of
    //!   appropriate type. Otherwise the behavior is undefined.
@@ -3299,7 +3301,8 @@ class hashtable_impl
    //!
    //! <b>Complexity</b>: Average case linear in this->size(), worst case quadratic.
    //!
-   //! <b>Throws</b>: If the hasher functor throws. Basic guarantee.
+   //! <b>Throws</b>: If the hasher functor throws. Basic guarantee: all the elements
+   //!   are unlinked (no destructors are called) and the container is left empty.
    inline void rehash(const bucket_traits &new_bucket_traits)
    {  this->priv_rehash_impl(new_bucket_traits, false); }
 
@@ -3322,17 +3325,27 @@ class hashtable_impl
    //!
    //! <b>Complexity</b>: Average case linear in this->size(), worst case quadratic.
    //!
-   //! <b>Throws</b>: If the hasher functor throws. Basic guarantee.
+   //! <b>Throws</b>: If the hasher functor throws. Basic guarantee: all the elements
+   //!   are unlinked (no destructors are called) and the container is left empty.
    inline void full_rehash()
    {  this->priv_rehash_impl(this->priv_bucket_traits(), true);  }
 
-   //! <b>Requires</b>:
+   //! <b>Effects</b>: Let s be this->split_count() and n be this->bucket_count().
    //!
-   //! <b>Effects</b>:
+   //!   If grow is true and s < n, increments the split count and moves the elements
+   //!   of bucket (s - n/2) that hash to bucket s to bucket s.
    //!
-   //! <b>Complexity</b>:
+   //!   If grow is false and s > n/2, moves all the elements of bucket (s - 1)
+   //!   to bucket (s - 1 - n/2) and decrements the split count.
    //!
-   //! <b>Throws</b>:
+   //!   Otherwise, does nothing.
+   //!
+   //! <b>Returns</b>: true if the split count was changed, false otherwise.
+   //!
+   //! <b>Complexity</b>: Linear to the number of elements in the bucket that is split or merged.
+   //!
+   //! <b>Throws</b>: If grow is true and store_hash<true> is not set, if the internal
+   //!   hasher throws. Strong guarantee.
    //!
    //! <b>Note</b>: this method is only available if incremental<true> option is activated.
    bool incremental_rehash(bool grow = true)
@@ -3391,6 +3404,8 @@ class hashtable_impl
       return ret;
    }
 
+   //! <b>Requires</b>: 'new_bucket_traits' copy assignment should not throw.
+   //!
    //! <b>Effects</b>: If new_bucket_traits.bucket_count() is not
    //!   this->bucket_count()/2 or this->bucket_count()*2, or
    //!   this->split_bucket() != new_bucket_traits.bucket_count() returns false
