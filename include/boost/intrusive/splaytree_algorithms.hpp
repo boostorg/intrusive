@@ -227,7 +227,8 @@ class splaytree_algorithms
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::erase(node_ptr,node_ptr)
    //!
-   //! <b>Note</b>: The previous node of z is splayed to speed up range deletions.
+   //! <b>Note</b>: If z has a left child, the previous node of z is splayed to speed up
+   //!   range deletions.
    static void erase(node_ptr header, node_ptr z) BOOST_NOEXCEPT
    {
       //posibility 1
@@ -296,7 +297,8 @@ class splaytree_algorithms
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::bstree_algorithms::count(const_node_ptr,const KeyType&,KeyNodePtrCompare)
    //!
-   //! <b>Note</b>: An element with key `key` is splayed.
+   //! <b>Note</b>: A node with a key equivalent to `key` is splayed. If there is no such
+   //!   node, the node immediately before or after the position of `key` is splayed.
    template<class KeyType, class KeyNodePtrCompare>
    static std::size_t count
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
@@ -320,7 +322,8 @@ class splaytree_algorithms
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::lower_bound(const_node_ptr,const KeyType&,KeyNodePtrCompare)
    //!
-   //! <b>Note</b>: The first node of the range is splayed.
+   //! <b>Note</b>: A node with a key equivalent to `key` is splayed. If there is no such
+   //!   node, the node immediately before or after the position of `key` is splayed.
    template<class KeyType, class KeyNodePtrCompare>
    static node_ptr lower_bound
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
@@ -341,7 +344,8 @@ class splaytree_algorithms
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::upper_bound(const_node_ptr,const KeyType&,KeyNodePtrCompare)
    //!
-   //! <b>Note</b>: The first node of the range is splayed.
+   //! <b>Note</b>: A node with a key equivalent to `key` is splayed. If there is no such
+   //!   node, the node immediately before or after the position of `key` is splayed.
    template<class KeyType, class KeyNodePtrCompare>
    static node_ptr upper_bound
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
@@ -362,7 +366,8 @@ class splaytree_algorithms
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::find(const_node_ptr, const KeyType&,KeyNodePtrCompare)
    //!
-   //! <b>Note</b>: The found node of the lower bound is splayed.
+   //! <b>Note</b>: A node with a key equivalent to `key` is splayed. If there is no such
+   //!   node, the node immediately before or after the position of `key` is splayed.
    template<class KeyType, class KeyNodePtrCompare>
    static node_ptr find
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
@@ -382,7 +387,8 @@ class splaytree_algorithms
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::equal_range(const_node_ptr,const KeyType&,KeyNodePtrCompare)
    //!
-   //! <b>Note</b>: The first node of the range is splayed.
+   //! <b>Note</b>: A node with a key equivalent to `key` is splayed. If there is no such
+   //!   node, the node immediately before or after the position of `key` is splayed.
    template<class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, node_ptr> equal_range
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
@@ -407,7 +413,8 @@ class splaytree_algorithms
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::lower_bound_range(const_node_ptr,const KeyType&,KeyNodePtrCompare)
    //!
-   //! <b>Note</b>: The first node of the range is splayed.
+   //! <b>Note</b>: A node with a key equivalent to `key` is splayed. If there is no such
+   //!   node, the node immediately before or after the position of `key` is splayed.
    template<class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, node_ptr> lower_bound_range
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
@@ -432,7 +439,9 @@ class splaytree_algorithms
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::find(const_node_ptr, const KeyType&,KeyNodePtrCompare)
    //!
-   //! <b>Note</b>: The tree must not contain equivalent keys. The found node is splayed.
+   //! <b>Note</b>: The tree must not contain equivalent keys. The node with a key equivalent
+   //!   to `key` is splayed. If there is no such node, the node immediately before or after
+   //!   the position of `key` is splayed.
    //!   This function can be more efficient than find.
    template<class KeyType, class KeyNodePtrCompare>
    static node_ptr find_unique
@@ -445,7 +454,9 @@ class splaytree_algorithms
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::lower_bound(const_node_ptr,const KeyType&,KeyNodePtrCompare)
    //!
-   //! <b>Note</b>: The tree must not contain equivalent keys. The first node of the range is splayed.
+   //! <b>Note</b>: The tree must not contain equivalent keys. The node with a key equivalent
+   //!   to `key` is splayed. If there is no such node, the node immediately before or after
+   //!   the position of `key` is splayed.
    //!   This function can be more efficient than lower_bound.
    template<class KeyType, class KeyNodePtrCompare>
    static node_ptr lower_bound_unique
@@ -458,7 +469,9 @@ class splaytree_algorithms
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::upper_bound(const_node_ptr,const KeyType&,KeyNodePtrCompare)
    //!
-   //! <b>Note</b>: The tree must not contain equivalent keys. The first node of the range is splayed.
+   //! <b>Note</b>: The tree must not contain equivalent keys. The node with a key equivalent
+   //!   to `key` is splayed. If there is no such node, the node immediately before or after
+   //!   the position of `key` is splayed.
    //!   This function can be more efficient than upper_bound.
    template<class KeyType, class KeyNodePtrCompare>
    static node_ptr upper_bound_unique
@@ -471,7 +484,9 @@ class splaytree_algorithms
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::equal_range(const_node_ptr,const KeyType&,KeyNodePtrCompare)
    //!
-   //! <b>Note</b>: The tree must not contain equivalent keys. The first node of the range is splayed.
+   //! <b>Note</b>: The tree must not contain equivalent keys. The node with a key equivalent
+   //!   to `key` is splayed. If there is no such node, the node immediately before or after
+   //!   the position of `key` is splayed.
    //!   This function can be more efficient than equal_range.
    template<class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, node_ptr> equal_range_unique
@@ -487,7 +502,8 @@ class splaytree_algorithms
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::bounded_range(const_node_ptr,const KeyType&,const KeyType&,KeyNodePtrCompare,bool,bool)
    //!
-   //! <b>Note</b>: The first node of the range is splayed.
+   //! <b>Note</b>: A node with a key equivalent to `lower_key` is splayed. If there is no such
+   //!   node, the node immediately before or after the position of `lower_key` is splayed.
    template<class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, node_ptr> bounded_range
       (node_ptr header, const KeyType &lower_key, const KeyType &upper_key, KeyNodePtrCompare comp
@@ -511,7 +527,9 @@ class splaytree_algorithms
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::insert_equal_upper_bound(node_ptr,node_ptr,NodePtrCompare)
    //!
-   //! <b>Note</b>: The inserted node is splayed.
+   //! <b>Note</b>: Before the insertion, a node with a key equivalent to the key of `new_node`
+   //!   is splayed. If there is no such node, the node immediately before or after the
+   //!   insertion position is splayed.
    template<class NodePtrCompare>
    static node_ptr insert_equal_upper_bound
       (node_ptr header, node_ptr new_node, NodePtrCompare comp)
@@ -522,7 +540,9 @@ class splaytree_algorithms
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::insert_equal_lower_bound(node_ptr,node_ptr,NodePtrCompare)
    //!
-   //! <b>Note</b>: The inserted node is splayed.
+   //! <b>Note</b>: Before the insertion, a node with a key equivalent to the key of `new_node`
+   //!   is splayed. If there is no such node, the node immediately before or after the
+   //!   insertion position is splayed.
    template<class NodePtrCompare>
    static node_ptr insert_equal_lower_bound
       (node_ptr header, node_ptr new_node, NodePtrCompare comp)
@@ -534,7 +554,8 @@ class splaytree_algorithms
    //! @copydoc ::boost::intrusive::bstree_algorithms::insert_equal(node_ptr,node_ptr,node_ptr,NodePtrCompare)
    //!
    //! <b>Note</b>: If "hint" is correct, "hint" (or its previous node if "hint" is the header)
-   //!   is splayed. Otherwise nodes with the key of "new_node" are splayed.
+   //!   is splayed. Otherwise, the nodes are splayed as in insert_equal_upper_bound or
+   //!   insert_equal_lower_bound.
    template<class NodePtrCompare>
    static node_ptr insert_equal
       (node_ptr header, node_ptr hint, node_ptr new_node, NodePtrCompare comp)
@@ -588,7 +609,8 @@ class splaytree_algorithms
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::insert_unique_check(const_node_ptr,const KeyType&,KeyNodePtrCompare,insert_commit_data&)
    //!
-   //! <b>Note</b>: Nodes with the given key are splayed.
+   //! <b>Note</b>: A node with a key equivalent to `key` is splayed. If there is no such
+   //!   node, the node immediately before or after the position of `key` is splayed.
    template<class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, bool> insert_unique_check
       (node_ptr header, const KeyType &key
@@ -606,7 +628,7 @@ class splaytree_algorithms
    //!
    //! <b>Note</b>: If "hint" is correct, "hint" (or its previous node if "hint" is the header)
    //!   is splayed. If "hint" or its previous node are equivalent to "key", that node is splayed.
-   //!   Otherwise nodes with the given key are splayed.
+   //!   Otherwise, the nodes are splayed as in insert_unique_check without hint.
    template<class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, bool> insert_unique_check
       (node_ptr header, node_ptr hint, const KeyType &key

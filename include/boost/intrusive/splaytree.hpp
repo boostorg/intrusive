@@ -236,82 +236,145 @@ class splaytree_impl
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::bstree::insert_equal(reference)
+   //!
+   //! <b>Note</b>: Before the insertion, a node with a key equivalent to the key of `value` is splayed.
+   //!   If there is no such node, the node immediately before or after the insertion position
+   //!   is splayed.
    iterator insert_equal(reference value);
 
    //! @copydoc ::boost::intrusive::bstree::insert_equal(const_iterator,reference)
+   //!
+   //! <b>Note</b>: If `hint` is correct, `hint` (or its previous node if `hint` is end()) is splayed.
+   //!   Otherwise, the nodes are splayed as in insert_equal(reference).
    iterator insert_equal(const_iterator hint, reference value);
 
    //! @copydoc ::boost::intrusive::bstree::insert_equal(Iterator,Iterator)
+   //!
+   //! <b>Note</b>: Each element is inserted as in insert_equal(const_iterator,reference) with end() as hint.
    template<class Iterator>
    void insert_equal(Iterator b, Iterator e);
 
    //! @copydoc ::boost::intrusive::bstree::insert_unique(reference)
+   //!
+   //! <b>Note</b>: A node with a key equivalent to the key of `value` is splayed. If there is no such node,
+   //!   the node immediately before or after the insertion position is splayed.
    std::pair<iterator, bool> insert_unique(reference value);
 
    //! @copydoc ::boost::intrusive::bstree::insert_unique(const_iterator,reference)
+   //!
+   //! <b>Note</b>: If `hint` is correct, `hint` (or its previous node if `hint` is end()) is splayed.
+   //!   If `hint` or its previous node are equivalent to `value`, that node is splayed.
+   //!   Otherwise, the nodes are splayed as in insert_unique(reference).
    iterator insert_unique(const_iterator hint, reference value);
 
    //! @copydoc ::boost::intrusive::bstree::insert_unique_check(const key_type&,insert_commit_data&)
+   //!
+   //! <b>Note</b>: A node with a key equivalent to `key` is splayed.
+   //!   If there is no such node, the node immediately before or after the position
+   //!   of `key` is splayed.
    std::pair<iterator, bool> insert_unique_check
       (const key_type &key, insert_commit_data &commit_data);
 
    //! @copydoc ::boost::intrusive::bstree::insert_unique_check(const_iterator,const key_type&,insert_commit_data&)
+   //!
+   //! <b>Note</b>: If `hint` is correct, `hint` (or its previous node if `hint` is end()) is splayed.
+   //!   If `hint` or its previous node are equivalent to `key`, that node is splayed.
+   //!   Otherwise, the nodes are splayed as in insert_unique_check(const key_type&,insert_commit_data&).
    std::pair<iterator, bool> insert_unique_check
       (const_iterator hint, const key_type &key, insert_commit_data &commit_data);
 
    //! @copydoc ::boost::intrusive::bstree::insert_unique_check(const KeyType&,KeyTypeKeyCompare,insert_commit_data&)
+   //!
+   //! <b>Note</b>: A node with a key equivalent to `key` is splayed.
+   //!   If there is no such node, the node immediately before or after the position
+   //!   of `key` is splayed.
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<iterator, bool> insert_unique_check
       (const KeyType &key, KeyTypeKeyCompare comp, insert_commit_data &commit_data);
 
    //! @copydoc ::boost::intrusive::bstree::insert_unique_check(const_iterator,const KeyType&,KeyTypeKeyCompare,insert_commit_data&)
+   //!
+   //! <b>Note</b>: If `hint` is correct, `hint` (or its previous node if `hint` is end()) is splayed.
+   //!   If `hint` or its previous node are equivalent to `key`, that node is splayed.
+   //!   Otherwise, the nodes are splayed as in insert_unique_check(const KeyType&,KeyTypeKeyCompare,insert_commit_data&).
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<iterator, bool> insert_unique_check
       (const_iterator hint, const KeyType &key
       ,KeyTypeKeyCompare comp, insert_commit_data &commit_data);
 
    //! @copydoc ::boost::intrusive::bstree::insert_unique_commit
+   //!
+   //! <b>Note</b>: No splaying is performed: insert_unique_check splays the nodes.
    iterator insert_unique_commit(reference value, const insert_commit_data &commit_data) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree::insert_unique(Iterator,Iterator)
+   //!
+   //! <b>Note</b>: Each element is inserted as in insert_unique(reference) or, if the container is
+   //!   empty, as in insert_unique(const_iterator,reference) with end() as hint.
    template<class Iterator>
    void insert_unique(Iterator b, Iterator e);
 
    //! @copydoc ::boost::intrusive::bstree::insert_before
+   //!
+   //! <b>Note</b>: The inserted node is splayed.
    iterator insert_before(const_iterator pos, reference value) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree::push_back
+   //!
+   //! <b>Note</b>: The inserted node is splayed.
    void push_back(reference value) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree::push_front
+   //!
+   //! <b>Note</b>: The inserted node is splayed.
    void push_front(reference value) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree::erase(const_iterator)
+   //!
+   //! <b>Note</b>: If the erased node has a left child, the previous node is splayed.
    iterator erase(const_iterator i) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree::erase(const_iterator,const_iterator)
+   //!
+   //! <b>Note</b>: Each node is erased as in erase(const_iterator).
    iterator erase(const_iterator b, const_iterator e) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree::erase(const key_type &)
+   //!
+   //! <b>Note</b>: The nodes are splayed as in equal_range(key). Then, each node is erased
+   //!   as in erase(const_iterator).
    size_type erase(const key_type &key);
 
    //! @copydoc ::boost::intrusive::bstree::erase(const KeyType&,KeyTypeKeyCompare)
+   //!
+   //! <b>Note</b>: The nodes are splayed as in equal_range(key). Then, each node is erased
+   //!   as in erase(const_iterator).
    template<class KeyType, class KeyTypeKeyCompare>
    size_type erase(const KeyType& key, KeyTypeKeyCompare comp);
 
    //! @copydoc ::boost::intrusive::bstree::erase_and_dispose(const_iterator,Disposer)
+   //!
+   //! <b>Note</b>: If the erased node has a left child, the previous node is splayed.
    template<class Disposer>
    iterator erase_and_dispose(const_iterator i, Disposer disposer) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree::erase_and_dispose(const_iterator,const_iterator,Disposer)
+   //!
+   //! <b>Note</b>: Each node is erased as in erase(const_iterator).
    template<class Disposer>
    iterator erase_and_dispose(const_iterator b, const_iterator e, Disposer disposer) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree::erase_and_dispose(const key_type &, Disposer)
+   //!
+   //! <b>Note</b>: The nodes are splayed as in equal_range(key). Then, each node is erased
+   //!   as in erase(const_iterator).
    template<class Disposer>
    size_type erase_and_dispose(const key_type &key, Disposer disposer);
 
    //! @copydoc ::boost::intrusive::bstree::erase_and_dispose(const KeyType&,KeyTypeKeyCompare,Disposer)
+   //!
+   //! <b>Note</b>: The nodes are splayed as in equal_range(key). Then, each node is erased
+   //!   as in erase(const_iterator).
    template<class KeyType, class KeyTypeKeyCompare, class Disposer>
    size_type erase_and_dispose(const KeyType& key, KeyTypeKeyCompare comp, Disposer disposer);
 
@@ -324,12 +387,16 @@ class splaytree_impl
 
    //! @copydoc ::boost::intrusive::bstree::count(const key_type &)const
    //!
-   //! <b>Note</b>: Non-const function, splaying is performed.
+   //! <b>Note</b>: Non-const function, a node with a key equivalent to `key` is splayed.
+   //!   If there is no such node, the node immediately before or after the position
+   //!   of `key` is splayed.
    size_type count(const key_type &key);
 
    //! @copydoc ::boost::intrusive::bstree::count(const KeyType&,KeyTypeKeyCompare)const
    //!
-   //! <b>Note</b>: Non-const function, splaying is performed.
+   //! <b>Note</b>: Non-const function, a node with a key equivalent to `key` is splayed.
+   //!   If there is no such node, the node immediately before or after the position
+   //!   of `key` is splayed.
    template<class KeyType, class KeyTypeKeyCompare>
    size_type count(const KeyType &key, KeyTypeKeyCompare comp);
 
@@ -346,7 +413,9 @@ class splaytree_impl
 
    //! @copydoc ::boost::intrusive::bstree::lower_bound(const key_type &)
    //!
-   //! <b>Note</b>: Non-const function, splaying is performed.
+   //! <b>Note</b>: Non-const function, a node with a key equivalent to `key` is splayed.
+   //!   If there is no such node, the node immediately before or after the position
+   //!   of `key` is splayed.
    iterator lower_bound(const key_type &key);
 
    //! @copydoc ::boost::intrusive::bstree::lower_bound(const key_type &)const
@@ -356,8 +425,9 @@ class splaytree_impl
 
    //! @copydoc ::boost::intrusive::bstree::lower_bound(const KeyType&,KeyTypeKeyCompare)
    //!
-   //! <b>Note</b>: Non-const function, splaying is performed for the first
-   //!   element of the equal range of "key".
+   //! <b>Note</b>: Non-const function, a node with a key equivalent to `key` is splayed.
+   //!   If there is no such node, the node immediately before or after the position
+   //!   of `key` is splayed.
    template<class KeyType, class KeyTypeKeyCompare>
    iterator lower_bound(const KeyType &key, KeyTypeKeyCompare comp);
 
@@ -369,8 +439,9 @@ class splaytree_impl
 
    //! @copydoc ::boost::intrusive::bstree::upper_bound(const key_type &)
    //!
-   //! <b>Note</b>: Non-const function, splaying is performed for the first
-   //!   element of the equal range of "value".
+   //! <b>Note</b>: Non-const function, a node with a key equivalent to `key` is splayed.
+   //!   If there is no such node, the node immediately before or after the position
+   //!   of `key` is splayed.
    iterator upper_bound(const key_type &key);
 
    //! @copydoc ::boost::intrusive::bstree::upper_bound(const key_type &)const
@@ -380,8 +451,9 @@ class splaytree_impl
 
    //! @copydoc ::boost::intrusive::bstree::upper_bound(const KeyType&,KeyTypeKeyCompare)
    //!
-   //! <b>Note</b>: Non-const function, splaying is performed for the first
-   //!   element of the equal range of "key".
+   //! <b>Note</b>: Non-const function, a node with a key equivalent to `key` is splayed.
+   //!   If there is no such node, the node immediately before or after the position
+   //!   of `key` is splayed.
    template<class KeyType, class KeyTypeKeyCompare>
    iterator upper_bound(const KeyType &key, KeyTypeKeyCompare comp);
 
@@ -393,8 +465,9 @@ class splaytree_impl
 
    //! @copydoc ::boost::intrusive::bstree::find(const key_type &)
    //!
-   //! <b>Note</b>: Non-const function, splaying is performed for the first
-   //!   element of the equal range of "value".
+   //! <b>Note</b>: Non-const function, a node with a key equivalent to `key` is splayed.
+   //!   If there is no such node, the node immediately before or after the position
+   //!   of `key` is splayed.
    iterator find(const key_type &key);
 
    //! @copydoc ::boost::intrusive::bstree::find(const key_type &)const
@@ -404,8 +477,9 @@ class splaytree_impl
 
    //! @copydoc ::boost::intrusive::bstree::find(const KeyType&,KeyTypeKeyCompare)
    //!
-   //! <b>Note</b>: Non-const function, splaying is performed for the first
-   //!   element of the equal range of "key".
+   //! <b>Note</b>: Non-const function, a node with a key equivalent to `key` is splayed.
+   //!   If there is no such node, the node immediately before or after the position
+   //!   of `key` is splayed.
    template<class KeyType, class KeyTypeKeyCompare>
    iterator find(const KeyType &key, KeyTypeKeyCompare comp);
 
@@ -417,8 +491,9 @@ class splaytree_impl
 
    //! @copydoc ::boost::intrusive::bstree::equal_range(const key_type &)
    //!
-   //! <b>Note</b>: Non-const function, splaying is performed for the first
-   //!   element of the equal range of "value".
+   //! <b>Note</b>: Non-const function, a node with a key equivalent to `key` is splayed.
+   //!   If there is no such node, the node immediately before or after the position
+   //!   of `key` is splayed.
    std::pair<iterator, iterator> equal_range(const key_type &key);
 
    //! @copydoc ::boost::intrusive::bstree::equal_range(const key_type &)const
@@ -428,8 +503,9 @@ class splaytree_impl
 
    //! @copydoc ::boost::intrusive::bstree::equal_range(const KeyType&,KeyTypeKeyCompare)
    //!
-   //! <b>Note</b>: Non-const function, splaying is performed for the first
-   //!   element of the equal range of "key".
+   //! <b>Note</b>: Non-const function, a node with a key equivalent to `key` is splayed.
+   //!   If there is no such node, the node immediately before or after the position
+   //!   of `key` is splayed.
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<iterator, iterator> equal_range(const KeyType &key, KeyTypeKeyCompare comp);
 
@@ -440,19 +516,31 @@ class splaytree_impl
    std::pair<const_iterator, const_iterator> equal_range(const KeyType &key, KeyTypeKeyCompare comp) const;
 
    //! @copydoc ::boost::intrusive::bstree::bounded_range(const key_type &,const key_type &,bool,bool)
+   //!
+   //! <b>Note</b>: Non-const function, a node with a key equivalent to `lower_key` is splayed.
+   //!   If there is no such node, the node immediately before or after the position
+   //!   of `lower_key` is splayed.
    std::pair<iterator,iterator> bounded_range
       (const key_type &lower_key, const key_type &upper_key, bool left_closed, bool right_closed);
 
    //! @copydoc ::boost::intrusive::bstree::bounded_range(const KeyType&,const KeyType&,KeyTypeKeyCompare,bool,bool)
+   //!
+   //! <b>Note</b>: Non-const function, a node with a key equivalent to `lower_key` is splayed.
+   //!   If there is no such node, the node immediately before or after the position
+   //!   of `lower_key` is splayed.
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<iterator,iterator> bounded_range
       (const KeyType& lower_key, const KeyType& upper_key, KeyTypeKeyCompare comp, bool left_closed, bool right_closed);
 
    //! @copydoc ::boost::intrusive::bstree::bounded_range(const key_type &,const key_type &,bool,bool)const
+   //!
+   //! <b>Note</b>: Const function, no splaying is performed.
    std::pair<const_iterator, const_iterator> bounded_range
       (const key_type &lower_key, const key_type &upper_key, bool left_closed, bool right_closed) const;
 
    //! @copydoc ::boost::intrusive::bstree::bounded_range(const KeyType&,const KeyType&,KeyTypeKeyCompare,bool,bool)const
+   //!
+   //! <b>Note</b>: Const function, no splaying is performed.
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<const_iterator, const_iterator> bounded_range
          (const KeyType& lower_key, const KeyType& upper_key, KeyTypeKeyCompare comp, bool left_closed, bool right_closed) const;
@@ -482,10 +570,16 @@ class splaytree_impl
    void remove_node(reference value) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree::merge_unique
+   //!
+   //! <b>Note</b>: Each transferred element is splayed in *this. In source, the nodes are splayed
+   //!   as in erase(const_iterator).
    template<class T, class ...Options2>
    void merge_unique(splaytree<T, Options2...> &);
 
    //! @copydoc ::boost::intrusive::bstree::merge_equal
+   //!
+   //! <b>Note</b>: For each transferred element, the nodes of *this are splayed as in
+   //!   insert_equal(reference) and the nodes of source as in erase(const_iterator).
    template<class T, class ...Options2>
    void merge_equal(splaytree<T, Options2...> &);
 
