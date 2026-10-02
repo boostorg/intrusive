@@ -1244,7 +1244,7 @@ class slist_impl
    void dispose_and_assign(Disposer disposer, Iterator b, Iterator e)
    {
       this->clear_and_dispose(disposer);
-      this->insert_after(this->cbefore_begin(), b, e, disposer);
+      this->insert_after(this->cbefore_begin(), b, e);
    }
 
    //! <b>Requires</b>: prev must point to an element contained by this list or

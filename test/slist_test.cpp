@@ -290,6 +290,13 @@ void test_slist< ListType, ValueContainer >
    {  int init_values [] = { 3, 4, 5 };
       TEST_INTRUSIVE_SEQUENCE( init_values, const_testlist.begin() );  }
 
+   testlist.dispose_and_assign (test::empty_disposer(), values.begin(), values.begin() + 2);
+   {  int init_values [] = { 1, 2 };
+      TEST_INTRUSIVE_SEQUENCE( init_values, const_testlist.begin() );  }
+   testlist.dispose_and_assign (test::empty_disposer(), values.begin() + 2, values.begin() + 5);
+   {  int init_values [] = { 3, 4, 5 };
+      TEST_INTRUSIVE_SEQUENCE( init_values, const_testlist.begin() );  }
+
    typename list_type::iterator i = ++testlist.begin();
    BOOST_TEST (i->value_ == 4);
 
