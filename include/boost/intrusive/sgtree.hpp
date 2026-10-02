@@ -931,14 +931,14 @@ class sgtree_impl
    iterator private_erase(const_iterator b, const_iterator e, size_type &n, Disposer disposer) BOOST_NOEXCEPT
    {
       for(n = 0; b != e; ++n)
-        this->erase_and_dispose(b++, disposer);
+        b = this->erase_and_dispose(b, disposer);
       return b.unconst();
    }
 
    iterator private_erase(const_iterator b, const_iterator e, size_type &n) BOOST_NOEXCEPT
    {
       for(n = 0; b != e; ++n)
-        this->erase(b++);
+        b = this->erase(b);
       return b.unconst();
    }
    /// @endcond
