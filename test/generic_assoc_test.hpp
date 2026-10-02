@@ -27,7 +27,9 @@ namespace boost{
 namespace intrusive{
 namespace test{
 
-BOOST_INTRUSIVE_HAS_MEMBER_FUNC_CALLED(has_splay, splay)
+BOOST_INTRUSIVE_HAS_MEMBER_FUNC_CALLED(has_splay_up, splay_up)
+
+BOOST_INTRUSIVE_HAS_MEMBER_FUNC_CALLED(has_splay_down, splay_down)
 
 BOOST_INTRUSIVE_HAS_MEMBER_FUNC_CALLED(has_rebalance, rebalance)
 
@@ -365,8 +367,8 @@ void test_generic_assoc<ContainerDefiner>::test_all(value_cont_type& values)
    test_root(values);
    test_clone(values);
    test_container_from_end(values, detail::bool_< assoc_type::has_container_from_iterator >());
-   test_splay_up(values, detail::bool_< has_splay< assoc_type >::value >());
-   test_splay_down(values, detail::bool_< has_splay< assoc_type >::value >());
+   test_splay_up(values, detail::bool_< has_splay_up< assoc_type >::value >());
+   test_splay_down(values, detail::bool_< has_splay_down< assoc_type >::value >());
    test_rebalance(values, detail::bool_< has_rebalance< assoc_type >::value >());
    test_insert_before(values, detail::bool_< has_insert_before< assoc_type >::value >());
    test_insert_erase_burst();
@@ -597,7 +599,7 @@ void test_generic_assoc<ContainerDefiner>::test_splay_down
       {
          iterator it = testset.begin();
          for(std::size_t j = 0; j != i; ++j, ++it){}
-         BOOST_TEST(*it == *testset.splay_down(*it));
+         BOOST_TEST(*it == *testset.splay_down(typename assoc_type::key_of_value()(*it)));
       }
       BOOST_TEST (testset.size() == num_values);
       iterator it = testset.begin();
