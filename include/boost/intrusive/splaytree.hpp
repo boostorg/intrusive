@@ -515,9 +515,7 @@ class splaytree_impl
    template<class KeyType, class KeyTypeKeyCompare>
    iterator splay_down(const KeyType &key, KeyTypeKeyCompare comp)
    {
-      detail::key_nodeptr_comp<value_compare, value_traits>
-         key_node_comp(comp, &this->get_value_traits());
-      node_ptr r = node_algorithms::splay_down(tree_type::header_ptr(), key, key_node_comp);
+      node_ptr r = node_algorithms::splay_down(tree_type::header_ptr(), key, this->key_node_comp(comp));
       return iterator(r, this->priv_value_traits_ptr());
    }
 
