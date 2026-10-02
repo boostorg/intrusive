@@ -1965,9 +1965,11 @@ class slist_impl
    void check() const
    {
       const_node_ptr header_ptr = get_root_node();
-      // header's next is never null
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(node_traits::get_next(header_ptr));
-      if (node_traits::get_next(header_ptr) == header_ptr)
+      const_node_ptr const first_p = node_traits::get_next(header_ptr);
+
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(linear || first_p);
+
+      if (first_p == (linear ? const_node_ptr() : header_ptr))
       {
          BOOST_INTRUSIVE_INVARIANT_ASSERT(!constant_time_size || this->priv_size_traits().get_size() == 0);
          return;
