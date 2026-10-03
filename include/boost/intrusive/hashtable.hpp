@@ -2102,6 +2102,9 @@ class hashtable_impl
    typedef circular_slist_algorithms<group_traits>                   group_algorithms;
    typedef typename internal_type::store_hash_t                      store_hash_t;
    typedef detail::bool_<optimize_multikey>                          optimize_multikey_t;
+   //Only key_equal guarantees at most one equivalent element in a container with unique keys:
+   //a KeyEqual can be coarser. key_type overloads use unique_keys_t, KeyType overloads false.
+   typedef detail::bool_<unique_keys>                                unique_keys_t;
    typedef detail::bool_<cache_begin>                                cache_begin_t;
    typedef detail::bool_<power_2_buckets>                            power_2_buckets_t;
    typedef detail::bool_<fastmod_buckets>                            fastmod_buckets_t;
@@ -2698,7 +2701,10 @@ class hashtable_impl
    //! <b>Note</b>: Invalidates the iterators (but not the references)
    //!    to the erased elements. No destructors are called.
    inline size_type erase(const key_type &key)
-   {  return this->erase(key, this->priv_hasher(), this->priv_equal());  }
+   {
+      return this->priv_erase_and_dispose
+         (key, this->priv_hasher(), this->priv_equal(), detail::null_disposer(), unique_keys_t());
+   }
 
    //! <b>Requires</b>: "hash_func" must be a hash function that induces
    //!   the same hash values as the stored hasher. The difference is that
@@ -2806,7 +2812,10 @@ class hashtable_impl
    //!    to the erased elements. No destructors are called.
    template<class Disposer>
    inline size_type erase_and_dispose(const key_type &key, Disposer disposer)
-   {  return this->erase_and_dispose(key, this->priv_hasher(), this->priv_equal(), disposer);   }
+   {
+      return this->priv_erase_and_dispose
+         (key, this->priv_hasher(), this->priv_equal(), disposer, unique_keys_t());
+   }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!
@@ -2824,42 +2833,9 @@ class hashtable_impl
    //! <b>Note</b>: Invalidates the iterators
    //!    to the erased elements.
    template<class KeyType, class KeyHasher, class KeyEqual, class Disposer>
-   size_type erase_and_dispose(const KeyType& key, KeyHasher hash_func
+   inline size_type erase_and_dispose(const KeyType& key, KeyHasher hash_func
                               ,KeyEqual equal_func, Disposer disposer)
-   {
-      size_type bucket_num;
-      std::size_t h;
-      siterator prev;
-      siterator it = this->priv_find(key, hash_func, equal_func, bucket_num, h, prev);
-      bool const success = it != this->priv_end_sit();
-
-      std::size_t cnt(0);
-      if(success){
-         BOOST_IF_CONSTEXPR(optimize_multikey){
-            siterator past_last_in_group = it;
-            (priv_go_to_last_in_group)(past_last_in_group, optimize_multikey_t());
-            ++past_last_in_group;
-            cnt = this->priv_erase_from_single_bucket
-               ( this->priv_bucket(bucket_num), prev
-               , past_last_in_group
-               , this->make_node_disposer(disposer), optimize_multikey_t());
-         }
-         else{
-            siterator const end_sit = this->priv_bucket_lend(bucket_num);
-            do{
-               ++cnt;
-               ++it;
-            }while(it != end_sit && 
-                  this->priv_is_value_equal_to_key
-                  (this->priv_value_from_siterator(it), h, key, equal_func, compare_hash_t()));
-            slist_node_algorithms::unlink_after_and_dispose(prev.pointed_node(), it.pointed_node(), this->make_node_disposer(disposer));
-         }
-         this->priv_size_count(size_type(this->priv_size_count()-cnt));
-         this->priv_erasure_update_cache();
-      }
-
-      return static_cast<size_type>(cnt);
-   }
+   {  return this->priv_erase_and_dispose(key, hash_func, equal_func, disposer, detail::bool_<false>());  }
 
    //! <b>Effects</b>: Erases all of the elements.
    //!
@@ -2909,7 +2885,12 @@ class hashtable_impl
    //!
    //! <b>Throws</b>: If the internal hasher or the equality functor throws.
    inline size_type count(const key_type &key) const
-   {  return this->count(key, this->priv_hasher(), this->priv_equal());  }
+   {
+      size_type cnt;
+      size_type n_bucket;
+      this->priv_local_equal_range(key, this->priv_hasher(), this->priv_equal(), n_bucket, cnt, unique_keys_t());
+      return cnt;
+   }
 
    //! <b>Requires</b>: "hash_func" must be a hash function that induces
    //!   the same hash values as the stored hasher. The difference is that
@@ -2929,7 +2910,7 @@ class hashtable_impl
    {
       size_type cnt;
       size_type n_bucket;
-      this->priv_local_equal_range(key, hash_func, equal_func, n_bucket, cnt);
+      this->priv_local_equal_range(key, hash_func, equal_func, n_bucket, cnt, detail::bool_<false>());
       return cnt;
    }
 
@@ -3016,7 +2997,13 @@ class hashtable_impl
    //!
    //! <b>Throws</b>: If the internal hasher or the equality functor throws.
    inline std::pair<iterator,iterator> equal_range(const key_type &key)
-   {  return this->equal_range(key, this->priv_hasher(), this->priv_equal());  }
+   {
+      priv_equal_range_result ret =
+         this->priv_equal_range(key, this->priv_hasher(), this->priv_equal(), unique_keys_t());
+      return std::pair<iterator, iterator>
+         ( this->build_iterator(ret.first, ret.bucket_first)
+         , this->build_iterator(ret.second, ret.bucket_second));
+   }
 
    //! <b>Requires</b>: "hash_func" must be a hash function that induces
    //!   the same hash values as the stored hasher. The difference is that
@@ -3043,7 +3030,7 @@ class hashtable_impl
       (const KeyType &key, KeyHasher hash_func, KeyEqual equal_func)
    {
       priv_equal_range_result ret =
-         this->priv_equal_range(key, hash_func, equal_func);
+         this->priv_equal_range(key, hash_func, equal_func, detail::bool_<false>());
       return std::pair<iterator, iterator>
          ( this->build_iterator(ret.first, ret.bucket_first)
          , this->build_iterator(ret.second, ret.bucket_second));
@@ -3058,7 +3045,13 @@ class hashtable_impl
    //! <b>Throws</b>: If the internal hasher or the equality functor throws.
    inline std::pair<const_iterator, const_iterator>
       equal_range(const key_type &key) const
-   {  return this->equal_range(key, this->priv_hasher(), this->priv_equal());  }
+   {
+      priv_equal_range_result ret =
+         this->priv_equal_range(key, this->priv_hasher(), this->priv_equal(), unique_keys_t());
+      return std::pair<const_iterator, const_iterator>
+         ( this->build_const_iterator(ret.first,  ret.bucket_first)
+         , this->build_const_iterator(ret.second, ret.bucket_second));
+   }
 
    //! <b>Requires</b>: "hash_func" must be a hash function that induces
    //!   the same hash values as the stored hasher. The difference is that
@@ -3085,7 +3078,7 @@ class hashtable_impl
       (const KeyType &key, KeyHasher hash_func, KeyEqual equal_func) const
    {
       priv_equal_range_result ret =
-         this->priv_equal_range(key, hash_func, equal_func);
+         this->priv_equal_range(key, hash_func, equal_func, detail::bool_<false>());
       return std::pair<const_iterator, const_iterator>
          ( this->build_const_iterator(ret.first,  ret.bucket_first)
          , this->build_const_iterator(ret.second, ret.bucket_second));
@@ -3908,48 +3901,90 @@ class hashtable_impl
       (siterator /*&it_first_in_group*/, detail::false_) BOOST_NOEXCEPT
    { }
 
-   template<class KeyType, class KeyHasher, class KeyEqual>
+   //Searches the elements equivalent to key. If found, returns the first one, "previt" is the
+   //node before it and "last" is the end of the equivalent elements in the bucket (the end of
+   //the bucket if they are the last ones). If not found, returns priv_end_sit().
+   //If "pcnt" is not null, *pcnt is the number of equivalent elements (zero if not found).
+   //If Unique, at most one element is equivalent to key.
+   template<class KeyType, class KeyHasher, class KeyEqual, bool Unique>
+   siterator priv_find_range
+      ( const KeyType &key, KeyHasher hash_func, KeyEqual equal_func, detail::bool_<Unique>
+      , size_type &bucket_number, siterator &previt, siterator &last, std::size_t *pcnt) const
+   {
+      std::size_t h;
+      siterator const first = this->priv_find(key, hash_func, equal_func, bucket_number, h, previt);
+      std::size_t cnt = 0;
+      if(first != this->priv_end_sit()){
+         last = first;
+         BOOST_IF_CONSTEXPR(optimize_multikey){
+            (priv_go_to_last_in_group)(last, optimize_multikey_t());
+            ++last;
+            if(pcnt)
+               cnt = boost::intrusive::iterator_udistance(first, last);
+         }
+         else{
+            siterator const bend = this->priv_bucket_lend(bucket_number);
+            do{
+               ++cnt;   //At least one is found
+               ++last;
+            }while(!Unique && last != bend &&
+                  this->priv_is_value_equal_to_key
+                  (this->priv_value_from_siterator(last), h, key, equal_func, compare_hash_t()));
+         }
+      }
+      if(pcnt)
+         *pcnt = cnt;
+      return first;
+   }
+
+   //If Unique, at most one element is equivalent to key
+   template<class KeyType, class KeyHasher, class KeyEqual, class Disposer, bool Unique>
+   size_type priv_erase_and_dispose(const KeyType& key, KeyHasher hash_func
+                              ,KeyEqual equal_func, Disposer disposer, detail::bool_<Unique> unique_tag)
+   {
+      size_type bucket_num;
+      siterator prev, last;
+      std::size_t cnt = 0;
+      //With optimize_multikey, priv_erase_from_single_bucket counts the erased elements
+      siterator const first = this->priv_find_range
+         (key, hash_func, equal_func, unique_tag, bucket_num, prev, last, optimize_multikey ? 0 : &cnt);
+
+      if(first != this->priv_end_sit()){
+         BOOST_IF_CONSTEXPR(optimize_multikey){
+            cnt = this->priv_erase_from_single_bucket
+               ( this->priv_bucket(bucket_num), prev, last
+               , this->make_node_disposer(disposer), optimize_multikey_t());
+         }
+         else{
+            slist_node_algorithms::unlink_after_and_dispose(prev.pointed_node(), last.pointed_node(), this->make_node_disposer(disposer));
+         }
+         this->priv_size_count(size_type(this->priv_size_count()-cnt));
+         this->priv_erasure_update_cache();
+      }
+
+      return static_cast<size_type>(cnt);
+   }
+
+   template<class KeyType, class KeyHasher, class KeyEqual, bool Unique>
    std::pair<siterator, siterator> priv_local_equal_range
       ( const KeyType &key
       , KeyHasher hash_func
       , KeyEqual equal_func
       , size_type &found_bucket
-      , size_type &cnt) const
+      , size_type &cnt
+      , detail::bool_<Unique> unique_tag) const  //If Unique, at most one element is equivalent to key
    {
-      std::size_t internal_cnt = 0;
-      //Let's see if the element is present
-      
-      siterator prev;
+      std::size_t internal_cnt;
+      siterator prev, last;
       size_type n_bucket;
-      std::size_t h;
       std::pair<siterator, siterator> to_return
-         ( this->priv_find(key, hash_func, equal_func, n_bucket, h, prev)
+         ( this->priv_find_range(key, hash_func, equal_func, unique_tag, n_bucket, prev, last, &internal_cnt)
          , this->priv_end_sit());
 
       if(to_return.first != to_return.second){
          found_bucket = n_bucket;
-         //If it's present, find the first that it's not equal in
-         //the same bucket
-         siterator it = to_return.first;
-         siterator const bend = this->priv_bucket_lend(n_bucket);
-         BOOST_IF_CONSTEXPR(optimize_multikey){
-            siterator past_last_in_group_it = it;
-            (priv_go_to_last_in_group)(past_last_in_group_it, optimize_multikey_t());
-            ++past_last_in_group_it;
-            internal_cnt += boost::intrusive::iterator_udistance(++it, past_last_in_group_it) + 1u;
-            if (past_last_in_group_it != bend)
-               to_return.second = past_last_in_group_it;
-         }
-         else{
-            do {
-               ++internal_cnt;   //At least one is found
-               ++it;
-            } while(it != bend &&
-                     this->priv_is_value_equal_to_key
-                        (this->priv_value_from_siterator(it), h, key, equal_func, compare_hash_t()));
-            if (it != bend)
-               to_return.second = it;
-         }
+         if (last != this->priv_bucket_lend(n_bucket))
+            to_return.second = last;
       }
       cnt = size_type(internal_cnt);
       return to_return;
@@ -3963,11 +3998,12 @@ class hashtable_impl
       bucket_ptr bucket_second;
    };
 
-   template<class KeyType, class KeyHasher, class KeyEqual>
+   template<class KeyType, class KeyHasher, class KeyEqual, bool Unique>
    priv_equal_range_result priv_equal_range
       ( const KeyType &key
       , KeyHasher hash_func
-      , KeyEqual equal_func) const
+      , KeyEqual equal_func
+      , detail::bool_<Unique> unique_tag) const
    {
       //Avoid false GCC -Wmaybe-uninitialized warning
       size_type n_bucket = 0;
@@ -3975,7 +4011,7 @@ class hashtable_impl
 
       //Let's see if the element is present
       const std::pair<siterator, siterator> to_return
-         (this->priv_local_equal_range(key, hash_func, equal_func, n_bucket, cnt));
+         (this->priv_local_equal_range(key, hash_func, equal_func, n_bucket, cnt, unique_tag));
       priv_equal_range_result r;
       r.first = to_return.first;
       r.second = to_return.second;
