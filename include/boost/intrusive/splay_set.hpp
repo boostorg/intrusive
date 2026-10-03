@@ -292,6 +292,15 @@ class splay_set_impl
 
    #endif   //   #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
+   //! @copydoc ::boost::intrusive::splaytree::count(const key_type &)
+   size_type count(const key_type &key)
+   {  return static_cast<size_type>(this->find(key) != this->end()); }
+
+   //! @copydoc ::boost::intrusive::splaytree::count(const KeyType&,KeyTypeKeyCompare)
+   template<class KeyType, class KeyTypeKeyCompare>
+   size_type count(const KeyType& key, KeyTypeKeyCompare comp)
+   {  return static_cast<size_type>(this->find(key, comp) != this->end()); }
+
    //! @copydoc ::boost::intrusive::splaytree::count(const key_type &)const
    size_type count(const key_type &key) const
    {  return static_cast<size_type>(this->tree_type::find(key) != this->tree_type::cend()); }
