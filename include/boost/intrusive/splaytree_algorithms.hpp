@@ -677,12 +677,12 @@ class splaytree_algorithms
 
    // bottom-up splay, use data_ as parent for n    | complexity : logarithmic    | exception : nothrow
    static void splay_up(node_ptr n, node_ptr header) BOOST_NOEXCEPT
-   {  priv_splay_up<true>(n, header); }
+   {  priv_splay_up(n, header); }
 
    // top-down splay | complexity : logarithmic    | exception : strong, note A
    template<class KeyType, class KeyNodePtrCompare>
    static node_ptr splay_down(node_ptr header, const KeyType &key, KeyNodePtrCompare comp, bool *pfound = 0)
-   {  return priv_splay_down<true>(header, key, comp, pfound);   }
+   {  return priv_splay_down(header, key, comp, pfound);   }
 
    private:
 
@@ -754,7 +754,6 @@ class splaytree_algorithms
    }
 
    // bottom-up splay, use data_ as parent for n    | complexity : logarithmic    | exception : nothrow
-   template<bool SimpleSplay>
    static void priv_splay_up(node_ptr n, node_ptr header) BOOST_NOEXCEPT
    {
       // If (node == header) do a splay for the right most node instead
@@ -784,16 +783,13 @@ class splaytree_algorithms
             rotate(n, t);
          }
          else {
-            // zig-zag
+            // simple zig-zag: only one rotation, the next iteration continues with g
             rotate(n, t);
-            if(!SimpleSplay){
-               rotate(n, t);
-            }
          }
       }
    }
 
-   template<bool SimpleSplay, class KeyType, class KeyNodePtrCompare>
+   template<class KeyType, class KeyNodePtrCompare>
    static node_ptr priv_splay_down(node_ptr header, const KeyType &key, KeyNodePtrCompare comp, bool *pfound = 0)
    {
       //Most splay tree implementations use a dummy/null node to implement.
@@ -837,12 +833,8 @@ class splaytree_algorithms
                   link_right(commit.t_, commit.r_);
                }
                else{
+                  //simple zig-zag
                   link_right(commit.t_, commit.r_);
-                  if(!SimpleSplay && comp(t_left, key)){
-                     if( !NodeTraits::get_right(commit.t_) )
-                        break;
-                     link_left(commit.t_, commit.l_);
-                  }
                }
             }
             else if(comp(commit.t_, key)){
@@ -858,12 +850,8 @@ class splaytree_algorithms
                      link_left(commit.t_, commit.l_);
                }
                else{
+                  //simple zig-zag
                   link_left(commit.t_, commit.l_);
-                  if(!SimpleSplay && comp(key, t_right)){
-                     if( !NodeTraits::get_left(commit.t_) )
-                        break;
-                     link_right(commit.t_, commit.r_);
-                  }
                }
             }
             else{
