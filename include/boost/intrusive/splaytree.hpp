@@ -237,9 +237,8 @@ class splaytree_impl
 
    //! @copydoc ::boost::intrusive::bstree::insert_equal(reference)
    //!
-   //! <b>Note</b>: Before the insertion, a node with a key equivalent to the key of `value` is splayed.
-   //!   If there is no such node, the node immediately before or after the insertion position
-   //!   is splayed.
+   //! <b>Note</b>: Before the insertion, the node immediately before or after the insertion
+   //!   position is splayed.
    iterator insert_equal(reference value);
 
    //! @copydoc ::boost::intrusive::bstree::insert_equal(const_iterator,reference)
@@ -517,17 +516,15 @@ class splaytree_impl
 
    //! @copydoc ::boost::intrusive::bstree::bounded_range(const key_type &,const key_type &,bool,bool)
    //!
-   //! <b>Note</b>: Non-const function, a node with a key equivalent to `lower_key` is splayed.
-   //!   If there is no such node, the node immediately before or after the position
-   //!   of `lower_key` is splayed.
+   //! <b>Note</b>: Non-const function, the first node of the range, or the node
+   //!   immediately before it, is splayed.
    std::pair<iterator,iterator> bounded_range
       (const key_type &lower_key, const key_type &upper_key, bool left_closed, bool right_closed);
 
    //! @copydoc ::boost::intrusive::bstree::bounded_range(const KeyType&,const KeyType&,KeyTypeKeyCompare,bool,bool)
    //!
-   //! <b>Note</b>: Non-const function, a node with a key equivalent to `lower_key` is splayed.
-   //!   If there is no such node, the node immediately before or after the position
-   //!   of `lower_key` is splayed.
+   //! <b>Note</b>: Non-const function, the first node of the range, or the node
+   //!   immediately before it, is splayed.
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<iterator,iterator> bounded_range
       (const KeyType& lower_key, const KeyType& upper_key, KeyTypeKeyCompare comp, bool left_closed, bool right_closed);

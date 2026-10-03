@@ -278,8 +278,7 @@ class splaytree_algorithms
       (node_ptr header1, NodePtrCompare comp, node_ptr header2, node_ptr z)
    {
       insert_commit_data commit_data;
-      splay_down(header1, z, comp);
-      bstree_algo::insert_equal_upper_bound_check(header1, z, comp, commit_data);
+      priv_insert_equal_check<true>(header1, z, comp, commit_data);
       erase(header2, z);
       bstree_algo::insert_commit(header1, z, commit_data);
    }
@@ -328,10 +327,10 @@ class splaytree_algorithms
    static node_ptr lower_bound
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {
-      bool found;
-      node_ptr const r = splay_down(detail::uncast(header), key, comp, &found);
+      bool found, before;
+      node_ptr const r = priv_splay_down(detail::uncast(header), key, comp, found, before);
       return found ? bstree_algo::lower_bound_loop(NodeTraits::get_left(r), r, key, comp)
-                   : priv_bound_from_root(header, r, key, comp);
+                   : priv_bound_from_root(header, r, before);
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::lower_bound(const_node_ptr,const KeyType&,KeyNodePtrCompare)
@@ -350,10 +349,10 @@ class splaytree_algorithms
    static node_ptr upper_bound
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {
-      bool found;
-      node_ptr const r = splay_down(detail::uncast(header), key, comp, &found);
+      bool found, before;
+      node_ptr const r = priv_splay_down(detail::uncast(header), key, comp, found, before);
       return found ? bstree_algo::upper_bound_loop(NodeTraits::get_right(r), header, key, comp)
-                   : priv_bound_from_root(header, r, key, comp);
+                   : priv_bound_from_root(header, r, before);
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::upper_bound(const_node_ptr,const KeyType&,KeyNodePtrCompare)
@@ -372,8 +371,8 @@ class splaytree_algorithms
    static node_ptr find
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {
-      bool found;
-      node_ptr const r = splay_down(detail::uncast(header), key, comp, &found);
+      bool found, before;
+      node_ptr const r = priv_splay_down(detail::uncast(header), key, comp, found, before);
       return found ? bstree_algo::lower_bound_loop(NodeTraits::get_left(r), r, key, comp) : header;
    }
 
@@ -393,13 +392,13 @@ class splaytree_algorithms
    static std::pair<node_ptr, node_ptr> equal_range
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {
-      bool found;
-      node_ptr const r = splay_down(detail::uncast(header), key, comp, &found);
+      bool found, before;
+      node_ptr const r = priv_splay_down(detail::uncast(header), key, comp, found, before);
       if(found)
          return std::pair<node_ptr, node_ptr>
             ( bstree_algo::lower_bound_loop(NodeTraits::get_left(r), r, key, comp)
             , bstree_algo::upper_bound_loop(NodeTraits::get_right(r), header, key, comp));
-      node_ptr const b = priv_bound_from_root(header, r, key, comp);
+      node_ptr const b = priv_bound_from_root(header, r, before);
       return std::pair<node_ptr, node_ptr>(b, b);
    }
 
@@ -419,13 +418,13 @@ class splaytree_algorithms
    static std::pair<node_ptr, node_ptr> lower_bound_range
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {
-      bool found;
-      node_ptr const r = splay_down(detail::uncast(header), key, comp, &found);
+      bool found, before;
+      node_ptr const r = priv_splay_down(detail::uncast(header), key, comp, found, before);
       if(found){
          node_ptr const lb = bstree_algo::lower_bound_loop(NodeTraits::get_left(r), r, key, comp);
          return std::pair<node_ptr, node_ptr>(lb, lb == r ? priv_next_of_root(header, r) : bstree_algo::next_node(lb));
       }
-      node_ptr const b = priv_bound_from_root(header, r, key, comp);
+      node_ptr const b = priv_bound_from_root(header, r, before);
       return std::pair<node_ptr, node_ptr>(b, b);
    }
 
@@ -447,8 +446,8 @@ class splaytree_algorithms
    static node_ptr find_unique
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {
-      bool found;
-      node_ptr const r = splay_down(header, key, comp, &found);
+      bool found, before;
+      node_ptr const r = priv_splay_down(header, key, comp, found, before);
       return found ? r : header;
    }
 
@@ -462,9 +461,9 @@ class splaytree_algorithms
    static node_ptr lower_bound_unique
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {
-      bool found;
-      node_ptr const r = splay_down(header, key, comp, &found);
-      return found ? r : priv_bound_from_root(header, r, key, comp);
+      bool found, before;
+      node_ptr const r = priv_splay_down(header, key, comp, found, before);
+      return found ? r : priv_bound_from_root(header, r, before);
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::upper_bound(const_node_ptr,const KeyType&,KeyNodePtrCompare)
@@ -477,9 +476,9 @@ class splaytree_algorithms
    static node_ptr upper_bound_unique
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {
-      bool found;
-      node_ptr const r = splay_down(header, key, comp, &found);
-      return found ? priv_next_of_root(header, r) : priv_bound_from_root(header, r, key, comp);
+      bool found, before;
+      node_ptr const r = priv_splay_down(header, key, comp, found, before);
+      return found ? priv_next_of_root(header, r) : priv_bound_from_root(header, r, before);
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::equal_range(const_node_ptr,const KeyType&,KeyNodePtrCompare)
@@ -492,28 +491,40 @@ class splaytree_algorithms
    static std::pair<node_ptr, node_ptr> equal_range_unique
       (node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {
-      bool found;
-      node_ptr const r = splay_down(header, key, comp, &found);
+      bool found, before;
+      node_ptr const r = priv_splay_down(header, key, comp, found, before);
       if(found)
          return std::pair<node_ptr, node_ptr>(r, priv_next_of_root(header, r));
-      node_ptr const b = priv_bound_from_root(header, r, key, comp);
+      node_ptr const b = priv_bound_from_root(header, r, before);
       return std::pair<node_ptr, node_ptr>(b, b);
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::bounded_range(const_node_ptr,const KeyType&,const KeyType&,KeyNodePtrCompare,bool,bool)
    //!
-   //! <b>Note</b>: A node with a key equivalent to `lower_key` is splayed. If there is no such
-   //!   node, the node immediately before or after the position of `lower_key` is splayed.
+   //! <b>Note</b>: The first node of the range, or the node immediately before it,
+   //!   is splayed.
    template<class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, node_ptr> bounded_range
       (node_ptr header, const KeyType &lower_key, const KeyType &upper_key, KeyNodePtrCompare comp
       , bool left_closed, bool right_closed)
    {
-      splay_down(detail::uncast(header), lower_key, comp);
-      std::pair<node_ptr, node_ptr> ret =
-         bstree_algo::bounded_range(header, lower_key, upper_key, comp, left_closed, right_closed);
-      //splay_up(ret.first, detail::uncast(header));
-      return ret;
+      //Splay the node before or after the first node of the range (lower bound if
+      //left_closed, upper bound otherwise)
+      bool before;
+      node_ptr const r = left_closed
+         ? priv_splay_down_bound<false>(header, lower_key, comp, before)
+         : priv_splay_down_bound<true> (header, lower_key, comp, before);
+      if(r == header)   //Empty tree
+         return std::pair<node_ptr, node_ptr>(header, header);
+      node_ptr const first = before ? r : priv_next_of_root(header, r);
+      //The end of the range is not before first, so it is r or a node of the right subtree of r
+      if(before && (right_closed ? comp(upper_key, r) : !comp(r, upper_key)))
+         return std::pair<node_ptr, node_ptr>(first, r);
+      node_ptr const r_right = NodeTraits::get_right(r);
+      node_ptr const last = right_closed
+         ? bstree_algo::upper_bound_loop(r_right, header, upper_key, comp)
+         : bstree_algo::lower_bound_loop(r_right, header, upper_key, comp);
+      return std::pair<node_ptr, node_ptr>(first, last);
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::bounded_range(const_node_ptr,const KeyType&,const KeyType&,KeyNodePtrCompare,bool,bool)
@@ -527,29 +538,31 @@ class splaytree_algorithms
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::insert_equal_upper_bound(node_ptr,node_ptr,NodePtrCompare)
    //!
-   //! <b>Note</b>: Before the insertion, a node with a key equivalent to the key of `new_node`
-   //!   is splayed. If there is no such node, the node immediately before or after the
+   //! <b>Note</b>: Before the insertion, the node immediately before or after the
    //!   insertion position is splayed.
    template<class NodePtrCompare>
    static node_ptr insert_equal_upper_bound
       (node_ptr header, node_ptr new_node, NodePtrCompare comp)
    {
-      splay_down(header, new_node, comp);
-      return bstree_algo::insert_equal_upper_bound(header, new_node, comp);
+      insert_commit_data commit_data;
+      priv_insert_equal_check<true>(header, new_node, comp, commit_data);
+      bstree_algo::insert_commit(header, new_node, commit_data);
+      return new_node;
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::insert_equal_lower_bound(node_ptr,node_ptr,NodePtrCompare)
    //!
-   //! <b>Note</b>: Before the insertion, a node with a key equivalent to the key of `new_node`
-   //!   is splayed. If there is no such node, the node immediately before or after the
+   //! <b>Note</b>: Before the insertion, the node immediately before or after the
    //!   insertion position is splayed.
    template<class NodePtrCompare>
    static node_ptr insert_equal_lower_bound
       (node_ptr header, node_ptr new_node, NodePtrCompare comp)
    {
-      splay_down(header, new_node, comp);
-      return bstree_algo::insert_equal_lower_bound(header, new_node, comp);
-   }  
+      insert_commit_data commit_data;
+      priv_insert_equal_check<false>(header, new_node, comp, commit_data);
+      bstree_algo::insert_commit(header, new_node, commit_data);
+      return new_node;
+   }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::insert_equal(node_ptr,node_ptr,node_ptr,NodePtrCompare)
    //!
@@ -616,11 +629,11 @@ class splaytree_algorithms
       (node_ptr header, const KeyType &key
       ,KeyNodePtrCompare comp, insert_commit_data &commit_data)
    {
-      bool found;
-      node_ptr const r = splay_down(header, key, comp, &found);
+      bool found, before;
+      node_ptr const r = priv_splay_down(header, key, comp, found, before);
       if(found)
          return std::pair<node_ptr, bool>(r, false);
-      priv_insert_commit_data_from_root(header, r, r != header && comp(key, r), commit_data);
+      priv_insert_commit_data_from_root(header, r, before, commit_data);
       return std::pair<node_ptr, bool>(node_ptr(), true);
    }
 
@@ -682,17 +695,33 @@ class splaytree_algorithms
    // top-down splay | complexity : logarithmic    | exception : strong, note A
    template<class KeyType, class KeyNodePtrCompare>
    static node_ptr splay_down(node_ptr header, const KeyType &key, KeyNodePtrCompare comp, bool *pfound = 0)
-   {  return priv_splay_down(header, key, comp, pfound);   }
+   {
+      bool found, before;
+      node_ptr const r = priv_splay_down(header, key, comp, found, before);
+      if(pfound)
+         *pfound = found;
+      return r;
+   }
 
    private:
 
    /// @cond
 
-   //After a splay_down that did not find key, root r is its predecessor or successor
+   //After a priv_splay_down that did not find key, root r is its predecessor or successor
    //(or header if the tree is empty), so lower_bound(key) == upper_bound(key)
-   template<class KeyType, class KeyNodePtrCompare>
-   static node_ptr priv_bound_from_root(node_ptr header, node_ptr r, const KeyType &key, KeyNodePtrCompare comp)
-   {  return (r == header || comp(key, r)) ? r : priv_next_of_root(header, r);  }
+   static node_ptr priv_bound_from_root(node_ptr header, node_ptr r, bool before) BOOST_NOEXCEPT
+   {  return (r == header || before) ? r : priv_next_of_root(header, r);  }
+
+   //Splays the node immediately before or after the upper bound (if UpperBound) or
+   //the lower bound of new_node and fills commit_data to insert new_node in that position.
+   template<bool UpperBound, class NodePtrCompare>
+   static void priv_insert_equal_check
+      (node_ptr header, node_ptr new_node, NodePtrCompare comp, insert_commit_data &commit_data)
+   {
+      bool before_r;
+      node_ptr const r = priv_splay_down_bound<UpperBound>(header, new_node, comp, before_r);
+      priv_insert_commit_data_from_root(header, r, before_r, commit_data);
+   }
 
    static node_ptr priv_next_of_root(node_ptr header, node_ptr r) BOOST_NOEXCEPT
    {
@@ -789,8 +818,95 @@ class splaytree_algorithms
       }
    }
 
+   // Comparison adaptors for priv_splay_down_impl.
+   //
+   // - comp_left(key, n) is true if key (or its insertion position) is before n.
+   // - comp_right(n, key) is true if it is after n.
+   //
+   // If is_total, an equivalent node is never found: "after n" is !comp_left,
+   // so comp_right is never called and a node never needs both comparisons.
+
+   //Equivalent nodes are found (comp_left== false && comp_right== false)
    template<class KeyType, class KeyNodePtrCompare>
-   static node_ptr priv_splay_down(node_ptr header, const KeyType &key, KeyNodePtrCompare comp, bool *pfound = 0)
+   struct splay_three_way_comp
+   {
+      static const bool is_total = false;
+
+      explicit splay_three_way_comp(KeyNodePtrCompare &comp)
+         : comp_(comp)
+      {}
+
+      KeyNodePtrCompare &comp_;
+
+      bool comp_left(const KeyType &key, node_ptr n) const
+      {  return comp_(key, n);  }
+
+      bool comp_right(node_ptr n, const KeyType &key) const
+      {  return comp_(n, key);  }
+   };
+
+      
+   template<bool UpperBound, class KeyType, class KeyNodePtrCompare>
+   struct splay_bound_comp
+   {
+      static const bool is_total = true;
+
+      explicit splay_bound_comp(KeyNodePtrCompare &comp)
+         : comp_(comp)
+      {}
+
+      KeyNodePtrCompare &comp_;
+
+      bool comp_left(const KeyType &key, node_ptr n) const
+      {  return UpperBound ? comp_(key, n) : !comp_(n, key);  }
+
+      bool comp_right(node_ptr, const KeyType &) const
+      {
+         BOOST_INTRUSIVE_INVARIANT_ASSERT(false); //Should never be called
+         return false;
+      }
+   };
+
+   //Splays a node equivalent to key. If there is no such node, splays the node
+   //immediately before or after the position of key. Returns the new root
+   //(header if the tree is empty). If not found, "before" is true if the position
+   //of key is immediately before the returned root. If found, "before" is false.
+   template<class KeyType, class KeyNodePtrCompare>
+   static node_ptr priv_splay_down(node_ptr header, const KeyType &key, KeyNodePtrCompare comp, bool &found, bool &before)
+   {
+      splay_three_way_comp<KeyType, KeyNodePtrCompare> const c(comp);
+      return priv_splay_down_impl(header, key, c, found, before);
+   }
+
+   //Splays the node immediately before or after the upper bound (if UpperBound) or the
+   //lower bound of key. Returns the new root (header if the tree is empty). before_r is
+   //true if the bound is immediately before the returned root.
+   //
+   //Splaying an equivalent node and then searching the bound would not splay the
+   //bound position: inserting many equivalent keys would create a degenerate tree.
+   template<bool UpperBound, class KeyType, class KeyNodePtrCompare>
+   static node_ptr priv_splay_down_bound
+      (node_ptr header, const KeyType &key, KeyNodePtrCompare comp, bool &before_r)
+   {
+      splay_bound_comp<UpperBound, KeyType, KeyNodePtrCompare> const c(comp);
+      bool found;
+      return priv_splay_down_impl(header, key, c, found, before_r);
+   }
+
+   enum splay_dir {  splay_left, splay_right, splay_found  };
+
+   //Position of key relative to n
+   template<class KeyType, class Comp>
+   static splay_dir priv_splay_dir(const KeyType &key, node_ptr n, const Comp &c)
+   {
+      return c.comp_left(key, n) ? splay_left
+           : (Comp::is_total || c.comp_right(n, key)) ? splay_right : splay_found;
+   }
+
+   //Top-down simple splay. Each node is compared at most once with comp_left and at
+   //most once with comp_right. If Comp::is_total, each node is compared at most once.
+   template<class KeyType, class Comp>
+   static node_ptr priv_splay_down_impl(node_ptr header, const KeyType &key, const Comp &c, bool &found, bool &before)
    {
       //Most splay tree implementations use a dummy/null node to implement.
       //this function. This has some problems for a generic library like Intrusive:
@@ -806,10 +922,15 @@ class splaytree_algorithms
       node_ptr const leftmost  = NodeTraits::get_left(header);
       node_ptr const rightmost = NodeTraits::get_right(header);
       if(leftmost == rightmost){ //Empty or unique node
-         if(pfound){
-            *pfound = old_root && !comp(key, old_root) && !comp(old_root, key);
+         if(!old_root){
+            found  = false;
+            before = true;
+            return header;
          }
-         return old_root ? old_root : header;
+         splay_dir const dir = priv_splay_dir(key, old_root, c);
+         found  = dir == splay_found;
+         before = dir == splay_left;
+         return old_root;
       }
       else{
          //Initialize "null node" (the header in our case)
@@ -818,53 +939,56 @@ class splaytree_algorithms
          //Class that will backup leftmost/rightmost from header, commit the assemble(),
          //and will restore leftmost/rightmost to header even if "comp" throws
          detail::splaydown_assemble_and_fix_header<NodeTraits> commit(old_root, header, leftmost, rightmost);
-         bool found = false;
 
+         //dir is the position of key relative to commit.t_. A full comparison is only
+         //needed after a zig-zig. After a simple zig-zag one comparison is already known.
+         splay_dir dir = priv_splay_dir(key, commit.t_, c);
          for( ;; ){
-            if(comp(key, commit.t_)){
+            if(dir == splay_left){
                node_ptr const t_left = NodeTraits::get_left(commit.t_);
                if(!t_left)
                   break;
-               if(comp(key, t_left)){
+               if(c.comp_left(key, t_left)){ //zig-zig
                   bstree_algo::rotate_right_no_parent_fix(commit.t_, t_left);
                   commit.t_ = t_left;
                   if( !NodeTraits::get_left(commit.t_) )
                      break;
                   link_right(commit.t_, commit.r_);
+                  dir = priv_splay_dir(key, commit.t_, c);
                }
                else{
-                  //simple zig-zag
+                  //simple zig-zag: key is not before t_left, the new commit.t_
                   link_right(commit.t_, commit.r_);
+                  dir = (Comp::is_total || c.comp_right(commit.t_, key)) ? splay_right : splay_found;
                }
             }
-            else if(comp(commit.t_, key)){
+            else if(Comp::is_total || dir == splay_right){
                node_ptr const t_right = NodeTraits::get_right(commit.t_);
                if(!t_right)
                   break;
 
-               if(comp(t_right, key)){
+               if(Comp::is_total ? !c.comp_left(key, t_right) : c.comp_right(t_right, key)){  //zig-zig
                      bstree_algo::rotate_left_no_parent_fix(commit.t_, t_right);
                      commit.t_ = t_right;
                      if( !NodeTraits::get_right(commit.t_) )
                         break;
                      link_left(commit.t_, commit.l_);
+                     dir = priv_splay_dir(key, commit.t_, c);
                }
                else{
-                  //simple zig-zag
+                  //simple zig-zag: key is not after t_right, the new commit.t_
                   link_left(commit.t_, commit.l_);
+                  dir = (Comp::is_total || c.comp_left(key, commit.t_)) ? splay_left : splay_found;
                }
             }
             else{
-               found = true;
                break;
             }
          }
-
+         found  = dir == splay_found;
+         before = dir == splay_left;
          //commit.~splaydown_assemble_and_fix_header<NodeTraits>() will first
          //"assemble()" + link the new root & recover header's leftmost & rightmost
-         if(pfound){
-            *pfound = found;
-         }
          return commit.t_;
       }
    }
