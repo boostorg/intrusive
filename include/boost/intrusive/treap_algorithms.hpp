@@ -658,9 +658,11 @@ class treap_algorithms
 
       node_ptr z_left  = NodeTraits::get_left(z);
       node_ptr z_right = NodeTraits::get_right(z);
-      while(z_left || z_right){
+      //Stop when z has at most one child: bstree_algo::erase will splice that child
+      //into z's place, which preserves the heap property.
+      while(z_left && z_right){
          const node_ptr z_parent(NodeTraits::get_parent(z));
-         if(!z_right || (z_left && pcomp(z_left, z_right))){
+         if(pcomp(z_left, z_right)){
             bstree_algo::rotate_right(z, z_left, z_parent, header);
          }
          else{
