@@ -2114,6 +2114,20 @@ class bstree_impl
    {  x.swap(y);  }
 
    /// @cond
+   protected:
+   //For containers with unique keys: erases the only element equivalent to key, if any.
+   //Avoids searching both bounds of the equal range. It uses the find and erase_and_dispose
+   //members of the container "c" (e.g. sgtree and treap define their own erase functions).
+   template<class Container, class Disposer>
+   static size_type priv_erase_unique(Container &c, const key_type &key, Disposer disposer)
+   {
+      typename Container::const_iterator const i = c.find(key);
+      if(i == c.cend())
+         return 0;
+      c.erase_and_dispose(i, disposer);
+      return 1;
+   }
+
    private:
    template<class Disposer>
    iterator private_erase(const_iterator b, const_iterator e, size_type &n, Disposer disposer)

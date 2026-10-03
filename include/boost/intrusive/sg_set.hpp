@@ -290,6 +290,20 @@ class sg_set_impl
    template<class Disposer>
    void clear_and_dispose(Disposer disposer) BOOST_NOEXCEPT;
 
+   #else
+
+   using tree_type::erase;
+   using tree_type::erase_and_dispose;
+
+   //Only key_comp() guarantees at most one equivalent element (a KeyTypeKeyCompare can be
+   //coarser), so the key_type overloads can erase the unique element.
+   size_type erase(const key_type &key)
+   {  return tree_type::priv_erase_unique(*this, key, detail::null_disposer());  }
+
+   template<class Disposer>
+   size_type erase_and_dispose(const key_type &key, Disposer disposer)
+   {  return tree_type::priv_erase_unique(*this, key, disposer);  }
+
    #endif   //   #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::sgtree::count(const key_type &)const
