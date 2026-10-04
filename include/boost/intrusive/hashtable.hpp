@@ -3790,26 +3790,38 @@ class hashtable_impl
       typedef typename internal_type::template typeof_node_disposer<Disposer>::type NodeDisposer;
       NodeDisposer node_disp(disposer, &this->priv_value_traits());
 
+      //If the cloner throws, the clones are in the buckets of the destination
+      //array (smaller or bigger than the number of source buckets already processed)
       exception_bucket_disposer<bucket_type, slist_node_algorithms, NodeDisposer, size_type>
-         rollback(this->priv_bucket(0), node_disp, constructed);
-      //Now insert the remaining ones using the modulo trick
-      for( //"constructed" already initialized
-         ; constructed < src_bucket_count
-         ; ++constructed){
+         rollback(this->priv_bucket(0), node_disp, dst_bucket_count);
+      BOOST_INTRUSIVE_TRY{
+         //Now insert the remaining ones using the modulo trick
+         for( //"constructed" already initialized
+            ; constructed < src_bucket_count
+            ; ++constructed){
 
-         const size_type new_n = (size_type)hash_to_bucket_split<power_2_buckets, incremental>
-            (constructed, dst_bucket_count, this->split_count(), fastmod_buckets_t());
-         bucket_type &src_b = src.priv_bucket(constructed);
-         for( siterator b(this->priv_bucket_lbegin(src_b)), e(this->priv_bucket_lend(src_b)); b != e; ++b){
-            typedef typename detail::if_c
-               <detail::is_const<MaybeConstHashtableImpl>::value, const_reference, reference>::type reference_type;
-            reference_type r = this->priv_value_from_siterator(b);
-            this->priv_clone_front_in_bucket<reference_type>
-               (new_n, r, this->priv_stored_hash(b, store_hash_t()), cloner);
+            const size_type new_n = (size_type)hash_to_bucket_split<power_2_buckets, incremental>
+               (constructed, dst_bucket_count, this->split_count(), fastmod_buckets_t());
+            bucket_type &src_b = src.priv_bucket(constructed);
+            for( siterator b(this->priv_bucket_lbegin(src_b)), e(this->priv_bucket_lend(src_b)); b != e; ++b){
+               typedef typename detail::if_c
+                  <detail::is_const<MaybeConstHashtableImpl>::value, const_reference, reference>::type reference_type;
+               reference_type r = this->priv_value_from_siterator(b);
+               this->priv_clone_front_in_bucket<reference_type>
+                  (new_n, r, this->priv_stored_hash(b, store_hash_t()), cloner);
+            }
          }
+         this->priv_hasher() = src.priv_hasher();
+         this->priv_equal()  = src.priv_equal();
       }
-      this->priv_hasher() = src.priv_hasher();
-      this->priv_equal()  = src.priv_equal();
+      BOOST_INTRUSIVE_CATCH(...){
+         //The rollback disposes all the clones, the container will be empty
+         //but we must update size and the cached first bucket
+         this->priv_size_count(size_type(0));
+         this->priv_init_cache();
+         BOOST_INTRUSIVE_RETHROW;
+      }
+      BOOST_INTRUSIVE_CATCH_END
       rollback.release();
       this->priv_size_count(src.priv_size_count());
       //split_count is not modified as it depends on this bucket array
