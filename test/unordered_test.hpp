@@ -63,6 +63,14 @@ std::size_t seeded_hash_t<Dummy>::seed = 0u;
 
 typedef seeded_hash_t<> seeded_hash;
 
+//Hash function that stores all the elements in the same bucket
+struct zero_hash
+{
+   template<class T>
+   std::size_t operator()(const T &) const
+   {  return 0u;  }
+};
+
 template<class ContainerDefiner>
 struct test_unordered
 {
@@ -80,6 +88,8 @@ struct test_unordered
    static void test_rehash_groups(detail::true_);
    static void test_rehash_groups(detail::true_);
    static void test_rehash_groups(detail::false_);
+   static void test_erase_range_in_group(detail::true_);
+   static void test_erase_range_in_group(detail::false_);
    static void test_find(value_cont_type& values);
    static bool test_equal(const int *xv, std::size_t xn, const int *yv, std::size_t yn);
    static void test_equal();
@@ -131,6 +141,7 @@ void test_unordered<ContainerDefiner>::test_all (value_cont_type& values)
    test_swap(values);
    test_rehash(values, detail::bool_<unordered_type::incremental>());
    test_rehash_groups(detail::bool_<boost::intrusive::test::is_multikey_true<unordered_type>::value>());
+   test_erase_range_in_group(detail::bool_<boost::intrusive::test::is_multikey_true<unordered_type>::value>());
    test_find(values);
    test_equal();
    test_impl();
@@ -799,6 +810,90 @@ void test_unordered<ContainerDefiner>::test_rehash_groups(detail::true_)   //mul
 
 template<class ContainerDefiner>
 void test_unordered<ContainerDefiner>::test_rehash_groups(detail::false_)   //not multikey
+{}
+
+//test: erasing a range that starts and ends inside the same group of equivalent elements
+template<class ContainerDefiner>
+void test_unordered<ContainerDefiner>::test_erase_range_in_group(detail::true_)   //multikey
+{
+   typedef typename ContainerDefiner::template container
+      <hash<zero_hash> >::type unordered_type;   //All elements are stored in the same bucket
+   typedef typename unordered_type::iterator       iterator;
+   typedef typename unordered_type::bucket_traits  bucket_traits;
+   typedef typename unordered_type::bucket_ptr     bucket_ptr;
+   typedef typename unordered_type::key_of_value   key_of_value;
+   const std::size_t ExtraBuckets = unordered_type::bucket_overhead;
+   typedef bucket_sizes<unordered_type> sizes;
+
+   //Groups: (key 2, 2 elements), (key 9, 6 elements), (key 1, 2 elements). New groups are inserted
+   //at the beginning of the bucket, so the group of key 9 has other groups before and after it.
+   const std::size_t GroupSize = 6u, OtherSize = 2u, Total = GroupSize + 2u*OtherSize;   const int Key = 9, Before = 1, After = 2;
+
+   typename unordered_type::bucket_type buckets[sizes::Normal + ExtraBuckets];
+
+   //Try all the ranges of the group, including the ones that start or end at the group limits
+   for(std::size_t a = 0u; a != GroupSize; ++a){
+      for(std::size_t b = a + 1u; b <= GroupSize; ++b){
+         value_cont_type values(Total);
+         std::size_t k = 0u;
+         for (std::size_t i = 0u; i != OtherSize; ++i)
+            (&values[k++])->value_ = After;
+         for (std::size_t i = 0u; i != GroupSize; ++i)
+            (&values[k++])->value_ = Key;
+         for (std::size_t i = 0u; i != OtherSize; ++i)
+            (&values[k++])->value_ = Before;
+
+         unordered_type testset(values.begin(), values.end(), bucket_traits(
+            pointer_traits<bucket_ptr>::pointer_to(buckets[0]), sizeof(buckets)/sizeof(*buckets)));
+
+         //Check that the group is surrounded by other groups in the same bucket
+         BOOST_TEST(testset.bucket_count() >= 1u);
+         BOOST_TEST(testset.bucket_size(0u) == Total);
+         BOOST_TEST(testset.begin()->value_ != Key);
+         iterator last_in_bucket = testset.begin();
+         for(iterator it = testset.begin(); it != testset.end(); ++it)
+            last_in_bucket = it;
+         BOOST_TEST(last_in_bucket->value_ != Key);
+
+         typename unordered_type::value_type key_val, before_val, after_val;
+         key_val.value_ = Key;
+         before_val.value_ = Before;
+         after_val.value_ = After;
+
+         std::pair<iterator, iterator> range = testset.equal_range(key_of_value()(key_val));
+         BOOST_TEST(boost::intrusive::iterator_distance(range.first, range.second) == (std::ptrdiff_t)GroupSize);
+         iterator first = range.first;
+         for(std::size_t i = 0u; i != a; ++i)
+            ++first;
+         iterator last = first;
+         for(std::size_t i = a; i != b; ++i)
+            ++last;
+         testset.erase(first, last);
+
+         const std::size_t remaining = GroupSize - (b - a);
+         BOOST_TEST(testset.size() == remaining + 2u*OtherSize);
+         BOOST_TEST(testset.bucket_size(0u) == remaining + 2u*OtherSize);
+         BOOST_TEST(testset.count(key_of_value()(key_val)) == remaining);
+         BOOST_TEST(testset.count(key_of_value()(before_val)) == OtherSize);
+         BOOST_TEST(testset.count(key_of_value()(after_val)) == OtherSize);
+         range = testset.equal_range(key_of_value()(key_val));
+         BOOST_TEST(boost::intrusive::iterator_distance(range.first, range.second) == (std::ptrdiff_t)remaining);
+         range = testset.equal_range(key_of_value()(before_val));
+         BOOST_TEST(boost::intrusive::iterator_distance(range.first, range.second) == (std::ptrdiff_t)OtherSize);
+         range = testset.equal_range(key_of_value()(after_val));
+         BOOST_TEST(boost::intrusive::iterator_distance(range.first, range.second) == (std::ptrdiff_t)OtherSize);
+
+         //All the groups are still correctly linked, so they can be erased by key
+         BOOST_TEST(testset.erase(key_of_value()(key_val)) == remaining);
+         BOOST_TEST(testset.erase(key_of_value()(before_val)) == OtherSize);
+         BOOST_TEST(testset.erase(key_of_value()(after_val)) == OtherSize);
+         BOOST_TEST(testset.empty());
+      }
+   }
+}
+
+template<class ContainerDefiner>
+void test_unordered<ContainerDefiner>::test_erase_range_in_group(detail::false_)   //not multikey
 {}
 
 //Builds two containers from the "xv" and "yv" arrays, compares them

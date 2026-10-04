@@ -879,7 +879,8 @@ struct bucket_plus_vtraits
                if(nf == group2) {   //Both first and last in the same group
                                     //so join group1 and group2
                   node_ptr const end1 = group_traits::get_next(group1);
-                  node_ptr const end2 = group_traits::get_next(group2);
+                  //After splitting, nl is the first node of the second group
+                  node_ptr const end2 = group_traits::get_next(nl);
                   group_traits::set_next(group1, end2);
                   group_traits::set_next(nl, end1);
                }
