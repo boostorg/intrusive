@@ -759,6 +759,12 @@ void test_sequence(value (&values)[N], value (&values2)[N2])
    {
       Cont c2(&values2[0], &values2[0] + N2);
       test_throws_basic(c, c2, cont_merge(), values, values2);
+      //A throwing merge can move some or all elements from c2 to c
+      //so rebuild both containers to obtain the original state
+      c.clear();
+      c2.clear();
+      c.insert(c.end(), &values[0], &values[0] + N);
+      c2.insert(c2.end(), &values2[0], &values2[0] + N2);
       test_throws_basic(c, c2, list_merge_pred(), values, values2);
       c2.clear();
    }
