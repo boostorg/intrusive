@@ -1066,29 +1066,17 @@ class list_impl
    template<class Predicate>
    void merge(list_impl& x, Predicate p)
    {
-      const_iterator e(this->cend()), ex(x.cend());
-      const_iterator b(this->cbegin());
-      while(!x.empty()){
-         const_iterator ix(x.cbegin());
-         while (b != e && !p(*ix, *b)){
-            ++b;
-         }
-         if(b == e){
-            //Now transfer the rest to the end of the container
-            this->splice(e, x);
-            break;
-         }
-         else{
-            size_type n(0);
-            do{
-               ++ix; ++n;
-            } while(ix != ex && p(*ix, *b));
-            this->splice(b, x, x.begin(), ix, n);
-            //If x is not empty, the last comparison was false: *b goes before *ix,
-            //so the next search starts after b without comparing them again
-            ++b;
-         }
+      detail::key_nodeptr_comp<Predicate, value_traits> comp(p, &this->priv_value_traits());
+      BOOST_INTRUSIVE_TRY{
+         node_algorithms::merge(this->get_root_node(), x.get_root_node(), comp);
       }
+      BOOST_INTRUSIVE_CATCH(...){
+         //All nodes of x have been moved to *this even if the predicate throws
+         this->priv_transfer_all_size(x);
+         BOOST_INTRUSIVE_RETHROW;
+      }
+      BOOST_INTRUSIVE_CATCH_END
+      this->priv_transfer_all_size(x);
    }
 
    //! <b>Effects</b>: Reverses the order of elements in the list.
@@ -1405,6 +1393,15 @@ class list_impl
    /// @cond
 
    private:
+   //Updates sizes after all the elements of x have been moved to *this
+   void priv_transfer_all_size(list_impl &x) BOOST_NOEXCEPT
+   {
+      size_traits &thist = this->priv_size_traits();
+      size_traits &xt = x.priv_size_traits();
+      thist.increase(xt.get_size());
+      xt.set_size(size_type(0));
+   }
+
    BOOST_INTRUSIVE_NO_DANGLING
    static list_impl &priv_container_from_end_iterator(const const_iterator &end_iterator) BOOST_NOEXCEPT
    {

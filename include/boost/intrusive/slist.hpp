@@ -1463,12 +1463,7 @@ class slist_impl
          }
          BOOST_INTRUSIVE_CATCH(...){
             //Nodes remain linked in unspecified order, so recalculate the new last node
-            const node_ptr end_node = this->get_end_node();
-            node_ptr l = this->get_root_node();
-            for(node_ptr n = node_traits::get_next(l); n != end_node; n = node_traits::get_next(n)){
-               l = n;
-            }
-            this->set_last_node(l);
+            this->priv_update_last_node();
             BOOST_INTRUSIVE_RETHROW;
          }
          BOOST_INTRUSIVE_CATCH_END
@@ -1519,32 +1514,32 @@ class slist_impl
    template<class Predicate>
    void merge(slist_impl& x, Predicate p, const_iterator *l = 0)
    {
-      const_iterator e(this->cend()), ex(x.cend()), bb(this->cbefore_begin()),
-                     bb_next;
-      if(l) *l = e.unconst();
-      while(!x.empty()){
-         const_iterator ibx_next(x.cbefore_begin()), ibx(ibx_next++);
-         while (++(bb_next = bb) != e && !p(*ibx_next, *bb_next)){
-            bb = bb_next;
+      detail::key_nodeptr_comp<Predicate, value_traits> comp(p, &this->priv_value_traits());
+      node_ptr last_x = node_ptr();
+      BOOST_INTRUSIVE_TRY{
+         //With a cached last node, merge does not need to traverse the lists to find it
+         last_x = node_algorithms::merge
+            ( this->get_root_node(), x.get_root_node(), comp
+            , cache_last ? this->get_last_node() : node_ptr()
+            , cache_last ? x.get_last_node() : node_ptr());
+      }
+      BOOST_INTRUSIVE_CATCH(...){
+         //All nodes of x have been moved to *this even if the predicate throws
+         this->priv_transfer_all(x);
+         BOOST_IF_CONSTEXPR(cache_last){
+            this->priv_update_last_node();
          }
-         if(bb_next == e){
-            //Now transfer the rest to the end of the container
-            this->splice_after(bb, x, l);
-            break;
-         }
-         else{
-            size_type n(0);
-            do{
-               ibx = ibx_next; ++n;
-            } while(++(ibx_next = ibx) != ex && p(*ibx_next, *bb_next));
-            this->splice_after(bb, x, x.before_begin(), ibx, n);
-            if(l) *l = ibx;
-            //Transferred elements are now between bb and bb_next. If x is not empty,
-            //the last comparison was false: bb_next goes before the next element of x,
-            //so the next search starts after bb_next without comparing them again
-            bb = bb_next;
+         if(l) *l = this->cend().unconst();
+         BOOST_INTRUSIVE_RETHROW;
+      }
+      BOOST_INTRUSIVE_CATCH_END
+      this->priv_transfer_all(x);
+      BOOST_IF_CONSTEXPR(cache_last){
+         if(last_x != node_ptr() && node_traits::get_next(last_x) == this->get_end_node()){
+            this->set_last_node(last_x);
          }
       }
+      if(l) *l = last_x != node_ptr() ? const_iterator(last_x, this->priv_value_traits_ptr()) : this->cend();
    }
 
    //! <b>Effects</b>: This function removes all of x's elements and inserts them
@@ -1999,6 +1994,29 @@ class slist_impl
    {  x.swap(y);  }
 
    private:
+   //Updates sizes (and the cached last node of x) after all the nodes of x have been moved to *this
+   void priv_transfer_all(slist_impl &x) BOOST_NOEXCEPT
+   {
+      size_traits &thist = this->priv_size_traits();
+      size_traits &xt = x.priv_size_traits();
+      thist.increase(xt.get_size());
+      xt.set_size(size_type(0));
+      BOOST_IF_CONSTEXPR(cache_last){
+         x.set_last_node(x.get_root_node());
+      }
+   }
+
+   //Recalculates the cached last node
+   void priv_update_last_node() BOOST_NOEXCEPT
+   {
+      const node_ptr end_node = this->get_end_node();
+      node_ptr l = this->get_root_node();
+      for(node_ptr n = node_traits::get_next(l); n != end_node; n = node_traits::get_next(n)){
+         l = n;
+      }
+      this->set_last_node(l);
+   }
+
    void priv_splice_after(node_ptr prev_pos_n, slist_impl &x, node_ptr before_f_n, node_ptr before_l_n)
    {
       BOOST_IF_CONSTEXPR(cache_last)

@@ -337,7 +337,7 @@ class circular_list_algorithms
       const node_ptr first = NodeTraits::get_next(p);
       //Lists with less than two nodes are already sorted
       if(first != NodeTraits::get_previous(p)){
-         node_ptr head, tail;
+         node_ptr head = node_ptr(), tail = node_ptr();
          BOOST_INTRUSIVE_TRY{
             detail::node_chain_sort<NodeTraits>::sort(first, p, comp, head, tail);
          }
@@ -349,6 +349,49 @@ class circular_list_algorithms
          BOOST_INTRUSIVE_CATCH_END
          priv_relink_sorted(p, head, tail);
       }
+   }
+
+   //! <b>Requires</b>: p and x must be nodes of two different circular lists (typically their
+   //!   headers). The nodes that follow p in its list and the nodes that follow x in its list
+   //!   must be sorted according to "comp", a function object that induces a strict weak ordering
+   //!   on node_ptrs: <tt>comp(a, b)</tt> returns true if node a must be placed before node b.
+   //!
+   //! <b>Effects</b>: Removes all the nodes of x's list (except x) and inserts them in order
+   //!   in p's list. The merge is stable: if a node of p's list is equivalent to a node of x's list,
+   //!   the node of p's list goes first.
+   //!
+   //! <b>Complexity</b>: Linear: it performs at most N + M - 1 comparisons, where N and M
+   //!   are the number of nodes of each list.
+   //!
+   //! <b>Throws</b>: If "comp" throws. Basic guarantee: all the nodes of x's list
+   //!   are moved to p's list in unspecified order.
+   template<class NodePtrCompare>
+   static void merge(node_ptr p, node_ptr x, NodePtrCompare comp)
+   {
+      const node_ptr first_p = NodeTraits::get_next(p);
+      const node_ptr first_x = NodeTraits::get_next(x);
+      if(first_x == x){
+         return;
+      }
+      else if(first_p == p){
+         transfer(p, first_x, x);
+         return;
+      }
+      typedef detail::node_chain_sort<NodeTraits> chain_sort;
+      node_ptr head = node_ptr(), tail = node_ptr(), last_x = node_ptr();
+      BOOST_INTRUSIVE_TRY{
+         chain_sort::template merge_nodes<typename chain_sort::next_prev_linker>
+            ( first_p, first_x, NodeTraits::get_previous(p), NodeTraits::get_previous(x)
+            , p, x, comp, head, tail, last_x);
+      }
+      BOOST_INTRUSIVE_CATCH(...){
+         chain_sort::next_prev_linker::link(p, head);
+         init_header(x);
+         BOOST_INTRUSIVE_RETHROW;
+      }
+      BOOST_INTRUSIVE_CATCH_END
+      chain_sort::next_prev_linker::link(p, head);
+      init_header(x);
    }
 
    //! <b>Effects</b>: Moves the node p n positions towards the end of the list.
