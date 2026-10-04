@@ -28,7 +28,6 @@
 #include <boost/intrusive/detail/reverse_iterator.hpp>
 #include <boost/intrusive/detail/uncast.hpp>
 #include <boost/intrusive/detail/list_iterator.hpp>
-#include <boost/intrusive/detail/array_initializer.hpp>
 #include <boost/intrusive/detail/exception_disposer.hpp>
 #include <boost/intrusive/detail/equal_to_value.hpp>
 #include <boost/intrusive/detail/key_nodeptr_comp.hpp>
@@ -1032,26 +1031,8 @@ class list_impl
    template<class Predicate>
    void sort(Predicate p)
    {
-      if(node_traits::get_next(this->get_root_node())
-         != node_traits::get_previous(this->get_root_node())){
-         list_impl carry(this->priv_value_traits());
-         detail::array_initializer<list_impl, 64> counter(this->priv_value_traits());
-         int fill = 0;
-         while(!this->empty()){
-            carry.splice(carry.cbegin(), *this, this->cbegin());
-            int i = 0;
-            while(i < fill && !counter[i].empty()) {
-               counter[i].merge(carry, p);
-               carry.swap(counter[i++]);
-            }
-            carry.swap(counter[i]);
-            if(i == fill)
-               ++fill;
-         }
-         for (int i = 1; i < fill; ++i)
-            counter[i].merge(counter[i-1], p);
-         this->swap(counter[fill-1]);
-      }
+      detail::key_nodeptr_comp<Predicate, value_traits> comp(p, &this->priv_value_traits());
+      node_algorithms::sort(this->get_root_node(), comp);
    }
 
    //! <b>Effects</b>: This function removes all of x's elements and inserts them

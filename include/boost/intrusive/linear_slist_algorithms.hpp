@@ -18,6 +18,7 @@
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/detail/common_slist_algorithms.hpp>
 #include <boost/intrusive/detail/algo_type.hpp>
+#include <boost/intrusive/detail/node_chain_sort.hpp>
 #include <cstddef>
 #include <boost/intrusive/detail/twin.hpp>   //for node_pair
 
@@ -258,6 +259,45 @@ class linear_slist_algorithms
       }
       NodeTraits::set_next(p, node_ptr());
       return first;
+   }
+
+   //! <b>Requires</b>: p must be a node of a linear list (typically the node before the first element). "comp" must be a function
+   //!   object that induces a strict weak ordering on node_ptrs: <tt>comp(a, b)</tt> returns
+   //!   true if node a must be placed before node b.
+   //!
+   //! <b>Effects</b>: Stable sorts, according to "comp", all the nodes of the list that follow p.
+   //!   p is not compared and keeps its position.
+   //!
+   //! <b>Returns</b>: The last node of the sorted list (p if the list has no other nodes).
+   //!
+   //! <b>Complexity</b>: Approximately N log N comparisons, where N is the number of nodes.
+   //!   Uses a fixed amount of stack memory.
+   //!
+   //! <b>Throws</b>: If "comp" throws. Basic guarantee: all nodes remain in the list
+   //!   in unspecified order.
+   template<class NodePtrCompare>
+   static node_ptr sort(node_ptr p, NodePtrCompare comp)
+   {
+      const node_ptr first = NodeTraits::get_next(p);
+      //Lists with less than two nodes are already sorted
+      if(first == node_ptr())
+         return p;
+      if(NodeTraits::get_next(first) == node_ptr())
+         return first;
+      node_ptr head, tail;
+      BOOST_INTRUSIVE_TRY{
+         detail::node_chain_sort<NodeTraits>::sort(first, node_ptr(), comp, head, tail);
+      }
+      BOOST_INTRUSIVE_CATCH(...){
+         //All nodes are in the chain [head, tail] in unspecified order
+         NodeTraits::set_next(p, head);
+         NodeTraits::set_next(tail, node_ptr());
+         BOOST_INTRUSIVE_RETHROW;
+      }
+      BOOST_INTRUSIVE_CATCH_END
+      NodeTraits::set_next(p, head);
+      NodeTraits::set_next(tail, node_ptr());
+      return tail;
    }
 
    //! <b>Effects</b>: Moves the first n nodes starting at p to the end of the list.

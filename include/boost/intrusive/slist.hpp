@@ -30,7 +30,6 @@
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/iterator.hpp>
 #include <boost/intrusive/detail/slist_iterator.hpp>
-#include <boost/intrusive/detail/array_initializer.hpp>
 #include <boost/intrusive/detail/exception_disposer.hpp>
 #include <boost/intrusive/detail/equal_to_value.hpp>
 #include <boost/intrusive/detail/key_nodeptr_comp.hpp>
@@ -1457,56 +1456,25 @@ class slist_impl
    template<class Predicate>
    void sort(Predicate p)
    {
-      //Lists with less than two elements are already sorted
-      const node_ptr first_node = node_traits::get_next(this->get_root_node());
-      const node_ptr end_node   = this->get_end_node();
-      if (first_node != end_node && node_traits::get_next(first_node) != end_node) {
-
-         slist_impl carry(this->priv_value_traits());
-         detail::array_initializer<slist_impl, 64> counter(this->priv_value_traits());
-         int fill = 0;
-         const_iterator last_inserted;
-         while(!this->empty()){
-            last_inserted = this->cbegin();
-            carry.splice_after(carry.cbefore_begin(), *this, this->cbefore_begin());
-            int i = 0;
-            while(i < fill && !counter[i].empty()) {
-               carry.swap(counter[i]);
-               carry.merge(counter[i++], p, &last_inserted);
-            }
-            BOOST_INTRUSIVE_INVARIANT_ASSERT(counter[i].empty());
-            const_iterator last_element(carry.previous(last_inserted, carry.end()));
-
-            BOOST_IF_CONSTEXPR(constant_time_size){
-               counter[i].splice_after( counter[i].cbefore_begin(), carry
-                                    , carry.cbefore_begin(), last_element
-                                    , carry.size());
-            }
-            else{
-               counter[i].splice_after( counter[i].cbefore_begin(), carry
-                                    , carry.cbefore_begin(), last_element);
-            }
-            if(i == fill)
-               ++fill;
+      detail::key_nodeptr_comp<Predicate, value_traits> comp(p, &this->priv_value_traits());
+      BOOST_IF_CONSTEXPR(cache_last){
+         BOOST_INTRUSIVE_TRY{
+            this->set_last_node(node_algorithms::sort(this->get_root_node(), comp));
          }
-
-         for (int i = 1; i < fill; ++i)
-            counter[i].merge(counter[i-1], p, &last_inserted);
-         --fill;
-         //merge() sets last_inserted to end() when the merged list is empty
-         //and linear lists can't be traversed from end()
-         BOOST_IF_CONSTEXPR(linear)
-         if(last_inserted == counter[fill].cend())
-            last_inserted = counter[fill].cbefore_begin();
-         const_iterator last_element(counter[fill].previous(last_inserted, counter[fill].end()));
-         BOOST_IF_CONSTEXPR(constant_time_size){
-            this->splice_after( cbefore_begin(), counter[fill], counter[fill].cbefore_begin()
-                              , last_element, counter[fill].size());
+         BOOST_INTRUSIVE_CATCH(...){
+            //Nodes remain linked in unspecified order, so recalculate the new last node
+            const node_ptr end_node = this->get_end_node();
+            node_ptr l = this->get_root_node();
+            for(node_ptr n = node_traits::get_next(l); n != end_node; n = node_traits::get_next(n)){
+               l = n;
+            }
+            this->set_last_node(l);
+            BOOST_INTRUSIVE_RETHROW;
          }
-         else{
-            this->splice_after( cbefore_begin(), counter[fill], counter[fill].cbefore_begin()
-                              , last_element);
-         }
+         BOOST_INTRUSIVE_CATCH_END
+      }
+      else{
+         node_algorithms::sort(this->get_root_node(), comp);
       }
    }
 

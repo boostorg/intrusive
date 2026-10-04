@@ -20,6 +20,7 @@
 #include <boost/intrusive/detail/common_slist_algorithms.hpp>
 #include <boost/intrusive/detail/uncast.hpp>
 #include <boost/intrusive/detail/algo_type.hpp>
+#include <boost/intrusive/detail/node_chain_sort.hpp>
 
 #if defined(BOOST_HAS_PRAGMA_ONCE)
 #  pragma once
@@ -332,6 +333,45 @@ class circular_slist_algorithms
          i = nxt;
       }
       NodeTraits::set_next(p, prev);
+   }
+
+   //! <b>Requires</b>: p must be a node of a circular list (typically its header). "comp" must be a function
+   //!   object that induces a strict weak ordering on node_ptrs: <tt>comp(a, b)</tt> returns
+   //!   true if node a must be placed before node b.
+   //!
+   //! <b>Effects</b>: Stable sorts, according to "comp", all the nodes of the list that follow p
+   //!   (for a circular list, all nodes except p). p is not compared and keeps its position.
+   //!
+   //! <b>Returns</b>: The last node of the sorted list (p if the list has no other nodes).
+   //!
+   //! <b>Complexity</b>: Approximately N log N comparisons, where N is the number of nodes.
+   //!   Uses a fixed amount of stack memory.
+   //!
+   //! <b>Throws</b>: If "comp" throws. Basic guarantee: all nodes remain in the list
+   //!   in unspecified order.
+   template<class NodePtrCompare>
+   static node_ptr sort(node_ptr p, NodePtrCompare comp)
+   {
+      const node_ptr first = NodeTraits::get_next(p);
+      //Lists with less than two nodes are already sorted
+      if(first == p)
+         return p;
+      if(NodeTraits::get_next(first) == p)
+         return first;
+      node_ptr head, tail;
+      BOOST_INTRUSIVE_TRY{
+         detail::node_chain_sort<NodeTraits>::sort(first, p, comp, head, tail);
+      }
+      BOOST_INTRUSIVE_CATCH(...){
+         //All nodes are in the chain [head, tail] in unspecified order
+         NodeTraits::set_next(p, head);
+         NodeTraits::set_next(tail, p);
+         BOOST_INTRUSIVE_RETHROW;
+      }
+      BOOST_INTRUSIVE_CATCH_END
+      NodeTraits::set_next(p, head);
+      NodeTraits::set_next(tail, p);
+      return tail;
    }
 
    //! <b>Effects</b>: Moves the node p n positions towards the end of the list.
