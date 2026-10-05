@@ -648,8 +648,7 @@ class unordered_multiset_impl
       :  table_type(false, b, e, b_traits, hash_func, equal_func, v_traits)
    {}
 
-   //! <b>Effects</b>: to-do
-   //!
+   //! @copydoc ::boost::intrusive::hashtable::hashtable(hashtable&&)
    inline unordered_multiset_impl(BOOST_RV_REF(unordered_multiset_impl) x)
       :  table_type(BOOST_MOVE_BASE(table_type, x))
    {}
