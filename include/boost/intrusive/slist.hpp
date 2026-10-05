@@ -2019,16 +2019,17 @@ class slist_impl
 
    void priv_splice_after(node_ptr prev_pos_n, slist_impl &x, node_ptr before_f_n, node_ptr before_l_n)
    {
+      node_algorithms::transfer_after(prev_pos_n, before_f_n, before_l_n);
+      //Update the last nodes from the final position of the nodes if something was transferred
       BOOST_IF_CONSTEXPR(cache_last)
       if(before_f_n != before_l_n){
-         if(prev_pos_n == this->get_last_node()){
+         if(node_traits::get_next(before_l_n) == this->get_end_node()){
             this->set_last_node(before_l_n);
          }
-         if(&x != this && node_traits::get_next(before_l_n) == x.get_end_node()){
+         if(node_traits::get_next(before_f_n) == x.get_end_node()){
             x.set_last_node(before_f_n);
          }
       }
-      node_algorithms::transfer_after(prev_pos_n, before_f_n, before_l_n);
    }
 
    void priv_incorporate_after(node_ptr prev_pos_n, node_ptr first_n, node_ptr before_l_n)

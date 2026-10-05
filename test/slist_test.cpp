@@ -57,6 +57,7 @@ struct test_slist
    static void test_insert(ValueContainer&);
    static void test_shift(ValueContainer&);
    static void test_swap(ValueContainer&);
+   static void test_splice_after(ValueContainer&);
    static void test_slow_insert(ValueContainer&);
    static void test_clone(ValueContainer&);
    static void test_container_from_end(ValueContainer&, detail::true_type);
@@ -87,6 +88,7 @@ void test_slist< ListType, ValueContainer >
    test_shift(values);
    test_slow_insert (values);
    test_swap(values);
+   test_splice_after(values);
    test_clone(values);
    test_container_from_end(values, detail::bool_< !list_type::linear && list_type::has_container_from_iterator >());
 }
@@ -420,7 +422,7 @@ void test_slist< ListType, ValueContainer >
    }
 }
 
-//test: insert_after (seq-version), swap, splice_after:
+//test: insert_after (seq-version), swap, swap_nodes:
 template < typename ListType, typename ValueContainer >
 void test_slist< ListType, ValueContainer >
    ::test_swap(ValueContainer& values)
@@ -433,23 +435,6 @@ void test_slist< ListType, ValueContainer >
       {  int init_values [] = { 3, 4, 5 };
          TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
       {  int init_values [] = { 1, 2 };
-         TEST_INTRUSIVE_SEQUENCE( init_values, testlist2.begin() );  }
-         testlist2.splice_after (testlist2.begin(), testlist1);
-      {  int init_values [] = { 1, 3, 4, 5, 2 };
-         TEST_INTRUSIVE_SEQUENCE( init_values, testlist2.begin() );  }
-      BOOST_TEST (testlist1.empty());
-
-      testlist1.splice_after (testlist1.before_begin(), testlist2, ++testlist2.begin());
-      {  int init_values [] = { 4 };
-         TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
-      {  int init_values [] = { 1, 3, 5, 2 };
-         TEST_INTRUSIVE_SEQUENCE( init_values, testlist2.begin() );  }
-
-      testlist1.splice_after (testlist1.begin(), testlist2,
-                              testlist2.before_begin(), ++++testlist2.begin());
-      {  int init_values [] = { 4, 1, 3, 5 };
-         TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
-      {  int init_values [] = { 2 };
          TEST_INTRUSIVE_SEQUENCE( init_values, testlist2.begin() );  }
    }
 
@@ -563,6 +548,34 @@ void test_slist< ListType, ValueContainer >
       {  int init_values [] = { 1 };
          TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
    }
+}
+
+//test: splice_after between two lists and in the same list
+template < typename ListType, typename ValueContainer >
+void test_slist< ListType, ValueContainer >
+   ::test_splice_after(ValueContainer& values)
+{
+   {  //splice between two lists
+      list_type testlist1 (values.begin() + 2, values.begin() + 5);
+      list_type testlist2 (values.begin(), values.begin() + 2);
+      testlist2.splice_after (testlist2.begin(), testlist1);
+      {  int init_values [] = { 1, 3, 4, 5, 2 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist2.begin() );  }
+      BOOST_TEST (testlist1.empty());
+
+      testlist1.splice_after (testlist1.before_begin(), testlist2, ++testlist2.begin());
+      {  int init_values [] = { 4 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
+      {  int init_values [] = { 1, 3, 5, 2 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist2.begin() );  }
+
+      testlist1.splice_after (testlist1.begin(), testlist2,
+                              testlist2.before_begin(), ++++testlist2.begin());
+      {  int init_values [] = { 4, 1, 3, 5 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
+      {  int init_values [] = { 2 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist2.begin() );  }
+   }
 
    {  //splice in the same list
       list_type testlist1 (values.begin(), values.begin() + 5);
@@ -598,6 +611,57 @@ void test_slist< ListType, ValueContainer >
       {  int init_values [] = { 2, 4, 1, 3, 5 };
          TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
       #endif
+   }
+
+   //splice in the same list of a range that ends in the last element: the last element
+   //(cached if cache_last is true, also used by previous(end())) must be updated
+   {  //range version: move { 3, 4 } after 1
+      list_type testlist (values.begin(), values.begin() + 4);
+      typename list_type::iterator before_f = testlist.begin();
+      ++before_f;
+      typename list_type::iterator before_l = before_f;
+      ++before_l;
+      ++before_l;
+      testlist.splice_after(testlist.begin(), testlist, before_f, before_l);
+      {  int init_values [] = { 1, 3, 4, 2 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist.begin() );  }
+      BOOST_TEST (&*testlist.previous(testlist.end()) == &values[1]);
+      testlist.insert_after(testlist.previous(testlist.end()), values[4]);
+      {  int init_values [] = { 1, 3, 4, 2, 5 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist.begin() );  }
+      BOOST_TEST (&*testlist.previous(testlist.end()) == &values[4]);
+      testlist.check();
+   }
+   {  //single element version: move 4 after 1
+      list_type testlist (values.begin(), values.begin() + 4);
+      typename list_type::iterator prev = testlist.begin();
+      ++prev;
+      ++prev;
+      testlist.splice_after(testlist.begin(), testlist, prev);
+      {  int init_values [] = { 1, 4, 2, 3 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist.begin() );  }
+      BOOST_TEST (&*testlist.previous(testlist.end()) == &values[2]);
+      testlist.insert_after(testlist.previous(testlist.end()), values[4]);
+      {  int init_values [] = { 1, 4, 2, 3, 5 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist.begin() );  }
+      BOOST_TEST (&*testlist.previous(testlist.end()) == &values[4]);
+      testlist.check();
+   }
+   {  //no-op splices of a range that ends in the last element must not change it
+      list_type testlist (values.begin(), values.begin() + 2);
+      typename list_type::iterator last = testlist.begin();
+      ++last;
+      //prev_pos == before_l
+      testlist.splice_after(last, testlist, testlist.begin(), last);
+      //prev_pos == before_f
+      testlist.splice_after(testlist.begin(), testlist, testlist.begin(), last);
+      {  int init_values [] = { 1, 2 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist.begin() );  }
+      BOOST_TEST (&*testlist.previous(testlist.end()) == &values[1]);
+      testlist.insert_after(testlist.previous(testlist.end()), values[4]);
+      {  int init_values [] = { 1, 2, 5 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist.begin() );  }
+      testlist.check();
    }
 }
 
