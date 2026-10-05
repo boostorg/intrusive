@@ -84,6 +84,10 @@ struct test_unordered
    static void test_swap(value_cont_type& values);
    static void test_rehash(value_cont_type& values, detail::true_);
    static void test_rehash(value_cont_type& values, detail::false_);
+   template<class Set>
+   static void check_begin(Set &testset, std::size_t expected_size);
+   static void test_begin_after_rehash(detail::true_);
+   static void test_begin_after_rehash(detail::false_);
    template<bool FullRehash>
    static void test_rehash_groups(detail::true_);
    static void test_rehash_groups(detail::true_);
@@ -140,6 +144,7 @@ void test_unordered<ContainerDefiner>::test_all (value_cont_type& values)
    test_insert(values, detail::bool_<boost::intrusive::test::is_multikey_true<unordered_type>::value>());
    test_swap(values);
    test_rehash(values, detail::bool_<unordered_type::incremental>());
+   test_begin_after_rehash(detail::bool_<unordered_type::incremental>());
    test_rehash_groups(detail::bool_<boost::intrusive::test::is_multikey_true<unordered_type>::value>());
    test_erase_range_in_group(detail::bool_<boost::intrusive::test::is_multikey_true<unordered_type>::value>());
    test_find(values);
@@ -746,6 +751,108 @@ void test_unordered<ContainerDefiner>::test_rehash(value_cont_type& values, deta
    BOOST_TEST(testset1.empty());
    testset1.full_rehash();
    BOOST_TEST(testset1.empty());
+}
+
+//Checks that begin() is the first element of the first non-empty bucket or end()
+template<class ContainerDefiner>
+template<class Set>
+void test_unordered<ContainerDefiner>::check_begin(Set &testset, std::size_t expected_size)
+{
+   BOOST_TEST(std::size_t(boost::intrusive::iterator_distance(testset.begin(), testset.end())) == expected_size);
+   BOOST_TEST(testset.size() == expected_size);
+   typedef typename Set::size_type size_type;
+   size_type first_used = 0u;
+   const size_type bucket_count = testset.bucket_count();
+   while(first_used != bucket_count && testset.bucket_size(first_used) == 0u)
+      ++first_used;
+   if(first_used == bucket_count){
+      BOOST_TEST(expected_size == 0u);
+      BOOST_TEST(testset.begin() == testset.end());
+   }
+   else{
+      BOOST_TEST(testset.begin() != testset.end());
+      BOOST_TEST(&*testset.begin() == &*testset.begin(first_used));
+   }
+}
+
+//test: rehash functions must keep begin() correct, with empty and non-empty containers
+//and bucket arrays that are bigger or smaller than the original one
+template<class ContainerDefiner>
+void test_unordered<ContainerDefiner>::test_begin_after_rehash(detail::false_)   //not incremental
+{
+   typedef typename ContainerDefiner::template container
+      <>::type unordered_type;
+   typedef typename unordered_type::bucket_traits  bucket_traits;
+   typedef typename unordered_type::bucket_ptr     bucket_ptr;
+   const std::size_t ExtraBuckets = unordered_type::bucket_overhead;
+   typedef bucket_sizes<unordered_type> sizes;
+
+   //Elements are in buckets that are not the first ones and that are removed when shrinking
+   value_cont_type values(2);
+   (&values[0])->value_ = 3;
+   (&values[1])->value_ = 6;
+
+   for(std::size_t num_elements = 0u; num_elements <= 2u; num_elements += 2u){
+      typename unordered_type::bucket_type buckets[sizes::Big + ExtraBuckets];
+      typename unordered_type::bucket_type buckets2[sizes::Big + ExtraBuckets];
+      unordered_type testset(values.begin(), values.begin() + std::ptrdiff_t(num_elements), bucket_traits(
+         pointer_traits<bucket_ptr>::pointer_to(buckets[0]), sizes::Normal + ExtraBuckets));
+      check_begin(testset, num_elements);
+
+      //Shrink and grow in the same buffer
+      testset.rehash(bucket_traits(pointer_traits<bucket_ptr>::pointer_to(buckets[0]), sizes::Small + ExtraBuckets));
+      check_begin(testset, num_elements);
+      testset.rehash(bucket_traits(pointer_traits<bucket_ptr>::pointer_to(buckets[0]), sizes::Big + ExtraBuckets));
+      check_begin(testset, num_elements);
+      testset.rehash(bucket_traits(pointer_traits<bucket_ptr>::pointer_to(buckets[0]), sizes::Normal + ExtraBuckets));
+      check_begin(testset, num_elements);
+
+      //Shrink and grow using another buffer
+      testset.rehash(bucket_traits(pointer_traits<bucket_ptr>::pointer_to(buckets2[0]), sizes::Small + ExtraBuckets));
+      check_begin(testset, num_elements);
+      testset.rehash(bucket_traits(pointer_traits<bucket_ptr>::pointer_to(buckets[0]), sizes::Big + ExtraBuckets));
+      check_begin(testset, num_elements);
+      testset.clear();
+   }
+}
+
+template<class ContainerDefiner>
+void test_unordered<ContainerDefiner>::test_begin_after_rehash(detail::true_)   //incremental
+{
+   typedef typename ContainerDefiner::template container
+      <>::type unordered_type;
+   typedef typename unordered_type::bucket_traits  bucket_traits;
+   typedef typename unordered_type::bucket_ptr     bucket_ptr;
+   const std::size_t ExtraBuckets = unordered_type::bucket_overhead;
+   typedef bucket_sizes<unordered_type> sizes;
+
+   value_cont_type values(2);
+   (&values[0])->value_ = 3;
+   (&values[1])->value_ = 7;
+
+   for(std::size_t num_elements = 0u; num_elements <= 2u; num_elements += 2u){
+      typename unordered_type::bucket_type buckets1[sizes::Normal + ExtraBuckets];
+      typename unordered_type::bucket_type buckets2[sizes::Big + ExtraBuckets];
+      unordered_type testset(values.begin(), values.begin() + std::ptrdiff_t(num_elements), bucket_traits(
+         pointer_traits<bucket_ptr>::pointer_to(buckets1[0]), sizes::Normal + ExtraBuckets));
+      check_begin(testset, num_elements);
+
+      //Split all the buckets
+      while(testset.incremental_rehash(true))
+         check_begin(testset, num_elements);
+      //Use a bigger bucket array
+      BOOST_TEST(testset.incremental_rehash(bucket_traits(
+         pointer_traits<bucket_ptr>::pointer_to(buckets2[0]), sizes::Big + ExtraBuckets)));
+      check_begin(testset, num_elements);
+      //And again the original one
+      BOOST_TEST(testset.incremental_rehash(bucket_traits(
+         pointer_traits<bucket_ptr>::pointer_to(buckets1[0]), sizes::Normal + ExtraBuckets)));
+      check_begin(testset, num_elements);
+      //Merge buckets until the original split count
+      while(testset.incremental_rehash(false))
+         check_begin(testset, num_elements);
+      testset.clear();
+   }
 }
 
 //test: rehash and full_rehash must keep groups of equivalent elements

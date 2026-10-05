@@ -3419,9 +3419,12 @@ class hashtable_impl
             const std::size_t target_bucket_num = split_idx - 1u - bucket_cnt/2u;
             bucket_type &target_bucket = this->priv_bucket(target_bucket_num);
             bucket_type &source_bucket = this->priv_bucket(split_idx-1u);
+            //The cached first bucket is only updated if elements are moved to the target bucket
+            const bool source_is_empty = slist_node_algorithms::is_empty(source_bucket.get_node_ptr());
             slist_node_algorithms::transfer_after(target_bucket.get_node_ptr(), source_bucket.get_node_ptr());
             this->dec_split_count();
-            this->priv_insertion_update_cache(target_bucket_num);
+            if(!source_is_empty)
+               this->priv_insertion_update_cache(target_bucket_num);
          }
       }
       return ret;
@@ -3481,6 +3484,13 @@ class hashtable_impl
             slist_node_ptr old_bucket_node_ptr = old_buckets[difference_type(n)].get_node_ptr();
             slist_node_algorithms::transfer_after(new_bucket_nodeptr, old_bucket_node_ptr);
          }
+      }
+      if(ini_n >= old_bucket_count){
+         //The container was empty, so the cache was the end of the old bucket
+         //array, that is not the end of the new one.
+         this->priv_init_cache();
+      }
+      else if(old_buckets != new_buckets){
          //Reset cache to safe position
          this->priv_set_cache_bucket_num(ini_n);
       }
@@ -3705,7 +3715,8 @@ class hashtable_impl
          else{
             const size_type new_n = (size_type)hash_to_bucket_split<power_2_buckets, incremental>
                                        (n, new_bucket_count, split, fastmod_buckets_t());
-            if(cache_begin && new_n < new_first_bucket_num)
+            //Empty buckets must not update the first used bucket cache
+            if(cache_begin && new_n < new_first_bucket_num && !slist_node_algorithms::is_empty(old_bucket.get_node_ptr()))
                new_first_bucket_num = new_n;
             bucket_type &new_b = new_buckets[difference_type(new_n)];
             siterator last = this->priv_get_last(old_bucket, optimize_multikey_t());
