@@ -53,6 +53,10 @@ class avl_set_impl
 {
    /// @cond
    typedef bstree_impl<ValueTraits, VoidOrKeyOfValue, Compare, SizeType, ConstantTimeSize, AvlTreeAlgorithms, HeaderHolder> tree_type;
+
+   //Not supported: they build a new shape for the tree without restoring the balance factors
+   using tree_type::rebalance;
+   using tree_type::rebalance_subtree;
    BOOST_MOVABLE_BUT_NOT_COPYABLE(avl_set_impl)
 
    typedef tree_type implementation_defined;
@@ -610,6 +614,10 @@ class avl_multiset_impl
 {
    /// @cond
    typedef bstree_impl<ValueTraits, VoidOrKeyOfValue, Compare, SizeType, ConstantTimeSize, AvlTreeAlgorithms, HeaderHolder> tree_type;
+
+   //Not supported: they build a new shape for the tree without restoring the balance factors
+   using tree_type::rebalance;
+   using tree_type::rebalance_subtree;
 
    BOOST_MOVABLE_BUT_NOT_COPYABLE(avl_multiset_impl)
    typedef tree_type implementation_defined;

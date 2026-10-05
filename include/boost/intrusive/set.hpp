@@ -55,6 +55,10 @@ class set_impl
 {
    /// @cond
    typedef bstree_impl<ValueTraits, VoidOrKeyOfValue, Compare, SizeType, ConstantTimeSize, RbTreeAlgorithms, HeaderHolder> tree_type;
+
+   //Not supported: they build a new shape for the tree without restoring the colors
+   using tree_type::rebalance;
+   using tree_type::rebalance_subtree;
    BOOST_MOVABLE_BUT_NOT_COPYABLE(set_impl)
 
    typedef tree_type implementation_defined;
@@ -610,6 +614,10 @@ class multiset_impl
 {
    /// @cond
    typedef bstree_impl<ValueTraits, VoidOrKeyOfValue, Compare, SizeType, ConstantTimeSize, RbTreeAlgorithms, HeaderHolder> tree_type;
+
+   //Not supported: they build a new shape for the tree without restoring the colors
+   using tree_type::rebalance;
+   using tree_type::rebalance_subtree;
 
    BOOST_MOVABLE_BUT_NOT_COPYABLE(multiset_impl)
    typedef tree_type implementation_defined;

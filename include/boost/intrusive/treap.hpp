@@ -156,6 +156,12 @@ class treap_impl
    /// @cond
    private:
 
+   //Not supported: they build a new shape for the tree, or unlink a node, without restoring
+   //the heap order of the priorities
+   using tree_type::rebalance;
+   using tree_type::rebalance_subtree;
+   using tree_type::remove_node;
+
    //noncopyable
    BOOST_MOVABLE_BUT_NOT_COPYABLE(treap_impl)
 
@@ -1249,9 +1255,6 @@ class treap_impl
    //!   ordering and priority rules. This function is faster than erasing and inserting
    //!   the node, since no rebalancing or comparison is needed.
    void replace_node(iterator replace_this, reference with_this) BOOST_NOEXCEPT;
-
-   //! @copydoc ::boost::intrusive::bstree::remove_node
-   void remove_node(reference value) BOOST_NOEXCEPT;
 
    friend bool operator< (const treap_impl &x, const treap_impl &y);
 

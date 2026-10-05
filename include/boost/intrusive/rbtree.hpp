@@ -111,6 +111,10 @@ class rbtree_impl
    /// @cond
    private:
 
+   //Not supported: they build a new shape for the tree without restoring the colors
+   using tree_type::rebalance;
+   using tree_type::rebalance_subtree;
+
    //noncopyable
    BOOST_MOVABLE_BUT_NOT_COPYABLE(rbtree_impl)
 

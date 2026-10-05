@@ -459,9 +459,6 @@ class treap_set_impl
    //! @copydoc ::boost::intrusive::treap::replace_node
    void replace_node(iterator replace_this, reference with_this) BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::treap::remove_node
-   void remove_node(reference value) BOOST_NOEXCEPT;
-
 
    //! @copydoc ::boost::intrusive::treap::merge_unique
    template<class ...Options2>
@@ -983,9 +980,6 @@ class treap_multiset_impl
 
    //! @copydoc ::boost::intrusive::treap::replace_node
    void replace_node(iterator replace_this, reference with_this) BOOST_NOEXCEPT;
-
-   //! @copydoc ::boost::intrusive::treap::remove_node
-   void remove_node(reference value) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::treap::merge_equal
    template<class ...Options2>

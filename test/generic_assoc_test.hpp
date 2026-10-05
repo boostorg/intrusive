@@ -37,6 +37,19 @@ BOOST_INTRUSIVE_HAS_MEMBER_FUNC_CALLED(has_insert_before, insert_before)
 
 BOOST_INTRUSIVE_HAS_MEMBER_FUNC_CALLED(is_treap, priority_comp)
 
+//rebalance is private in red-black, AVL and treap trees, but has_rebalance
+//also detects private members
+template<class Assoc>
+struct is_rebalanceable
+{
+   typedef typename Assoc::node_algorithms   node_algorithms;
+   typedef typename Assoc::node_traits       node_traits;
+   static const bool value = has_rebalance<Assoc>::value
+      && !detail::is_same<node_algorithms, rbtree_algorithms<node_traits> >::value
+      && !detail::is_same<node_algorithms, avltree_algorithms<node_traits> >::value
+      && !is_treap<Assoc>::value;
+};
+
 template<class ContainerDefiner>
 struct test_generic_assoc
 {
@@ -369,7 +382,7 @@ void test_generic_assoc<ContainerDefiner>::test_all(value_cont_type& values)
    test_container_from_end(values, detail::bool_< assoc_type::has_container_from_iterator >());
    test_splay_up(values, detail::bool_< has_splay_up< assoc_type >::value >());
    test_splay_down(values, detail::bool_< has_splay_down< assoc_type >::value >());
-   test_rebalance(values, detail::bool_< has_rebalance< assoc_type >::value >());
+   test_rebalance(values, detail::bool_< is_rebalanceable< assoc_type >::value >());
    test_insert_before(values, detail::bool_< has_insert_before< assoc_type >::value >());
    test_insert_erase_burst();
    test_swap_nodes();
