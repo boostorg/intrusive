@@ -617,7 +617,8 @@ class unordered_bucket_manager
    //!   are invalidated; pointers and references remain valid).
    //!
    //! <b>Throws</b>: If the allocator throws, or if the container's hasher
-   //!   throws during rehashing (see rehash() notes below).
+   //!   throws during rehashing. Only the basic guarantee is provided if the
+   //!   hasher throws: the container is left empty (see the note of rehash()).
    bool reserve(hashtable_type &c, size_type element_capacity)
    {
       BOOST_ASSERT(c.bucket_pointer() == this->buckets());
@@ -640,7 +641,8 @@ class unordered_bucket_manager
    //!   are invalidated; pointers and references remain valid).
    //!
    //! <b>Throws</b>: If the allocator throws, or if the container's hasher
-   //!   throws during rehashing (see rehash() notes below).
+   //!   throws during rehashing. Only the basic guarantee is provided if the
+   //!   hasher throws: the container is left empty (see the note of rehash()).
    bool reserve_additional(hashtable_type &c, size_type extra_elements = 1u)
    {  return this->reserve(c, size_type(c.size() + extra_elements));  }
 
@@ -654,13 +656,13 @@ class unordered_bucket_manager
    //!   are invalidated; pointers and references remain valid).
    //!
    //! <b>Throws</b>: If the allocator throws, or if the container's hasher
-   //!   throws during rehashing.
+   //!   throws during rehashing. If the allocator throws, nothing is modified.
+   //!   If the hasher throws, only the basic guarantee is provided (see the note).
    //!
-   //! <b>Note</b>: If the container's hasher throws while relinking,
-   //!   Boost.Intrusive restores every element into the previous bucket
-   //!   array, this manager deallocates the new (empty) one and the
-   //!   exception is propagated, so the strong guarantee is provided as long
-   //!   as the hasher computes equal values for equal keys.
+   //! <b>Note</b>: If the container's hasher throws while relinking, the container
+   //!   unlinks all its elements (see hashtable::rehash), so it is left empty
+   //!   (pointers and references to the elements remain valid, but they are no longer
+   //!   in the container).
    bool rehash(hashtable_type &c, size_type bucket_count_hint)
    {
       const size_type new_count = this->rehash_count(c.size(), bucket_count_hint);
@@ -681,7 +683,8 @@ class unordered_bucket_manager
    //!   are invalidated; pointers and references remain valid).
    //!
    //! <b>Throws</b>: If the allocator throws, or if the container's hasher
-   //!   throws during rehashing.
+   //!   throws during rehashing. Only the basic guarantee is provided if the
+   //!   hasher throws: the container is left empty (see the note of rehash()).
    bool shrink_to_fit(hashtable_type &c)
    {  return this->rehash(c, 0u);  }
 
@@ -689,10 +692,10 @@ class unordered_bucket_manager
    private:
 
    //Allocates a new array, rehashes the container into it and releases the
-   //old (now empty) array. Provides the strong guarantee: if the hasher
-   //throws, Boost.Intrusive's internal rollback relinks every already
-   //transferred node back into the old buckets, so the new array is empty
-   //again and can be destroyed before rethrowing.
+   //old (now empty) array. If the hasher throws, hashtable::rehash unlinks all
+   //the elements (basic guarantee) and keeps the old bucket array, that is empty
+   //and still used by the container, so the new array is empty and can be
+   //destroyed before rethrowing.
    void priv_do_rehash(hashtable_type &c, size_type new_count)
    {
       BOOST_ASSERT(new_count != 0u);
