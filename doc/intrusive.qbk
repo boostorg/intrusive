@@ -1425,14 +1425,28 @@ option. A user-defined bucket-traits must fulfill the following interface:
 
    class my_bucket_traits
    {
+      public:
+      my_bucket_traits(const my_bucket_traits &);
+      my_bucket_traits(my_bucket_traits &&);   //Must leave the source without a bucket array
+      my_bucket_traits& operator=(const my_bucket_traits &);
+      my_bucket_traits& operator=(my_bucket_traits &&); //Must leave the source without a bucket array
+
       bucket_ptr        bucket_begin();
       const_bucket_ptr  bucket_begin() const;
       std::size_t bucket_count() const;
    };
 
+[note Moving an unordered container moves its bucket traits, and the nodes stay in the bucket
+array, which is now used by the new container. To support moving containers, the move constructor
+of a user-defined bucket traits must leave the moved-from object without a bucket array (for example,
+with a null pointer and a zero bucket count, like the default `bucket_traits` does). If the bucket
+traits class is not move-aware, do not use the moved-from container.]
 
 The following bucket traits just stores a pointer to the bucket
-array but the size is a compile-time constant. Note the use of the auxiliary
+array but the size is a compile-time constant. The bucket traits are copyable (containers copy
+them in their constructors and when rehashing) and movable: the move operations leave the
+moved-from object without the bucket array, so the moved-from container does not share it
+with the new one. Note the use of the auxiliary
 [classref boost::intrusive::unordered_bucket unordered_bucket] and
 [classref boost::intrusive::unordered_bucket_ptr unordered_bucket_ptr]
 utilities to obtain the type of the bucket and its pointer before defining

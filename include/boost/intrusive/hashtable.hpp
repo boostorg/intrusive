@@ -2220,6 +2220,10 @@ class hashtable_impl
    //! <b>Throws</b>: If value_traits::node_traits::node's
    //!   move constructor throws (this does not happen with predefined Boost.Intrusive hooks)
    //!   or the move constructor of value traits, bucket traits, hasher or comparison throws.
+   //!
+   //! <b>Note</b>: The bucket array is not copied: after the move, *this uses the bucket array
+   //!   of x, which holds the nodes. The move constructor of the bucket traits must therefore leave
+   //!   the moved-from bucket traits without a bucket array.
    hashtable_impl(BOOST_RV_REF(hashtable_impl) x)
       : internal_type(BOOST_MOVE_BASE(internal_type, x))
    {

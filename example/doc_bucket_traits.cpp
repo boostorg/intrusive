@@ -11,7 +11,9 @@
 /////////////////////////////////////////////////////////////////////////////
 //[doc_bucket_traits
 #include <boost/intrusive/unordered_set.hpp>
+#include <boost/move/utility_core.hpp>
 #include <vector>
+#include <cassert>
 
 using namespace boost::intrusive;
 
@@ -39,9 +41,15 @@ typedef base_hook< unordered_set_base_hook<> >     BaseHookOption;
 typedef unordered_bucket<BaseHookOption>::type     BucketType;
 typedef unordered_bucket_ptr<BaseHookOption>::type BucketPtr;
 
-//The custom bucket traits.
+//The custom bucket traits. A container that is moved keeps using the bucket
+//array, so the move operations must leave the moved-from bucket traits without it
+//(otherwise, the moved-from container would share the bucket array with the new one).
 class custom_bucket_traits
 {
+   //<-
+   BOOST_COPYABLE_AND_MOVABLE(custom_bucket_traits)
+   //->
+
    public:
    static const int NumBuckets = 100;
 
@@ -49,9 +57,23 @@ class custom_bucket_traits
       :  buckets_(buckets)
    {}
 
+   custom_bucket_traits(const custom_bucket_traits &x)
+      :  buckets_(x.buckets_)
+   {}
+
+   custom_bucket_traits(BOOST_RV_REF(custom_bucket_traits) x)
+      :  buckets_(x.buckets_)
+   {  x.buckets_ = BucketPtr();  }
+
+   custom_bucket_traits& operator=(BOOST_COPY_ASSIGN_REF(custom_bucket_traits) x)
+   {  buckets_ = x.buckets_;  return *this;  }
+
+   custom_bucket_traits& operator=(BOOST_RV_REF(custom_bucket_traits) x)
+   {  buckets_ = x.buckets_;  x.buckets_ = BucketPtr();  return *this;  }
+
    //Functions to be implemented by custom bucket traits
    BucketPtr   bucket_begin() const {  return buckets_;  }
-   std::size_t bucket_count() const {  return NumBuckets;}
+   std::size_t bucket_count() const {  return buckets_ ? NumBuckets : 0;  }
 
    private:
    BucketPtr buckets_;
@@ -78,6 +100,10 @@ int main()
    //Insert the values in the unordered set
    for(VectIt it(values.begin()), itend(values.end()); it != itend; ++it)
       uset.insert(*it);
+
+   //Move the container: the moved-from bucket traits no longer refer to the bucket array
+   BucketTraitsUset uset2(boost::move(uset));
+   assert(uset.bucket_count() == 0 && uset2.size() == values.size());
 
    return 0;
 }
