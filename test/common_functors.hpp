@@ -113,6 +113,37 @@ struct any_greater
    {  return t > u;  }
 };
 
+//Comparison functor with a state
+template<class Key>
+struct tagged_less
+{
+   int tag_;
+   explicit tagged_less(int tag = 0) : tag_(tag) {}
+   bool operator()(const Key &a, const Key &b) const
+   {  return a < b;  }
+};
+
+//Hash function and equality predicate with a state
+struct instance_seed_hash
+{
+   std::size_t seed_;
+   explicit instance_seed_hash(std::size_t seed = 0u) : seed_(seed) {}
+
+   template<class T>
+   std::size_t operator()(const T &t) const
+   {  return hash_value(t) ^ seed_;  }
+};
+
+struct tagged_equal
+{
+   int tag_;
+   explicit tagged_equal(int tag = 0) : tag_(tag) {}
+
+   template<class T, class U>
+   bool operator()(const T &t, const U &u) const
+   {  return t == u;  }
+};
+
 }  //namespace test       {
 }  //namespace intrusive  {
 }  //namespace boost      {

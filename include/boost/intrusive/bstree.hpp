@@ -1013,6 +1013,7 @@ class bstree_impl
    void clone_from(const bstree_impl &src, Cloner cloner, Disposer disposer)
    {
       this->clear_and_dispose(disposer);
+      this->get_comp() = src.get_comp();
       if(!src.empty()){
          detail::exception_disposer<bstree_impl, Disposer>
             rollback(*this, disposer);
@@ -1022,7 +1023,6 @@ class bstree_impl
             ,detail::node_cloner <Cloner,    value_traits, AlgoType>(cloner,   &this->get_value_traits())
             ,detail::node_disposer<Disposer, value_traits, AlgoType>(disposer, &this->get_value_traits()));
          this->sz_traits().set_size(src.sz_traits().get_size());
-         this->get_comp() = src.get_comp();
          rollback.release();
       }
    }
@@ -1048,6 +1048,7 @@ class bstree_impl
    void clone_from(BOOST_RV_REF(bstree_impl) src, Cloner cloner, Disposer disposer)
    {
       this->clear_and_dispose(disposer);
+      this->get_comp() = src.get_comp();
       if(!src.empty()){
          detail::exception_disposer<bstree_impl, Disposer>
             rollback(*this, disposer);
@@ -1057,7 +1058,6 @@ class bstree_impl
             ,detail::node_cloner <Cloner,    value_traits, AlgoType, false>(cloner,   &this->get_value_traits())
             ,detail::node_disposer<Disposer, value_traits, AlgoType>(disposer, &this->get_value_traits()));
          this->sz_traits().set_size(src.sz_traits().get_size());
-         this->get_comp() = src.get_comp();
          rollback.release();
       }
    }

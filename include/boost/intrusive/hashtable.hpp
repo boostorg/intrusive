@@ -3739,6 +3739,8 @@ class hashtable_impl
    void priv_clone_from(MaybeConstHashtableImpl &src, Cloner cloner, Disposer disposer)
    {
       this->clear_and_dispose(disposer);
+      this->priv_hasher() = src.priv_hasher();
+      this->priv_equal()  = src.priv_equal();
       if(!constant_time_size || !src.empty()){
          const size_type src_bucket_count = src.bucket_count();
          const size_type dst_bucket_count = this->bucket_count();
@@ -3826,8 +3828,6 @@ class hashtable_impl
                   (new_n, r, this->priv_stored_hash(b, store_hash_t()), cloner);
             }
          }
-         this->priv_hasher() = src.priv_hasher();
-         this->priv_equal()  = src.priv_equal();
       }
       BOOST_INTRUSIVE_CATCH(...){
          //The rollback disposes all the clones, the container will be empty

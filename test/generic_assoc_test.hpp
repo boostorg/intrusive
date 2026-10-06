@@ -474,6 +474,33 @@ void test_generic_assoc<ContainerDefiner>::test_clone(value_cont_type& values)
       testset2.clone_from(boost::move(empty_set), test::new_nonconst_cloner<value_type>(), test::delete_disposer<value_type>());
       BOOST_TEST (testset2.empty());
    }
+   {  //The predicate is copied from the source, also if the source is empty
+      typedef typename ContainerDefiner::template container
+         <>::type default_type;
+      typedef typename default_type::key_type key_type;
+      typedef typename ContainerDefiner::template container
+         < compare< tagged_less<key_type> > >::type assoc_type;
+      typedef typename assoc_type::value_type value_type;
+
+      assoc_type src(values.begin(), values.end(), tagged_less<key_type>(7));
+      assoc_type empty_src((tagged_less<key_type>(8)));
+      assoc_type dst((tagged_less<key_type>(3)));
+
+      dst.clone_from(src, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST(dst.key_comp().tag_ == 7);
+      BOOST_TEST(dst == src);
+      dst.clear_and_dispose(test::delete_noexcept_disposer<value_type>());
+
+      dst.clone_from(empty_src, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST(dst.empty());
+      BOOST_TEST(dst.key_comp().tag_ == 8);
+
+      assoc_type dst2((tagged_less<key_type>(3)));
+      dst2.clone_from(boost::move(empty_src), test::new_nonconst_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST(dst2.empty());
+      BOOST_TEST(dst2.key_comp().tag_ == 8);
+      src.clear();
+   }
    {  //Empty source with the node algorithms: the containers don't call
       //them with an empty source, so call them directly
       typedef typename ContainerDefiner::template container
