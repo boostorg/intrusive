@@ -819,7 +819,7 @@ struct make_and_test_slist< ValueTraits, ConstantTimeSize, Linear, CacheLast, fa
                         constant_time_size< ConstantTimeSize >,
                         linear<Linear>,
                         cache_last<CacheLast>,
-                        header_holder_type< heap_node_holder< typename ValueTraits::pointer > >
+                        header_holder_type< heap_node_holder< typename ValueTraits::node_ptr > >
                       >,
                   ValueContainer
                 >
@@ -998,12 +998,16 @@ struct test_main_template_bptr
 
 int main(int, char* [])
 {
-   // test (plain/smart pointers) x (nonconst/const size) x (void node allocator)
+   // test (plain/smart pointers) x (nonconst/const size) x (default/heap allocated header)
    test_main_template<void*, false, true>()();
    test_main_template<void*, true, true>()();
+   test_main_template<void*, false, false>()();
+   test_main_template<void*, true, false>()();
 
    test_main_template<boost::intrusive::smart_ptr<void>, false, true>()();
    test_main_template<boost::intrusive::smart_ptr<void>, true, true>()();
+   test_main_template<boost::intrusive::smart_ptr<void>, false, false>()();
+   test_main_template<boost::intrusive::smart_ptr<void>, true, false>()();
    // test (bounded pointers) x ((nonconst/const size) x (special node allocator)
    test_main_template_bptr< true >()();
    test_main_template_bptr< false >()();
