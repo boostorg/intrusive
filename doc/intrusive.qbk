@@ -2063,20 +2063,21 @@ from `key_type` and a comparison object are provided by the user. This applies t
 
 Requirements for such functions are:
 
-* For unordered container the provided hashing function shall return for the given key the same hash
-  value that `hasher` returns for all the elements equivalent to the key, and the provided comparison
-  shall consider equivalent to the key all the elements that `key_equal` considers equivalent to it.
+* For unordered container the provided comparison and hashing
+  function with the given key shall induce the same hash and equivalence as `hasher` and `key_equal`.
+  A comparison coarser than `key_equal` is not supported: elements equivalent to the key only for the
+  provided comparison are not found.
 
 * For ordered associative containers, lookup and erasure functions, the container to be searched shall
   be partitioned in regards to the supplied comparison object and key.
 
 For more details, see  [*Requires] clauses of such functions in the reference.
 
-[note The provided comparison can be [*coarser] than the comparison of the container: it can consider
-equivalent to the key several elements that `key_compare` (or `key_equal`) considers different. In this case,
-even in containers with unique keys (like `set` or `unordered_set`), `count`, `equal_range` and `erase`
-with the provided key and comparison can find (or erase) more than one element, and `find` returns one of them.
-Only the overloads that take a `key_type` and use the comparison of the container can assume that
+[note In ordered associative containers the provided comparison can be [*coarser] than `key_compare`:
+it can consider equivalent to the key several elements that `key_compare` considers different. In this case,
+even in containers with unique keys (like `set`), `count`, `equal_range` and `erase`
+with the provided key and comparison can find (or erase) more than one element, and `find` returns the first one.
+Only the overloads that take a `key_type` and use `key_compare` can assume that
 at most one element is equivalent to the key.]
 
 [section:advanced_lookups_example Example]
