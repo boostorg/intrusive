@@ -3385,6 +3385,12 @@ Stateful value traits have many advantages but also some downsides:
 *  [*Iterator invalidation on swap]: Swapping two containers (or move assigning a container)
    also swaps their value traits. Iterators store a pointer to the value traits of their container,
    so after the swap they point to the wrong value traits and are invalidated. References are not invalidated.
+*  [*Transfer of elements between containers]: Functions that transfer elements from one container
+   to another (e.g. `splice`, `splice_after` or `merge`) do not transfer the value traits. The value traits
+   of the destination container must be able to convert the transferred nodes to values (e.g. both
+   containers have equal value traits), otherwise the behavior is undefined. Iterators to the transferred
+   elements store a pointer to the value traits of the source container, so they are invalidated.
+   References are not invalidated.
 
 An easy and useful example of stateful value traits is when an array of values can be indirectly introduced
 in a list guaranteeing no additional allocation apart from the initial resource reservation:
