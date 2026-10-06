@@ -33,6 +33,7 @@
 #include <boost/intrusive/detail/key_nodeptr_comp.hpp>
 #include <boost/intrusive/detail/simple_disposers.hpp>
 #include <boost/intrusive/detail/size_holder.hpp>
+#include <boost/intrusive/detail/list_node_ops.hpp>
 #include <boost/intrusive/detail/algorithm.hpp>
 
 #include <boost/move/utility_core.hpp>
@@ -120,6 +121,8 @@ class list_impl
    BOOST_MOVABLE_BUT_NOT_COPYABLE(list_impl)
 
    static const bool safemode_or_autounlink = is_safe_autounlink<value_traits::link_mode>::value;
+
+   typedef detail::list_node_ops<node_traits, size_traits, safemode_or_autounlink> node_ops;
 
    //Constant-time size is incompatible with auto-unlink hooks!
    BOOST_INTRUSIVE_STATIC_ASSERT(!(constant_time_size &&
@@ -254,7 +257,7 @@ class list_impl
    #endif
    {
       BOOST_IF_CONSTEXPR(is_safe_autounlink<ValueTraits::link_mode>::value){
-         this->clear();
+         node_ops::clear(this->get_root_node(), this->priv_size_traits());
          node_algorithms::init(this->get_root_node());
       }
    }
@@ -309,7 +312,7 @@ class list_impl
    //!
    //! <b>Note</b>: Invalidates the iterators (but not the references) to the erased element.
    void pop_back() BOOST_NOEXCEPT
-   {  return this->pop_back_and_dispose(detail::null_disposer());   }
+   {  node_ops::erase(node_traits::get_previous(this->get_root_node()), this->priv_size_traits());   }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!
@@ -342,7 +345,7 @@ class list_impl
    //!
    //! <b>Note</b>: Invalidates the iterators (but not the references) to the erased element.
    void pop_front() BOOST_NOEXCEPT
-   {  return this->pop_front_and_dispose(detail::null_disposer());   }
+   {  node_ops::erase(node_traits::get_next(this->get_root_node()), this->priv_size_traits());   }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!
@@ -533,12 +536,7 @@ class list_impl
    //!
    //! <b>Note</b>: Does not affect the validity of iterators and references.
    inline size_type size() const BOOST_NOEXCEPT
-   {
-      BOOST_IF_CONSTEXPR(constant_time_size)
-         return this->priv_size_traits().get_size();
-      else
-         return node_algorithms::count(this->get_root_node()) - 1;
-   }
+   {  return node_ops::size(this->get_root_node(), this->priv_size_traits());   }
 
    //! <b>Effects</b>: Returns true if the list contains no elements.
    //!
@@ -602,7 +600,12 @@ class list_impl
    //! <b>Note</b>: Invalidates the iterators (but not the references) to the
    //!   erased element.
    inline iterator erase(const_iterator i) BOOST_NOEXCEPT
-   {  return this->erase_and_dispose(i, detail::null_disposer());  }
+   {
+      node_ptr to_erase(i.pointed_node());
+      ++i;
+      node_ops::erase(to_erase, this->priv_size_traits());
+      return i.unconst();
+   }
 
    //! <b>Requires</b>: b and e must be valid iterators to elements in *this.
    //!
@@ -621,13 +624,8 @@ class list_impl
    //!   erased elements.
    inline iterator erase(const_iterator b, const_iterator e) BOOST_NOEXCEPT
    {
-      BOOST_IF_CONSTEXPR(safemode_or_autounlink || constant_time_size){
-         return this->erase_and_dispose(b, e, detail::null_disposer());
-      }
-      else{
-         node_algorithms::unlink(b.pointed_node(), e.pointed_node());
-         return e.unconst();
-      }
+      node_ops::erase(b.pointed_node(), e.pointed_node(), this->priv_size_traits());
+      return e.unconst();
    }
 
    //! <b>Requires</b>: b and e must be valid iterators to elements in *this.
@@ -648,18 +646,8 @@ class list_impl
    //!   erased elements.
    iterator erase(const_iterator b, const_iterator e, size_type n) BOOST_NOEXCEPT
    {
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(node_algorithms::distance(b.pointed_node(), e.pointed_node()) == n);
-      (void)n;
-      BOOST_IF_CONSTEXPR(safemode_or_autounlink){
-         return this->erase_and_dispose(b, e, detail::null_disposer());
-      }
-      else{
-         BOOST_IF_CONSTEXPR(constant_time_size){
-            this->priv_size_traits().decrease(n);
-         }
-         node_algorithms::unlink(b.pointed_node(), e.pointed_node());
-         return e.unconst();
-      }
+      node_ops::erase(b.pointed_node(), e.pointed_node(), n, this->priv_size_traits());
+      return e.unconst();
    }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
@@ -735,15 +723,7 @@ class list_impl
    //!
    //! <b>Note</b>: Invalidates the iterators (but not the references) to the erased elements.
    void clear() BOOST_NOEXCEPT
-   {
-      BOOST_IF_CONSTEXPR(safemode_or_autounlink){
-         this->clear_and_dispose(detail::null_disposer());
-      }
-      else{
-         node_algorithms::init_header(this->get_root_node());
-         this->priv_size_traits().set_size(size_type(0));
-      }
-   }
+   {  node_ops::clear(this->get_root_node(), this->priv_size_traits());   }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!
@@ -920,16 +900,7 @@ class list_impl
    //! <b>Note</b>: Iterators of values obtained from list x now point to elements of
    //!    this list. Iterators of this list and all the references are not invalidated.
    void splice(const_iterator p, list_impl& x) BOOST_NOEXCEPT
-   {
-      if(!x.empty()){
-         node_algorithms::transfer
-            (p.pointed_node(), x.begin().pointed_node(), x.end().pointed_node());
-         size_traits &thist = this->priv_size_traits();
-         size_traits &xt = x.priv_size_traits();
-         thist.increase(xt.get_size());
-         xt.set_size(size_type(0));
-      }
-   }
+   {  node_ops::splice_all(p.pointed_node(), this->priv_size_traits(), x.get_root_node(), x.priv_size_traits());   }
 
    //! <b>Requires</b>: p must be a valid iterator of *this.
    //!   new_ele must point to an element contained in list x.
@@ -945,11 +916,7 @@ class list_impl
    //! <b>Note</b>: Iterators of values obtained from list x now point to elements of this
    //!   list. Iterators of this list and all the references are not invalidated.
    void splice(const_iterator p, list_impl&x, const_iterator new_ele) BOOST_NOEXCEPT
-   {
-      node_algorithms::transfer(p.pointed_node(), new_ele.pointed_node());
-      x.priv_size_traits().decrement();
-      this->priv_size_traits().increment();
-   }
+   {  node_ops::splice_one(p.pointed_node(), this->priv_size_traits(), new_ele.pointed_node(), x.priv_size_traits());   }
 
    //! <b>Requires</b>: p must be a valid iterator of *this.
    //!   f and e must point to elements contained in list x.
@@ -965,12 +932,7 @@ class list_impl
    //! <b>Note</b>: Iterators of values obtained from list x now point to elements of this
    //!   list. Iterators of this list and all the references are not invalidated.
    void splice(const_iterator p, list_impl&x, const_iterator f, const_iterator e) BOOST_NOEXCEPT
-   {
-      BOOST_IF_CONSTEXPR(constant_time_size)
-         this->splice(p, x, f, e, node_algorithms::distance(f.pointed_node(), e.pointed_node()));
-      else
-         this->splice(p, x, f, e, 1);//intrusive::iterator_distance is a dummy value
-   }
+   {  node_ops::splice_range(p.pointed_node(), this->priv_size_traits(), f.pointed_node(), e.pointed_node(), x.priv_size_traits());   }
 
    //! <b>Requires</b>: p must be a valid iterator of *this.
    //!   f and e must point to elements contained in list x.
@@ -986,21 +948,7 @@ class list_impl
    //! <b>Note</b>: Iterators of values obtained from list x now point to elements of this
    //!   list. Iterators of this list and all the references are not invalidated.
    void splice(const_iterator p, list_impl&x, const_iterator f, const_iterator e, size_type n) BOOST_NOEXCEPT
-   {
-      if(n){
-         BOOST_IF_CONSTEXPR(constant_time_size){
-            BOOST_INTRUSIVE_INVARIANT_ASSERT(n == node_algorithms::distance(f.pointed_node(), e.pointed_node()));
-            node_algorithms::transfer(p.pointed_node(), f.pointed_node(), e.pointed_node());
-            size_traits &thist = this->priv_size_traits();
-            size_traits &xt = x.priv_size_traits();
-            thist.increase(n);
-            xt.decrease(n);
-         }
-         else{
-            node_algorithms::transfer(p.pointed_node(), f.pointed_node(), e.pointed_node());
-         }
-      }
-   }
+   {  node_ops::splice_range(p.pointed_node(), this->priv_size_traits(), f.pointed_node(), e.pointed_node(), n, x.priv_size_traits());   }
 
    //! <b>Effects</b>: This function sorts the list *this according to operator <.
    //!   The sort is stable, that is, the relative order of equivalent elements is preserved.
@@ -1075,11 +1023,11 @@ class list_impl
       }
       BOOST_INTRUSIVE_CATCH(...){
          //All nodes of x have been moved to *this even if the predicate throws
-         this->priv_transfer_all_size(x);
+         node_ops::transfer_all_size(this->priv_size_traits(), x.priv_size_traits());
          BOOST_INTRUSIVE_RETHROW;
       }
       BOOST_INTRUSIVE_CATCH_END
-      this->priv_transfer_all_size(x);
+      node_ops::transfer_all_size(this->priv_size_traits(), x.priv_size_traits());
    }
 
    //! <b>Effects</b>: Reverses the order of elements in the list.
@@ -1141,9 +1089,7 @@ class list_impl
          (node_traits::get_next(root_node), root_node, detail::key_nodeptr_comp<Pred, value_traits>(pred, &this->priv_value_traits()), info);
       //Invariants preserved by stable_partition so erase can be safely called
       //The first element might have changed so calculate it again
-      this->erase( const_iterator(node_traits::get_next(root_node), this->priv_value_traits_ptr())
-                 , const_iterator(info.beg_2st_partition, this->priv_value_traits_ptr())
-                 , info.num_1st_partition);
+      node_ops::erase(node_traits::get_next(root_node), info.beg_2st_partition, info.num_1st_partition, this->priv_size_traits());
       return info.num_1st_partition;
    }
 
@@ -1337,34 +1283,7 @@ class list_impl
    //! <b>Note</b>: The method has no effect when asserts are turned off (e.g., with NDEBUG).
    //!   Experimental function, interface might change in future versions.
    void check() const
-   {
-      const_node_ptr header_ptr = get_root_node();
-      // header's next and prev are never null
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(node_traits::get_next(header_ptr));
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(node_traits::get_previous(header_ptr));
-      // header's next and prev either both point to header (empty list) or neither does
-      BOOST_INTRUSIVE_INVARIANT_ASSERT((node_traits::get_next(header_ptr) == header_ptr)
-         == (node_traits::get_previous(header_ptr) == header_ptr));
-      if (node_traits::get_next(header_ptr) == header_ptr)
-      {
-         BOOST_IF_CONSTEXPR(constant_time_size)
-            BOOST_INTRUSIVE_INVARIANT_ASSERT(this->priv_size_traits().get_size() == 0);
-         return;
-      }
-      size_t node_count = 0; (void)node_count;
-      const_node_ptr p = header_ptr;
-      while (true)
-      {
-         const_node_ptr next_p = node_traits::get_next(p);
-         BOOST_INTRUSIVE_INVARIANT_ASSERT(next_p);
-         BOOST_INTRUSIVE_INVARIANT_ASSERT(node_traits::get_previous(next_p) == p);
-         p = next_p;
-         if (p == header_ptr) break;
-         ++node_count;
-      }
-      BOOST_IF_CONSTEXPR(constant_time_size)
-         BOOST_INTRUSIVE_INVARIANT_ASSERT(this->priv_size_traits().get_size() == node_count);
-   }
+   {  node_ops::check(this->get_root_node(), this->priv_size_traits());   }
 
    friend bool operator==(const list_impl &x, const list_impl &y)
    {
@@ -1397,14 +1316,6 @@ class list_impl
 
    private:
    //Updates sizes after all the elements of x have been moved to *this
-   void priv_transfer_all_size(list_impl &x) BOOST_NOEXCEPT
-   {
-      size_traits &thist = this->priv_size_traits();
-      size_traits &xt = x.priv_size_traits();
-      thist.increase(xt.get_size());
-      xt.set_size(size_type(0));
-   }
-
    BOOST_INTRUSIVE_NO_DANGLING
    static list_impl &priv_container_from_end_iterator(const const_iterator &end_iterator) BOOST_NOEXCEPT
    {

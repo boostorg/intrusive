@@ -36,6 +36,7 @@
 #include <boost/intrusive/detail/key_nodeptr_comp.hpp>
 #include <boost/intrusive/detail/simple_disposers.hpp>
 #include <boost/intrusive/detail/size_holder.hpp>
+#include <boost/intrusive/detail/slist_node_ops.hpp>
 #include <boost/intrusive/detail/algorithm.hpp>
 #include <boost/intrusive/detail/value_functors.hpp>
 #include <boost/intrusive/detail/node_cloner_disposer.hpp>
@@ -165,6 +166,8 @@ class slist_impl
 
    static const bool safemode_or_autounlink = is_safe_autounlink<value_traits::link_mode>::value;
 
+   typedef detail::slist_node_ops<node_traits, size_traits, linear, cache_last, safemode_or_autounlink> node_ops;
+
    //Constant-time size is incompatible with auto-unlink hooks!
    BOOST_INTRUSIVE_STATIC_ASSERT(!(constant_time_size && ((int)value_traits::link_mode == (int)auto_unlink)));
    //Linear singly linked lists are incompatible with auto-unlink hooks!
@@ -189,6 +192,15 @@ class slist_impl
 
    inline const_node_ptr get_last_node() const
    {  return this->get_last_node(detail::bool_<cache_last>());  }
+
+   inline node_ptr *priv_last_ptr()
+   {  return this->priv_last_ptr(detail::bool_<cache_last>());  }
+
+   inline static node_ptr *priv_last_ptr(detail::bool_<false>)
+   {  return 0;  }
+
+   inline node_ptr *priv_last_ptr(detail::bool_<true>)
+   {  return &data_.root_plus_size_.last_;  }
 
    inline void set_last_node(node_ptr n)
    {  return this->set_last_node(n, detail::bool_<cache_last>());  }
@@ -216,13 +228,7 @@ class slist_impl
    {  data_.root_plus_size_.last_ = n;  }
 
    void set_default_constructed_state()
-   {
-      node_algorithms::init_header(this->get_root_node());
-      this->priv_size_traits().set_size(size_type(0));
-      BOOST_IF_CONSTEXPR(cache_last){
-         this->set_last_node(this->get_root_node());
-      }
-   }
+   {  node_ops::init(this->get_root_node(), this->priv_last_ptr(), this->priv_size_traits());  }
 
    typedef header_holder_plus_last<header_holder_type, node_ptr, cache_last> header_holder_plus_last_t;
    struct BOOST_INTRUSIVE_EMPTY_BASES root_plus_size
@@ -373,7 +379,7 @@ class slist_impl
    #endif
    {
       BOOST_IF_CONSTEXPR(is_safe_autounlink<ValueTraits::link_mode>::value){
-         this->clear();
+         node_ops::clear(this->get_root_node(), this->priv_last_ptr(), this->priv_size_traits());
          node_algorithms::init(this->get_root_node());
       }
    }
@@ -392,14 +398,7 @@ class slist_impl
    //!
    //! <b>Note</b>: Invalidates the iterators (but not the references) to the erased elements.
    void clear() BOOST_NOEXCEPT
-   {
-      BOOST_IF_CONSTEXPR(safemode_or_autounlink){
-         this->clear_and_dispose(detail::null_disposer());
-      }
-      else{
-         this->set_default_constructed_state();
-      }
-   }
+   {  node_ops::clear(this->get_root_node(), this->priv_last_ptr(), this->priv_size_traits());  }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!
@@ -476,7 +475,7 @@ class slist_impl
    //!
    //! <b>Note</b>: Invalidates the iterators (but not the references) to the erased element.
    void pop_front() BOOST_NOEXCEPT
-   {  return this->pop_front_and_dispose(detail::null_disposer());   }
+   {  node_ops::erase_after(this->get_root_node(), this->priv_last_ptr(), this->priv_size_traits());  }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!
@@ -694,12 +693,7 @@ class slist_impl
    //!
    //! <b>Note</b>: Does not affect the validity of iterators and references.
    inline size_type size() const BOOST_NOEXCEPT
-   {
-      BOOST_IF_CONSTEXPR(constant_time_size)
-         return this->priv_size_traits().get_size();
-      else
-         return node_algorithms::count(this->get_root_node()) - 1;
-   }
+   {  return node_ops::size(this->get_root_node(), this->priv_size_traits());  }
 
    //! <b>Effects</b>: Returns true if the list contains no elements.
    //!
@@ -722,12 +716,7 @@ class slist_impl
    //!   If value traits are stateful, iterators are invalidated.
    void swap(slist_impl& other)
    {
-      BOOST_IF_CONSTEXPR(cache_last){
-         priv_swap_cache_last(this, &other);
-      }
-      else{
-         this->priv_swap_lists(this->get_root_node(), other.get_root_node(), detail::bool_<linear>());
-      }
+      node_ops::swap(this->get_root_node(), this->priv_last_ptr(), other.get_root_node(), other.priv_last_ptr());
       ::boost::adl_move_swap(this->priv_value_traits(), other.priv_value_traits());
       this->priv_size_traits().swap(other.priv_size_traits());
    }
@@ -742,7 +731,7 @@ class slist_impl
    //!
    //! <b>Note</b>: Iterators Does not affect the validity of iterators and references.
    void shift_backwards(size_type n = 1) BOOST_NOEXCEPT
-   {  this->priv_shift_backwards(n, detail::bool_<linear>());  }
+   {  node_ops::shift_backwards(this->get_root_node(), this->priv_last_ptr(), std::size_t(n));  }
 
    //! <b>Effects</b>: Moves forward all the elements, so that the second
    //!   element becomes the first, the third becomes the second...
@@ -754,7 +743,7 @@ class slist_impl
    //!
    //! <b>Note</b>: Does not affect the validity of iterators and references.
    void shift_forward(size_type n = 1) BOOST_NOEXCEPT
-   {  this->priv_shift_forward(n, detail::bool_<linear>()); }
+   {  node_ops::shift_forward(this->get_root_node(), this->priv_last_ptr(), std::size_t(n));  }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!   Cloner should yield to nodes equivalent to the original nodes.
@@ -920,7 +909,13 @@ class slist_impl
    //! <b>Note</b>: Invalidates the iterators (but not the references) to the
    //!   erased element.
    iterator erase_after(const_iterator prev) BOOST_NOEXCEPT
-   {  return this->erase_after_and_dispose(prev, detail::null_disposer());  }
+   {
+      const_iterator it(prev);
+      ++it;
+      ++it;
+      node_ops::erase_after(prev.pointed_node(), this->priv_last_ptr(), this->priv_size_traits());
+      return it.unconst();
+   }
 
    //! <b>Effects</b>: Erases the range (before_f, l) from
    //!   the list. No destructors are called.
@@ -937,20 +932,8 @@ class slist_impl
    //!   erased element.
    iterator erase_after(const_iterator before_f, const_iterator l) BOOST_NOEXCEPT
    {
-      BOOST_IF_CONSTEXPR(safemode_or_autounlink || constant_time_size){
-         return this->erase_after_and_dispose(before_f, l, detail::null_disposer());
-      }
-      else{
-         const node_ptr bfp = before_f.pointed_node();
-         const node_ptr lp = l.pointed_node();
-         BOOST_IF_CONSTEXPR(cache_last){
-            if(lp == this->get_end_node()){
-               this->set_last_node(bfp);
-            }
-         }
-         node_algorithms::unlink_after(bfp, lp);
-         return l.unconst();
-      }
+      node_ops::erase_after(before_f.pointed_node(), l.pointed_node(), this->get_root_node(), this->priv_last_ptr(), this->priv_size_traits());
+      return l.unconst();
    }
 
    //! <b>Effects</b>: Erases the range (before_f, l) from
@@ -969,25 +952,8 @@ class slist_impl
    //!   erased element.
    iterator erase_after(const_iterator before_f, const_iterator l, size_type n) BOOST_NOEXCEPT
    {
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(node_algorithms::distance((++const_iterator(before_f)).pointed_node(), l.pointed_node()) == n);
-      (void)n;
-      BOOST_IF_CONSTEXPR(safemode_or_autounlink){
-         return this->erase_after(before_f, l);
-      }
-      else{
-         const node_ptr bfp = before_f.pointed_node();
-         const node_ptr lp = l.pointed_node();
-         BOOST_IF_CONSTEXPR(cache_last){
-            if((lp == this->get_end_node())){
-               this->set_last_node(bfp);
-            }
-         }
-         node_algorithms::unlink_after(bfp, lp);
-         BOOST_IF_CONSTEXPR(constant_time_size){
-            this->priv_size_traits().decrease(n);
-         }
-         return l.unconst();
-      }
+      node_ops::erase_after(before_f.pointed_node(), l.pointed_node(), n, this->get_root_node(), this->priv_last_ptr(), this->priv_size_traits());
+      return l.unconst();
    }
 
    //! <b>Effects</b>: Erases the element pointed by i of the list.
@@ -1281,19 +1247,10 @@ class slist_impl
          if(l) *l = this->previous(this->cend());
       }
       else{
-         const_iterator last_x(x.previous(x.end()));  //constant time if cache_last is active
-         node_ptr prev_n(prev.pointed_node());
-         node_ptr last_x_n(last_x.pointed_node());
-         BOOST_IF_CONSTEXPR(cache_last){
-            x.set_last_node(x.get_root_node());
-            if(node_traits::get_next(prev_n) == this->get_end_node()){
-               this->set_last_node(last_x_n);
-            }
-         }
-         node_algorithms::transfer_after( prev_n, x.before_begin().pointed_node(), last_x_n);
-         this->priv_size_traits().increase(x.priv_size_traits().get_size());
-         x.priv_size_traits().set_size(size_type(0));
-         if(l) *l = last_x;
+         node_ptr const last_x_n = node_ops::splice_after_all
+            ( prev.pointed_node(), this->get_root_node(), this->priv_last_ptr(), this->priv_size_traits()
+            , x.get_root_node(), x.priv_last_ptr(), x.priv_size_traits());
+         if(l) *l = const_iterator(last_x_n, this->priv_value_traits_ptr());
       }
    }
 
@@ -1333,11 +1290,9 @@ class slist_impl
    //!   list. Iterators of this list and all the references are not invalidated.
    void splice_after(const_iterator prev_pos, slist_impl &x, const_iterator before_f, const_iterator before_l) BOOST_NOEXCEPT
    {
-      BOOST_IF_CONSTEXPR(constant_time_size)
-         this->splice_after(prev_pos, x, before_f, before_l, node_algorithms::distance(before_f.pointed_node(), before_l.pointed_node()));
-      else
-         this->priv_splice_after
-            (prev_pos.pointed_node(), x, before_f.pointed_node(), before_l.pointed_node());
+      node_ops::splice_after
+         ( prev_pos.pointed_node(), this->get_root_node(), this->priv_last_ptr(), this->priv_size_traits(), before_f.pointed_node(), before_l.pointed_node()
+         , x.get_root_node(), x.priv_last_ptr(), x.priv_size_traits());
    }
 
    //! <b>Requires</b>: prev_pos must be a dereferenceable iterator in *this or be
@@ -1356,14 +1311,9 @@ class slist_impl
    //!   list. Iterators of this list and all the references are not invalidated.
    void splice_after(const_iterator prev_pos, slist_impl &x, const_iterator before_f, const_iterator before_l, size_type n) BOOST_NOEXCEPT
    {
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(node_algorithms::distance(before_f.pointed_node(), before_l.pointed_node()) == n);
-      (void)n;
-      this->priv_splice_after
-         (prev_pos.pointed_node(), x, before_f.pointed_node(), before_l.pointed_node());
-      BOOST_IF_CONSTEXPR(constant_time_size){
-         this->priv_size_traits().increase(n);
-         x.priv_size_traits().decrease(n);
-      }
+      node_ops::splice_after
+         ( prev_pos.pointed_node(), this->get_root_node(), this->priv_last_ptr(), this->priv_size_traits(), before_f.pointed_node(), before_l.pointed_node(), n
+         , x.get_root_node(), x.priv_last_ptr(), x.priv_size_traits());
    }
 
    //! <b>Requires</b>: it is an iterator to an element in *this.
@@ -1467,7 +1417,7 @@ class slist_impl
          }
          BOOST_INTRUSIVE_CATCH(...){
             //Nodes remain linked in unspecified order, so recalculate the new last node
-            this->priv_update_last_node();
+            node_ops::update_last_node(this->get_root_node(), this->priv_last_ptr());
             BOOST_INTRUSIVE_RETHROW;
          }
          BOOST_INTRUSIVE_CATCH_END
@@ -1529,15 +1479,15 @@ class slist_impl
       }
       BOOST_INTRUSIVE_CATCH(...){
          //All nodes of x have been moved to *this even if the predicate throws
-         this->priv_transfer_all(x);
+         node_ops::transfer_all(this->priv_size_traits(), x.get_root_node(), x.priv_last_ptr(), x.priv_size_traits());
          BOOST_IF_CONSTEXPR(cache_last){
-            this->priv_update_last_node();
+            node_ops::update_last_node(this->get_root_node(), this->priv_last_ptr());
          }
          if(l) *l = this->cend().unconst();
          BOOST_INTRUSIVE_RETHROW;
       }
       BOOST_INTRUSIVE_CATCH_END
-      this->priv_transfer_all(x);
+      node_ops::transfer_all(this->priv_size_traits(), x.get_root_node(), x.priv_last_ptr(), x.priv_size_traits());
       BOOST_IF_CONSTEXPR(cache_last){
          if(last_x != node_ptr() && node_traits::get_next(last_x) == this->get_end_node()){
             this->set_last_node(last_x);
@@ -1568,13 +1518,7 @@ class slist_impl
    //!
    //! <b>Note</b>: Iterators and references are not invalidated
    void reverse() BOOST_NOEXCEPT
-   {
-      BOOST_IF_CONSTEXPR(cache_last)
-      if(!this->empty()){
-         this->set_last_node(node_traits::get_next(this->get_root_node()));
-      }
-      this->priv_reverse(detail::bool_<linear>());
-   }
+   {  node_ops::reverse(this->get_root_node(), this->priv_last_ptr());  }
 
    //! <b>Effects</b>: Removes all the elements that compare equal to value.
    //!   No destructors are called.
@@ -1625,9 +1569,7 @@ class slist_impl
          this->set_last_node(info.new_last_node);
       }
       //...so erase can be safely called
-      this->erase_after( const_iterator(bbeg, this->priv_value_traits_ptr())
-                       , const_iterator(info.beg_2st_partition, this->priv_value_traits_ptr())
-                       , info.num_1st_partition);
+      node_ops::erase_after(bbeg, info.beg_2st_partition, info.num_1st_partition, bbeg, this->priv_last_ptr(), this->priv_size_traits());
       return info.num_1st_partition;
    }
 
@@ -1886,12 +1828,7 @@ class slist_impl
    //!
    //! <b>Warning</b>: Experimental function, don't use it!
    void incorporate_after(const_iterator prev_pos, node_ptr f, node_ptr before_l) BOOST_NOEXCEPT
-   {
-      BOOST_IF_CONSTEXPR(constant_time_size)
-         this->incorporate_after(prev_pos, f, before_l, size_type(node_algorithms::distance(f, before_l)+1u));
-      else
-         this->priv_incorporate_after(prev_pos.pointed_node(), f, before_l);
-   }
+   {  node_ops::incorporate_after(prev_pos.pointed_node(), f, before_l, this->priv_last_ptr(), this->priv_size_traits());  }
 
    //! <b>Requires</b>: prev_pos must be a dereferenceable iterator in *this or be
    //!   before_begin(), and f and before_l belong to another slist.
@@ -1910,20 +1847,7 @@ class slist_impl
    //!
    //! <b>Warning</b>: Experimental function, don't use it!
    void incorporate_after(const_iterator prev_pos, node_ptr f, node_ptr before_l, size_type n) BOOST_NOEXCEPT
-   {
-      if(n){
-         BOOST_INTRUSIVE_INVARIANT_ASSERT(n > 0);
-         BOOST_INTRUSIVE_INVARIANT_ASSERT
-            (size_type(boost::intrusive::iterator_distance
-               ( iterator(f, this->priv_value_traits_ptr())
-               , iterator(before_l, this->priv_value_traits_ptr())))
-            +1 == n);
-         this->priv_incorporate_after(prev_pos.pointed_node(), f, before_l);
-         BOOST_IF_CONSTEXPR(constant_time_size){
-            this->priv_size_traits().increase(n);
-         }
-      }
-   }
+   {  node_ops::incorporate_after(prev_pos.pointed_node(), f, before_l, n, this->priv_last_ptr(), this->priv_size_traits());  }
 
    ///@endcond
 
@@ -1934,40 +1858,7 @@ class slist_impl
    //! <b>Note</b>: The method has no effect when asserts are turned off (e.g., with NDEBUG).
    //!   Experimental function, interface might change in future versions.
    void check() const
-   {
-      const_node_ptr header_ptr = get_root_node();
-      const_node_ptr const first_p = node_traits::get_next(header_ptr);
-
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(linear || first_p);
-
-      if (first_p == (linear ? const_node_ptr() : header_ptr))
-      {
-         BOOST_INTRUSIVE_INVARIANT_ASSERT(!constant_time_size || this->priv_size_traits().get_size() == 0);
-         return;
-      }
-      size_t node_count = 0; (void)node_count;
-      const_node_ptr p = header_ptr;
-      while (true)
-      {
-         const_node_ptr next_p = node_traits::get_next(p);
-         BOOST_IF_CONSTEXPR(!linear)
-         {
-            BOOST_INTRUSIVE_INVARIANT_ASSERT(next_p);
-         }
-         else
-         {
-            BOOST_INTRUSIVE_INVARIANT_ASSERT(next_p != header_ptr);
-         }
-         if ((!linear && next_p == header_ptr) || (linear && !next_p))
-         {
-            BOOST_INTRUSIVE_INVARIANT_ASSERT(!cache_last || get_last_node() == p);
-            break;
-         }
-         p = next_p;
-         ++node_count;
-      }
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(!constant_time_size || this->priv_size_traits().get_size() == node_count);
-   }
+   {  node_ops::check(this->get_root_node(), cache_last ? this->get_last_node() : const_node_ptr(), this->priv_size_traits());  }
 
 
    friend bool operator==(const slist_impl &x, const slist_impl &y)
@@ -1998,157 +1889,6 @@ class slist_impl
    {  x.swap(y);  }
 
    private:
-   //Updates sizes (and the cached last node of x) after all the nodes of x have been moved to *this
-   void priv_transfer_all(slist_impl &x) BOOST_NOEXCEPT
-   {
-      size_traits &thist = this->priv_size_traits();
-      size_traits &xt = x.priv_size_traits();
-      thist.increase(xt.get_size());
-      xt.set_size(size_type(0));
-      BOOST_IF_CONSTEXPR(cache_last){
-         x.set_last_node(x.get_root_node());
-      }
-   }
-
-   //Recalculates the cached last node
-   void priv_update_last_node() BOOST_NOEXCEPT
-   {
-      const node_ptr end_node = this->get_end_node();
-      node_ptr l = this->get_root_node();
-      for(node_ptr n = node_traits::get_next(l); n != end_node; n = node_traits::get_next(n)){
-         l = n;
-      }
-      this->set_last_node(l);
-   }
-
-   void priv_splice_after(node_ptr prev_pos_n, slist_impl &x, node_ptr before_f_n, node_ptr before_l_n)
-   {
-      node_algorithms::transfer_after(prev_pos_n, before_f_n, before_l_n);
-      //Update the last nodes from the final position of the nodes if something was transferred
-      BOOST_IF_CONSTEXPR(cache_last)
-      if(before_f_n != before_l_n){
-         if(node_traits::get_next(before_l_n) == this->get_end_node()){
-            this->set_last_node(before_l_n);
-         }
-         if(node_traits::get_next(before_f_n) == x.get_end_node()){
-            x.set_last_node(before_f_n);
-         }
-      }
-   }
-
-   void priv_incorporate_after(node_ptr prev_pos_n, node_ptr first_n, node_ptr before_l_n)
-   {
-      BOOST_IF_CONSTEXPR(cache_last){
-         if(prev_pos_n == this->get_last_node()){
-            this->set_last_node(before_l_n);
-         }
-      }
-      node_algorithms::incorporate_after(prev_pos_n, first_n, before_l_n);
-   }
-
-   void priv_reverse(detail::bool_<false>)
-   {  node_algorithms::reverse(this->get_root_node());   }
-
-   void priv_reverse(detail::bool_<true>)
-   {
-      node_ptr new_first = node_algorithms::reverse
-         (node_traits::get_next(this->get_root_node()));
-      node_traits::set_next(this->get_root_node(), new_first);
-   }
-
-   void priv_shift_backwards(size_type n, detail::bool_<false>)
-   {
-      node_ptr l = node_algorithms::move_forward(this->get_root_node(), (std::size_t)n);
-      (void)l;
-
-      BOOST_IF_CONSTEXPR(cache_last)
-      if(l){
-         this->set_last_node(l);
-      }
-   }
-
-   void priv_shift_backwards(size_type n, detail::bool_<true>)
-   {
-      typename node_algorithms::node_pair ret(
-         node_algorithms::move_first_n_forward
-            (node_traits::get_next(this->get_root_node()), (std::size_t)n));
-      if(ret.first){
-         node_traits::set_next(this->get_root_node(), ret.first);
-         BOOST_IF_CONSTEXPR(cache_last){
-            this->set_last_node(ret.second);
-         }
-      }
-   }
-
-   void priv_shift_forward(size_type n, detail::bool_<false>)
-   {
-      node_ptr l = node_algorithms::move_backwards(this->get_root_node(), (std::size_t)n);
-      (void)l;
-
-      BOOST_IF_CONSTEXPR(cache_last)
-      if(l){
-         this->set_last_node(l);
-      }
-   }
-
-   void priv_shift_forward(size_type n, detail::bool_<true>)
-   {
-      typename node_algorithms::node_pair ret(
-         node_algorithms::move_first_n_backwards
-         (node_traits::get_next(this->get_root_node()), (std::size_t)n));
-      if(ret.first){
-         node_traits::set_next(this->get_root_node(), ret.first);
-         BOOST_IF_CONSTEXPR(cache_last){
-            this->set_last_node(ret.second);
-         }
-      }
-   }
-
-   static void priv_swap_cache_last(slist_impl *this_impl, slist_impl *other_impl)
-   {
-      bool other_was_empty = false;
-      if(this_impl->empty()){
-         //Check if both are empty or
-         if(other_impl->empty())
-            return;
-         //If this is empty swap pointers
-         slist_impl *tmp = this_impl;
-         this_impl  = other_impl;
-         other_impl = tmp;
-         other_was_empty = true;
-      }
-      else{
-         other_was_empty = other_impl->empty();
-      }
-
-      //Precondition: this is not empty
-      node_ptr other_old_last(other_impl->get_last_node());
-      node_ptr other_bfirst(other_impl->get_root_node());
-      node_ptr this_bfirst(this_impl->get_root_node());
-      node_ptr this_old_last(this_impl->get_last_node());
-
-      //Move all nodes from this to other's beginning
-      node_algorithms::transfer_after(other_bfirst, this_bfirst, this_old_last);
-      other_impl->set_last_node(this_old_last);
-
-      if(other_was_empty){
-         this_impl->set_last_node(this_bfirst);
-      }
-      else{
-         //Move trailing nodes from other to this
-         node_algorithms::transfer_after(this_bfirst, this_old_last, other_old_last);
-         this_impl->set_last_node(other_old_last);
-      }
-   }
-
-   //circular version
-   static void priv_swap_lists(node_ptr this_node, node_ptr other_node, detail::bool_<false>)
-   {  node_algorithms::swap_nodes(this_node, other_node); }
-
-   //linear version
-   static void priv_swap_lists(node_ptr this_node, node_ptr other_node, detail::bool_<true>)
-   {  node_algorithms::swap_trailing_nodes(this_node, other_node); }
-
    BOOST_INTRUSIVE_NO_DANGLING
    static slist_impl &priv_container_from_end_iterator(const const_iterator &end_iterator)
    {
