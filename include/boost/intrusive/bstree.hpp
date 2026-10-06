@@ -145,32 +145,38 @@ struct bstbase3
    inline const_value_traits_ptr priv_value_traits_ptr() const
    {  return pointer_traits<const_value_traits_ptr>::pointer_to(this->get_value_traits());  }
 
+   inline iterator priv_to_it(node_ptr n)
+   {  return iterator(n, this->priv_value_traits_ptr());  }
+
+   inline const_iterator priv_to_cit(node_ptr n) const
+   {  return const_iterator(n, this->priv_value_traits_ptr());  }
+
    inline iterator begin() BOOST_NOEXCEPT
-   {  return iterator(node_algorithms::begin_node(this->header_ptr()), this->priv_value_traits_ptr());   }
+   {  return this->priv_to_it(node_algorithms::begin_node(this->header_ptr()));   }
 
    inline const_iterator begin() const BOOST_NOEXCEPT
    {  return cbegin();   }
 
    inline const_iterator cbegin() const BOOST_NOEXCEPT
-   {  return const_iterator(node_algorithms::begin_node(this->header_ptr()), this->priv_value_traits_ptr());   }
+   {  return this->priv_to_cit(node_algorithms::begin_node(this->header_ptr()));   }
 
    inline iterator end() BOOST_NOEXCEPT
-   {  return iterator(node_algorithms::end_node(this->header_ptr()), this->priv_value_traits_ptr());   }
+   {  return this->priv_to_it(node_algorithms::end_node(this->header_ptr()));   }
 
    inline const_iterator end() const BOOST_NOEXCEPT
    {  return cend();  }
 
    inline const_iterator cend() const BOOST_NOEXCEPT
-   {  return const_iterator(node_algorithms::end_node(this->header_ptr()), this->priv_value_traits_ptr());   }
+   {  return this->priv_to_cit(node_algorithms::end_node(this->header_ptr()));   }
 
    inline iterator root()
-   {  return iterator(node_algorithms::root_node(this->header_ptr()), this->priv_value_traits_ptr());   }
+   {  return this->priv_to_it(node_algorithms::root_node(this->header_ptr()));   }
 
    inline const_iterator root() const
    {  return croot();   }
 
    inline const_iterator croot() const
-   {  return const_iterator(node_algorithms::root_node(this->header_ptr()), this->priv_value_traits_ptr());   }
+   {  return this->priv_to_cit(node_algorithms::root_node(this->header_ptr()));   }
 
    inline reverse_iterator rbegin()
    {  return reverse_iterator(end());  }
@@ -203,7 +209,7 @@ struct bstbase3
    {  node_algorithms::rebalance(this->header_ptr()); }
 
    iterator rebalance_subtree(iterator r) BOOST_NOEXCEPT
-   {  return iterator(node_algorithms::rebalance_subtree(r.pointed_node()), this->priv_value_traits_ptr()); }
+   {  return this->priv_to_it(node_algorithms::rebalance_subtree(r.pointed_node())); }
 
    static iterator s_iterator_to(reference value) BOOST_NOEXCEPT
    {
@@ -218,10 +224,10 @@ struct bstbase3
    }
 
    iterator iterator_to(reference value) BOOST_NOEXCEPT
-   {  return iterator (this->get_value_traits().to_node_ptr(value), this->priv_value_traits_ptr()); }
+   {  return this->priv_to_it(this->get_value_traits().to_node_ptr(value)); }
 
    const_iterator iterator_to(const_reference value) const BOOST_NOEXCEPT
-   {  return const_iterator (this->get_value_traits().to_node_ptr(*pointer_traits<pointer>::const_cast_from(pointer_traits<const_pointer>::pointer_to(value))), this->priv_value_traits_ptr()); }
+   {  return this->priv_to_cit(this->get_value_traits().to_node_ptr(*pointer_traits<pointer>::const_cast_from(pointer_traits<const_pointer>::pointer_to(value)))); }
 
    inline static void init_node(reference value)
    { node_algorithms::init(value_traits::to_node_ptr(value)); }
@@ -320,46 +326,61 @@ struct bstbase2
    inline key_compare key_comp() const
    {  return this->get_comp().key_comp();   }
 
+   //Overloads taking key_type call node algorithms directly instead of the
+   //overloads taking a comparison functor, to avoid instantiating both.
+
    //lower_bound
    inline iterator lower_bound(const key_type &key)
-   {  return this->lower_bound(key, this->key_comp());   }
+   {
+      return this->priv_to_it(node_algorithms::lower_bound
+         (this->header_ptr(), key, this->key_node_comp(this->key_comp())));
+   }
 
    inline const_iterator lower_bound(const key_type &key) const
-   {  return this->lower_bound(key, this->key_comp());   }
+   {
+      return this->priv_to_cit(node_algorithms::lower_bound
+         (this->header_ptr(), key, this->key_node_comp(this->key_comp())));
+   }
 
    template<class KeyType, class KeyTypeKeyCompare>
    iterator lower_bound(const KeyType &key, KeyTypeKeyCompare comp)
    {
-      return iterator(node_algorithms::lower_bound
-         (this->header_ptr(), key, this->key_node_comp(comp)), this->priv_value_traits_ptr());
+      return this->priv_to_it(node_algorithms::lower_bound
+         (this->header_ptr(), key, this->key_node_comp(comp)));
    }
 
    template<class KeyType, class KeyTypeKeyCompare>
    const_iterator lower_bound(const KeyType &key, KeyTypeKeyCompare comp) const
    {
-      return const_iterator(node_algorithms::lower_bound
-         (this->header_ptr(), key, this->key_node_comp(comp)), this->priv_value_traits_ptr());
+      return this->priv_to_cit(node_algorithms::lower_bound
+         (this->header_ptr(), key, this->key_node_comp(comp)));
    }
 
    //upper_bound
    inline iterator upper_bound(const key_type &key)
-   {  return this->upper_bound(key, this->key_comp());   }
+   {
+      return this->priv_to_it(node_algorithms::upper_bound
+         (this->header_ptr(), key, this->key_node_comp(this->key_comp())));
+   }
 
    template<class KeyType, class KeyTypeKeyCompare>
    iterator upper_bound(const KeyType &key, KeyTypeKeyCompare comp)
    {
-      return iterator(node_algorithms::upper_bound
-         (this->header_ptr(), key, this->key_node_comp(comp)), this->priv_value_traits_ptr());
+      return this->priv_to_it(node_algorithms::upper_bound
+         (this->header_ptr(), key, this->key_node_comp(comp)));
    }
 
    inline const_iterator upper_bound(const key_type &key) const
-   {  return this->upper_bound(key, this->key_comp());   }
+   {
+      return this->priv_to_cit(node_algorithms::upper_bound
+         (this->header_ptr(), key, this->key_node_comp(this->key_comp())));
+   }
 
    template<class KeyType, class KeyTypeKeyCompare>
    const_iterator upper_bound(const KeyType &key, KeyTypeKeyCompare comp) const
    {
-      return const_iterator(node_algorithms::upper_bound
-         (this->header_ptr(), key, this->key_node_comp(comp)), this->priv_value_traits_ptr());
+      return this->priv_to_cit(node_algorithms::upper_bound
+         (this->header_ptr(), key, this->key_node_comp(comp)));
    }
 
    template<class KeyTypeKeyCompare>
@@ -374,41 +395,53 @@ struct bstbase2
 
    //find
    inline iterator find(const key_type &key)
-   {  return this->find(key, this->key_comp()); }
+   {
+      return this->priv_to_it(node_algorithms::find(this->header_ptr(), key, this->key_node_comp(this->key_comp())));
+   }
 
    template<class KeyType, class KeyTypeKeyCompare>
    iterator find(const KeyType &key, KeyTypeKeyCompare comp)
    {
-      return iterator
-         (node_algorithms::find(this->header_ptr(), key, this->key_node_comp(comp)), this->priv_value_traits_ptr());
+      return this->priv_to_it(node_algorithms::find(this->header_ptr(), key, this->key_node_comp(comp)));
    }
 
    inline const_iterator find(const key_type &key) const
-   {  return this->find(key, this->key_comp()); }
+   {
+      return this->priv_to_cit(node_algorithms::find(this->header_ptr(), key, this->key_node_comp(this->key_comp())));
+   }
 
    template<class KeyType, class KeyTypeKeyCompare>
    const_iterator find(const KeyType &key, KeyTypeKeyCompare comp) const
    {
-      return const_iterator
-         (node_algorithms::find(this->header_ptr(), key, this->key_node_comp(comp)), this->priv_value_traits_ptr());
+      return this->priv_to_cit(node_algorithms::find(this->header_ptr(), key, this->key_node_comp(comp)));
    }
 
    //equal_range
    inline std::pair<iterator,iterator> equal_range(const key_type &key)
-   {  return this->equal_range(key, this->key_comp());   }
+   {
+      std::pair<node_ptr, node_ptr> ret =
+         node_algorithms::equal_range(this->header_ptr(), key, this->key_node_comp(this->key_comp()));
+      return std::pair<iterator, iterator>( this->priv_to_it(ret.first)
+                                          , this->priv_to_it(ret.second));
+   }
 
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<iterator,iterator> equal_range(const KeyType &key, KeyTypeKeyCompare comp)
    {
       std::pair<node_ptr, node_ptr> ret = 
          node_algorithms::equal_range(this->header_ptr(), key, this->key_node_comp(comp));
-      return std::pair<iterator, iterator>( iterator(ret.first, this->priv_value_traits_ptr())
-                                          , iterator(ret.second, this->priv_value_traits_ptr()));
+      return std::pair<iterator, iterator>( this->priv_to_it(ret.first)
+                                          , this->priv_to_it(ret.second));
    }
 
    inline std::pair<const_iterator, const_iterator>
       equal_range(const key_type &key) const
-   {  return this->equal_range(key, this->key_comp());   }
+   {
+      std::pair<node_ptr, node_ptr> ret =
+         node_algorithms::equal_range(this->header_ptr(), key, this->key_node_comp(this->key_comp()));
+      return std::pair<const_iterator, const_iterator>( this->priv_to_cit(ret.first)
+                                                      , this->priv_to_cit(ret.second));
+   }
 
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<const_iterator, const_iterator>
@@ -416,26 +449,36 @@ struct bstbase2
    {
       std::pair<node_ptr, node_ptr> ret =
          node_algorithms::equal_range(this->header_ptr(), key, this->key_node_comp(comp));
-      return std::pair<const_iterator, const_iterator>( const_iterator(ret.first, this->priv_value_traits_ptr())
-                                                      , const_iterator(ret.second, this->priv_value_traits_ptr()));
+      return std::pair<const_iterator, const_iterator>( this->priv_to_cit(ret.first)
+                                                      , this->priv_to_cit(ret.second));
    }
 
    //lower_bound_range
    inline std::pair<iterator,iterator> lower_bound_range(const key_type &key)
-   {  return this->lower_bound_range(key, this->key_comp());   }
+   {
+      std::pair<node_ptr, node_ptr> ret =
+         node_algorithms::lower_bound_range(this->header_ptr(), key, this->key_node_comp(this->key_comp()));
+      return std::pair<iterator, iterator>( this->priv_to_it(ret.first)
+                                          , this->priv_to_it(ret.second));
+   }
 
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<iterator,iterator> lower_bound_range(const KeyType &key, KeyTypeKeyCompare comp)
    {
       std::pair<node_ptr, node_ptr> ret =
          node_algorithms::lower_bound_range(this->header_ptr(), key, this->key_node_comp(comp));
-      return std::pair<iterator, iterator>( iterator(ret.first, this->priv_value_traits_ptr())
-                                          , iterator(ret.second, this->priv_value_traits_ptr()));
+      return std::pair<iterator, iterator>( this->priv_to_it(ret.first)
+                                          , this->priv_to_it(ret.second));
    }
 
    inline std::pair<const_iterator, const_iterator>
       lower_bound_range(const key_type &key) const
-   {  return this->lower_bound_range(key, this->key_comp());   }
+   {
+      std::pair<node_ptr, node_ptr> ret =
+         node_algorithms::lower_bound_range(this->header_ptr(), key, this->key_node_comp(this->key_comp()));
+      return std::pair<const_iterator, const_iterator>( this->priv_to_cit(ret.first)
+                                                      , this->priv_to_cit(ret.second));
+   }
 
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<const_iterator, const_iterator>
@@ -443,8 +486,8 @@ struct bstbase2
    {
       std::pair<node_ptr, node_ptr> ret =
          node_algorithms::lower_bound_range(this->header_ptr(), key, this->key_node_comp(comp));
-      return std::pair<const_iterator, const_iterator>( const_iterator(ret.first, this->priv_value_traits_ptr())
-                                                      , const_iterator(ret.second, this->priv_value_traits_ptr()));
+      return std::pair<const_iterator, const_iterator>( this->priv_to_cit(ret.first)
+                                                      , this->priv_to_cit(ret.second));
    }
 
    //bounded_range
@@ -453,7 +496,11 @@ struct bstbase2
    {
       BOOST_INTRUSIVE_INVARIANT_ASSERT(!this->key_comp()(upper_key, lower_key));
       BOOST_INTRUSIVE_INVARIANT_ASSERT(right_closed || left_closed || this->key_comp()(lower_key, upper_key));
-      return this->bounded_range(lower_key, upper_key, this->key_comp(), left_closed, right_closed);
+      std::pair<node_ptr, node_ptr> ret =
+         node_algorithms::bounded_range
+            (this->header_ptr(), lower_key, upper_key, this->key_node_comp(this->key_comp()), left_closed, right_closed);
+      return std::pair<iterator, iterator>( this->priv_to_it(ret.first)
+                                          , this->priv_to_it(ret.second));
    }
 
    template<class KeyType, class KeyTypeKeyCompare>
@@ -463,8 +510,8 @@ struct bstbase2
       std::pair<node_ptr, node_ptr> ret =
          node_algorithms::bounded_range
             (this->header_ptr(), lower_key, upper_key, this->key_node_comp(comp), left_closed, right_closed);
-      return std::pair<iterator, iterator>( iterator(ret.first, this->priv_value_traits_ptr())
-                                          , iterator(ret.second, this->priv_value_traits_ptr()));
+      return std::pair<iterator, iterator>( this->priv_to_it(ret.first)
+                                          , this->priv_to_it(ret.second));
    }
 
    inline std::pair<const_iterator,const_iterator> bounded_range
@@ -472,7 +519,11 @@ struct bstbase2
    {
       BOOST_INTRUSIVE_INVARIANT_ASSERT(!this->key_comp()(upper_key, lower_key));
       BOOST_INTRUSIVE_INVARIANT_ASSERT(right_closed || left_closed || this->key_comp()(lower_key, upper_key));
-      return this->bounded_range(lower_key, upper_key, this->key_comp(), left_closed, right_closed);
+      std::pair<node_ptr, node_ptr> ret =
+         node_algorithms::bounded_range
+            (this->header_ptr(), lower_key, upper_key, this->key_node_comp(this->key_comp()), left_closed, right_closed);
+      return std::pair<const_iterator, const_iterator>( this->priv_to_cit(ret.first)
+                                                      , this->priv_to_cit(ret.second));
    }
 
    template<class KeyType, class KeyTypeKeyCompare>
@@ -482,18 +533,28 @@ struct bstbase2
       std::pair<node_ptr, node_ptr> ret =
          node_algorithms::bounded_range
             (this->header_ptr(), lower_key, upper_key, this->key_node_comp(comp), left_closed, right_closed);
-      return std::pair<const_iterator, const_iterator>( const_iterator(ret.first, this->priv_value_traits_ptr())
-                                                      , const_iterator(ret.second, this->priv_value_traits_ptr()));
+      return std::pair<const_iterator, const_iterator>( this->priv_to_cit(ret.first)
+                                                      , this->priv_to_cit(ret.second));
    }
 
    //insert_unique_check
    inline std::pair<iterator, bool> insert_unique_check
       (const key_type &key, insert_commit_data &commit_data)
-   {  return this->insert_unique_check(key, this->key_comp(), commit_data);   }
+   {
+      std::pair<node_ptr, bool> ret =
+         (node_algorithms::insert_unique_check
+            (this->header_ptr(), key, this->key_node_comp(this->key_comp()), commit_data));
+      return std::pair<iterator, bool>(this->priv_to_it(ret.first), ret.second);
+   }
 
    inline std::pair<iterator, bool> insert_unique_check
       (const_iterator hint, const key_type &key, insert_commit_data &commit_data)
-   {  return this->insert_unique_check(hint, key, this->key_comp(), commit_data);   }
+   {
+      std::pair<node_ptr, bool> ret =
+         (node_algorithms::insert_unique_check
+            (this->header_ptr(), hint.pointed_node(), key, this->key_node_comp(this->key_comp()), commit_data));
+      return std::pair<iterator, bool>(this->priv_to_it(ret.first), ret.second);
+   }
 
    template<class KeyType, class KeyTypeKeyCompare>
    BOOST_INTRUSIVE_DOC1ST(std::pair<iterator BOOST_INTRUSIVE_I bool>
@@ -506,7 +567,7 @@ struct bstbase2
       std::pair<node_ptr, bool> ret =
          (node_algorithms::insert_unique_check
             (this->header_ptr(), key, this->key_node_comp(comp), commit_data));
-      return std::pair<iterator, bool>(iterator(ret.first, this->priv_value_traits_ptr()), ret.second);
+      return std::pair<iterator, bool>(this->priv_to_it(ret.first), ret.second);
    }
 
    template<class KeyType, class KeyTypeKeyCompare>
@@ -516,7 +577,7 @@ struct bstbase2
       std::pair<node_ptr, bool> ret =
          (node_algorithms::insert_unique_check
             (this->header_ptr(), hint.pointed_node(), key, this->key_node_comp(comp), commit_data));
-      return std::pair<iterator, bool>(iterator(ret.first, this->priv_value_traits_ptr()), ret.second);
+      return std::pair<iterator, bool>(this->priv_to_it(ret.first), ret.second);
    }
 };
 
@@ -1090,8 +1151,8 @@ class bstree_impl
    {
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
       BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::unique(to_insert));
-      iterator ret(node_algorithms::insert_equal_upper_bound
-         (this->header_ptr(), to_insert, this->key_node_comp(this->key_comp())), this->priv_value_traits_ptr());
+      iterator ret = this->priv_to_it(node_algorithms::insert_equal_upper_bound
+         (this->header_ptr(), to_insert, this->key_node_comp(this->key_comp())));
       this->sz_traits().increment();
       return ret;
    }
@@ -1114,8 +1175,8 @@ class bstree_impl
    {
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
       BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::unique(to_insert));
-      iterator ret(node_algorithms::insert_equal
-         (this->header_ptr(), hint.pointed_node(), to_insert, this->key_node_comp(this->key_comp())), this->priv_value_traits_ptr());
+      iterator ret = this->priv_to_it(node_algorithms::insert_equal
+         (this->header_ptr(), hint.pointed_node(), to_insert, this->key_node_comp(this->key_comp())));
       this->sz_traits().increment();
       return ret;
    }
@@ -1162,7 +1223,7 @@ class bstree_impl
             (this->header_ptr(), key_of_value()(value), this->key_node_comp(this->key_comp()), commit_data));
       return std::pair<iterator, bool>
          ( ret.second ? this->insert_unique_commit(value, commit_data)
-                      : iterator(ret.first, this->priv_value_traits_ptr())
+                      : this->priv_to_it(ret.first)
          , ret.second);
    }
 
@@ -1187,7 +1248,7 @@ class bstree_impl
          (node_algorithms::insert_unique_check
             (this->header_ptr(), hint.pointed_node(), key_of_value()(value), this->key_node_comp(this->key_comp()), commit_data));
       return ret.second ? this->insert_unique_commit(value, commit_data)
-                        : iterator(ret.first, this->priv_value_traits_ptr());
+                        : this->priv_to_it(ret.first);
    }
 
    //! <b>Requires</b>: Dereferencing iterator must yield an lvalue
@@ -1348,7 +1409,7 @@ class bstree_impl
       //Check if the insertion point is correct
       //The comparison could throw and this function is noexcept
       BOOST_INTRUSIVE_TRY{
-         iterator p(commit_data.node, this->priv_value_traits_ptr());
+         iterator p = this->priv_to_it(commit_data.node);
          if(!commit_data.link_left){
             ++p;
          }
@@ -1363,7 +1424,7 @@ class bstree_impl
       node_algorithms::insert_unique_commit
                (this->header_ptr(), to_insert, commit_data);
       this->sz_traits().increment();
-      return iterator(to_insert, this->priv_value_traits_ptr());
+      return this->priv_to_it(to_insert);
    }
 
    //! <b>Requires</b>: value must be an lvalue, "pos" must be
@@ -1385,8 +1446,8 @@ class bstree_impl
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
       BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::unique(to_insert));
       this->sz_traits().increment();
-      return iterator(node_algorithms::insert_before
-         (this->header_ptr(), pos.pointed_node(), to_insert), this->priv_value_traits_ptr());
+      return this->priv_to_it(node_algorithms::insert_before
+         (this->header_ptr(), pos.pointed_node(), to_insert));
    }
 
    //! <b>Requires</b>: value must be an lvalue, and it must be no less
@@ -1477,7 +1538,12 @@ class bstree_impl
    //! <b>Note</b>: Invalidates the iterators (but not the references)
    //!    to the erased elements. No destructors are called.
    size_type erase(const key_type &key)
-   {  return this->erase(key, this->key_comp());   }
+   {
+      std::pair<iterator,iterator> p = this->equal_range(key);
+      size_type n;
+      this->private_erase(p.first, p.second, n);
+      return n;
+   }
 
    //! <b>Requires</b>: key is a value such that `*this` is partitioned with respect to
    //!   comp(nk, key) and !comp(key, nk), with comp(nk, key) implying !comp(key, nk),
@@ -1637,7 +1703,7 @@ class bstree_impl
    //!
    //! <b>Throws</b>: If `key_compare` throws.
    size_type count(const key_type &key) const
-   {  return size_type(this->count(key, this->key_comp()));   }
+   {  return size_type(node_algorithms::count(this->header_ptr(), key, this->key_node_comp(this->key_comp())));   }
 
    //! <b>Requires</b>: key is a value such that `*this` is partitioned with respect to
    //!   comp(nk, key) and !comp(key, nk), with comp(nk, key) implying !comp(key, nk),
@@ -1651,28 +1717,18 @@ class bstree_impl
    //! <b>Throws</b>: If `comp` throws.
    template<class KeyType, class KeyTypeKeyCompare>
    size_type count(const KeyType &key, KeyTypeKeyCompare comp) const
-   {
-      std::pair<const_iterator, const_iterator> ret = this->equal_range(key, comp);
-      size_type n = 0;
-      for(; ret.first != ret.second; ++ret.first){ ++n; }
-      return n;
-   }
+   {  return size_type(node_algorithms::count(this->header_ptr(), key, this->key_node_comp(comp)));   }
 
    #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
    //Add non-const overloads to theoretically const members
    //as some algorithms have different behavior when non-const versions are used (like splay trees).
    size_type count(const key_type &key)
-   {  return size_type(this->count(key, this->key_comp()));   }
+   {  return size_type(node_algorithms::count(this->header_ptr(), key, this->key_node_comp(this->key_comp())));   }
 
    template<class KeyType, class KeyTypeKeyCompare>
    size_type count(const KeyType &key, KeyTypeKeyCompare comp)
-   {
-      std::pair<const_iterator, const_iterator> ret = this->equal_range(key, comp);
-      size_type n = 0;
-      for(; ret.first != ret.second; ++ret.first){ ++n; }
-      return n;
-   }
+   {  return size_type(node_algorithms::count(this->header_ptr(), key, this->key_node_comp(comp)));   }
 
    #else //defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
