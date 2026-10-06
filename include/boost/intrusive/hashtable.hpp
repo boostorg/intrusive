@@ -190,8 +190,8 @@ class exception_bucket_disposer
    public:
 
    exception_bucket_disposer
-      (Bucket &cont, Disposer &disp, const SizeType &constructed)
-      :  cont_(&cont), disp_(disp), constructed_(constructed)
+      (Bucket *cont, Disposer &disp, const SizeType &constructed)
+      :  cont_(cont), disp_(disp), constructed_(constructed)
    {}
 
    inline void release()
@@ -807,6 +807,9 @@ struct bucket_plus_vtraits
    inline void priv_unset_sentinel_bucket() const
    {
       BOOST_IF_CONSTEXPR(LinearBuckets) {
+         //A moved-from container has no bucket array and no sentinel bucket
+         if(!this->priv_bucket_traits().bucket_count())
+            return;
          BOOST_INTRUSIVE_INVARIANT_ASSERT(this->priv_bucket_traits().bucket_count() > 1);
          bucket_type& b = this->priv_bucket_pointer()[std::ptrdiff_t(this->priv_usable_bucket_count())];
          slist_node_algorithms::init_header(b.get_node_ptr());
@@ -817,10 +820,11 @@ struct bucket_plus_vtraits
    {  return priv_end_sit(linear_buckets_t());  }
 
    inline siterator priv_end_sit(detail::true_) const
-   {  return siterator(this->priv_bucket_pointer() + std::ptrdiff_t(this->priv_bucket_traits().bucket_count() - bucket_overhead)); }
+   {  return siterator(this->priv_bucket_pointer() + std::ptrdiff_t(this->priv_usable_bucket_count())); }
 
+   //The bucket pointer is null in a moved-from container: convert it without dereferencing it
    inline siterator priv_end_sit(detail::false_) const
-   {  return siterator(this->priv_bucket_pointer()->get_node_ptr());  }
+   {  return siterator(pointer_traits<slist_node_ptr>::static_cast_from(this->priv_bucket_pointer()));  }
 
    inline siterator priv_bucket_lbegin(std::size_t n) const
    {  siterator s(this->priv_bucket_lbbegin(n)); return ++s; }
@@ -2226,6 +2230,12 @@ class hashtable_impl
    //! <b>Note</b>: The bucket array is not copied: after the move, *this uses the bucket array
    //!   of x, which holds the nodes. The move constructor of the bucket traits must therefore leave
    //!   the moved-from bucket traits without a bucket array.
+   //!
+   //!   x is left empty and without a bucket array (bucket_count() == 0). It can be destroyed,
+   //!   cleared, iterated, swapped, move assigned, used in clone_from (as destination only if
+   //!   the source is empty) and rehashed (full_rehash does nothing). Calling rehash with new
+   //!   bucket traits gives it a new bucket array. Functions that need a bucket (insertions,
+   //!   lookups and erasures by key, bucket functions, etc.) can't be used until then.
    hashtable_impl(BOOST_RV_REF(hashtable_impl) x)
       : internal_type(BOOST_MOVE_BASE(internal_type, x))
    {
@@ -3357,7 +3367,11 @@ class hashtable_impl
    //! <b>Throws</b>: If the hasher functor throws. Basic guarantee: all the elements
    //!   are unlinked (no destructors are called) and the container is left empty.
    inline void full_rehash()
-   {  this->priv_rehash_impl(this->priv_bucket_traits(), true);  }
+   {
+      //A moved-from container has no bucket array and nothing to rehash
+      if(this->priv_bucket_traits().bucket_count())
+         this->priv_rehash_impl(this->priv_bucket_traits(), true);
+   }
 
    //! <b>Effects</b>: Let s be this->split_count() and n be this->bucket_count().
    //!
@@ -3651,8 +3665,8 @@ class hashtable_impl
       //destroyed after the rollback functions, as with a bigger new bucket array in the same
       //buffer the old sentinel bucket is a bucket of the new array.
       exception_sentinel_bucket_restorer<internal_type> rollback_sentinel(*this);
-      ArrayDisposer rollback1(new_buckets[0], nd, new_bucket_count);
-      ArrayDisposer rollback2(old_buckets[0], nd, old_bucket_count);
+      ArrayDisposer rollback1(boost::movelib::to_raw_pointer(new_buckets), nd, new_bucket_count);
+      ArrayDisposer rollback2(boost::movelib::to_raw_pointer(old_buckets), nd, old_bucket_count);
 
       //Put size in a safe value for rollback exception
       size_type const size_backup = this->priv_size_count();
@@ -3747,7 +3761,8 @@ class hashtable_impl
       this->clear_and_dispose(disposer);
       this->priv_hasher() = src.priv_hasher();
       this->priv_equal()  = src.priv_equal();
-      if(!constant_time_size || !src.empty()){
+      //An empty source can be a moved-from container without bucket array
+      if(!src.empty()){
          const size_type src_bucket_count = src.bucket_count();
          const size_type dst_bucket_count = this->bucket_count();
          //Check power of two bucket array if the option is activated
@@ -3816,7 +3831,7 @@ class hashtable_impl
       //If the cloner throws, the clones are in the buckets of the destination
       //array (smaller or bigger than the number of source buckets already processed)
       exception_bucket_disposer<bucket_type, slist_node_algorithms, NodeDisposer, size_type>
-         rollback(this->priv_bucket(0), node_disp, dst_bucket_count);
+         rollback(boost::movelib::to_raw_pointer(this->priv_bucket_pointer()), node_disp, dst_bucket_count);
       BOOST_INTRUSIVE_TRY{
          //Now insert the remaining ones using the modulo trick
          for( //"constructed" already initialized
