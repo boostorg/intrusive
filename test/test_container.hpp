@@ -345,35 +345,49 @@ void test_common_unordered_and_associative_container(Container & c, Data & d, bo
    //
    //suggested_upper_bucket_count
    //
-   //Maximum fallbacks to the highest possible value
    typename Container::size_type sz = Container::suggested_upper_bucket_count(size_type(-1));
+   BOOST_TEST( Container::suggested_lower_bucket_count(sz) == sz );
+   BOOST_TEST( Container::suggested_upper_bucket_count(size_type(sz + 1u)) == sz );
    //If size_type is big enough the upper bound is returned
    BOOST_IF_CONSTEXPR(sizeof(size_type) < sizeof(std::size_t)){
       sz = Container::suggested_upper_bucket_count(size_type(-1)/2);
-      BOOST_TEST( sz > size_type(-1)/2 );
+      BOOST_TEST( sz >= size_type(-1)/2 );
+      BOOST_TEST( Container::suggested_lower_bucket_count(sz) == sz );
    }
    sz = Container::suggested_upper_bucket_count(size_type(-1)/4);
-   BOOST_TEST( sz > size_type(-1)/4 );
+   BOOST_TEST( sz >= size_type(-1)/4 );
+   BOOST_TEST( Container::suggested_lower_bucket_count(sz) == sz );
    sz = Container::suggested_upper_bucket_count(size_type(-1) / 8);
-   BOOST_TEST(sz > size_type(-1) / 8);
-   sz = Container::suggested_upper_bucket_count(0);
-   BOOST_TEST( sz > 0 );
+   BOOST_TEST( sz >= size_type(-1) / 8 );
+   BOOST_TEST( Container::suggested_lower_bucket_count(sz) == sz );
+   //A supported value is returned unchanged, otherwise the next one is returned
+   BOOST_TEST( Container::suggested_upper_bucket_count(0) == 3u );
+   BOOST_TEST( Container::suggested_upper_bucket_count(3) == 3u );
+   BOOST_TEST( Container::suggested_upper_bucket_count(8) == 11u );
+   BOOST_TEST( Container::suggested_upper_bucket_count(11) == 11u );
+   BOOST_TEST( Container::suggested_upper_bucket_count(12) == 17u );
    //
    //suggested_lower_bucket_count
    //
-   //If size_type is big enough the lower bound is returned
-   BOOST_IF_CONSTEXPR(sizeof(size_type) < sizeof(std::size_t)) {
-      sz = Container::suggested_lower_bucket_count(size_type(-1) / 2);
-      BOOST_TEST(sz >= size_type(-1) / 2);
-   }
-   //In the rest of cases the lower bound is returned
+   sz = Container::suggested_lower_bucket_count(size_type(-1));
+   BOOST_TEST( Container::suggested_upper_bucket_count(sz) == sz );
+   sz = Container::suggested_lower_bucket_count(size_type(-1) / 2);
+   BOOST_TEST( sz <= size_type(-1) / 2 );
+   BOOST_TEST( Container::suggested_upper_bucket_count(sz) == sz );
    sz = Container::suggested_lower_bucket_count(size_type(-1)/4);
-   BOOST_TEST( sz >= size_type(-1)/4 );
+   BOOST_TEST( sz <= size_type(-1)/4 );
+   BOOST_TEST( Container::suggested_upper_bucket_count(sz) == sz );
    sz = Container::suggested_lower_bucket_count(size_type(-1) / 8);
-   BOOST_TEST(sz >= size_type(-1) / 8);
+   BOOST_TEST( sz <= size_type(-1) / 8 );
+   BOOST_TEST( Container::suggested_upper_bucket_count(sz) == sz );
+   //A supported value is returned unchanged, otherwise the previous one is returned
+   BOOST_TEST( Container::suggested_lower_bucket_count(3) == 3u );
+   BOOST_TEST( Container::suggested_lower_bucket_count(8) == 7u );
+   BOOST_TEST( Container::suggested_lower_bucket_count(11) == 11u );
+   BOOST_TEST( Container::suggested_lower_bucket_count(12) == 11u );
    //Minimum fallbacks to the lowest possible value
-   sz = Container::suggested_upper_bucket_count(0);
-   BOOST_TEST( sz > 0 );
+   BOOST_TEST( Container::suggested_lower_bucket_count(0) == 3u );
+   BOOST_TEST( Container::suggested_lower_bucket_count(2) == 3u );
 }
 
 template< class Container, class Data >

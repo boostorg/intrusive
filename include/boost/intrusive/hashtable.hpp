@@ -3546,7 +3546,7 @@ class hashtable_impl
    //!   the container that is bigger or equal than n. This suggestion can be
    //!   used to create bucket arrays with a size that will usually improve
    //!   container's performance. If such value does not exist, the
-   //!   higher possible value is returned.
+   //!   highest possible value that size_type can represent is returned.
    //!
    //! <b>Complexity</b>: Amortized constant time.
    //!

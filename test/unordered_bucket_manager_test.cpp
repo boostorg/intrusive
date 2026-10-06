@@ -660,7 +660,7 @@ int main()
 
    //////////////////////////////////////
    // A bucket count for the requested capacity that does not fit in
-   // size_type is limited to the maximum value of size_type
+   // size_type is limited to what size_type can represent
    //////////////////////////////////////
    {
       typedef bi::unordered_multiset
@@ -672,7 +672,7 @@ int main()
       mgr.max_load_factor(0.001f);
       //1000 elements need 1000000 buckets, more than unsigned short can hold
       BOOST_TEST(mgr.reserve(mset, small_t::size_type(1000u)));
-      BOOST_TEST(mgr.bucket_count() == small_t::size_type(-1));
+      BOOST_TEST(mgr.bucket_count() == 49157u);
       check_sync(mgr, mset);
       item x(1);
       mset.insert(x);

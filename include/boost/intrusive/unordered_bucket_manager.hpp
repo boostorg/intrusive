@@ -230,7 +230,7 @@ class bucket_array_base
    {
       const size_type max_count = priv_max_count();
       const size_type r = prime_list_holder<>::suggested_upper_bucket_count(n);
-      return r > max_count ? max_count : r;
+      return r > max_count ? prime_list_holder<>::suggested_lower_bucket_count(max_count) : r;
    }
 
    //Smallest bucket count `b` such that element_count <= max_load_factor*b.

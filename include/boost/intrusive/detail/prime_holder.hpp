@@ -53,64 +53,66 @@ struct prime_list_holder
 {
    private:
 
-   template <class SizeType> // sizeof(SizeType) < sizeof(std::size_t)
-   static inline SizeType truncate_size_type(std::size_t n, detail::true_)
-   {  return n < std::size_t(SizeType(-1)) ? static_cast<SizeType>(n) : SizeType(-1);  }
+   //Maximum value of SizeType that std::size_t can represent
+   template <class SizeType>
+   static inline std::size_t max_size_type_value()
+   {  return sizeof(SizeType) < sizeof(std::size_t) ? std::size_t(SizeType(-1)) : std::size_t(-1);  }
 
-   template <class SizeType> // sizeof(SizeType) == sizeof(std::size_t)
-   static inline SizeType truncate_size_type(std::size_t n, detail::false_)
-   {  return static_cast<SizeType>(n);   }
+   //Converts n to std::size_t, saturating values that std::size_t can't represent
+   template <class SizeType>
+   static inline std::size_t saturate_to_size_t(SizeType n)
+   {  return n > SizeType(std::size_t(-1)) ? std::size_t(-1) : std::size_t(n);  }
 
    static const std::size_t prime_list[];
    static const std::size_t prime_list_size;
 
+   //Biggest prime smaller or equal than n or the smallest prime
    static const std::size_t *suggested_lower_bucket_count_ptr(std::size_t n)
    {
       const std::size_t *primes     = &prime_list[0];
       const std::size_t *primes_end = primes + prime_list_size;
       std::size_t const* bound =
-         boost::movelib::lower_bound(primes, primes_end, n, value_less<std::size_t>());
-      bound -= std::size_t(bound == primes_end);
+         boost::movelib::upper_bound(primes, primes_end, n, value_less<std::size_t>());
+      bound -= std::size_t(bound != primes);
       return bound;
    }
 
-   static const std::size_t *suggested_upper_bucket_count_ptr(std::size_t n)
+   //Smallest prime bigger or equal than n and smaller or equal than max_n
+   static const std::size_t *suggested_upper_bucket_count_ptr(std::size_t n, std::size_t max_n)
    {
       const std::size_t *primes     = &prime_list[0];
       const std::size_t *primes_end = primes + prime_list_size;
       std::size_t const* bound =
-         boost::movelib::upper_bound(primes, primes_end, n, value_less<std::size_t>());
-      bound -= std::size_t(bound == primes_end);
+         boost::movelib::lower_bound(primes, primes_end, n, value_less<std::size_t>());
+      if(bound == primes_end || *bound > max_n){
+         bound = suggested_lower_bucket_count_ptr(max_n);
+      }
       return bound;
    }
-
-   static std::size_t suggested_lower_bucket_count_impl(std::size_t n)
-   {  return *suggested_lower_bucket_count_ptr(n); }
-
-   static std::size_t suggested_upper_bucket_count_impl(std::size_t n)
-   {  return *suggested_upper_bucket_count_ptr(n); }
 
    public:
 
    template <class SizeType>
    static inline SizeType suggested_upper_bucket_count(SizeType n)
    {
-      std::size_t const c = suggested_upper_bucket_count_impl(static_cast<std::size_t>(n));
-      return truncate_size_type<SizeType>(c, detail::bool_<(sizeof(SizeType) < sizeof(std::size_t))>());
+      return static_cast<SizeType>
+         (*suggested_upper_bucket_count_ptr(saturate_to_size_t(n), max_size_type_value<SizeType>()));
    }
 
    template <class SizeType>
    static inline SizeType suggested_lower_bucket_count(SizeType n)
+   {  return static_cast<SizeType>(*suggested_lower_bucket_count_ptr(saturate_to_size_t(n)));   }
+
+   template <class SizeType>
+   static inline std::size_t suggested_lower_bucket_count_idx(SizeType n)
+   {  return static_cast<std::size_t>(suggested_lower_bucket_count_ptr(saturate_to_size_t(n)) - &prime_list[0]); }
+
+   template <class SizeType>
+   static inline std::size_t suggested_upper_bucket_count_idx(SizeType n)
    {
-      std::size_t const c = suggested_lower_bucket_count_impl(static_cast<std::size_t>(n));
-      return truncate_size_type<SizeType>(c, detail::bool_<(sizeof(SizeType) < sizeof(std::size_t))>());
+      return static_cast<std::size_t>
+         (suggested_upper_bucket_count_ptr(saturate_to_size_t(n), max_size_type_value<SizeType>()) - &prime_list[0]);
    }
-
-   static inline std::size_t suggested_lower_bucket_count_idx(std::size_t n)
-   {  return static_cast<std::size_t>(suggested_lower_bucket_count_ptr(n) - &prime_list[0]); }
-
-   static inline std::size_t suggested_upper_bucket_count_idx(std::size_t n)
-   {  return static_cast<std::size_t>(suggested_upper_bucket_count_ptr(n) - &prime_list[0]); }
 
    static inline std::size_t size_from_index(std::size_t n)
    {  return prime_list[std::ptrdiff_t(n)]; }
@@ -125,10 +127,12 @@ struct prime_list_holder
    static const std::size_t inv_sizes32_size;
    #endif
 
-   inline static std::size_t lower_size_index(std::size_t n)
+   template <class SizeType>
+   inline static std::size_t lower_size_index(SizeType n)
    {   return prime_list_holder<>::suggested_lower_bucket_count_idx(n);  }
 
-   inline static std::size_t upper_size_index(std::size_t n)
+   template <class SizeType>
+   inline static std::size_t upper_size_index(SizeType n)
    {   return prime_list_holder<>::suggested_upper_bucket_count_idx(n);  }
 
    inline static std::size_t size(std::size_t size_index)

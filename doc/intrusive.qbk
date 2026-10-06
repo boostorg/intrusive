@@ -4018,8 +4018,13 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
   copyable when their members are. This way, compilers can pass and return them in registers instead of
   by hidden reference.
 * Fixed functions calling predicates and/or hashes that were incorrectly marked as `noexcept`.
-* [*Breaking change]: treap containers no longer accept `auto_unlink` hooks (a static assertion is raised),
-  as unlinking a node through the hook broke the heap order of the priorities.
+* [*Potentially breaking change]: treap containers no longer accept `auto_unlink` hooks (a static assertion
+  is raised), as unlinking a node through the hook broke the heap order of the priorities, so it was a bug.
+* [*Potentially breaking change]: `suggested_lower_bucket_count(n)` now returns the biggest supported bucket count that is smaller
+  than or equal to `n` (previously it returned the smallest one bigger than or equal to `n`) and
+  `suggested_upper_bucket_count(n)` now returns `n` if `n` is a supported bucket count (previously it returned the next one),
+  as documented. If the value does not fit in `size_type`, both functions now return the biggest supported bucket count
+  that `size_type` can represent, instead of a truncated or saturated value that was not valid for `fastmod_buckets`.
 * Optimized:
    * `reverse` operations for lists.
    * splay tree algorithms/containers, taking advantage of splaying operations to reduce comparisons for unique keys and insertions with hints.
