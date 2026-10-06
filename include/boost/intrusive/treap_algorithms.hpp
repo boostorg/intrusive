@@ -706,23 +706,6 @@ class treap_algorithms
       num_rotations = n;
    }
 
-   template<class NodePtrPriorityCompare>
-   static bool check_invariant(const_node_ptr header, NodePtrPriorityCompare pcomp)
-   {
-      node_ptr beg = begin_node(header);
-      node_ptr end = end_node(header);
-
-      while(beg != end){
-         node_ptr p = NodeTraits::get_parent(beg);
-         if(p != header){
-            if(pcomp(beg, p))
-               return false;
-         }
-         beg = next_node(beg);
-      }
-      return true;
-   }
-
    /// @endcond
 };
 
