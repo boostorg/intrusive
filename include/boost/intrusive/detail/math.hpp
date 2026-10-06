@@ -211,7 +211,7 @@ struct sqrt2_pow_max;
 template <class SizeType>
 struct sqrt2_pow_max<SizeType, typename voider<typename enable_if< numbits_eq<SizeType, 32> >::type>::type>
 {
-   static const SizeType value = 0xb504f334;
+   static const SizeType value = 0xb504f333;
    static const std::size_t pow   = 31;
 };
 
@@ -226,7 +226,10 @@ struct sqrt2_pow_max<SizeType, typename voider<typename enable_if< numbits_eq<Si
 
 #endif   //BOOST_NO_INT64_T
 
-// Returns floor(pow(sqrt(2), x * 2 + 1)).
+// sqrt2_pow_max<SizeType>::value is floor(pow(sqrt(2), pow * 2 + 1)).
+
+// Returns floor(pow(sqrt(2), x * 2 + 1)) + 1, that is ceil(pow(sqrt(2), x * 2 + 1)),
+// as pow(sqrt(2), x * 2 + 1) is irrational.
 // Defined for X from 0 up to the number of bits in size_t minus 1.
 inline std::size_t sqrt2_pow_2xplus1 (std::size_t x)
 {
