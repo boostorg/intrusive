@@ -56,7 +56,7 @@ namespace function_detector {
             class NonStaticType, \
             class NonStaticConstType, \
             class StaticType > \
-   class DetectMember_##InstantiationKey_##Identifier { \
+   class DetectMember_##InstantiationKey##_##Identifier { \
       template < NonStaticType > \
       struct TestNonStaticNonConst ; \
       \
@@ -83,7 +83,7 @@ namespace function_detector {
 }}} //namespace boost::intrusive::function_detector {
 
 #define BOOST_INTRUSIVE_DETECT_FUNCTION(Class, InstantiationKey, ReturnType, Identifier, Params) \
-    ::boost::intrusive::function_detector::DetectMember_##InstantiationKey_##Identifier< Class,\
+    ::boost::intrusive::function_detector::DetectMember_##InstantiationKey##_##Identifier< Class,\
                                          ReturnType (Class::*)Params,\
                                          ReturnType (Class::*)Params const,\
                                          ReturnType (*)Params \
