@@ -48,6 +48,17 @@ BOOST_INTRUSIVE_STATIC_ASSERT(( boost::intrusive::detail::is_same<combined_type:
 //test packing the default options leads to a default options type
 BOOST_INTRUSIVE_STATIC_ASSERT(( boost::intrusive::detail::is_same<pack_options<default_options>::type, default_options>::value ));
 
+//test that "void" options are ignored
+BOOST_INTRUSIVE_STATIC_ASSERT(( boost::intrusive::detail::is_same<pack_options<default_options, void>::type, default_options>::value ));
+BOOST_INTRUSIVE_STATIC_ASSERT(( boost::intrusive::detail::is_same<pack_options<default_options, void, void>::type, default_options>::value ));
+typedef pack_options < default_options
+                     , void
+                     , incremental<true>
+                     , void
+                     >::type void_combined_type;
+BOOST_INTRUSIVE_STATIC_ASSERT(( void_combined_type::is_incremental == true ));
+BOOST_INTRUSIVE_STATIC_ASSERT(( void_combined_type::long_constant == -3 ));
+
 int main()
 {
    return 0;
