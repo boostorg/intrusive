@@ -133,6 +133,13 @@ void test_slist< ListType, ValueContainer >
    BOOST_TEST(*testlist.previous(testlist.end()) == values[1]);
    BOOST_TEST (&testlist.front() == &values[0]);
    BOOST_TEST (&testlist.back() == &values[1]);
+
+   //last() and clast()
+   const list_type &ctestlist = testlist;
+   BOOST_TEST (&*testlist.last() == &values[1]);
+   BOOST_TEST (&*ctestlist.last() == &values[1]);
+   BOOST_TEST (&*testlist.clast() == &values[1]);
+   BOOST_TEST (&*ctestlist.clast() == &values[1]);
 }
 
 //test: merge due to error in merge implementation:

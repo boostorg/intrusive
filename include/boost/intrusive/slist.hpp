@@ -646,7 +646,7 @@ class slist_impl
    {
       //This function shall not be used if cache_last is not true
       BOOST_INTRUSIVE_INVARIANT_ASSERT(cache_last);
-      return const_iterator (this->get_last_node(), this->priv_value_traits_ptr());
+      return const_iterator (detail::uncast(this->get_last_node()), this->priv_value_traits_ptr());
    }
 
    //! <b>Effects</b>: Returns a const_iterator to the last element contained in the list.
@@ -657,7 +657,7 @@ class slist_impl
    //!
    //! <b>Note</b>: This function is present only if cached_last<> option is true.
    inline const_iterator clast() const BOOST_NOEXCEPT
-   { return const_iterator(this->get_last_node(), this->priv_value_traits_ptr()); }
+   {  return this->last();  }
 
    //! <b>Precondition</b>: end_iterator must be a valid end iterator
    //!   of slist.
