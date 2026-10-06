@@ -516,6 +516,8 @@ class splaytree_algorithms
          : priv_splay_down_bound<true> (header, lower_key, comp, before);
       if(r == header)   //Empty tree
          return std::pair<node_ptr, node_ptr>(header, header);
+      //Sanity check: if lower_key and upper_key are equal, then both left_closed and right_closed can't be false
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(right_closed || left_closed || priv_open_range_check(header, r, before, lower_key, upper_key, comp));
       node_ptr const first = before ? r : priv_next_of_root(header, r);
       //The end of the range is not before first, so it is r or a node of the right subtree of r
       if(before && (right_closed ? comp(upper_key, r) : !comp(r, upper_key)))
@@ -727,6 +729,19 @@ class splaytree_algorithms
    {
       node_ptr const r_right(NodeTraits::get_right(r));
       return r_right ? bstree_algo::minimum(r_right) : header;
+   }
+
+   //Sanity check of bounded_range with left_closed and right_closed false: no node can be
+   //equivalent to both lower_key and upper_key. r is the root after splaying the upper bound
+   //of lower_key, so the last node not greater than lower_key is r or, if "before", the
+   //previous one. Only that node can be equivalent to lower_key.
+   template<class KeyType, class KeyNodePtrCompare>
+   static bool priv_open_range_check
+      ( node_ptr header, node_ptr r, bool before, const KeyType &lower_key, const KeyType &upper_key
+      , KeyNodePtrCompare comp)
+   {
+      node_ptr const x = before ? priv_prev_of_hint(header, r) : r;
+      return x == header || comp(x, lower_key) || comp(upper_key, x) || comp(x, upper_key);
    }
 
    //Returns prev(hint), or header if there is no previous node (hint is the leftmost node

@@ -450,7 +450,11 @@ struct bstbase2
    //bounded_range
    inline std::pair<iterator,iterator> bounded_range
       (const key_type &lower_key, const key_type &upper_key, bool left_closed, bool right_closed)
-   {  return this->bounded_range(lower_key, upper_key, this->key_comp(), left_closed, right_closed);   }
+   {
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(!this->key_comp()(upper_key, lower_key));
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(right_closed || left_closed || this->key_comp()(lower_key, upper_key));
+      return this->bounded_range(lower_key, upper_key, this->key_comp(), left_closed, right_closed);
+   }
 
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<iterator,iterator> bounded_range
@@ -465,7 +469,11 @@ struct bstbase2
 
    inline std::pair<const_iterator,const_iterator> bounded_range
       (const key_type &lower_key, const key_type &upper_key, bool left_closed, bool right_closed) const
-   {  return this->bounded_range(lower_key, upper_key, this->key_comp(), left_closed, right_closed);   }
+   {
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(!this->key_comp()(upper_key, lower_key));
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(right_closed || left_closed || this->key_comp()(lower_key, upper_key));
+      return this->bounded_range(lower_key, upper_key, this->key_comp(), left_closed, right_closed);
+   }
 
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<const_iterator,const_iterator> bounded_range
@@ -1785,7 +1793,7 @@ class bstree_impl
    //!
    //!   If `lower_key` is equivalent to `upper_key`
    //!   [!key_comp()(upper_key, lower_key) && !key_comp()(lower_key, upper_key)] then
-   //!   ('left_closed' || 'right_closed') must be false.
+   //!   ('left_closed' || 'right_closed') must be true.
    //!
    //! <b>Effects</b>: Returns an a pair with the following criteria:
    //!
@@ -1816,7 +1824,7 @@ class bstree_impl
    //!
    //!   If `lower_key` is equivalent to `upper_key`
    //!   [!comp(upper_key, lower_key) && !comp(lower_key, upper_key)] then
-   //!   ('left_closed' || 'right_closed') must be false.
+   //!   ('left_closed' || 'right_closed') must be true.
    //!
    //! <b>Effects</b>: Returns an a pair with the following criteria:
    //!
