@@ -1933,7 +1933,7 @@ class bstree_impl
       node_ptr to_be_disposed(node_algorithms::unlink_leftmost_without_rebalance
                            (this->header_ptr()));
       if(!to_be_disposed)
-         return 0;
+         return pointer();
       this->sz_traits().decrement();
       BOOST_IF_CONSTEXPR(safemode_or_autounlink)//If this is commented does not work with normal_link
          node_algorithms::init(to_be_disposed);
