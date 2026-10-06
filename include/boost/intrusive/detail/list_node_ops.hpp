@@ -43,6 +43,7 @@ struct list_node_ops
 
    static size_type size(const_node_ptr header, const SizeTraits &sz) BOOST_NOEXCEPT
    {
+      (void)header; (void)sz;
       BOOST_IF_CONSTEXPR(constant_time_size)
          return sz.get_size();
       else
@@ -61,6 +62,7 @@ struct list_node_ops
    //Unlinks [b, e) and initializes the nodes, if needed
    static void erase(node_ptr b, node_ptr e, SizeTraits &sz) BOOST_NOEXCEPT
    {
+      (void)sz;
       node_algorithms::unlink(b, e);
       BOOST_IF_CONSTEXPR(SafeModeOrAutoUnlink || constant_time_size){
          while(b != e){
@@ -76,6 +78,7 @@ struct list_node_ops
    //Unlinks [b, e), with n == distance(b, e), and initializes the nodes, if needed
    static void erase(node_ptr b, node_ptr e, size_type n, SizeTraits &sz) BOOST_NOEXCEPT
    {
+      (void)n;
       BOOST_INTRUSIVE_INVARIANT_ASSERT(node_algorithms::distance(b, e) == n);
       BOOST_IF_CONSTEXPR(SafeModeOrAutoUnlink){
          list_node_ops::erase(b, e, sz);
@@ -121,6 +124,7 @@ struct list_node_ops
    //Transfers [f, e) before p, with n == distance(f, e) if constant_time_size
    static void splice_range(node_ptr p, SizeTraits &sz, node_ptr f, node_ptr e, size_type n, SizeTraits &xsz) BOOST_NOEXCEPT
    {
+      (void)sz; (void)xsz;
       if(n){
          BOOST_IF_CONSTEXPR(constant_time_size){
             BOOST_INTRUSIVE_INVARIANT_ASSERT(n == node_algorithms::distance(f, e));
