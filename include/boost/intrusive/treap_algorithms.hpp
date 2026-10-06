@@ -120,6 +120,11 @@ class treap_algorithms
 
    typedef bstree_algorithms<NodeTraits>  bstree_algo;
 
+   //Not supported: they build a new shape for the tree without restoring the heap order
+   //of the priorities
+   using bstree_algo::rebalance;
+   using bstree_algo::rebalance_subtree;
+
    class rerotate_on_destroy
    {
       rerotate_on_destroy& operator=(const rerotate_on_destroy&);

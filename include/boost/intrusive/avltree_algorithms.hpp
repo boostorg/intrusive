@@ -157,6 +157,10 @@ class avltree_algorithms
    private:
    typedef bstree_algorithms<NodeTraits>  bstree_algo;
 
+   //Not supported: they build a new shape for the tree without restoring the balance factors
+   using bstree_algo::rebalance;
+   using bstree_algo::rebalance_subtree;
+
    /// @endcond
 
    public:

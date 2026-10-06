@@ -180,6 +180,10 @@ class rbtree_algorithms
 
    typedef bstree_algorithms<NodeTraits>  bstree_algo;
 
+   //Not supported: they build a new shape for the tree without restoring the colors
+   using bstree_algo::rebalance;
+   using bstree_algo::rebalance_subtree;
+
    /// @endcond
 
    public:
