@@ -612,8 +612,20 @@ struct downcast_node_to_value_t
          template rebind_pointer
             <const ValueTraits>::type                   const_value_traits_ptr;
 
+   inline downcast_node_to_value_t()
+      :  base_t(const_value_traits_ptr())
+   {}
+
    inline downcast_node_to_value_t(const_value_traits_ptr ptr)
       :  base_t(ptr)
+   {}
+
+   //Conversion from the non-const functor (only enabled if IsConst is true)
+   inline downcast_node_to_value_t
+      (const typename detail::if_c< IsConst
+                                  , downcast_node_to_value_t<ValueTraits, false>
+                                  , move_detail::nat>::type &other)
+      :  base_t(other.get_value_traits())
    {}
 
    inline result_type operator()(first_argument_type arg) const

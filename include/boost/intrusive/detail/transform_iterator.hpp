@@ -72,12 +72,22 @@ class transform_iterator
       :  members_(it, f)
    {}
 
-   explicit transform_iterator()
+   transform_iterator()
       :  members_()
+   {}
+
+   //Conversion from an iterator with a convertible functor (e.g. local_iterator -> const_local_iterator)
+   template<class OtherUnaryFunction>
+   transform_iterator( const transform_iterator<Iterator, OtherUnaryFunction> &other
+                     , typename enable_if_convertible<OtherUnaryFunction, UnaryFunction>::type* = 0)
+      :  members_(other.get_it(), other.get_functor())
    {}
 
    inline Iterator get_it() const
    {  return members_.m_it;   }
+
+   inline const UnaryFunction &get_functor() const
+   {  return members_;   }
 
    //Constructors
    inline transform_iterator& operator++()

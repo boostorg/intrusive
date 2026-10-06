@@ -707,6 +707,14 @@ void test_unordered_associative_container_invariants(Container & c, Data & d)
       size_type bucket_elem = (size_type) boost::intrusive::iterator_distance(c.begin(nb), c.end(nb));
       BOOST_TEST( bucket_elem ==  c.bucket_size(nb) );
       BOOST_TEST( size_type(c.end(nb) - c.begin(nb)) == bucket_elem );
+      {
+         typedef typename boost::intrusive::detail::remove_const<Container>::type ncontainer_t;
+         typename Container::local_iterator lit;
+         lit = const_cast<ncontainer_t &>(c).begin(nb);
+         typename Container::const_local_iterator clit = lit;
+         BOOST_TEST( clit == c.cbegin(nb) );
+         BOOST_TEST( &*clit == &*lit );
+      }
       BOOST_TEST( &*c.local_iterator_to(*c.find(key_of_value()(*di))) == &*i );
       BOOST_TEST( &*c.local_iterator_to(*const_cast<const Container &>(c).find(key_of_value()(*di))) == &*i );
       BOOST_TEST( &*Container::s_local_iterator_to(*c.find(key_of_value()(*di))) == &*i );
