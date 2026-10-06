@@ -1353,6 +1353,26 @@ And they also can receive additional options:
    [@http://en.wikipedia.org/wiki/Linear_hashing `Linear hash` on Wikipedia]
    Default: `incremental<false>`
 
+*  [*`linear_buckets<bool Enabled>`]: [*Experimental].
+   [*Note: this option is not compatible with `auto_unlink` hooks].
+   By default each bucket is a circular singly linked list that includes the bucket node. With this
+   option the list of each bucket is linear (null-ended list), which can improve performance
+   in some cases. The bucket array must hold one additional bucket, used as the end sentinel:
+   the length passed to the bucket traits is the number of usable buckets plus one,
+   and `bucket_count()` returns the number of usable buckets.
+   Iterators are bigger, as they also store a pointer to their bucket, and `iterator_to` must
+   compute the hash of the value to find its bucket (if `store_hash<true>` is not used in the hook),
+   so it can throw if the hash function throws.
+   Default: `linear_buckets<false>`.
+
+*  [*`fastmod_buckets<bool Enabled>`]: [*Experimental].
+   [*Note: this option is not compatible with `power_2_buckets<true>` and `incremental<true>`].
+   The user guarantees that the bucket count will always be one of the values returned by
+   `suggested_upper_bucket_count` or `suggested_lower_bucket_count`. The container then uses
+   precomputed values for these bucket counts to obtain the bucket number from the hash value
+   faster than with a modulo operation ("fastmod" technique).
+   Default: `fastmod_buckets<false>`.
+
 *  [*`key_of_value<class KeyOfValueFunctionObject>`]: A function object that will
    define the `key_type` of the value type to be stored. This type will allow a map-like interface. See
    [link intrusive.map_multimap Map and multimap-like interface with set and multiset]
