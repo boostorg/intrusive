@@ -26,6 +26,7 @@
 #include <boost/intrusive/detail/ebo_functor_holder.hpp>
 #include <boost/intrusive/detail/algo_type.hpp>
 #include <boost/intrusive/detail/assert.hpp>
+#include <boost/intrusive/detail/simple_disposers.hpp>
 
 namespace boost {
 namespace intrusive {
@@ -97,6 +98,56 @@ struct node_disposer
    }
    const ValueTraits * const traits_;
 };
+
+//Node disposer when the user disposer is null_disposer and the link mode
+//is safe_link or auto_unlink. It only depends on the node algorithms
+template<class NodeAlgorithms>
+struct node_null_disposer
+{
+   typedef typename NodeAlgorithms::node_ptr    node_ptr;
+
+   inline node_null_disposer(null_disposer, const void *)
+   {}
+
+   inline void operator()(node_ptr p)
+   {  NodeAlgorithms::init(p);   }
+};
+
+template<class F, class ValueTraits, algo_types AlgoType>
+struct get_node_disposer
+{
+   typedef node_disposer<F, ValueTraits, AlgoType> type;
+};
+
+//Node disposer when the user disposer is null_disposer and the link mode
+//is normal_link. No dependencies
+struct node_noop_disposer
+{
+   inline node_noop_disposer(null_disposer, const void *)
+   {}
+
+   template<class NodePtr>
+   inline void operator()(const NodePtr &)
+   {}
+};
+
+template<class ValueTraits, algo_types AlgoType, bool SafeModeOrAutoUnlink = is_safe_autounlink<ValueTraits::link_mode>::value>
+struct get_node_null_disposer
+{
+   typedef node_null_disposer
+      <typename get_algo<AlgoType, typename ValueTraits::node_traits>::type> type;
+};
+
+template<class ValueTraits, algo_types AlgoType>
+struct get_node_null_disposer<ValueTraits, AlgoType, false>
+{
+   typedef node_noop_disposer type;
+};
+
+template<class ValueTraits, algo_types AlgoType>
+struct get_node_disposer<null_disposer, ValueTraits, AlgoType>
+   : get_node_null_disposer<ValueTraits, AlgoType>
+{};
 
 }  //namespace detail{
 }  //namespace intrusive{

@@ -647,7 +647,7 @@ struct node_cast_adaptor
       :  base_t(base_t(c2f, traits))
    {}
 
-   inline typename base_t::node_ptr operator()(const slist_node &to_clone)
+   inline NodePtr operator()(const slist_node &to_clone)
    {  return base_t::operator()(static_cast<const node &>(to_clone));   }
 
    inline void operator()(SlistNodePtr to_clone)
@@ -1024,7 +1024,7 @@ struct bucket_plus_vtraits
    struct typeof_node_disposer
    {
       typedef node_cast_adaptor
-         < detail::node_disposer< Disposer, value_traits, CommonSListAlgorithms>
+         < typename detail::get_node_disposer<Disposer, value_traits, CommonSListAlgorithms>::type
          , slist_node_ptr, node_ptr > type;
    };
 

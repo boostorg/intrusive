@@ -601,7 +601,7 @@ struct bstbase
       BOOST_IF_CONSTEXPR(is_safe_autounlink<value_traits::link_mode>::value){
          node_algorithms::clear_and_dispose
             ( this->header_ptr()
-            , detail::node_disposer<detail::null_disposer, value_traits, AlgoType>
+            , typename detail::get_node_disposer<detail::null_disposer, value_traits, AlgoType>::type
                (detail::null_disposer(), &this->get_value_traits()));
          node_algorithms::init(this->header_ptr());
       }
@@ -1034,7 +1034,7 @@ class bstree_impl
             (src.header_ptr()
             ,this->header_ptr()
             ,detail::node_cloner <Cloner,    value_traits, AlgoType>(cloner,   &this->get_value_traits())
-            ,detail::node_disposer<Disposer, value_traits, AlgoType>(disposer, &this->get_value_traits()));
+            ,typename detail::get_node_disposer<Disposer, value_traits, AlgoType>::type(disposer, &this->get_value_traits()));
          this->sz_traits().set_size(src.sz_traits().get_size());
          rollback.release();
       }
@@ -1069,7 +1069,7 @@ class bstree_impl
             (src.header_ptr()
             ,this->header_ptr()
             ,detail::node_cloner <Cloner,    value_traits, AlgoType, false>(cloner,   &this->get_value_traits())
-            ,detail::node_disposer<Disposer, value_traits, AlgoType>(disposer, &this->get_value_traits()));
+            ,typename detail::get_node_disposer<Disposer, value_traits, AlgoType>::type(disposer, &this->get_value_traits()));
          this->sz_traits().set_size(src.sz_traits().get_size());
          rollback.release();
       }
@@ -1625,7 +1625,7 @@ class bstree_impl
    void clear_and_dispose(Disposer disposer) BOOST_NOEXCEPT
    {
       node_algorithms::clear_and_dispose(this->header_ptr()
-         , detail::node_disposer<Disposer, value_traits, AlgoType>(disposer, &this->get_value_traits()));
+         , typename detail::get_node_disposer<Disposer, value_traits, AlgoType>::type(disposer, &this->get_value_traits()));
       node_algorithms::init_header(this->header_ptr());
       this->sz_traits().set_size(0);
    }

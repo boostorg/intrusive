@@ -1039,7 +1039,7 @@ class treap_impl
    void clear_and_dispose(Disposer disposer) BOOST_NOEXCEPT
    {
       node_algorithms::clear_and_dispose(this->tree_type::header_ptr()
-         , detail::node_disposer<Disposer, value_traits, TreapAlgorithms>(disposer, &this->get_value_traits()));
+         , typename detail::get_node_disposer<Disposer, value_traits, TreapAlgorithms>::type(disposer, &this->get_value_traits()));
       node_algorithms::init_header(this->tree_type::header_ptr());
       this->tree_type::sz_traits().set_size(0);
    }

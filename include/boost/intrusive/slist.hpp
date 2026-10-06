@@ -415,7 +415,7 @@ class slist_impl
    {
       node_algorithms::detach_and_dispose
          ( this->get_root_node()
-         , detail::node_disposer<Disposer, value_traits, CommonSListAlgorithms>
+         , typename detail::get_node_disposer<Disposer, value_traits, CommonSListAlgorithms>::type
                (disposer, &this->priv_value_traits()) );
       this->set_default_constructed_state();
    }
