@@ -300,6 +300,13 @@ void test_generic_set<ContainerDefiner>::test_merge(value_cont_type& values)
    {  int init_values [] = { 2 };
       TEST_INTRUSIVE_SEQUENCE( init_values, testset2.begin() );  }
    BOOST_TEST (&*testset2.begin() == &values[5]);
+
+   //Merging a container with itself has no effect
+   testset1.merge(testset1);
+   testset1.check();
+   BOOST_TEST (testset1.size() == 5);
+   {  int init_values [] = { 1, 2, 3, 4, 5 };
+      TEST_INTRUSIVE_SEQUENCE( init_values, testset1.begin() );  }
 }
 
 //test: find, equal_range (lower_bound, upper_bound), bounded_range, count:

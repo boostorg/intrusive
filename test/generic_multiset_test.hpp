@@ -223,6 +223,14 @@ void test_generic_multiset<ContainerDefiner>::test_merge(value_cont_type& values
    BOOST_TEST (*testset1.find(2, any_less()) == values[5]);
    BOOST_TEST (&*(++testset1.find(key_of_value()(cmp_val))) == &values[1]);
    BOOST_TEST (testset2.empty());
+
+   testset1.merge(testset1);
+   testset1.check();
+   BOOST_TEST (testset1.size() == 6);
+   {  int init_values [] = { 1, 2, 2, 3, 4, 5 };
+      TEST_INTRUSIVE_SEQUENCE( init_values, testset1.begin() );  }
+   BOOST_TEST (*testset1.find(key_of_value()(cmp_val)) == values[5]);
+   BOOST_TEST (&*(++testset1.find(key_of_value()(cmp_val))) == &values[1]);
 }
 
 //test: find, equal_range (lower_bound, upper_bound):

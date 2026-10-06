@@ -1069,6 +1069,8 @@ class treap_impl
       <ValueTraits, VoidOrKeyOfValue, Compare2, VoidOrPrioOfValue, VoidOrPrioComp, SizeType, ConstantTimeSize, HeaderHolder> &source)
    #endif
    {
+      if(static_cast<const void*>(&source) == static_cast<const void*>(this))
+         return;
       node_ptr it   (node_algorithms::begin_node(source.header_ptr()))
              , itend(node_algorithms::end_node  (source.header_ptr()));
 
@@ -1109,6 +1111,8 @@ class treap_impl
       <ValueTraits, VoidOrKeyOfValue, Compare2, VoidOrPrioOfValue, VoidOrPrioComp, SizeType, ConstantTimeSize, HeaderHolder> &source)
    #endif
    {
+      if(static_cast<const void*>(&source) == static_cast<const void*>(this))
+         return;
       node_ptr it   (node_algorithms::begin_node(source.header_ptr()))
              , itend(node_algorithms::end_node  (source.header_ptr()));
 
