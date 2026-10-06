@@ -944,7 +944,7 @@ class unordered_multiset
    typedef typename make_unordered_multiset
       <T,
          #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-         O1, O2, O3, O4, O5, O6, O7, O8, O9, O10
+         O1, O2, O3, O4, O5, O6, O7, O8, O9, O10, O11
          #else
          Options...
          #endif
