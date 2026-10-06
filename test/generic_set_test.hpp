@@ -302,7 +302,7 @@ void test_generic_set<ContainerDefiner>::test_merge(value_cont_type& values)
    BOOST_TEST (&*testset2.begin() == &values[5]);
 }
 
-//test: find, equal_range (lower_bound, upper_bound), bounded_range:
+//test: find, equal_range (lower_bound, upper_bound), bounded_range, count:
 template<class ContainerDefiner>
 void test_generic_set<ContainerDefiner>::test_find(value_cont_type& values)
 {
@@ -334,6 +334,19 @@ void test_generic_set<ContainerDefiner>::test_find(value_cont_type& values)
       (&cmp_val)->value_ = 7;
       BOOST_TEST (testset.find (key_of_value()(cmp_val)) == testset.end());
       BOOST_TEST (testset.find (7, any_less()) == testset.end());
+   }
+
+   {  //A coarser comparison finds several elements: { 1, 2, 3, 4, 5 } has 2 and 3 equivalent to 2
+      const set_type &const_testset = testset;
+      BOOST_TEST (testset.count(2, any_less()) == 1u);
+      BOOST_TEST (const_testset.count(2, any_less()) == 1u);
+      BOOST_TEST (testset.count(2, coarse_less()) == 2u);
+      BOOST_TEST (const_testset.count(2, coarse_less()) == 2u);
+      BOOST_TEST (testset.count(0, coarse_less()) == 1u);
+      BOOST_TEST (testset.count(6, coarse_less()) == 0u);
+      std::pair<iterator,iterator> range = testset.equal_range(2, coarse_less());
+      BOOST_TEST (boost::intrusive::iterator_distance (range.first, range.second) == 2);
+      BOOST_TEST (range.first->value_ == 2);
    }
 
    {

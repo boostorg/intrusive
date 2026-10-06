@@ -348,9 +348,11 @@ class treap_set_impl
    {  return static_cast<size_type>(this->tree_type::find(key) != this->tree_type::cend()); }
 
    //! @copydoc ::boost::intrusive::treap::count(const KeyType&,KeyTypeKeyCompare)const
+   //!
+   //! <b>Note</b>: A KeyTypeKeyCompare coarser than key_comp() can find several elements.
    template<class KeyType, class KeyTypeKeyCompare>
    size_type count(const KeyType& key, KeyTypeKeyCompare comp) const
-   {  return static_cast<size_type>(this->tree_type::find(key, comp) != this->tree_type::cend()); }
+   {  return this->tree_type::count(key, comp);  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 

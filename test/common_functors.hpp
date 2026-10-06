@@ -144,6 +144,22 @@ struct tagged_equal
    {  return t == u;  }
 };
 
+//Compares the integer values divided by 2: a comparison coarser than less.
+//Several elements with unique keys can be equivalent to a key
+struct coarse_less
+{
+   static int int_of(int i)
+   {  return i;  }
+
+   template<class T>
+   static int int_of(const T &t)
+   {  return t.int_value();  }
+
+   template<class T, class U>
+   bool operator()(const T &t, const U &u) const
+   {  return int_of(t)/2 < int_of(u)/2;  }
+};
+
 }  //namespace test       {
 }  //namespace intrusive  {
 }  //namespace boost      {
