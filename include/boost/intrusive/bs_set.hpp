@@ -22,13 +22,13 @@
 #  pragma once
 #endif
 
+namespace boost {
+namespace intrusive {
+
 #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class ValueTraits, class VoidOrKeyOfValue, class Compare, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
 class bs_multiset_impl;
 #endif
-
-namespace boost {
-namespace intrusive {
 
 //! The class template bs_set is an intrusive container, that mimics most of
 //! the interface of std::set as described in the C++ standard.
