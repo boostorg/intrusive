@@ -97,7 +97,7 @@ class transform_iterator
    { return !(i == i2); }
 
    inline friend typename Iterator::difference_type operator- (const transform_iterator& i, const transform_iterator& i2)
-   { return i2.distance_to(i); }
+   { return i.distance_to(i2); }
 
    //Arithmetic
    transform_iterator& operator+=(typename Iterator::difference_type off)
