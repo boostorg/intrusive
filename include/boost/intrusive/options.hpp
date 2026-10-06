@@ -253,6 +253,7 @@ BOOST_INTRUSIVE_OPTION_CONSTANT(incremental, bool, Enabled, incremental)
 //!This option setter specifies if the buckets (which form a singly linked lists of nodes)
 //!are linear (true) or circular (false, default value). Linear buckets can improve performance
 //!in some cases, but the container loses some features like obtaining an iterator from a value.
+//!This option is not compatible with auto_unlink hooks.
 BOOST_INTRUSIVE_OPTION_CONSTANT(linear_buckets, bool, Enabled, linear_buckets)
 
 /// @cond

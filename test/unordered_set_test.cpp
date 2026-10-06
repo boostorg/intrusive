@@ -149,16 +149,18 @@ int main()
 {
    //Combinations: VoidPointer x ConstantTimeSize x DefaultHolder x Map x HookType x LinearBuckets
    //Minimize them selecting different combinations for raw and smart pointers
+   //Base and Member hooks use auto_unlink if !ConstantTimeSize, and auto_unlink
+   //hooks are not compatible with linear buckets.
 
    //void pointer
    test_main_template<void*, false, false, false, Base, false>::execute();
    test_main_template<void*,  true,  true,  true, Base, true>::execute();
-   test_main_template<void*, false,  true,  true, Member, true>::execute();
-   test_main_template<void*,  true, false, false, NonMember, false>::execute();
+   test_main_template<void*, false,  true,  true, Member, false>::execute();
+   test_main_template<void*,  true, false, false, NonMember, true>::execute();
 
    //smart_ptr
-   test_main_template<smart_ptr<void>,  true, false,  true, Member, false>::execute();
-   test_main_template<smart_ptr<void>, false,  true, false, Base, true>::execute();
+   test_main_template<smart_ptr<void>,  true, false,  true, Member, true>::execute();
+   test_main_template<smart_ptr<void>, false,  true, false, Base, false>::execute();
 
    //bounded_ptr is not supported
 

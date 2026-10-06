@@ -2124,6 +2124,8 @@ class hashtable_impl
    BOOST_INTRUSIVE_STATIC_ASSERT(!(constant_time_size && ((int)value_traits::link_mode == (int)auto_unlink)));
    //Cache begin is incompatible with auto-unlink hooks!
    BOOST_INTRUSIVE_STATIC_ASSERT(!(cache_begin && ((int)value_traits::link_mode == (int)auto_unlink)));
+   //Linear buckets are incompatible with auto-unlink hooks!
+   BOOST_INTRUSIVE_STATIC_ASSERT(!(linear_buckets && ((int)value_traits::link_mode == (int)auto_unlink)));
 
 
    /// @endcond
