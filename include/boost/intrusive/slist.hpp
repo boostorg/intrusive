@@ -1884,7 +1884,7 @@ class slist_impl
    void incorporate_after(const_iterator prev_pos, node_ptr f, node_ptr before_l) BOOST_NOEXCEPT
    {
       BOOST_IF_CONSTEXPR(constant_time_size)
-         this->incorporate_after(prev_pos, f, before_l, node_algorithms::distance(f.pointed_node(), before_l.pointed_node())+1);
+         this->incorporate_after(prev_pos, f, before_l, size_type(node_algorithms::distance(f, before_l)+1u));
       else
          this->priv_incorporate_after(prev_pos.pointed_node(), f, before_l);
    }

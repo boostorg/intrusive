@@ -670,6 +670,32 @@ void test_slist< ListType, ValueContainer >
          TEST_INTRUSIVE_SEQUENCE( init_values, testlist.begin() );  }
       testlist.check();
    }
+   {  //incorporate_after: links a chain of free nodes [f, before_l]
+      typedef typename list_type::node_traits node_traits;
+      typedef typename list_type::node_ptr node_ptr;
+      node_ptr const n4 = value_traits::to_node_ptr(values[3]);
+      node_ptr const n5 = value_traits::to_node_ptr(values[4]);
+      {  //3 argument version, in the middle
+         list_type testlist (values.begin(), values.begin() + 3);
+         node_traits::set_next(n4, n5);
+         testlist.incorporate_after(testlist.begin(), n4, n5);
+         {  int init_values [] = { 1, 4, 5, 2, 3 };
+            TEST_INTRUSIVE_SEQUENCE( init_values, testlist.begin() );  }
+         BOOST_TEST (testlist.size() == 5u);
+         BOOST_TEST (&*testlist.previous(testlist.end()) == &values[2]);
+         testlist.check();
+      }
+      {  //4 argument version, after the last element
+         list_type testlist (values.begin(), values.begin() + 3);
+         node_traits::set_next(n4, n5);
+         testlist.incorporate_after(testlist.previous(testlist.end()), n4, n5, 2u);
+         {  int init_values [] = { 1, 2, 3, 4, 5 };
+            TEST_INTRUSIVE_SEQUENCE( init_values, testlist.begin() );  }
+         BOOST_TEST (testlist.size() == 5u);
+         BOOST_TEST (&*testlist.previous(testlist.end()) == &values[4]);
+         testlist.check();
+      }
+   }
 }
 
 template < typename ListType, typename ValueContainer >
