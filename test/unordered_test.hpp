@@ -101,6 +101,7 @@ struct test_unordered
    static void test_clone(value_cont_type& values);
    template<class Option>
    static void test_clone_functors(value_cont_type& values);
+   static void test_moved_from(value_cont_type& values);
 };
 
 template<class ContainerDefiner>
@@ -156,6 +157,7 @@ void test_unordered<ContainerDefiner>::test_all (value_cont_type& values)
    //Only one option can be added to the container in C++03 compilers
    test_clone_functors<hash<instance_seed_hash> >(values);
    test_clone_functors<equal<tagged_equal> >(values);
+   test_moved_from(values);
 }
 
 //test case due to an error in tree implementation:
@@ -1348,6 +1350,78 @@ void test_unordered<ContainerDefiner>::test_clone_functors(value_cont_type& valu
       dst.clear_and_dispose(test::delete_disposer<value_type>());
       BOOST_TEST(dst.empty());
    }
+}
+
+//test: a moved-from container has no bucket array. It can be destroyed, cleared, iterated,
+//swapped, move assigned, cloned from an empty container, used as an empty source of
+//clone_from and rehashed with a new bucket array.
+template<class ContainerDefiner>
+void test_unordered<ContainerDefiner>::test_moved_from(value_cont_type& values)
+{
+   typedef typename ContainerDefiner::template container
+      <>::type unordered_type;
+   const std::size_t ExtraBuckets = unordered_type::bucket_overhead;
+   typedef bucket_sizes<unordered_type> sizes;
+   typedef typename unordered_type::value_type    value_type;
+   typedef typename unordered_type::key_of_value  key_of_value;
+   typedef typename unordered_type::iterator      iterator;
+   typedef typename unordered_type::bucket_traits bucket_traits;
+   typedef typename unordered_type::bucket_ptr    bucket_ptr;
+   typedef typename unordered_type::size_type     size_type;
+
+   typename unordered_type::bucket_type buckets1[sizes::Normal + ExtraBuckets];
+   typename unordered_type::bucket_type buckets2[sizes::Normal + ExtraBuckets];
+   unordered_type src (values.begin(), values.end(), bucket_traits(
+      pointer_traits<bucket_ptr>::pointer_to(buckets1[0]), sizes::Normal + ExtraBuckets));
+   const size_type size = src.size();
+   unordered_type dst (boost::move(src));
+   BOOST_TEST(dst.size() == size);
+
+   //Observers, iteration, clear and full_rehash
+   BOOST_TEST(src.bucket_count() == 0u);
+   BOOST_TEST(src.size() == 0u);
+   BOOST_TEST(src.empty());
+   BOOST_TEST(src.begin() == src.end());
+   src.clear();
+   src.full_rehash();
+   BOOST_TEST(src.empty());
+
+   {  //clone_from an empty container and to a container
+      unordered_type empty_cont (bucket_traits(
+         pointer_traits<bucket_ptr>::pointer_to(buckets2[0]), sizes::Normal + ExtraBuckets));
+      src.clone_from(empty_cont, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST(src.empty());
+      empty_cont.clone_from(src, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST(empty_cont.empty());
+   }
+
+   //swap
+   src.swap(dst);
+   BOOST_TEST(src.size() == size);
+   BOOST_TEST(dst.size() == 0u);
+   BOOST_TEST(dst.begin() == dst.end());
+   src.swap(dst);
+   BOOST_TEST(dst.size() == size);
+
+   //rehash with a new bucket array, the container can be used again
+   dst.clear();
+   src.rehash(bucket_traits(
+      pointer_traits<bucket_ptr>::pointer_to(buckets2[0]), sizes::Normal + ExtraBuckets));
+   BOOST_TEST(src.bucket_count() == sizes::Normal);
+   src.insert(values.begin(), values.end());
+   BOOST_TEST(src.size() == size);
+   for(iterator it = src.begin(), itend = src.end(); it != itend; ++it){
+      BOOST_TEST(src.find(key_of_value()(*it)) != src.end());
+   }
+
+   //move assignment to a moved-from container
+   unordered_type moved (boost::move(src));
+   BOOST_TEST(src.bucket_count() == 0u);
+   src = boost::move(moved);
+   BOOST_TEST(src.size() == size);
+   BOOST_TEST(moved.bucket_count() == 0u);
+   BOOST_TEST(moved.empty());
+   src.clear();
 }
 
 }  //namespace test{

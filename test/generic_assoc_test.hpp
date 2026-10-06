@@ -58,6 +58,7 @@ struct test_generic_assoc
    static void test_all(value_cont_type&);
    static void test_root(value_cont_type&);
    static void test_clone(value_cont_type&);
+   static void test_moved_from(value_cont_type&);
    static void test_insert_erase_burst();
    static void test_swap_nodes();
    template <class Assoc>
@@ -379,6 +380,7 @@ void test_generic_assoc<ContainerDefiner>::test_all(value_cont_type& values)
       <>::type assoc_type;
    test_root(values);
    test_clone(values);
+   test_moved_from(values);
    test_container_from_end(values, detail::bool_< assoc_type::has_container_from_iterator >());
    test_splay_up(values, detail::bool_< has_splay_up< assoc_type >::value >());
    test_splay_down(values, detail::bool_< has_splay_down< assoc_type >::value >());
@@ -568,6 +570,64 @@ void test_generic_assoc<ContainerDefiner>::test_clone(value_cont_type& values)
          testset1.clear();
       }while(std::next_permutation(order, order + NumValues));
    }
+}
+
+//test: the moved-from container is empty and can be used again
+template<class ContainerDefiner>
+void test_generic_assoc<ContainerDefiner>::test_moved_from(value_cont_type& values)
+{
+   typedef typename ContainerDefiner::template container
+      <>::type assoc_type;
+   typedef typename assoc_type::value_type value_type;
+   typedef typename assoc_type::size_type  size_type;
+
+   assoc_type src (values.begin(), values.end());
+   const size_type size = src.size();
+   assoc_type dst (boost::move(src));
+   BOOST_TEST (dst.size() == size);
+   dst.check();
+
+   //Observers, iteration and clear
+   BOOST_TEST (src.empty());
+   BOOST_TEST (src.size() == 0u);
+   BOOST_TEST (src.begin() == src.end());
+   BOOST_TEST (src.root() == src.end());
+   src.check();
+   src.clear();
+   BOOST_TEST (src.empty());
+
+   //clone_from to and from a moved-from container
+   src.clone_from(dst, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+   BOOST_TEST (src == dst);
+   src.check();
+   {
+      assoc_type moved_from (boost::move(src));
+      BOOST_TEST (src.empty());
+      moved_from.clone_from(src, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST (moved_from.empty());
+   }
+
+   //swap
+   src.swap(dst);
+   BOOST_TEST (src.size() == size);
+   BOOST_TEST (dst.empty());
+   src.swap(dst);
+   BOOST_TEST (dst.size() == size);
+
+   //Insertions in a moved-from container
+   dst.clear();
+   src.insert(values.begin(), values.end());
+   BOOST_TEST (src.size() == size);
+   src.check();
+
+   //Move assignment to a moved-from container
+   assoc_type moved (boost::move(src));
+   BOOST_TEST (src.empty());
+   src = boost::move(moved);
+   BOOST_TEST (src.size() == size);
+   BOOST_TEST (moved.empty());
+   src.check();
+   src.clear();
 }
 
 template<class ContainerDefiner>

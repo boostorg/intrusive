@@ -56,6 +56,7 @@ struct test_list
    static void test_swap(ValueContainer&);
    static void test_splice(ValueContainer&);
    static void test_clone(ValueContainer&);
+   static void test_moved_from(ValueContainer&);
    static void test_container_from_end(ValueContainer&, detail::true_type);
    static void test_container_from_end(ValueContainer&, detail::false_type) {}
 };
@@ -84,6 +85,7 @@ void test_list< ListType, ValueContainer >::test_all(ValueContainer& values)
    test_swap(values);
    test_splice(values);
    test_clone(values);
+   test_moved_from(values);
    test_container_from_end(values, detail::bool_< ListType::has_container_from_iterator >());
 }
 
@@ -633,6 +635,63 @@ void test_list< ListType, ValueContainer >
       BOOST_TEST (testlist2 == testlist1);
       testlist2.clear_and_dispose(test::delete_disposer<value_type>());
       BOOST_TEST (testlist2.empty());
+}
+
+//test: the moved-from container is empty and can be used again
+template < class ListType, typename ValueContainer >
+void test_list< ListType, ValueContainer >
+   ::test_moved_from(ValueContainer& values)
+{
+   typedef typename list_type::size_type size_type;
+   typedef typename list_type::iterator  iterator;
+
+   list_type src (values.begin(), values.end());
+   const size_type size = src.size();
+   list_type dst (boost::move(src));
+   BOOST_TEST (dst.size() == size);
+
+   //Observers, iteration and clear
+   BOOST_TEST (src.empty());
+   BOOST_TEST (src.size() == 0u);
+   BOOST_TEST (src.begin() == src.end());
+   src.clear();
+   BOOST_TEST (src.empty());
+
+   //clone_from to and from a moved-from container
+   src.clone_from(dst, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+   BOOST_TEST (src == dst);
+   {
+      list_type moved_from (boost::move(src));
+      BOOST_TEST (src.empty());
+      moved_from.clone_from(src, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST (moved_from.empty());
+   }
+
+   //swap
+   src.swap(dst);
+   BOOST_TEST (src.size() == size);
+   BOOST_TEST (dst.empty());
+   src.swap(dst);
+   BOOST_TEST (dst.size() == size);
+
+   //Insertions in a moved-from container
+   dst.clear();
+   src.insert(src.end(), values.begin(), values.end());
+   BOOST_TEST (src.size() == size);
+   {
+      std::size_t i = 0;
+      for(iterator it = src.begin(), itend = src.end(); it != itend; ++it, ++i){
+         BOOST_TEST (&*it == &values[i]);
+      }
+   }
+
+   //Move assignment to a moved-from container
+   list_type moved (boost::move(src));
+   BOOST_TEST (src.empty());
+   src = boost::move(moved);
+   BOOST_TEST (src.size() == size);
+   BOOST_TEST (moved.empty());
+   src.clear();
 }
 
 template < typename ValueTraits, bool ConstantTimeSize, bool Default_Holder, typename ValueContainer >
