@@ -2366,12 +2366,16 @@ class hashtable_impl
    //!   call should not throw.
    //!
    //! <b>Effects</b>: Swaps the contents of two unordered_sets.
-   //!   Swaps also the contained bucket array and equality and hasher functors.
+   //!   Swaps also the contained bucket array, the value traits and
+   //!   the equality and hasher functors.
    //!
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: If the swap() call for the comparison or hash functors
    //!   found using ADL throw. Basic guarantee.
+   //!
+   //! <b>Note</b>: Does not affect the validity of iterators and references.
+   //!   If value traits are stateful, iterators are invalidated.
    void swap(hashtable_impl& other)
    {
       //These can throw

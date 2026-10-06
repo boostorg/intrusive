@@ -3373,6 +3373,9 @@ Stateful value traits have many advantages but also some downsides:
 *  [*Bigger iterators]: The size of some iterators is increased because the iterator
    needs to store a pointer to the stateful value traits to implement node to value
    transformations (e.g. `operator*()` and `operator->()`).
+*  [*Iterator invalidation on swap]: Swapping two containers (or move assigning a container)
+   also swaps their value traits. Iterators store a pointer to the value traits of their container,
+   so after the swap they point to the wrong value traits and are invalidated. References are not invalidated.
 
 An easy and useful example of stateful value traits is when an array of values can be indirectly introduced
 in a list guaranteeing no additional allocation apart from the initial resource reservation:

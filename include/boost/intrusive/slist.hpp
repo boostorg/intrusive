@@ -40,6 +40,7 @@
 #include <boost/intrusive/detail/node_cloner_disposer.hpp>
 
 #include <boost/move/utility_core.hpp>
+#include <boost/move/adl_move_swap.hpp>
 
 #include <cstddef>   //std::size_t
 
@@ -709,7 +710,7 @@ class slist_impl
    inline bool empty() const BOOST_NOEXCEPT
    {  return node_algorithms::is_empty(this->get_root_node()); }
 
-   //! <b>Effects</b>: Swaps the elements of x and *this.
+   //! <b>Effects</b>: Swaps the elements and the value traits of x and *this.
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -717,6 +718,7 @@ class slist_impl
    //!  Constant-time if linear<> and/or cache_last<> options are used.
    //!
    //! <b>Note</b>: Does not affect the validity of iterators and references.
+   //!   If value traits are stateful, iterators are invalidated.
    void swap(slist_impl& other)
    {
       BOOST_IF_CONSTEXPR(cache_last){
@@ -725,6 +727,7 @@ class slist_impl
       else{
          this->priv_swap_lists(this->get_root_node(), other.get_root_node(), detail::bool_<linear>());
       }
+      ::boost::adl_move_swap(this->priv_value_traits(), other.priv_value_traits());
       this->priv_size_traits().swap(other.priv_size_traits());
    }
 

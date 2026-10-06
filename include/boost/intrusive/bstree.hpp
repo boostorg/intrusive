@@ -982,16 +982,21 @@ class bstree_impl
    }
 
    //! <b>Effects</b>: Swaps the contents of two containers.
+   //!   Swaps also the comparison functor and the value traits.
    //!
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: If the comparison functor's swap call throws.
+   //!
+   //! <b>Note</b>: Does not affect the validity of iterators and references.
+   //!   If value traits are stateful, iterators are invalidated.
    void swap(bstree_impl& other)
    {
       //This can throw
       ::boost::adl_move_swap(this->get_comp(), other.get_comp());
       //These can't throw
       node_algorithms::swap_tree(this->header_ptr(), node_ptr(other.header_ptr()));
+      ::boost::adl_move_swap(this->get_value_traits(), other.get_value_traits());
       this->sz_traits().swap(other.sz_traits());
    }
 
