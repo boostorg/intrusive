@@ -30,6 +30,7 @@
 #define BOOST_INTRUSIVE_HASHTABLE_HPP
 
 #include <boost/intrusive/detail/config_begin.hpp>
+#include <boost/intrusive/detail/workaround.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 
 #include <boost/move/detail/meta_utils_core.hpp>
@@ -666,7 +667,7 @@ struct bucket_plus_vtraits
    BOOST_MOVABLE_BUT_NOT_COPYABLE(bucket_plus_vtraits)
 
 
-   struct data_type
+   struct BOOST_INTRUSIVE_EMPTY_BASES data_type
       : public ValueTraits, BucketTraits
    {
       private:
@@ -1192,7 +1193,7 @@ struct hash_key_equal
 //bucket_hash_t
 //Stores bucket_plus_vtraits plust the hash function
 template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyHash, class BucketTraits, bool LinearBuckets>
-struct bucket_hash_t
+struct BOOST_INTRUSIVE_EMPTY_BASES bucket_hash_t
    //Use public inheritance to avoid MSVC bugs with closures
    : public detail::ebo_functor_holder
       <typename hash_key_hash < typename bucket_plus_vtraits<ValueTraits,BucketTraits, LinearBuckets >::value_traits::value_type
@@ -1263,7 +1264,7 @@ struct hashtable_equal_holder
 //Stores bucket_hash_t and the equality function when the first
 //non-empty bucket shall not be cached.
 template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyHash, class VoidOrKeyEqual, class BucketTraits, bool LinearBuckets, bool>
-struct bucket_hash_equal_t
+struct BOOST_INTRUSIVE_EMPTY_BASES bucket_hash_equal_t
    //Use public inheritance to avoid MSVC bugs with closures
    : public bucket_hash_t<ValueTraits, VoidOrKeyOfValue, VoidOrKeyHash, BucketTraits, LinearBuckets> //3
    , public hashtable_equal_holder<ValueTraits, BucketTraits, VoidOrKeyOfValue, VoidOrKeyEqual, LinearBuckets>::type //equal
@@ -1357,7 +1358,7 @@ struct bucket_hash_equal_t
 //Stores bucket_hash_t and the equality function when the first
 //non-empty bucket shall be cached.
 template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyHash, class VoidOrKeyEqual, class BucketTraits, bool LinearBuckets>  //cache_begin == true version
-struct bucket_hash_equal_t<ValueTraits, VoidOrKeyOfValue, VoidOrKeyHash, VoidOrKeyEqual, BucketTraits, LinearBuckets, true>
+struct BOOST_INTRUSIVE_EMPTY_BASES bucket_hash_equal_t<ValueTraits, VoidOrKeyOfValue, VoidOrKeyHash, VoidOrKeyEqual, BucketTraits, LinearBuckets, true>
    //Use public inheritance to avoid MSVC bugs with closures
    : public bucket_hash_t<ValueTraits, VoidOrKeyOfValue, VoidOrKeyHash, BucketTraits, LinearBuckets> //2
    , public hashtable_equal_holder<ValueTraits, BucketTraits, VoidOrKeyOfValue, VoidOrKeyEqual, LinearBuckets>::type

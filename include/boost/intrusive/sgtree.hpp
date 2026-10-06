@@ -19,6 +19,7 @@
 #define BOOST_INTRUSIVE_SGTREE_HPP
 
 #include <boost/intrusive/detail/config_begin.hpp>
+#include <boost/intrusive/detail/workaround.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/intrusive/bs_set_hook.hpp>
@@ -225,7 +226,7 @@ template<class T, class ...Options>
 #else
 template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyComp, class SizeType, bool FloatingPoint, typename HeaderHolder>
 #endif
-class sgtree_impl
+class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
    /// @cond
    :  public bstree_impl<ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, SizeType, true, SgTreeAlgorithms, HeaderHolder>
    ,  public detail::alpha_holder<FloatingPoint, SizeType>

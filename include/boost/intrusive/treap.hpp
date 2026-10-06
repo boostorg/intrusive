@@ -13,6 +13,7 @@
 #define BOOST_INTRUSIVE_TREAP_HPP
 
 #include <boost/intrusive/detail/config_begin.hpp>
+#include <boost/intrusive/detail/workaround.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 
 #include <boost/intrusive/detail/assert.hpp>
@@ -91,7 +92,7 @@ template<class T, class ...Options>
 #else
 template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyComp, class VoidOrPrioOfValue, class VoidOrPrioComp, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
 #endif
-class treap_impl
+class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    /// @cond
    : public bstree_impl<ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, SizeType, ConstantTimeSize, BsTreeAlgorithms, HeaderHolder>
    //Use public inheritance to avoid MSVC bugs with closures

@@ -15,6 +15,7 @@
 #define BOOST_INTRUSIVE_SLIST_HPP
 
 #include <boost/intrusive/detail/config_begin.hpp>
+#include <boost/intrusive/detail/workaround.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 
 #include <boost/intrusive/detail/assert.hpp>
@@ -224,7 +225,7 @@ class slist_impl
    }
 
    typedef header_holder_plus_last<header_holder_type, node_ptr, cache_last> header_holder_plus_last_t;
-   struct root_plus_size
+   struct BOOST_INTRUSIVE_EMPTY_BASES root_plus_size
       :  public size_traits
       ,  public header_holder_plus_last_t
    {};

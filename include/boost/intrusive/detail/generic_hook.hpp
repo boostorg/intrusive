@@ -25,6 +25,7 @@
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/assert.hpp>
+#include <boost/intrusive/detail/workaround.hpp>
 #include <boost/intrusive/detail/node_holder.hpp>
 #include <boost/intrusive/detail/algo_type.hpp>
 
@@ -126,7 +127,7 @@ template
    , link_mode_type LinkMode
    , base_hook_type BaseHookType
    >
-class generic_hook
+class BOOST_INTRUSIVE_EMPTY_BASES generic_hook
    /// @cond
    //If the hook is a base hook, derive generic hook from node_holder
    //so that a unique base class is created to convert from the node

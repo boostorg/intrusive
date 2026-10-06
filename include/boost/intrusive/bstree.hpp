@@ -13,6 +13,7 @@
 #define BOOST_INTRUSIVE_BSTREE_HPP
 
 #include <boost/intrusive/detail/config_begin.hpp>
+#include <boost/intrusive/detail/workaround.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 
 #include <boost/intrusive/detail/assert.hpp>
@@ -274,7 +275,7 @@ struct bst_key_types
 };
 
 template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyComp, algo_types AlgoType, typename HeaderHolder>
-struct bstbase2
+struct BOOST_INTRUSIVE_EMPTY_BASES bstbase2
    //Put the (possibly empty) functor in the first position to get EBO in MSVC
    //Use public inheritance to avoid MSVC bugs with closures
    : public detail::ebo_functor_holder
@@ -585,7 +586,7 @@ struct bstbase2
 //in the first position, but if size is not going to be stored then we'll use an specialization
 //that doesn't inherit from size_holder
 template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyComp, bool ConstantTimeSize, class SizeType, algo_types AlgoType, typename HeaderHolder>
-struct bstbase_hack
+struct BOOST_INTRUSIVE_EMPTY_BASES bstbase_hack
    : public detail::size_holder<ConstantTimeSize, SizeType>
    , public bstbase2 < ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, AlgoType, HeaderHolder>
 {
