@@ -525,6 +525,7 @@ BOOST_INTRUSIVE_FORCEINLINE std::size_t hash_to_bucket(std::size_t hash_value, s
 template<bool Power2Buckets, bool Incremental>  //!fastmod_buckets
 inline std::size_t hash_to_bucket_split(std::size_t hash_value, std::size_t bucket_cnt, std::size_t split, detail::false_)
 {
+   (void)split;
    std::size_t bucket_number = hash_to_bucket(hash_value, bucket_cnt, detail::bool_<Power2Buckets>());
    BOOST_IF_CONSTEXPR(Incremental)
       bucket_number -= static_cast<std::size_t>(bucket_number >= split)*(bucket_cnt/2);
@@ -963,6 +964,74 @@ struct hashtable_node_ops
       return true;
    }
 
+   //Initializes the buckets of "new_buckets" that are not already initialized buckets of "old_buckets"
+   static void priv_initialize_new_buckets
+      ( bucket_ptr old_buckets, std::size_t old_bucket_count
+      , bucket_ptr new_buckets, std::size_t new_bucket_count)
+   {
+      const bool same_buffer = old_buckets == new_buckets;
+      if (same_buffer && new_bucket_count <= old_bucket_count) {
+         //Nothing to do here
+      }
+      else if (same_buffer) {
+         priv_init_buckets(old_buckets + std::ptrdiff_t(old_bucket_count), new_bucket_count - old_bucket_count);
+      }
+      else {
+         priv_init_buckets(new_buckets, new_bucket_count);
+      }
+   }
+
+   //Returns the number of the bucket that holds the node "sp", searching the bucket node
+   //that ends the bucket. Used when the bucket can't be obtained from the stored hash.
+   template<bool OptimizeMultikey>
+   static std::size_t priv_bucket_num_from_node(bucket_ptr buckets, std::size_t usable_cnt, slist_node_ptr sp)
+   {
+      const bucket_type &f = buckets[0];
+      slist_node_ptr bb = group_functions_t::get_bucket_before_begin
+         ( sit_bbegin(buckets[0]).pointed_node()
+         , sit_bbegin(buckets[std::ptrdiff_t(usable_cnt - 1u)]).pointed_node()
+         , sp
+         , detail::bool_<OptimizeMultikey>());
+
+      //Now get the bucket_impl from the iterator
+      const bucket_type &b = static_cast<const bucket_type&>(*bb);
+      //Now just calculate the index b has in the bucket array
+      return static_cast<std::size_t>(&b - &f);
+   }
+
+   //Links "n" after "prev", storing the hash value if the node stores it. If OptimizeMultikey
+   //is true and "next_is_in_group" is true, "n" joins the group of the node that follows "prev",
+   //otherwise "n" starts a new group.
+   template<bool OptimizeMultikey, bool SafeModeOrAutoUnlink>
+   static void priv_link_after(slist_node_ptr prev, node_ptr n, std::size_t hash_value, bool next_is_in_group)
+   {
+      BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!SafeModeOrAutoUnlink || slist_node_algorithms::unique(n));
+      node_functions<node_traits>::store_hash(n, hash_value, detail::bool_<store_hash_is_true<node_traits>::value>());
+      group_functions_t::insert_in_group
+         ( next_is_in_group ? dcast_bucket_ptr<node>(slist_node_traits::get_next(prev)) : n
+         , n, detail::bool_<OptimizeMultikey>());
+      slist_node_algorithms::link_after(prev, n);
+   }
+
+   //Erases [first, last), "first" being an element of bucket "first_bucket" and "last"
+   //an element of bucket "last_bucket". If "last_is_end" is true, the range ends at the
+   //end of the bucket "last_bucket" and "last" is not used. Returns the number of erased elements.
+   template<class NodeDisposer, bool OptimizeMultikey>
+   static std::size_t priv_erase_range
+      ( bucket_ptr buckets
+      , siterator first, std::size_t const first_bucket
+      , siterator last,  std::size_t const last_bucket, bool const last_is_end
+      , NodeDisposer node_disposer, detail::bool_<OptimizeMultikey> optimize_multikey_tag)
+   {
+      siterator const before_first
+         = priv_get_previous(buckets[std::ptrdiff_t(first_bucket)], first, optimize_multikey_tag);
+      if(last_is_end){
+         last = sit_end(buckets[std::ptrdiff_t(last_bucket)]);
+      }
+      return priv_erase_node_range
+         (buckets, before_first, first_bucket, last, last_bucket, node_disposer, optimize_multikey_tag);
+   }
+
    template<class NodeDisposer, bool OptimizeMultikey>
    static std::size_t priv_erase_node_range
       ( bucket_ptr buckets
@@ -1182,17 +1251,6 @@ struct bucket_plus_vtraits
 
    BOOST_INTRUSIVE_FORCEINLINE bool priv_bucket_empty(bucket_ptr p) const
    {  return slist_node_algorithms::is_empty(p->get_node_ptr());  }
-
-   template<class NodeDisposer, bool OptimizeMultikey>
-   BOOST_INTRUSIVE_FORCEINLINE std::size_t priv_erase_node_range
-      ( siterator const &before_first_it,  std::size_t const first_bucket
-      , siterator const &last_it,          std::size_t const last_bucket
-      , NodeDisposer node_disposer, detail::bool_<OptimizeMultikey> optimize_multikey_tag)
-   {
-      return node_ops_t::priv_erase_node_range
-         ( this->priv_bucket_pointer(), before_first_it, first_bucket, last_it, last_bucket
-         , node_disposer, optimize_multikey_tag);
-   }
 
    template<class Disposer>
    struct typeof_node_disposer
@@ -2779,11 +2837,9 @@ class hashtable_impl
       bucket_type& b = this->priv_bucket(bucket_num);
       this->priv_size_traits().increment();
       node_ptr const n = pointer_traits<node_ptr>::pointer_to(this->priv_value_to_node(value));
-      BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || slist_node_algorithms::unique(n));
-      node_functions_t::store_hash(n, commit_data.get_hash(), store_hash_t());
+      node_ops_t::template priv_link_after<optimize_multikey, safemode_or_autounlink>
+         (b.get_node_ptr(), n, commit_data.get_hash(), false);
       this->priv_insertion_update_cache(bucket_num);
-      group_functions_t::insert_in_group(n, n, optimize_multikey_t());
-      slist_node_algorithms::link_after(b.get_node_ptr(), n);
       return this->build_iterator(siterator(n), node_ops_t::to_ptr(b));
    }
 
@@ -2813,12 +2869,10 @@ class hashtable_impl
    {
       this->priv_size_traits().increment();
       node_ptr const n = this->priv_value_to_node_ptr(value);
-      BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || slist_node_algorithms::unique(n));
-      node_functions_t::store_hash(n, commit_data.get_hash(), store_hash_t());
-      this->priv_insertion_update_cache(static_cast<size_type>(commit_data.bucket_idx));
-      group_functions_t::insert_in_group(n, n, optimize_multikey_t());
       bucket_type& b = this->priv_bucket(commit_data.bucket_idx);
-      slist_node_algorithms::link_after(b.get_node_ptr(), n);
+      node_ops_t::template priv_link_after<optimize_multikey, safemode_or_autounlink>
+         (b.get_node_ptr(), n, commit_data.get_hash(), false);
+      this->priv_insertion_update_cache(static_cast<size_type>(commit_data.bucket_idx));
       return this->build_iterator(siterator(n), node_ops_t::to_ptr(b));
    }
 
@@ -2926,26 +2980,14 @@ class hashtable_impl
    void erase_and_dispose(const_iterator b, const_iterator e, Disposer disposer) BOOST_NOEXCEPT
    {
       if(b != e){
-         //Get the bucket number and local iterator for both iterators
-         size_type first_bucket_num = this->priv_get_bucket_num(b);
-
-         siterator before_first_local_it
-            = node_ops_t::priv_get_previous(this->priv_bucket(first_bucket_num), b.slist_it(), optimize_multikey_t());
-         size_type last_bucket_num;
-         siterator last_local_it;
-
-         //For the end iterator, we will assign the end iterator
-         //of the last bucket
-         if(e == this->end()){
-            last_bucket_num   = size_type(this->bucket_count() - 1u);
-            last_local_it     = node_ops_t::sit_end(this->priv_bucket(last_bucket_num));
-         }
-         else{
-            last_local_it     = e.slist_it();
-            last_bucket_num   = this->priv_get_bucket_num(e);
-         }
-         size_type const num_erased = (size_type)this->priv_erase_node_range
-            ( before_first_local_it, first_bucket_num, last_local_it, last_bucket_num
+         //Get the bucket number of both iterators. For the end iterator,
+         //the range ends at the end of the last bucket
+         size_type const first_bucket_num = this->priv_get_bucket_num(b);
+         bool const last_is_end = e == this->end();
+         size_type const last_bucket_num = last_is_end
+            ? size_type(this->bucket_count() - 1u) : this->priv_get_bucket_num(e);
+         size_type const num_erased = (size_type)node_ops_t::priv_erase_range
+            ( this->priv_bucket_pointer(), b.slist_it(), first_bucket_num, e.slist_it(), last_bucket_num, last_is_end
             , this->make_node_disposer(disposer), optimize_multikey_t());
          this->priv_size_traits().set_size(size_type(this->priv_size_traits().get_size()-num_erased));
          this->priv_erasure_update_cache_range(first_bucket_num, last_bucket_num);
@@ -3734,30 +3776,10 @@ class hashtable_impl
    BOOST_INTRUSIVE_FORCEINLINE void check() const {}
    private:
 
-   static void priv_initialize_new_buckets
+   BOOST_INTRUSIVE_FORCEINLINE static void priv_initialize_new_buckets
       ( bucket_ptr old_buckets, size_type old_bucket_count
       , bucket_ptr new_buckets, size_type new_bucket_count)
-   {
-      //Initialize new buckets
-      const bool same_buffer = old_buckets == new_buckets;
-      if (same_buffer && new_bucket_count <= old_bucket_count) {
-         //Nothing to do here
-      }
-      else {
-         bucket_ptr p;
-         size_type c;
-
-         if (same_buffer) {
-            p = old_buckets + std::ptrdiff_t(old_bucket_count);
-            c = size_type(new_bucket_count - old_bucket_count);
-         }
-         else {
-            p = new_buckets;
-            c = new_bucket_count;
-         }
-         node_ops_t::priv_init_buckets(p, c);
-      }
-   }
+   {  node_ops_t::priv_initialize_new_buckets(old_buckets, old_bucket_count, new_buckets, new_bucket_count);  }
 
    void priv_rehash_impl(const bucket_traits &new_bucket_traits, bool do_full_rehash)
    {
@@ -4003,19 +4025,12 @@ class hashtable_impl
 
    iterator priv_insert_equal_after_find(reference value, size_type bucket_num, std::size_t hash_value, siterator prev, bool const next_is_in_group)
    {
-      //Now store hash if needed
       node_ptr n = this->priv_value_to_node_ptr(value);
-      node_functions_t::store_hash(n, hash_value, store_hash_t());
-      //Checks for some modes
-      BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || slist_node_algorithms::unique(n));
-      //Shortcut to optimize_multikey cases
-      group_functions_t::insert_in_group
-         ( next_is_in_group ? dcast_bucket_ptr<node>((++siterator(prev)).pointed_node()) : n
-         , n, optimize_multikey_t());
+      node_ops_t::template priv_link_after<optimize_multikey, safemode_or_autounlink>
+         (prev.pointed_node(), n, hash_value, next_is_in_group);
       //Update cache and increment size if needed
       this->priv_insertion_update_cache(bucket_num);
       this->priv_size_traits().increment();
-      slist_node_algorithms::link_after(prev.pointed_node(), n);
       return this->build_iterator(siterator(n), this->priv_bucket_ptr(bucket_num));
    }
 
@@ -4240,19 +4255,10 @@ class hashtable_impl
    BOOST_INTRUSIVE_FORCEINLINE size_type priv_get_bucket_num_hash_dispatch(siterator it, detail::true_) BOOST_NOEXCEPT    //store_hash
    {  return (size_type)this->priv_hash_to_nbucket(node_ops_t::priv_stored_hash(it, store_hash_t()));  }
 
-   size_type priv_get_bucket_num_hash_dispatch(siterator it, detail::false_) BOOST_NOEXCEPT   //NO store_hash
+   BOOST_INTRUSIVE_FORCEINLINE size_type priv_get_bucket_num_hash_dispatch(siterator it, detail::false_) BOOST_NOEXCEPT   //NO store_hash
    {
-      const bucket_type &f = this->priv_bucket(0u);
-      slist_node_ptr bb = group_functions_t::get_bucket_before_begin
-         ( this->priv_bucket_lbbegin(0u).pointed_node()
-         , this->priv_bucket_lbbegin(this->priv_usable_bucket_count() - 1u).pointed_node()
-         , it.pointed_node()
-         , optimize_multikey_t());
-
-      //Now get the bucket_impl from the iterator
-      const bucket_type &b = static_cast<const bucket_type&>(*bb);
-      //Now just calculate the index b has in the bucket array
-      return static_cast<size_type>(&b - &f);
+      return static_cast<size_type>(node_ops_t::template priv_bucket_num_from_node<optimize_multikey>
+         (this->priv_bucket_pointer(), this->priv_usable_bucket_count(), it.pointed_node()));
    }
 
 

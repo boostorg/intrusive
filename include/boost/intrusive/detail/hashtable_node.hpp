@@ -97,6 +97,70 @@ struct reduced_slist_node_traits
       >::type type;
 };
 
+//Increment operations of hashtable iterators. They only depend on the bucket type,
+//so that they are instantiated once for all hashtables that use the same void pointer.
+template<class BucketType>
+struct hashtable_iterator_ops
+{
+   typedef BucketType                                          bucket_type;
+   typedef typename bucket_type::node_traits                   slist_node_traits;
+   typedef typename slist_node_traits::node_ptr                slist_node_ptr;
+   typedef trivial_value_traits
+      <slist_node_traits, normal_link>                         slist_value_traits;
+   typedef slist_iterator<slist_value_traits, false>           siterator;
+
+   //Circular buckets: the last node of a bucket points to the bucket node.
+   //"buckets_len" is the number of buckets of the array.
+   static void circular_increment(siterator &slist_it, bucket_type *const buckets, const std::size_t buckets_len)
+   {
+      typedef circular_slist_algorithms<slist_node_traits> slist_node_algorithms;
+      ++slist_it;
+      const slist_node_ptr n = slist_it.pointed_node();
+      const siterator first_bucket_bbegin(buckets->get_node_ptr());
+      if(first_bucket_bbegin.pointed_node() <= n && n <= buckets[buckets_len-1].get_node_ptr()){
+         //If one-past the node is inside the bucket then look for the next non-empty bucket
+         //1. get the bucket_impl from the iterator
+         const bucket_type &b = static_cast<const bucket_type&>(*n);
+
+         //2. Now just calculate the index b has in the bucket array
+         std::size_t n_bucket = static_cast<std::size_t>(&b - buckets);
+
+         //3. Iterate until a non-empty bucket is found
+         slist_node_ptr bucket_nodeptr = buckets->get_node_ptr();
+         do{
+            if (++n_bucket >= buckets_len){  //bucket overflow, return end() iterator
+               slist_it = first_bucket_bbegin;
+               return;
+            }
+            bucket_nodeptr = buckets[n_bucket].get_node_ptr();
+         }
+         while (slist_node_algorithms::is_empty(bucket_nodeptr));
+         slist_it = siterator(bucket_nodeptr);
+         ++slist_it;
+      }
+      else{
+         //++slist_it yield to a valid object
+      }
+   }
+
+   //Linear buckets: the last node of a bucket is null and a sentinel bucket ends the array.
+   //"bucket" is the bucket of the element and it is updated to the bucket of the next element.
+   template<class BucketPtr>
+   static void linear_increment(siterator &slist_it, BucketPtr &bucket)
+   {
+      typedef linear_slist_algorithms<slist_node_traits> slist_node_algorithms;
+      ++slist_it;
+      if (slist_it == siterator()){
+         slist_node_ptr bucket_nodeptr;
+         do {
+            ++bucket;
+            bucket_nodeptr = bucket->get_node_ptr();
+         }while(slist_node_algorithms::is_empty(bucket_nodeptr));
+         slist_it = siterator(slist_node_traits::get_next(bucket_nodeptr));
+      }
+   }
+};
+
 template<class BucketValueTraits, bool LinearBuckets, bool IsConst>
 class hashtable_iterator
 {
@@ -194,38 +258,12 @@ class hashtable_iterator
 
    private:
 
-   void increment()
+   BOOST_INTRUSIVE_FORCEINLINE void increment()
    {
-      bucket_type* const buckets = boost::movelib::to_raw_pointer(traitsptr_->priv_bucket_traits().bucket_begin());
-      const std::size_t buckets_len = traitsptr_->priv_bucket_traits().bucket_count();
-
-      ++slist_it_;
-      const slist_node_ptr n = slist_it_.pointed_node();
-      const siterator first_bucket_bbegin(buckets->get_node_ptr());
-      if(first_bucket_bbegin.pointed_node() <= n && n <= buckets[buckets_len-1].get_node_ptr()){
-         //If one-past the node is inside the bucket then look for the next non-empty bucket
-         //1. get the bucket_impl from the iterator
-         const bucket_type &b = static_cast<const bucket_type&>(*n);
-
-         //2. Now just calculate the index b has in the bucket array
-         std::size_t n_bucket = static_cast<std::size_t>(&b - buckets);
-
-         //3. Iterate until a non-empty bucket is found
-         slist_node_ptr bucket_nodeptr = buckets->get_node_ptr();
-         do{
-            if (++n_bucket >= buckets_len){  //bucket overflow, return end() iterator
-               slist_it_ = first_bucket_bbegin;
-               return;
-            }
-            bucket_nodeptr = buckets[n_bucket].get_node_ptr();
-         }
-         while (slist_node_algorithms::is_empty(bucket_nodeptr));
-         slist_it_ = siterator(bucket_nodeptr);
-         ++slist_it_;
-      }
-      else{
-         //++slist_it_ yield to a valid object
-      }
+      hashtable_iterator_ops<bucket_type>::circular_increment
+         ( slist_it_
+         , boost::movelib::to_raw_pointer(traitsptr_->priv_bucket_traits().bucket_begin())
+         , traitsptr_->priv_bucket_traits().bucket_count());
    }
 
    siterator                  slist_it_;
@@ -337,18 +375,8 @@ class hashtable_iterator<BucketValueTraits, true, IsConst>
    BOOST_INTRUSIVE_FORCEINLINE pointer operator_arrow(detail::true_) const
    { return this->get_value_traits()->to_value_ptr(downcast_bucket(slist_it_.pointed_node())); }
 
-   void increment()
-   {
-      ++slist_it_;
-      if (slist_it_ == siterator()){
-         slist_node_ptr bucket_nodeptr;
-         do {
-            ++members_.nodeptr_;
-             bucket_nodeptr = members_.nodeptr_->get_node_ptr();
-         }while(slist_node_algorithms::is_empty(bucket_nodeptr));
-         slist_it_ = siterator(slist_node_traits::get_next(bucket_nodeptr));
-      }
-   }
+   BOOST_INTRUSIVE_FORCEINLINE void increment()
+   {  hashtable_iterator_ops<bucket_type>::linear_increment(slist_it_, members_.nodeptr_);  }
 
    siterator   slist_it_;
    iiterator_members<bucket_ptr, const_value_traits_ptr, stateful_value_traits> members_;
