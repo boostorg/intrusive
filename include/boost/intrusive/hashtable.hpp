@@ -1539,19 +1539,10 @@ struct hashtable_size_wrapper
    typedef const size_traits & size_traits_const_t;
    typedef       size_traits & size_traits_t;
 
-   inline SizeType get_hashtable_size_wrapper_size() const
-   {  return size_traits_.get_size(); }
-
-   inline void set_hashtable_size_wrapper_size(SizeType s)
-   {  size_traits_.set_size(s); }
-
-   inline void inc_hashtable_size_wrapper_size()
-   {  size_traits_.increment(); }
-
-   inline void dec_hashtable_size_wrapper_size()
-   {  size_traits_.decrement(); }
-
    inline size_traits_t priv_size_traits()
+   {  return size_traits_; }
+
+   inline size_traits_const_t priv_size_traits() const
    {  return size_traits_; }
 };
 
@@ -1581,19 +1572,7 @@ struct hashtable_size_wrapper<DeriveFrom, SizeType, false>
    typedef size_traits size_traits_const_t;
    typedef size_traits size_traits_t;
 
-   inline SizeType get_hashtable_size_wrapper_size() const
-   {  return 0u; }
-
-   inline void set_hashtable_size_wrapper_size(SizeType)
-   {}
-
-   inline void inc_hashtable_size_wrapper_size()
-   {}
-
-   inline void dec_hashtable_size_wrapper_size()
-   {}
-
-   inline size_traits priv_size_traits()
+   inline size_traits priv_size_traits() const
    {  return size_traits(); }
 };
 
@@ -1690,6 +1669,9 @@ struct hashdata_internal
    inline typename split_bucket_hash_equal_t::size_traits_t priv_split_traits()
    {  return this->priv_size_traits();  }
 
+   inline typename split_bucket_hash_equal_t::size_traits_const_t priv_split_traits() const
+   {  return this->priv_size_traits();  }
+
    ~hashdata_internal()
    #if defined(BOOST_INTRUSIVE_CONCEPTS_BASED_OVERLOADING)
       requires (ValueTraits::link_mode != normal_link)
@@ -1730,17 +1712,17 @@ struct hashdata_internal
 
    //public functions
    inline SizeType split_count() const BOOST_NOEXCEPT
-   {  return this->split_bucket_hash_equal_t::get_hashtable_size_wrapper_size();  }
+   {  return this->priv_split_traits().get_size();  }
 
    inline void split_count(SizeType s) BOOST_NOEXCEPT
-   {  this->split_bucket_hash_equal_t::set_hashtable_size_wrapper_size(s);  }
+   {  this->priv_split_traits().set_size(s);  }
 
    //public functions
    inline void inc_split_count() BOOST_NOEXCEPT
-   {  this->split_bucket_hash_equal_t::inc_hashtable_size_wrapper_size();  }
+   {  this->priv_split_traits().increment();  }
 
    inline void dec_split_count() BOOST_NOEXCEPT
-   {  this->split_bucket_hash_equal_t::dec_hashtable_size_wrapper_size();  }
+   {  this->priv_split_traits().decrement();  }
 
    inline static SizeType initial_split_from_bucket_count(SizeType bc) BOOST_NOEXCEPT
    {
@@ -2187,7 +2169,7 @@ class hashtable_impl
    {
       this->priv_set_sentinel_bucket();
       this->priv_init_buckets_and_cache();
-      this->priv_size_count(size_type(0));
+      this->priv_size_traits().set_size(size_type(0));
       size_type bucket_sz = this->bucket_count();
       BOOST_INTRUSIVE_INVARIANT_ASSERT(bucket_sz != 0);
       //Check power of two bucket array if the option is activated
@@ -2195,18 +2177,6 @@ class hashtable_impl
          (!power_2_buckets || (0 == (bucket_sz & (bucket_sz - 1))));
       this->split_count(this->initial_split_from_bucket_count(bucket_sz));
    }
-
-   inline SizeType priv_size_count() const BOOST_NOEXCEPT
-   {  return this->internal_type::get_hashtable_size_wrapper_size(); }
-
-   inline void priv_size_count(SizeType s) BOOST_NOEXCEPT
-   {  this->internal_type::set_hashtable_size_wrapper_size(s); }
-
-   inline void priv_size_inc() BOOST_NOEXCEPT
-   {  this->internal_type::inc_hashtable_size_wrapper_size(); }
-
-   inline void priv_size_dec() BOOST_NOEXCEPT
-   {  this->internal_type::dec_hashtable_size_wrapper_size(); }
 
    public:
 
@@ -2286,8 +2256,8 @@ class hashtable_impl
    {
       this->priv_swap_cache(x);
       x.priv_init_cache();
-      this->priv_size_count(x.priv_size_count());
-      x.priv_size_count(size_type(0));
+      this->priv_size_traits().set_size(x.priv_size_traits().get_size());
+      x.priv_size_traits().set_size(size_type(0));
       this->split_count(x.split_count());
       x.split_count(size_type(0));
    }
@@ -2406,7 +2376,7 @@ class hashtable_impl
    size_type size() const BOOST_NOEXCEPT
    {
       BOOST_IF_CONSTEXPR(constant_time_size)
-         return this->priv_size_count();
+         return this->priv_size_traits().get_size();
       else{
          std::size_t len = 0;
          std::size_t bucket_cnt = this->bucket_count();
@@ -2720,7 +2690,7 @@ class hashtable_impl
    //!   and the commit, it's faster than `insert_commit`.
    iterator insert_unique_fast_commit(reference value, const insert_commit_data &commit_data) BOOST_NOEXCEPT
    {
-      this->priv_size_inc();
+      this->priv_size_traits().increment();
       node_ptr const n = this->priv_value_to_node_ptr(value);
       BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || slist_node_algorithms::unique(n));
       node_functions_t::store_hash(n, commit_data.get_hash(), store_hash_t());
@@ -2815,7 +2785,7 @@ class hashtable_impl
       //Get the bucket number and local iterator for both iterators
       const bucket_ptr bp = this->priv_get_bucket_ptr(i);
       node_ops_t::priv_erase_node(*bp, i.slist_it(), this->make_node_disposer(disposer), optimize_multikey_t());
-      this->priv_size_dec();
+      this->priv_size_traits().decrement();
       this->priv_erasure_update_cache(bp);
    }
 
@@ -2856,7 +2826,7 @@ class hashtable_impl
          size_type const num_erased = (size_type)this->priv_erase_node_range
             ( before_first_local_it, first_bucket_num, last_local_it, last_bucket_num
             , this->make_node_disposer(disposer), optimize_multikey_t());
-         this->priv_size_count(size_type(this->priv_size_count()-num_erased));
+         this->priv_size_traits().set_size(size_type(this->priv_size_traits().get_size()-num_erased));
          this->priv_erasure_update_cache_range(first_bucket_num, last_bucket_num);
       }
    }
@@ -2915,7 +2885,7 @@ class hashtable_impl
    void clear() BOOST_NOEXCEPT
    {
       this->priv_clear_buckets_and_cache();
-      this->priv_size_count(size_type(0));
+      this->priv_size_traits().set_size(size_type(0));
    }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
@@ -2940,7 +2910,7 @@ class hashtable_impl
             --num_buckets;
             slist_node_algorithms::detach_and_dispose(b->get_node_ptr(), d);
          }
-         this->priv_size_count(size_type(0));
+         this->priv_size_traits().set_size(size_type(0));
       }
       this->priv_init_cache();
    }
@@ -3714,8 +3684,8 @@ class hashtable_impl
       ArrayDisposer rollback2(boost::movelib::to_raw_pointer(old_buckets), nd, old_bucket_count);
 
       //Put size in a safe value for rollback exception
-      size_type const size_backup = this->priv_size_count();
-      this->priv_size_count(0);
+      size_type const size_backup = this->priv_size_traits().get_size();
+      this->priv_size_traits().set_size(0);
       //Put cache to safe position
       this->priv_init_cache();
       this->priv_unset_sentinel_bucket();
@@ -3789,7 +3759,7 @@ class hashtable_impl
          }
       }
 
-      this->priv_size_count(size_backup);
+      this->priv_size_traits().set_size(size_backup);
       this->split_count(split);
       if(&new_bucket_traits != &this->priv_bucket_traits())
          this->priv_bucket_traits() = new_bucket_traits;
@@ -3898,13 +3868,13 @@ class hashtable_impl
       BOOST_INTRUSIVE_CATCH(...){
          //The rollback disposes all the clones, the container will be empty
          //but we must update size and the cached first bucket
-         this->priv_size_count(size_type(0));
+         this->priv_size_traits().set_size(size_type(0));
          this->priv_init_cache();
          BOOST_INTRUSIVE_RETHROW;
       }
       BOOST_INTRUSIVE_CATCH_END
       rollback.release();
-      this->priv_size_count(src.priv_size_count());
+      this->priv_size_traits().set_size(src.priv_size_traits().get_size());
       //split_count is not modified as it depends on this bucket array
       this->priv_set_cache_bucket_num(0u);
       this->priv_erasure_update_cache();
@@ -3923,7 +3893,7 @@ class hashtable_impl
          , n, optimize_multikey_t());
       //Update cache and increment size if needed
       this->priv_insertion_update_cache(bucket_num);
-      this->priv_size_inc();
+      this->priv_size_traits().increment();
       slist_node_algorithms::link_after(prev.pointed_node(), n);
       return this->build_iterator(siterator(n), this->priv_bucket_ptr(bucket_num));
    }
@@ -4052,7 +4022,7 @@ class hashtable_impl
          else{
             slist_node_algorithms::unlink_after_and_dispose(prev.pointed_node(), last.pointed_node(), this->make_node_disposer(disposer));
          }
-         this->priv_size_count(size_type(this->priv_size_count()-cnt));
+         this->priv_size_traits().set_size(size_type(this->priv_size_traits().get_size()-cnt));
          this->priv_erasure_update_cache();
       }
 
