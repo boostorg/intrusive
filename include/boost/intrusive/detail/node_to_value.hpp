@@ -40,8 +40,7 @@ struct dummy_constptr
    BOOST_INTRUSIVE_FORCEINLINE explicit dummy_constptr(ConstVoidPtr)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE dummy_constptr()
-   {}
+   BOOST_DEFAULTED_FUNCTION(BOOST_INTRUSIVE_FORCEINLINE dummy_constptr(), {})
 
    BOOST_INTRUSIVE_FORCEINLINE ConstVoidPtr get_ptr() const
    {  return ConstVoidPtr();  }
@@ -53,8 +52,7 @@ struct constptr
    typedef typename boost::intrusive::pointer_traits<VoidPointer>::
       template rebind_pointer<const void>::type ConstVoidPtr;
 
-   BOOST_INTRUSIVE_FORCEINLINE constptr()
-   {}
+   BOOST_DEFAULTED_FUNCTION(BOOST_INTRUSIVE_FORCEINLINE constptr(), {})
 
    BOOST_INTRUSIVE_FORCEINLINE explicit constptr(const ConstVoidPtr &ptr)
       :  const_void_ptr_(ptr)

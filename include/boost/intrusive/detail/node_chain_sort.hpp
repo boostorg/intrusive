@@ -57,7 +57,7 @@ struct node_chain_sort
    struct chain
    {
       //Does not initialize the members, so arrays of chains cost nothing to create
-      BOOST_INTRUSIVE_FORCEINLINE chain() {}
+      BOOST_DEFAULTED_FUNCTION(BOOST_INTRUSIVE_FORCEINLINE chain(), {})
       BOOST_INTRUSIVE_FORCEINLINE chain(node_ptr h, node_ptr t) : head(h), tail(t) {}
 
       BOOST_INTRUSIVE_FORCEINLINE bool empty() const

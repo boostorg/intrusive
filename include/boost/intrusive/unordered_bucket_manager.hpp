@@ -174,6 +174,11 @@ class bucket_array_base
 
    //Used to implement move operations: the source must be reset afterwards
    //with set_buckets(bucket_ptr(), 0u)
+   #if !defined(BOOST_NO_CXX11_DEFAULTED_FUNCTIONS)
+   //Defaulted copy operations are trivial for raw bucket pointers
+   bucket_array_base(const bucket_array_base &) = default;
+   bucket_array_base &operator=(const bucket_array_base &) = default;
+   #else
    BOOST_INTRUSIVE_FORCEINLINE bucket_array_base(const bucket_array_base &x)
       :  m_buckets(x.m_buckets)
       ,  m_bucket_count(x.m_bucket_count)
@@ -189,6 +194,7 @@ class bucket_array_base
       m_max_elements    = x.m_max_elements;
       return *this;
    }
+   #endif
 
    void swap(bucket_array_base &x)
    {

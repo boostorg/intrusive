@@ -58,9 +58,6 @@ struct bucket_impl
    BOOST_INTRUSIVE_FORCEINLINE bucket_impl(const bucket_impl &)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE ~bucket_impl()
-   {}
-
    BOOST_INTRUSIVE_FORCEINLINE bucket_impl &operator=(const bucket_impl&)
    {  return *this;  }
 

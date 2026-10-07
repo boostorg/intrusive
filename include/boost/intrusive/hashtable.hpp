@@ -245,9 +245,20 @@ public:
       : buckets_(buckets), buckets_len_(len)
    {}
 
+   #if !defined(BOOST_NO_CXX11_DEFAULTED_FUNCTIONS) && !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
+   //Defaulted copy operations are trivial for raw bucket pointers
+   bucket_traits_impl(const bucket_traits_impl&) = default;
+   bucket_traits_impl& operator=(const bucket_traits_impl&) = default;
+   #else
    BOOST_INTRUSIVE_FORCEINLINE bucket_traits_impl(const bucket_traits_impl& x)
       : buckets_(x.buckets_), buckets_len_(x.buckets_len_)
    {}
+
+   inline bucket_traits_impl& operator=(BOOST_COPY_ASSIGN_REF(bucket_traits_impl) x)
+   {
+      buckets_ = x.buckets_;  buckets_len_ = x.buckets_len_; return *this;
+   }
+   #endif
 
    inline bucket_traits_impl(BOOST_RV_REF(bucket_traits_impl) x)
       : buckets_(x.buckets_), buckets_len_(x.buckets_len_)
@@ -259,11 +270,6 @@ public:
    {
       buckets_ = x.buckets_; buckets_len_ = x.buckets_len_;
       x.buckets_ = bucket_ptr();   x.buckets_len_ = 0u; return *this;
-   }
-
-   inline bucket_traits_impl& operator=(BOOST_COPY_ASSIGN_REF(bucket_traits_impl) x)
-   {
-      buckets_ = x.buckets_;  buckets_len_ = x.buckets_len_; return *this;
    }
 
    BOOST_INTRUSIVE_FORCEINLINE bucket_ptr bucket_begin() const
