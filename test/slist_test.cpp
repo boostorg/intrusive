@@ -825,138 +825,56 @@ struct make_and_test_slist< ValueTraits, ConstantTimeSize, Linear, CacheLast, fa
                 >
 {};
 
-template<class VoidPointer, bool constant_time_size, bool Default_Holder>
-class test_main_template
+enum HookType
 {
-   public:
-   int operator()()
-   {
-      typedef testvalue< hooks<VoidPointer> > value_type;
-      std::vector< value_type > data (5);
-      for (std::size_t i = 0; i < 5u; ++i)
-         data[i].value_ = (int)i + 1;
-
-      make_and_test_slist < typename detail::get_base_value_traits
-                  < value_type
-                  , typename hooks<VoidPointer>::base_hook_type
-                  >::type
-                 , constant_time_size
-                 , false
-                 , false
-                 , Default_Holder
-                 , std::vector< value_type >
-                >::test_all(data);
-      make_and_test_slist < nonhook_node_member_value_traits< value_type,
-                                                     typename hooks<VoidPointer>::nonhook_node_member_type,
-                                                     &value_type::nhn_member_,
-                                                     safe_link
-                                                   >
-                 , constant_time_size
-                 , false
-                 , false
-                 , Default_Holder
-                 , std::vector< value_type >
-                >::test_all(data);
-
-      //Now linear slists
-      make_and_test_slist < typename detail::get_member_value_traits
-                  < member_hook< value_type
-                               , typename hooks<VoidPointer>::member_hook_type
-                               , &value_type::node_
-                               >
-                  >::type
-                 , constant_time_size
-                 , true
-                 , false
-                 , Default_Holder
-                 , std::vector< value_type >
-                >::test_all(data);
-
-      //Now the same but caching the last node
-      make_and_test_slist < typename detail::get_base_value_traits
-                  < value_type
-                  , typename hooks<VoidPointer>::base_hook_type
-                  >::type
-                 , constant_time_size
-                 , false
-                 , true
-                 , Default_Holder
-                 , std::vector< value_type >
-                >::test_all(data);
-
-      //Now linear slists
-      make_and_test_slist < typename detail::get_base_value_traits
-                  < value_type
-                  , typename hooks<VoidPointer>::base_hook_type
-                  >::type
-                 , constant_time_size
-                 , true
-                 , true
-                 , Default_Holder
-                 , std::vector< value_type >
-                >::test_all(data);
-      return 0;
-   }
+   Base,
+   Member,
+   NonMember
 };
 
-template<class VoidPointer, bool Default_Holder>
-class test_main_template<VoidPointer, false, Default_Holder>
+//Each combination tests a single hook type to limit the instantiations per test
+template < class VoidPointer, bool ConstantTimeSize, bool Default_Holder, bool Linear, bool CacheLast, HookType Type >
+class test_main_template
 {
+   typedef testvalue_traits< hooks<VoidPointer> > testval_traits_t;
+   typedef typename testval_traits_t::value_type value_type;
+
+   //Auto-unlink hooks are incompatible with constant time size, linear and cache_last
+   static const bool normal_hook = ConstantTimeSize || Linear || CacheLast;
+   typedef typename detail::if_c
+      < normal_hook
+      , typename testval_traits_t::base_value_traits
+      , typename testval_traits_t::auto_base_value_traits
+      >::type base_value_traits_t;
+   typedef typename detail::if_c
+      < normal_hook
+      , typename testval_traits_t::member_value_traits
+      , typename testval_traits_t::auto_member_value_traits
+      >::type member_value_traits_t;
+   typedef typename detail::if_c
+      < Type == Base
+      , base_value_traits_t
+      , typename detail::if_c
+         < Type == Member
+         , member_value_traits_t
+         , typename testval_traits_t::nonhook_value_traits
+         >::type
+      >::type value_traits_t;
+
    public:
    int operator()()
    {
-      typedef testvalue< hooks<VoidPointer> > value_type;
       std::vector< value_type > data (5);
       for (std::size_t i = 0; i < 5u; ++i)
          data[i].value_ = (int)i + 1;
 
-      make_and_test_slist < typename detail::get_base_value_traits
-                  < value_type
-                  , typename hooks<VoidPointer>::auto_base_hook_type
-                  >::type
-                 , false
-                 , false
-                 , false
-                 , Default_Holder
-                 , std::vector< value_type >
-                >::test_all(data);
-
-      make_and_test_slist < nonhook_node_member_value_traits< value_type,
-                                                     typename hooks<VoidPointer>::nonhook_node_member_type,
-                                                     &value_type::nhn_member_,
-                                                     safe_link
-                                                   >
-                 , false
-                 , false
-                 , true
-                 , Default_Holder
-                 , std::vector< value_type >
-                >::test_all(data);
-
-      make_and_test_slist < typename detail::get_member_value_traits
-                  < member_hook< value_type
-                               , typename hooks<VoidPointer>::member_hook_type
-                               , &value_type::node_
-                               >
-                  >::type
-                 , false
-                 , true
-                 , false
-                 , Default_Holder
-                 , std::vector< value_type >
-                >::test_all(data);
-
-      make_and_test_slist < typename detail::get_base_value_traits
-                  < value_type
-                  , typename hooks<VoidPointer>::base_hook_type
-                  >::type
-                 , false
-                 , true
-                 , true
-                 , Default_Holder
-                 , std::vector< value_type >
-                >::test_all(data);
-
+      make_and_test_slist < value_traits_t
+                          , ConstantTimeSize
+                          , Linear
+                          , CacheLast
+                          , Default_Holder
+                          , std::vector< value_type >
+                          >::test_all(data);
       return 0;
    }
 };
@@ -998,17 +916,22 @@ struct test_main_template_bptr
 
 int main(int, char* [])
 {
-   // test (plain/smart pointers) x (nonconst/const size) x (default/heap allocated header)
-   test_main_template<void*, false, true>()();
-   test_main_template<void*, true, true>()();
-   test_main_template<void*, false, false>()();
-   test_main_template<void*, true, false>()();
+   //Combinations: VoidPointer x ConstantTimeSize x Default_Holder x Linear x CacheLast x HookType
+   //Minimize them selecting different combinations for raw and smart pointers
 
-   test_main_template<boost::intrusive::smart_ptr<void>, false, true>()();
-   test_main_template<boost::intrusive::smart_ptr<void>, true, true>()();
-   test_main_template<boost::intrusive::smart_ptr<void>, false, false>()();
-   test_main_template<boost::intrusive::smart_ptr<void>, true, false>()();
-   // test (bounded pointers) x ((nonconst/const size) x (special node allocator)
+   //void pointer
+   test_main_template<void*, false, false, false, false, Base>()();
+   test_main_template<void*, false, true, false, true, NonMember>()();
+   test_main_template<void*, false, true, true, false, Member>()();
+   test_main_template<void*, true, false, false, true, Base>()();
+   test_main_template<void*, true, true, true, true, Base>()();
+   test_main_template<void*, true, true, false, false, NonMember>()();
+
+   //smart_ptr
+   test_main_template<boost::intrusive::smart_ptr<void>, false, true, false, false, Member>()();
+   test_main_template<boost::intrusive::smart_ptr<void>, true, true, true, false, Base>()();
+
+   //bounded_ptr (bool ConstantTimeSize)
    test_main_template_bptr< true >()();
    test_main_template_bptr< false >()();
 
