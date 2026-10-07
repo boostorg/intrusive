@@ -656,12 +656,206 @@ struct node_cast_adaptor
       base_t::operator()(pointer_traits<NodePtr>::pointer_to(static_cast<node &>(*to_clone)));
    }
 };
+ 
+//hashtable_node_ops contains the bucket and node operations of bucket_plus_vtraits
+//that don't depend on ValueTraits/BucketTraits
+template<class NodeTraits, bool LinearBuckets>
+struct hashtable_node_ops
+{
+   typedef NodeTraits                                    node_traits;
+   typedef typename reduced_slist_node_traits
+      <node_traits>::type                                reduced_node_traits;
+   typedef bucket_impl<reduced_node_traits>              bucket_type;
+   typedef typename pointer_traits
+      <typename reduced_node_traits::node_ptr>
+         ::template rebind_pointer<bucket_type>::type    bucket_ptr;
+   typedef typename bucket_type::node_traits             slist_node_traits;
+   typedef unordered_group_adapter<node_traits>          group_traits;
+   typedef group_functions<node_traits>                  group_functions_t;
+   typedef typename detail::if_c
+      < LinearBuckets
+      , linear_slist_algorithms<slist_node_traits>
+      , circular_slist_algorithms<slist_node_traits>
+      >::type                                            slist_node_algorithms;
+   typedef typename slist_node_traits::node_ptr          slist_node_ptr;
+   typedef trivial_value_traits
+      <slist_node_traits, normal_link>                   slist_value_traits;
+   typedef slist_iterator<slist_value_traits, false>     siterator;
+   typedef typename node_traits::node_ptr                node_ptr;
+   typedef typename node_traits::node                    node;
+   typedef circular_slist_algorithms<group_traits>       group_algorithms;
+
+   static inline siterator priv_bucket_lbegin(bucket_type &b)
+   {  return siterator(slist_node_traits::get_next(b.get_node_ptr()));  }
+
+   static inline siterator priv_bucket_lbbegin(bucket_type& b)
+   {  return siterator(b.get_node_ptr());  }
+
+   static inline siterator priv_bucket_lend(bucket_type& b)
+   {  return siterator(slist_node_algorithms::end_node(b.get_node_ptr()));  }
+
+   static inline std::size_t priv_bucket_size(const bucket_type& b)
+   {  return slist_node_algorithms::count(b.get_node_ptr())-1u;  }
+
+   static inline bool priv_bucket_empty(const bucket_type& b)
+   {  return slist_node_algorithms::is_empty(b.get_node_ptr());  }
+
+   template<class NodeDisposer>
+   static std::size_t priv_erase_from_single_bucket
+      (bucket_type &b, siterator sbefore_first, siterator slast, NodeDisposer node_disposer, detail::true_)   //optimize multikey
+   {
+      std::size_t n = 0;
+      siterator const sfirst(++siterator(sbefore_first));
+      if(sfirst != slast){
+         node_ptr const nf = dcast_bucket_ptr<node>(sfirst.pointed_node());
+         node_ptr const nl = dcast_bucket_ptr<node>(slast.pointed_node());
+         slist_node_ptr const ne = (priv_bucket_lend(b)).pointed_node();
+
+         if(group_functions_t::is_first_in_group(nf)) {
+            // The first node is at the beginning of a group.
+            if(nl != ne){
+               group_functions_t::split_group(nl);
+            }
+         }
+         else {
+            node_ptr const group1 = group_functions_t::split_group(nf);
+            if(nl != ne) {
+               node_ptr const group2 = group_functions_t::split_group(nl);
+               if(nf == group2) {   //Both first and last in the same group
+                                    //so join group1 and group2
+                  node_ptr const end1 = group_traits::get_next(group1);
+                  //After splitting, nl is the first node of the second group
+                  node_ptr const end2 = group_traits::get_next(nl);
+                  group_traits::set_next(group1, end2);
+                  group_traits::set_next(nl, end1);
+               }
+            }
+         }
+
+         n = slist_node_algorithms::unlink_after_and_dispose(sbefore_first.pointed_node(), slast.pointed_node(), node_disposer);
+      }
+      return n;
+   }
+
+   template<class NodeDisposer>
+   static std::size_t priv_erase_from_single_bucket
+      (bucket_type &, siterator sbefore_first, siterator slast, NodeDisposer node_disposer, detail::false_)   //optimize multikey
+   {
+      return slist_node_algorithms::unlink_after_and_dispose(sbefore_first.pointed_node(), slast.pointed_node(), node_disposer);
+   }
+
+   template<class NodeDisposer>
+   static void priv_erase_node(bucket_type &b, siterator i, NodeDisposer node_disposer, detail::true_)   //optimize multikey
+   {
+      slist_node_ptr const ne(priv_bucket_lend(b).pointed_node());
+      slist_node_ptr const nbb(priv_bucket_lbbegin(b).pointed_node());
+      node_ptr n(dcast_bucket_ptr<node>(i.pointed_node()));
+      node_ptr pos = node_traits::get_next(group_traits::get_next(n));
+      node_ptr bn;
+      node_ptr nn(node_traits::get_next(n));
+      
+      if(pos != n) {
+         //Node is the first of the group
+         bn = group_functions_t::get_prev_to_first_in_group(nbb, n);
+
+         //Unlink the rest of the group if it's not the last node of its group
+         if(nn != ne && group_traits::get_next(nn) == n){
+            group_algorithms::unlink_after(nn);
+         }
+      }
+      else if(nn != ne && group_traits::get_next(nn) == n){
+         //Node is not the end of the group
+         bn = group_traits::get_next(n);
+         group_algorithms::unlink_after(nn);
+      }
+      else{
+         //Node is the end of the group
+         bn = group_traits::get_next(n);
+         node_ptr const x(group_algorithms::get_previous_node(n));
+         group_algorithms::unlink_after(x);
+      }
+      slist_node_algorithms::unlink_after_and_dispose(bn, node_disposer);
+   }
+
+   template<class NodeDisposer>
+   inline static void priv_erase_node(bucket_type &b, siterator i, NodeDisposer node_disposer, detail::false_)   //!optimize multikey
+   {
+      slist_node_ptr bi = slist_node_algorithms::get_previous_node(b.get_node_ptr(), i.pointed_node());
+      slist_node_algorithms::unlink_after_and_dispose(bi, node_disposer);
+   }
+
+   static siterator priv_get_last(bucket_type &b, detail::true_)  //optimize multikey
+   {
+      //First find the last node of p's group.
+      //This requires checking the first node of the next group or
+      //the bucket node.
+      slist_node_ptr end_ptr(sit_end(b).pointed_node());
+      slist_node_ptr last_node_group(b.get_node_ptr());
+      slist_node_ptr possible_end(slist_node_traits::get_next(last_node_group));
+
+      while(end_ptr != possible_end){
+         last_node_group   = group_traits::get_next(dcast_bucket_ptr<node>(possible_end));
+         possible_end      = slist_node_traits::get_next(last_node_group);
+      }
+      return siterator(last_node_group);
+   }
+
+   inline static siterator priv_get_last(bucket_type &b, detail::false_) //NOT optimize multikey
+   {
+      slist_node_ptr p = b.get_node_ptr();
+      return siterator(slist_node_algorithms::get_previous_node(p, slist_node_algorithms::end_node(p)));
+   }
+
+   template<class NodeDisposer>
+   static inline std::size_t priv_erase_whole_bucket(bucket_type &b, NodeDisposer node_disposer)
+   {  return slist_node_algorithms::detach_and_dispose(b.get_node_ptr(), node_disposer);  }
+
+   static siterator priv_get_previous(bucket_type &b, siterator i, detail::true_)   //optimize multikey
+   {
+      node_ptr const elem(dcast_bucket_ptr<node>(i.pointed_node()));
+      node_ptr const prev_in_group(group_traits::get_next(elem));
+      bool const first_in_group = node_traits::get_next(prev_in_group) != elem;
+      slist_node_ptr n = first_in_group
+         ? group_functions_t::get_prev_to_first_in_group(b.get_node_ptr(), elem)
+         : group_traits::get_next(elem)
+         ;
+      return siterator(n);
+   }
+
+   inline static siterator priv_get_previous(bucket_type &b, siterator i, detail::false_)   //NOT optimize multikey
+   {  return siterator(slist_node_algorithms::get_previous_node(b.get_node_ptr(), i.pointed_node()));   }
+
+   static inline bucket_ptr to_ptr(bucket_type &b)
+   {  return pointer_traits<bucket_ptr>::pointer_to(b);   }
+
+   static inline siterator sit_bbegin(bucket_type& b)
+   {  return siterator(b.get_node_ptr());  }
+
+   static inline siterator sit_begin(bucket_type& b)
+   {  return siterator(b.begin_ptr());  }
+
+   static inline siterator sit_end(bucket_type& b)
+   {  return siterator(slist_node_algorithms::end_node(b.get_node_ptr()));  }
+
+   inline static std::size_t priv_stored_hash(siterator s, detail::true_) //store_hash
+   {  return node_traits::get_hash(dcast_bucket_ptr<node>(s.pointed_node()));  }
+
+   inline static std::size_t priv_stored_hash(siterator, detail::false_)  //NO store_hash
+   {  return std::size_t(-1);   }
+
+   static void priv_init_buckets(const bucket_ptr buckets_ptr, const std::size_t bucket_cnt)
+   {
+      bucket_ptr buckets_it = buckets_ptr;
+      for (std::size_t bucket_i = 0; bucket_i != bucket_cnt; ++buckets_it, ++bucket_i) {
+         slist_node_algorithms::init_header(buckets_it->get_node_ptr());
+      }
+   }
+};
 
 //bucket_plus_vtraits stores ValueTraits + BucketTraits
-//this data is needed by iterators to obtain the
-//value from the iterator and detect the bucket
 template<class ValueTraits, class BucketTraits, bool LinearBuckets>
 struct bucket_plus_vtraits
+   : public hashtable_node_ops<typename ValueTraits::node_traits, LinearBuckets>
 {
    private:
    BOOST_MOVABLE_BUT_NOT_COPYABLE(bucket_plus_vtraits)
@@ -732,6 +926,13 @@ struct bucket_plus_vtraits
    typedef bucket_plus_vtraits&                          this_ref;
 
    static const std::size_t bucket_overhead = LinearBuckets ? 1u : 0u;
+
+   typedef hashtable_node_ops<node_traits, LinearBuckets> node_ops_t;
+   using node_ops_t::priv_bucket_lbegin;
+   using node_ops_t::priv_bucket_lbbegin;
+   using node_ops_t::priv_bucket_lend;
+   using node_ops_t::priv_bucket_size;
+   using node_ops_t::priv_bucket_empty;
 
    inline bucket_plus_vtraits(const ValueTraits &val_traits, const bucket_traits &b_traits)
       : m_data(val_traits, b_traits)
@@ -857,105 +1058,6 @@ struct bucket_plus_vtraits
    inline bool priv_bucket_empty(bucket_ptr p) const
    {  return slist_node_algorithms::is_empty(p->get_node_ptr());  }
 
-   static inline siterator priv_bucket_lbegin(bucket_type &b)
-   {  return siterator(slist_node_traits::get_next(b.get_node_ptr()));  }
-
-   static inline siterator priv_bucket_lbbegin(bucket_type& b)
-   {  return siterator(b.get_node_ptr());  }
-
-   static inline siterator priv_bucket_lend(bucket_type& b)
-   {  return siterator(slist_node_algorithms::end_node(b.get_node_ptr()));  }
-
-   static inline std::size_t priv_bucket_size(const bucket_type& b)
-   {  return slist_node_algorithms::count(b.get_node_ptr())-1u;  }
-
-   static inline bool priv_bucket_empty(const bucket_type& b)
-   {  return slist_node_algorithms::is_empty(b.get_node_ptr());  }
-
-   template<class NodeDisposer>
-   static std::size_t priv_erase_from_single_bucket
-      (bucket_type &b, siterator sbefore_first, siterator slast, NodeDisposer node_disposer, detail::true_)   //optimize multikey
-   {
-      std::size_t n = 0;
-      siterator const sfirst(++siterator(sbefore_first));
-      if(sfirst != slast){
-         node_ptr const nf = dcast_bucket_ptr<node>(sfirst.pointed_node());
-         node_ptr const nl = dcast_bucket_ptr<node>(slast.pointed_node());
-         slist_node_ptr const ne = (priv_bucket_lend(b)).pointed_node();
-
-         if(group_functions_t::is_first_in_group(nf)) {
-            // The first node is at the beginning of a group.
-            if(nl != ne){
-               group_functions_t::split_group(nl);
-            }
-         }
-         else {
-            node_ptr const group1 = group_functions_t::split_group(nf);
-            if(nl != ne) {
-               node_ptr const group2 = group_functions_t::split_group(nl);
-               if(nf == group2) {   //Both first and last in the same group
-                                    //so join group1 and group2
-                  node_ptr const end1 = group_traits::get_next(group1);
-                  //After splitting, nl is the first node of the second group
-                  node_ptr const end2 = group_traits::get_next(nl);
-                  group_traits::set_next(group1, end2);
-                  group_traits::set_next(nl, end1);
-               }
-            }
-         }
-
-         n = slist_node_algorithms::unlink_after_and_dispose(sbefore_first.pointed_node(), slast.pointed_node(), node_disposer);
-      }
-      return n;
-   }
-
-   template<class NodeDisposer>
-   static std::size_t priv_erase_from_single_bucket
-      (bucket_type &, siterator sbefore_first, siterator slast, NodeDisposer node_disposer, detail::false_)   //optimize multikey
-   {
-      return slist_node_algorithms::unlink_after_and_dispose(sbefore_first.pointed_node(), slast.pointed_node(), node_disposer);
-   }
-
-   template<class NodeDisposer>
-   static void priv_erase_node(bucket_type &b, siterator i, NodeDisposer node_disposer, detail::true_)   //optimize multikey
-   {
-      slist_node_ptr const ne(priv_bucket_lend(b).pointed_node());
-      slist_node_ptr const nbb(priv_bucket_lbbegin(b).pointed_node());
-      node_ptr n(dcast_bucket_ptr<node>(i.pointed_node()));
-      node_ptr pos = node_traits::get_next(group_traits::get_next(n));
-      node_ptr bn;
-      node_ptr nn(node_traits::get_next(n));
-      
-      if(pos != n) {
-         //Node is the first of the group
-         bn = group_functions_t::get_prev_to_first_in_group(nbb, n);
-
-         //Unlink the rest of the group if it's not the last node of its group
-         if(nn != ne && group_traits::get_next(nn) == n){
-            group_algorithms::unlink_after(nn);
-         }
-      }
-      else if(nn != ne && group_traits::get_next(nn) == n){
-         //Node is not the end of the group
-         bn = group_traits::get_next(n);
-         group_algorithms::unlink_after(nn);
-      }
-      else{
-         //Node is the end of the group
-         bn = group_traits::get_next(n);
-         node_ptr const x(group_algorithms::get_previous_node(n));
-         group_algorithms::unlink_after(x);
-      }
-      slist_node_algorithms::unlink_after_and_dispose(bn, node_disposer);
-   }
-
-   template<class NodeDisposer>
-   inline static void priv_erase_node(bucket_type &b, siterator i, NodeDisposer node_disposer, detail::false_)   //!optimize multikey
-   {
-      slist_node_ptr bi = slist_node_algorithms::get_previous_node(b.get_node_ptr(), i.pointed_node());
-      slist_node_algorithms::unlink_after_and_dispose(bi, node_disposer);
-   }
-
    template<class NodeDisposer, bool OptimizeMultikey>
    std::size_t priv_erase_node_range( siterator const &before_first_it,  std::size_t const first_bucket
                         , siterator const &last_it,          std::size_t const last_bucket
@@ -980,47 +1082,6 @@ struct bucket_plus_vtraits
       return num_erased;
    }
 
-   static siterator priv_get_last(bucket_type &b, detail::true_)  //optimize multikey
-   {
-      //First find the last node of p's group.
-      //This requires checking the first node of the next group or
-      //the bucket node.
-      slist_node_ptr end_ptr(sit_end(b).pointed_node());
-      slist_node_ptr last_node_group(b.get_node_ptr());
-      slist_node_ptr possible_end(slist_node_traits::get_next(last_node_group));
-
-      while(end_ptr != possible_end){
-         last_node_group   = group_traits::get_next(dcast_bucket_ptr<node>(possible_end));
-         possible_end      = slist_node_traits::get_next(last_node_group);
-      }
-      return siterator(last_node_group);
-   }
-
-   inline static siterator priv_get_last(bucket_type &b, detail::false_) //NOT optimize multikey
-   {
-      slist_node_ptr p = b.get_node_ptr();
-      return siterator(slist_node_algorithms::get_previous_node(p, slist_node_algorithms::end_node(p)));
-   }
-
-   template<class NodeDisposer>
-   static inline std::size_t priv_erase_whole_bucket(bucket_type &b, NodeDisposer node_disposer)
-   {  return slist_node_algorithms::detach_and_dispose(b.get_node_ptr(), node_disposer);  }
-
-   static siterator priv_get_previous(bucket_type &b, siterator i, detail::true_)   //optimize multikey
-   {
-      node_ptr const elem(dcast_bucket_ptr<node>(i.pointed_node()));
-      node_ptr const prev_in_group(group_traits::get_next(elem));
-      bool const first_in_group = node_traits::get_next(prev_in_group) != elem;
-      slist_node_ptr n = first_in_group
-         ? group_functions_t::get_prev_to_first_in_group(b.get_node_ptr(), elem)
-         : group_traits::get_next(elem)
-         ;
-      return siterator(n);
-   }
-
-   inline static siterator priv_get_previous(bucket_type &b, siterator i, detail::false_)   //NOT optimize multikey
-   {  return siterator(slist_node_algorithms::get_previous_node(b.get_node_ptr(), i.pointed_node()));   }
-
    template<class Disposer>
    struct typeof_node_disposer
    {
@@ -1036,24 +1097,6 @@ struct bucket_plus_vtraits
       typedef typename typeof_node_disposer<Disposer>::type return_t;
       return return_t(disposer, &this->priv_value_traits());
    }
-
-   static inline bucket_ptr to_ptr(bucket_type &b)
-   {  return pointer_traits<bucket_ptr>::pointer_to(b);   }
-
-   static inline siterator sit_bbegin(bucket_type& b)
-   {  return siterator(b.get_node_ptr());  }
-
-   static inline siterator sit_begin(bucket_type& b)
-   {  return siterator(b.begin_ptr());  }
-
-   static inline siterator sit_end(bucket_type& b)
-   {  return siterator(slist_node_algorithms::end_node(b.get_node_ptr()));  }
-
-   inline static std::size_t priv_stored_hash(siterator s, detail::true_) //store_hash
-   {  return node_traits::get_hash(dcast_bucket_ptr<node>(s.pointed_node()));  }
-
-   inline static std::size_t priv_stored_hash(siterator, detail::false_)  //NO store_hash
-   {  return std::size_t(-1);   }
 
    inline node &priv_value_to_node(reference v)
    {  return *this->priv_value_traits().to_node_ptr(v);  }
@@ -1072,14 +1115,6 @@ struct bucket_plus_vtraits
 
    inline const_reference priv_value_from_siterator(siterator s) const
    {  return *this->priv_value_traits().to_value_ptr(dcast_bucket_ptr<node>(s.pointed_node())); }
-
-   static void priv_init_buckets(const bucket_ptr buckets_ptr, const std::size_t bucket_cnt)
-   {
-      bucket_ptr buckets_it = buckets_ptr;
-      for (std::size_t bucket_i = 0; bucket_i != bucket_cnt; ++buckets_it, ++bucket_i) {
-         slist_node_algorithms::init_header(buckets_it->get_node_ptr());
-      }
-   }
 
    void priv_clear_buckets(const bucket_ptr buckets_ptr, const std::size_t bucket_cnt)
    {

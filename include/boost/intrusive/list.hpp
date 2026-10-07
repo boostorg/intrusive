@@ -15,6 +15,7 @@
 #define BOOST_INTRUSIVE_LIST_HPP
 
 #include <boost/intrusive/detail/config_begin.hpp>
+#include <boost/intrusive/detail/workaround.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/intrusive/list_hook.hpp>
@@ -33,7 +34,8 @@
 #include <boost/intrusive/detail/key_nodeptr_comp.hpp>
 #include <boost/intrusive/detail/simple_disposers.hpp>
 #include <boost/intrusive/detail/size_holder.hpp>
-#include <boost/intrusive/detail/list_node_ops.hpp>
+#include <boost/intrusive/detail/parent_from_member.hpp>
+#include <boost/intrusive/detail/value_traits_holder.hpp>
 #include <boost/intrusive/detail/algorithm.hpp>
 
 #include <boost/move/utility_core.hpp>
@@ -50,6 +52,254 @@ namespace boost {
 namespace intrusive {
 
 /// @cond
+
+namespace detail {
+
+//Operations of list_impl that only depend on the node type, the size holder
+//and the link mode.
+template<class NodeTraits, class SizeTraits, bool SafeModeOrAutoUnlink>
+struct list_node_ops
+{
+   typedef circular_list_algorithms<NodeTraits>    node_algorithms;
+   typedef typename NodeTraits::node_ptr           node_ptr;
+   typedef typename NodeTraits::const_node_ptr     const_node_ptr;
+   typedef typename SizeTraits::size_type          size_type;
+   static const bool constant_time_size = SizeTraits::constant_time_size;
+
+   static size_type size(const_node_ptr header, const SizeTraits &sz) BOOST_NOEXCEPT
+   {
+      (void)header; (void)sz;
+      BOOST_IF_CONSTEXPR(constant_time_size)
+         return sz.get_size();
+      else
+         return size_type(node_algorithms::count(header) - 1u);
+   }
+
+   //Unlinks n and initializes it, if needed
+   static void erase(node_ptr n, SizeTraits &sz) BOOST_NOEXCEPT
+   {
+      node_algorithms::unlink(n);
+      sz.decrement();
+      BOOST_IF_CONSTEXPR(SafeModeOrAutoUnlink)
+         node_algorithms::init(n);
+   }
+
+   //Unlinks [b, e) and initializes the nodes, if needed
+   static void erase(node_ptr b, node_ptr e, SizeTraits &sz) BOOST_NOEXCEPT
+   {
+      (void)sz;
+      node_algorithms::unlink(b, e);
+      BOOST_IF_CONSTEXPR(SafeModeOrAutoUnlink || constant_time_size){
+         while(b != e){
+            node_ptr to_erase(b);
+            b = NodeTraits::get_next(b);
+            BOOST_IF_CONSTEXPR(SafeModeOrAutoUnlink)
+               node_algorithms::init(to_erase);
+            sz.decrement();
+         }
+      }
+   }
+
+   //Unlinks [b, e), with n == distance(b, e), and initializes the nodes, if needed
+   static void erase(node_ptr b, node_ptr e, size_type n, SizeTraits &sz) BOOST_NOEXCEPT
+   {
+      (void)n;
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(node_algorithms::distance(b, e) == n);
+      BOOST_IF_CONSTEXPR(SafeModeOrAutoUnlink){
+         list_node_ops::erase(b, e, sz);
+      }
+      else{
+         sz.decrease(n);
+         node_algorithms::unlink(b, e);
+      }
+   }
+
+   static void clear(node_ptr header, SizeTraits &sz) BOOST_NOEXCEPT
+   {
+      BOOST_IF_CONSTEXPR(SafeModeOrAutoUnlink){
+         node_ptr p(NodeTraits::get_next(header));
+         while(p != header){
+            node_ptr to_erase(p);
+            p = NodeTraits::get_next(p);
+            node_algorithms::init(to_erase);
+         }
+      }
+      node_algorithms::init_header(header);
+      sz.set_size(size_type(0));
+   }
+
+   //Transfers all the nodes of the list with header x before p
+   static void splice_all(node_ptr p, SizeTraits &sz, node_ptr x, SizeTraits &xsz) BOOST_NOEXCEPT
+   {
+      if(!node_algorithms::unique(x)){
+         node_algorithms::transfer(p, NodeTraits::get_next(x), x);
+         sz.increase(xsz.get_size());
+         xsz.set_size(size_type(0));
+      }
+   }
+
+   //Transfers node i before p
+   static void splice_one(node_ptr p, SizeTraits &sz, node_ptr i, SizeTraits &xsz) BOOST_NOEXCEPT
+   {
+      node_algorithms::transfer(p, i);
+      xsz.decrement();
+      sz.increment();
+   }
+
+   //Transfers [f, e) before p, with n == distance(f, e) if constant_time_size
+   static void splice_range(node_ptr p, SizeTraits &sz, node_ptr f, node_ptr e, size_type n, SizeTraits &xsz) BOOST_NOEXCEPT
+   {
+      (void)sz; (void)xsz;
+      if(n){
+         BOOST_IF_CONSTEXPR(constant_time_size){
+            BOOST_INTRUSIVE_INVARIANT_ASSERT(n == node_algorithms::distance(f, e));
+            node_algorithms::transfer(p, f, e);
+            sz.increase(n);
+            xsz.decrease(n);
+         }
+         else{
+            node_algorithms::transfer(p, f, e);
+         }
+      }
+   }
+
+   //Transfers [f, e) before p
+   static void splice_range(node_ptr p, SizeTraits &sz, node_ptr f, node_ptr e, SizeTraits &xsz) BOOST_NOEXCEPT
+   {
+      BOOST_IF_CONSTEXPR(constant_time_size)
+         list_node_ops::splice_range(p, sz, f, e, size_type(node_algorithms::distance(f, e)), xsz);
+      else
+         list_node_ops::splice_range(p, sz, f, e, size_type(1), xsz);//distance is a dummy value
+   }
+
+   static void transfer_all_size(SizeTraits &sz, SizeTraits &xsz) BOOST_NOEXCEPT
+   {
+      sz.increase(xsz.get_size());
+      xsz.set_size(size_type(0));
+   }
+
+   static void check(const_node_ptr header_ptr, const SizeTraits &sz)
+   {
+      (void)sz;
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_next(header_ptr));
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_previous(header_ptr));
+      BOOST_INTRUSIVE_INVARIANT_ASSERT((NodeTraits::get_next(header_ptr) == header_ptr)
+         == (NodeTraits::get_previous(header_ptr) == header_ptr));
+      if (NodeTraits::get_next(header_ptr) == header_ptr)
+      {
+         BOOST_IF_CONSTEXPR(constant_time_size)
+            BOOST_INTRUSIVE_INVARIANT_ASSERT(sz.get_size() == 0);
+         return;
+      }
+      size_type node_count = 0; (void)node_count;
+      const_node_ptr p = header_ptr;
+      while (true)
+      {
+         const_node_ptr next_p = NodeTraits::get_next(p);
+         BOOST_INTRUSIVE_INVARIANT_ASSERT(next_p);
+         BOOST_INTRUSIVE_INVARIANT_ASSERT(NodeTraits::get_previous(next_p) == p);
+         p = next_p;
+         if (p == header_ptr) break;
+         ++node_count;
+      }
+      BOOST_IF_CONSTEXPR(constant_time_size)
+         BOOST_INTRUSIVE_INVARIANT_ASSERT(sz.get_size() == node_count);
+   }
+};
+
+//Base class of list_impl that holds the header and the size. Its members only depend
+//on the node type, the header holder, the size type and the link mode (not on ValueTraits),
+//so that they are instantiated only once for all lists that share the same node type.
+template<class NodeTraits, class HeaderHolder, class SizeType, bool ConstantTimeSize, bool SafeModeOrAutoUnlink>
+class list_node_base
+{
+   public:
+   typedef SizeType                                            size_type;
+
+   protected:
+   typedef size_holder<ConstantTimeSize, SizeType>             size_traits;
+   typedef list_node_ops<NodeTraits, size_traits, SafeModeOrAutoUnlink>  node_ops;
+   typedef circular_list_algorithms<NodeTraits>                node_algorithms;
+   typedef typename NodeTraits::node_ptr                       node_ptr;
+   typedef typename NodeTraits::const_node_ptr                 const_node_ptr;
+   typedef HeaderHolder                                        header_holder_type;
+
+   struct root_plus_size : public size_traits
+   {
+      header_holder_type m_header;
+   } root_plus_size_;
+
+   inline list_node_base() BOOST_NOEXCEPT
+   {
+      this->priv_size_traits().set_size(size_type(0));
+      node_algorithms::init_header(this->get_root_node());
+   }
+
+   ~list_node_base()
+   #if defined(BOOST_INTRUSIVE_CONCEPTS_BASED_OVERLOADING)
+      requires (SafeModeOrAutoUnlink)
+   #endif
+   {
+      BOOST_IF_CONSTEXPR(SafeModeOrAutoUnlink){
+         node_ops::clear(this->get_root_node(), this->priv_size_traits());
+         node_algorithms::init(this->get_root_node());
+      }
+   }
+
+   #if defined(BOOST_INTRUSIVE_CONCEPTS_BASED_OVERLOADING)
+   //Default destructor for normal links (allows conditional triviality)
+   ~list_node_base() requires (!SafeModeOrAutoUnlink) = default;
+   #endif
+
+   inline node_ptr get_root_node() BOOST_NOEXCEPT
+   { return root_plus_size_.m_header.get_node(); }
+
+   inline const_node_ptr get_root_node() const BOOST_NOEXCEPT
+   { return root_plus_size_.m_header.get_node(); }
+
+   inline size_traits &priv_size_traits() BOOST_NOEXCEPT
+   {  return root_plus_size_;  }
+
+   inline const size_traits &priv_size_traits() const BOOST_NOEXCEPT
+   {  return root_plus_size_;  }
+
+   inline static list_node_base &priv_base_from_end_node(node_ptr p) BOOST_NOEXCEPT
+   {
+      header_holder_type* h = header_holder_type::get_holder(p);
+      root_plus_size* r = detail::parent_from_member
+         < root_plus_size, header_holder_type>(h, &root_plus_size::m_header);
+      return *detail::parent_from_member<list_node_base, root_plus_size>(r, &list_node_base::root_plus_size_);
+   }
+
+   private:
+   //noncopyable
+   list_node_base(const list_node_base &);
+   list_node_base &operator=(const list_node_base &);
+
+   public:
+   inline size_type size() const BOOST_NOEXCEPT
+   {  return node_ops::size(this->get_root_node(), this->priv_size_traits());   }
+
+   inline bool empty() const BOOST_NOEXCEPT
+   {  return node_algorithms::unique(this->get_root_node());   }
+
+   void clear() BOOST_NOEXCEPT
+   {  node_ops::clear(this->get_root_node(), this->priv_size_traits());   }
+
+   inline void shift_backwards(size_type n = 1) BOOST_NOEXCEPT
+   {  node_algorithms::move_forward(this->get_root_node(), n);  }
+
+   inline void shift_forward(size_type n = 1) BOOST_NOEXCEPT
+   {  node_algorithms::move_backwards(this->get_root_node(), n);  }
+
+   void reverse() BOOST_NOEXCEPT
+   {  node_algorithms::reverse(this->get_root_node());   }
+
+   void check() const
+   {  node_ops::check(this->get_root_node(), this->priv_size_traits());   }
+};
+
+}  //namespace detail{
 
 struct default_list_hook_applier
 {  template <class T> struct apply{ typedef typename T::default_list_hook type;  };  };
@@ -83,7 +333,14 @@ template<class T, class ...Options>
 #else
 template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
 #endif
-class list_impl
+class BOOST_INTRUSIVE_EMPTY_BASES list_impl
+   /// @cond
+   : public detail::value_traits_holder<ValueTraits>
+   , public detail::list_node_base
+      < typename ValueTraits::node_traits
+      , typename detail::get_header_holder_type<ValueTraits, HeaderHolder>::type
+      , SizeType, ConstantTimeSize, is_safe_autounlink<ValueTraits::link_mode>::value>
+   /// @endcond
 {
    //Public typedefs
    public:
@@ -115,6 +372,10 @@ class list_impl
    /// @cond
 
    private:
+   typedef detail::list_node_base
+      < node_traits, header_holder_type, SizeType, ConstantTimeSize
+      , is_safe_autounlink<ValueTraits::link_mode>::value>        base_t;
+   typedef detail::value_traits_holder<ValueTraits>                vtraits_holder_t;
    typedef detail::size_holder<constant_time_size, size_type>          size_traits;
 
    //noncopyable
@@ -129,38 +390,11 @@ class list_impl
                         ((int)value_traits::link_mode == (int)auto_unlink)
                       ));
 
-   inline node_ptr get_root_node()
-   { return data_.root_plus_size_.m_header.get_node(); }
-
-   inline const_node_ptr get_root_node() const
-   { return data_.root_plus_size_.m_header.get_node(); }
-
-   struct root_plus_size : public size_traits
-   {
-      header_holder_type m_header;
-   };
-
-   struct data_t : public value_traits
-   {
-      typedef typename list_impl::value_traits value_traits;
-      inline explicit data_t(const value_traits &val_traits)
-         :  value_traits(val_traits)
-      {}
-
-      root_plus_size root_plus_size_;
-   } data_;
-
-   inline size_traits &priv_size_traits() BOOST_NOEXCEPT
-   {  return data_.root_plus_size_;  }
-
-   inline const size_traits &priv_size_traits() const BOOST_NOEXCEPT
-   {  return data_.root_plus_size_;  }
-
    inline const value_traits &priv_value_traits() const BOOST_NOEXCEPT
-   {  return data_;  }
+   {  return *this;  }
 
    inline value_traits &priv_value_traits() BOOST_NOEXCEPT
-   {  return data_;  }
+   {  return *this;  }
 
    typedef typename boost::intrusive::value_traits_pointers
       <ValueTraits>::const_value_traits_ptr const_value_traits_ptr;
@@ -179,11 +413,8 @@ class list_impl
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks).
    list_impl()
-      :  data_(value_traits())
-   {
-      this->priv_size_traits().set_size(size_type(0));
-      node_algorithms::init_header(this->get_root_node());
-   }
+      :  vtraits_holder_t(value_traits()), base_t()
+   {}
 
    //! <b>Effects</b>: constructs an empty list.
    //!
@@ -192,11 +423,8 @@ class list_impl
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks).
    explicit list_impl(const value_traits &v_traits)
-      :  data_(v_traits)
-   {
-      this->priv_size_traits().set_size(size_type(0));
-      node_algorithms::init_header(this->get_root_node());
-   }
+      :  vtraits_holder_t(v_traits), base_t()
+   {}
 
    //! <b>Requires</b>: Dereferencing iterator must yield an lvalue of type value_type.
    //!
@@ -208,11 +436,8 @@ class list_impl
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks).
    template<class Iterator>
    list_impl(Iterator b, Iterator e, const value_traits &v_traits = value_traits())
-      :  data_(v_traits)
+      :  vtraits_holder_t(v_traits), base_t()
    {
-      //nothrow, no need to rollback to release elements on exception
-      this->priv_size_traits().set_size(size_type(0));
-      node_algorithms::init_header(this->get_root_node());
       //nothrow, no need to rollback to release elements on exception
       this->insert(this->cend(), b, e);
    }
@@ -227,10 +452,8 @@ class list_impl
    //!   move constructor throws (this does not happen with predefined Boost.Intrusive hooks)
    //!   or the move constructor of value traits throws.
    list_impl(BOOST_RV_REF(list_impl) x)
-      : data_(::boost::move(x.priv_value_traits()))
+      :  vtraits_holder_t(::boost::move(x.priv_value_traits())), base_t()
    {
-      this->priv_size_traits().set_size(size_type(0));
-      node_algorithms::init_header(this->get_root_node());
       //nothrow, no need to rollback to release elements on exception
       this->swap(x);
    }
@@ -251,20 +474,8 @@ class list_impl
    //! 
    //! <b>Complexity</b>: Linear to the number of elements in the list, if
    //!   it's a safe-mode or auto-unlink value . Otherwise constant.
-   ~list_impl()
-   #if defined(BOOST_INTRUSIVE_CONCEPTS_BASED_OVERLOADING)
-      requires (ValueTraits::link_mode != normal_link)
-   #endif
-   {
-      BOOST_IF_CONSTEXPR(is_safe_autounlink<ValueTraits::link_mode>::value){
-         node_ops::clear(this->get_root_node(), this->priv_size_traits());
-         node_algorithms::init(this->get_root_node());
-      }
-   }
-
-   #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && defined(BOOST_INTRUSIVE_CONCEPTS_BASED_OVERLOADING)
-   //Default destructor for normal links (allows conditional triviality)
-   ~list_impl() requires (ValueTraits::link_mode == normal_link) = default;
+   #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
+   ~list_impl();
    #endif
 
    //! <b>Requires</b>: value must be an lvalue.
@@ -535,8 +746,11 @@ class list_impl
    //!   if constant-time size option is disabled. Constant time otherwise.
    //!
    //! <b>Note</b>: Does not affect the validity of iterators and references.
-   inline size_type size() const BOOST_NOEXCEPT
-   {  return node_ops::size(this->get_root_node(), this->priv_size_traits());   }
+   #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
+   size_type size() const BOOST_NOEXCEPT;
+   #else
+   using base_t::size;
+   #endif
 
    //! <b>Effects</b>: Returns true if the list contains no elements.
    //!
@@ -545,8 +759,11 @@ class list_impl
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Note</b>: Does not affect the validity of iterators and references.
-   inline bool empty() const BOOST_NOEXCEPT
-   {  return node_algorithms::unique(this->get_root_node());   }
+   #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
+   bool empty() const BOOST_NOEXCEPT;
+   #else
+   using base_t::empty;
+   #endif
 
    //! <b>Effects</b>: Swaps the elements and the value traits of x and *this.
    //!
@@ -572,8 +789,11 @@ class list_impl
    //! <b>Complexity</b>: Linear to the number of shifts.
    //!
    //! <b>Note</b>: Does not affect the validity of iterators and references.
-   inline void shift_backwards(size_type n = 1) BOOST_NOEXCEPT
-   {  node_algorithms::move_forward(this->get_root_node(), n);  }
+   #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
+   void shift_backwards(size_type n = 1) BOOST_NOEXCEPT;
+   #else
+   using base_t::shift_backwards;
+   #endif
 
    //! <b>Effects</b>: Moves forward all the elements, so that the second
    //!   element becomes the first, the third becomes the second...
@@ -584,8 +804,11 @@ class list_impl
    //! <b>Complexity</b>: Linear to the number of shifts.
    //!
    //! <b>Note</b>: Does not affect the validity of iterators and references.
-   inline void shift_forward(size_type n = 1) BOOST_NOEXCEPT
-   {  node_algorithms::move_backwards(this->get_root_node(), n);  }
+   #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
+   void shift_forward(size_type n = 1) BOOST_NOEXCEPT;
+   #else
+   using base_t::shift_forward;
+   #endif
 
    //! <b>Effects</b>: Erases the element pointed by i of the list.
    //!   No destructors are called.
@@ -722,8 +945,11 @@ class list_impl
    //!   if it's a safe-mode or auto-unlink value_type. Constant time otherwise.
    //!
    //! <b>Note</b>: Invalidates the iterators (but not the references) to the erased elements.
-   void clear() BOOST_NOEXCEPT
-   {  node_ops::clear(this->get_root_node(), this->priv_size_traits());   }
+   #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
+   void clear() BOOST_NOEXCEPT;
+   #else
+   using base_t::clear;
+   #endif
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!
@@ -1037,8 +1263,11 @@ class list_impl
    //! <b>Complexity</b>: This function is linear time.
    //!
    //! <b>Note</b>: Iterators and references are not invalidated
-   void reverse() BOOST_NOEXCEPT
-   {  node_algorithms::reverse(this->get_root_node());   }
+   #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
+   void reverse() BOOST_NOEXCEPT;
+   #else
+   using base_t::reverse;
+   #endif
 
    //! <b>Effects</b>: Removes all the elements that compare equal to value.
    //!   No destructors are called.
@@ -1282,8 +1511,11 @@ class list_impl
    //!
    //! <b>Note</b>: The method has no effect when asserts are turned off (e.g., with NDEBUG).
    //!   Experimental function, interface might change in future versions.
-   void check() const
-   {  node_ops::check(this->get_root_node(), this->priv_size_traits());   }
+   #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
+   void check() const;
+   #else
+   using base_t::check;
+   #endif
 
    friend bool operator==(const list_impl &x, const list_impl &y)
    {
@@ -1320,14 +1552,7 @@ class list_impl
    static list_impl &priv_container_from_end_iterator(const const_iterator &end_iterator) BOOST_NOEXCEPT
    {
       BOOST_INTRUSIVE_STATIC_ASSERT((has_container_from_iterator));
-      node_ptr p = end_iterator.pointed_node();
-      header_holder_type* h = header_holder_type::get_holder(p);
-      root_plus_size* r = detail::parent_from_member
-         < root_plus_size, header_holder_type>(h, &root_plus_size::m_header);
-      data_t *d = detail::parent_from_member<data_t, root_plus_size>
-         ( r, &data_t::root_plus_size_);
-      list_impl *s  = detail::parent_from_member<list_impl, data_t>(d, &list_impl::data_);
-      return *s;
+      return static_cast<list_impl&>(base_t::priv_base_from_end_node(end_iterator.pointed_node()));
    }
    /// @endcond
 };

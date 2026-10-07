@@ -58,6 +58,60 @@ namespace intrusive {
 
 /// @cond
 
+namespace detail {
+
+//Operations of bstree_impl that only depend on the node algorithms, the size holder
+//and the link mode (not on ValueTraits or the comparison)
+template<class NodeAlgorithms, class SizeTraits, bool SafeModeOrAutoUnlink>
+struct bstree_node_ops
+{
+   typedef typename NodeAlgorithms::node_traits    node_traits;
+   typedef typename node_traits::node_ptr          node_ptr;
+   typedef typename node_traits::const_node_ptr    const_node_ptr;
+   typedef typename SizeTraits::size_type          size_type;
+   static const bool constant_time_size = SizeTraits::constant_time_size;
+   //The size holder is empty and might be a temporary if constant_time_size is false
+   typedef typename detail::if_c
+      <constant_time_size, SizeTraits &, SizeTraits>::type        size_traits_ref;
+   typedef typename detail::if_c
+      <constant_time_size, const SizeTraits &, SizeTraits>::type  const_size_traits_ref;
+
+   static size_type size(const_node_ptr header, const_size_traits_ref sz) BOOST_NOEXCEPT
+   {
+      (void)header; (void)sz;
+      BOOST_IF_CONSTEXPR(constant_time_size)
+         return sz.get_size();
+      else
+         return (size_type)NodeAlgorithms::size(header);
+   }
+
+   //Erases n from the tree and initializes it, if needed
+   static void erase(node_ptr header, node_ptr n, size_traits_ref sz) BOOST_NOEXCEPT
+   {
+      BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!SafeModeOrAutoUnlink || !NodeAlgorithms::unique(n));
+      NodeAlgorithms::erase(header, n);
+      sz.decrement();
+      BOOST_IF_CONSTEXPR(SafeModeOrAutoUnlink)
+         NodeAlgorithms::init(n);
+   }
+
+   //Erases [b, e) from the tree, initializes the nodes, if needed,
+   //and returns the number of erased nodes
+   static size_type erase(node_ptr header, node_ptr b, node_ptr e, size_traits_ref sz) BOOST_NOEXCEPT
+   {
+      size_type n = 0;
+      while(b != e){
+         node_ptr const to_erase(b);
+         b = NodeAlgorithms::next_node(b);
+         bstree_node_ops::erase(header, to_erase, sz);
+         ++n;
+      }
+      return n;
+   }
+};
+
+}  //namespace detail{
+
 struct default_bstree_hook_applier
 {  template <class T> struct apply{ typedef typename T::default_bstree_hook type;  };  };
 
@@ -745,6 +799,9 @@ class bstree_impl
 
    static const bool safemode_or_autounlink = is_safe_autounlink<value_traits::link_mode>::value;
 
+   typedef detail::bstree_node_ops
+      < node_algorithms, detail::size_holder<ConstantTimeSize, SizeType>, safemode_or_autounlink> node_ops;
+
    //Constant-time size is incompatible with auto-unlink hooks!
    BOOST_INTRUSIVE_STATIC_ASSERT(!(constant_time_size && ((int)value_traits::link_mode == (int)auto_unlink)));
 
@@ -1043,13 +1100,7 @@ class bstree_impl
    //!
    //! <b>Throws</b>: Nothing.
    size_type size() const BOOST_NOEXCEPT
-   {
-      BOOST_IF_CONSTEXPR(constant_time_size)
-         return this->sz_traits().get_size();
-      else{
-         return (size_type)node_algorithms::size(this->header_ptr());
-      }
-   }
+   {  return node_ops::size(this->header_ptr(), this->sz_traits());   }
 
    //! <b>Effects</b>: Swaps the contents of two containers.
    //!   Swaps also the comparison functor and the value traits.
@@ -1507,12 +1558,7 @@ class bstree_impl
    {
       const_iterator ret(i);
       ++ret;
-      node_ptr to_erase(i.pointed_node());
-      BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || !node_algorithms::unique(to_erase));
-      node_algorithms::erase(this->header_ptr(), to_erase);
-      this->sz_traits().decrement();
-      BOOST_IF_CONSTEXPR(safemode_or_autounlink)
-         node_algorithms::init(to_erase);
+      node_ops::erase(this->header_ptr(), i.pointed_node(), this->sz_traits());
       return ret.unconst();
    }
 
@@ -2213,9 +2259,8 @@ class bstree_impl
 
    iterator private_erase(const_iterator b, const_iterator e, size_type &n)
    {
-      for(n = 0; b != e; ++n)
-        b = this->erase(b);
-      return b.unconst();
+      n = node_ops::erase(this->header_ptr(), b.pointed_node(), e.pointed_node(), this->sz_traits());
+      return e.unconst();
    }
    /// @endcond
 };

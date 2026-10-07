@@ -61,6 +61,15 @@ struct prime_list_holder
    //Converts n to std::size_t, saturating values that std::size_t can't represent
    template <class SizeType>
    static inline std::size_t saturate_to_size_t(SizeType n)
+   {  return saturate_to_size_t(n, detail::bool_<(sizeof(SizeType) > sizeof(std::size_t))>());  }
+
+   //SizeType is not wider than std::size_t, no saturation needed
+   template <class SizeType>
+   static inline std::size_t saturate_to_size_t(SizeType n, detail::false_)
+   {  return std::size_t(n);  }
+
+   template <class SizeType>
+   static inline std::size_t saturate_to_size_t(SizeType n, detail::true_)
    {  return n > SizeType(std::size_t(-1)) ? std::size_t(-1) : std::size_t(n);  }
 
    static const std::size_t prime_list[];
