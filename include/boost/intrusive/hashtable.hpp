@@ -522,21 +522,88 @@ BOOST_INTRUSIVE_FORCEINLINE std::size_t hash_to_bucket(std::size_t hash_value, s
 BOOST_INTRUSIVE_FORCEINLINE std::size_t hash_to_bucket(std::size_t hash_value, std::size_t bucket_cnt, detail::true_)
 {  return hash_value & (bucket_cnt - 1);   }
 
-template<bool Power2Buckets, bool Incremental>  //!fastmod_buckets
-inline std::size_t hash_to_bucket_split(std::size_t hash_value, std::size_t bucket_cnt, std::size_t split, detail::false_)
+//Rules that map hash values to buckets and compute the split count and bucket counts.
+//They only depend on the bucket options (and the size type), not on the value type.
+//"split" is the split count with incremental<true> and the index of the bucket count
+//with fastmod_buckets<true>.
+template<bool Power2Buckets, bool Incremental, bool FastmodBuckets>
+struct hashtable_index_ops
 {
-   (void)split;
-   std::size_t bucket_number = hash_to_bucket(hash_value, bucket_cnt, detail::bool_<Power2Buckets>());
-   BOOST_IF_CONSTEXPR(Incremental)
-      bucket_number -= static_cast<std::size_t>(bucket_number >= split)*(bucket_cnt/2);
-   return bucket_number;
-}
+   //"usable_cnt" is the bucket count without the sentinel bucket of linear buckets.
+   //It is not used with fastmod_buckets.
+   static std::size_t hash_to_bucket(std::size_t hash_value, std::size_t usable_cnt, std::size_t split)
+   {
+      (void)usable_cnt; (void)split;
+      BOOST_IF_CONSTEXPR(FastmodBuckets){
+         return prime_fmod_size::position(hash_value, split);
+      }
+      else{
+         std::size_t bucket_number = ::boost::intrusive::hash_to_bucket
+            (hash_value, usable_cnt, detail::bool_<Power2Buckets>());
+         BOOST_IF_CONSTEXPR(Incremental)
+            bucket_number -= static_cast<std::size_t>(bucket_number >= split)*(usable_cnt/2);
+         return bucket_number;
+      }
+   }
 
-template<bool Power2Buckets, bool Incremental>  //fastmod_buckets
-inline std::size_t hash_to_bucket_split(std::size_t hash_value, std::size_t , std::size_t split, detail::true_)
-{
-   return prime_fmod_size::position(hash_value, split);
-}
+   template<class SizeType>
+   static SizeType initial_split_from_bucket_count(SizeType bc) BOOST_NOEXCEPT
+   {
+      BOOST_IF_CONSTEXPR(FastmodBuckets) {
+         const SizeType split = static_cast<SizeType>(prime_fmod_size::lower_size_index(bc));
+         //The passed bucket size must be exactly the supported one
+         BOOST_ASSERT(prime_fmod_size::size(split) == bc);
+         return split;
+      }
+      else {
+         BOOST_IF_CONSTEXPR(Incremental) {
+            BOOST_ASSERT(0 == (std::size_t(bc) & (std::size_t(bc) - 1u)));
+            return SizeType(bc >> 1u);
+         }
+         else{
+            return bc;
+         }
+      }
+   }
+
+   template<class SizeType>
+   BOOST_INTRUSIVE_FORCEINLINE static SizeType rehash_split_from_bucket_count(SizeType bc) BOOST_NOEXCEPT
+   {
+      BOOST_IF_CONSTEXPR(FastmodBuckets) {
+         return (initial_split_from_bucket_count)(bc);
+      }
+      else {
+         BOOST_IF_CONSTEXPR(Incremental) {
+            BOOST_ASSERT(0 == (std::size_t(bc) & (std::size_t(bc) - 1u)));
+         }
+         return bc;
+      }
+   }
+
+   template<class SizeType>
+   static SizeType suggested_upper_bucket_count(SizeType n) BOOST_NOEXCEPT
+   {
+      BOOST_IF_CONSTEXPR(FastmodBuckets){
+         std::size_t s = prime_fmod_size::upper_size_index(n);
+         return static_cast<SizeType>(prime_fmod_size::size(s));
+      }
+      else{
+         return prime_list_holder<0>::suggested_upper_bucket_count(n);
+      }
+   }
+
+   template<class SizeType>
+   static SizeType suggested_lower_bucket_count(SizeType n) BOOST_NOEXCEPT
+   {
+      BOOST_IF_CONSTEXPR(FastmodBuckets){
+         std::size_t s = prime_fmod_size::lower_size_index(n);
+         return static_cast<SizeType>(prime_fmod_size::size(s));
+      }
+      else{
+         return prime_list_holder<0>::suggested_lower_bucket_count(n);
+      }
+   }
+};
 
 //!This metafunction will obtain the type of a bucket
 //!from the value_traits or hook option to be used with
@@ -879,6 +946,22 @@ struct hashtable_node_ops
          return bucket_ptr();
       else
          return buckets + std::ptrdiff_t(usable_cnt);
+   }
+
+   //Prepares a bucket array of "bucket_cnt" buckets (the sentinel bucket of linear buckets
+   //included) to be used by an empty container: marks the sentinel bucket and empties the other buckets.
+   static void priv_init_bucket_array(bucket_ptr buckets, std::size_t bucket_cnt, bool power_2_buckets)
+   {
+      (void)power_2_buckets;
+      const std::size_t usable_cnt = bucket_cnt - std::size_t(LinearBuckets && bucket_cnt != 0);
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(usable_cnt != 0);
+      //Check power of two bucket array if the option is activated
+      BOOST_INTRUSIVE_INVARIANT_ASSERT
+         (!power_2_buckets || (0 == (usable_cnt & (usable_cnt - 1))));
+      BOOST_IF_CONSTEXPR(LinearBuckets){
+         priv_set_sentinel_bucket(buckets, bucket_cnt);
+      }
+      priv_init_buckets(buckets, usable_cnt);
    }
 
    //Linear buckets: marks the last bucket of the array ("bucket_cnt" is the total count)
@@ -1785,12 +1868,6 @@ struct hashdata_internal
       this->priv_init_cache();
    }
 
-   void priv_init_buckets_and_cache()
-   {
-      node_ops_t::priv_init_buckets(this->priv_bucket_pointer(), this->priv_usable_bucket_count());
-      this->priv_init_cache();
-   }
-
    //Cached first non-empty bucket. If cache_begin<> is not active, the cache is
    //always the first bucket and update operations do nothing.
    BOOST_INTRUSIVE_FORCEINLINE bucket_ptr priv_get_cache() const
@@ -1915,38 +1992,11 @@ struct hashdata_internal
    BOOST_INTRUSIVE_FORCEINLINE void dec_split_count() BOOST_NOEXCEPT
    {  this->priv_split_traits().decrement();  }
 
-   inline static SizeType initial_split_from_bucket_count(SizeType bc) BOOST_NOEXCEPT
-   {
-      BOOST_IF_CONSTEXPR(fastmod_buckets) {
-         size_type split;
-         split = static_cast<SizeType>(prime_fmod_size::lower_size_index(bc));
-         //The passed bucket size must be exactly the supported one
-         BOOST_ASSERT(prime_fmod_size::size(split) == bc);
-         return split;
-      }
-      else {
-         BOOST_IF_CONSTEXPR(incremental) {
-            BOOST_ASSERT(0 == (std::size_t(bc) & (std::size_t(bc) - 1u)));
-            return size_type(bc >> 1u);
-         }
-         else{
-            return bc;
-         }
-      }
-   }
+   BOOST_INTRUSIVE_FORCEINLINE static SizeType initial_split_from_bucket_count(SizeType bc) BOOST_NOEXCEPT
+   {  return index_ops_t::initial_split_from_bucket_count(bc);  }
 
-   inline static SizeType rehash_split_from_bucket_count(SizeType bc) BOOST_NOEXCEPT
-   {
-      BOOST_IF_CONSTEXPR(fastmod_buckets) {
-         return (initial_split_from_bucket_count)(bc);
-      }
-      else {
-         BOOST_IF_CONSTEXPR(incremental) {
-            BOOST_ASSERT(0 == (std::size_t(bc) & (std::size_t(bc) - 1u)));
-         }
-         return bc;
-      }
-   }
+   BOOST_INTRUSIVE_FORCEINLINE static SizeType rehash_split_from_bucket_count(SizeType bc) BOOST_NOEXCEPT
+   {  return index_ops_t::rehash_split_from_bucket_count(bc);  }
 
    BOOST_INTRUSIVE_FORCEINLINE iterator iterator_to(reference value) BOOST_NOEXCEPT_IF(!linear_buckets)
    {  return iterator_to(value, linear_buckets_t());  }
@@ -1975,6 +2025,7 @@ struct hashdata_internal
    static const bool fastmod_buckets = 0 != (BoolFlags & hash_bool_flags::fastmod_buckets_pos);
 
    typedef detail::bool_<fastmod_buckets> fastmod_buckets_t;
+   typedef hashtable_index_ops<power_2_buckets, incremental, fastmod_buckets> index_ops_t;
 
    BOOST_INTRUSIVE_FORCEINLINE bucket_type &priv_hash_to_bucket(std::size_t hash_value) const
    {  return this->priv_bucket(this->priv_hash_to_nbucket(hash_value));   }
@@ -1990,8 +2041,8 @@ struct hashdata_internal
 
    BOOST_INTRUSIVE_FORCEINLINE size_type priv_hash_to_nbucket(std::size_t hash_value, detail::false_) const //!fastmod_buckets_t
    {
-      return static_cast<size_type>(hash_to_bucket_split<power_2_buckets, incremental>
-         (hash_value, this->priv_usable_bucket_count(), this->split_count(), detail::false_()));
+      return static_cast<size_type>(index_ops_t::hash_to_bucket
+         (hash_value, this->priv_usable_bucket_count(), this->split_count()));
    }
 
    BOOST_INTRUSIVE_FORCEINLINE iterator iterator_to(reference value, detail::false_) BOOST_NOEXCEPT
@@ -2053,27 +2104,11 @@ struct hashdata_internal
    BOOST_INTRUSIVE_FORCEINLINE const_local_iterator begin(size_type n) const BOOST_NOEXCEPT
    {  return this->cbegin(n);  }
 
-   static inline size_type suggested_upper_bucket_count(size_type n) BOOST_NOEXCEPT
-   {
-      BOOST_IF_CONSTEXPR(fastmod_buckets){
-         std::size_t s = prime_fmod_size::upper_size_index(n);
-         return static_cast<SizeType>(prime_fmod_size::size(s));
-      }
-      else{
-         return prime_list_holder<0>::suggested_upper_bucket_count(n);
-      }
-   }
+   BOOST_INTRUSIVE_FORCEINLINE static size_type suggested_upper_bucket_count(size_type n) BOOST_NOEXCEPT
+   {  return index_ops_t::suggested_upper_bucket_count(n);  }
 
-   static inline size_type suggested_lower_bucket_count(size_type n) BOOST_NOEXCEPT
-   {
-      BOOST_IF_CONSTEXPR(fastmod_buckets){
-         std::size_t s = prime_fmod_size::lower_size_index(n);
-         return static_cast<SizeType>(prime_fmod_size::size(s));
-      }
-      else{
-         return prime_list_holder<0>::suggested_lower_bucket_count(n);
-      }
-   }
+   BOOST_INTRUSIVE_FORCEINLINE static size_type suggested_lower_bucket_count(size_type n) BOOST_NOEXCEPT
+   {  return index_ops_t::suggested_lower_bucket_count(n);  }
 
    BOOST_INTRUSIVE_FORCEINLINE const_local_iterator cbegin(size_type n) const BOOST_NOEXCEPT
    {
@@ -2330,9 +2365,9 @@ class hashtable_impl
    typedef detail::bool_<unique_keys>                                unique_keys_t;
    typedef detail::bool_<cache_begin>                                cache_begin_t;
    typedef detail::bool_<power_2_buckets>                            power_2_buckets_t;
-   typedef detail::bool_<fastmod_buckets>                            fastmod_buckets_t;
    typedef detail::bool_<compare_hash>                               compare_hash_t;
    typedef typename internal_type::split_traits                      split_traits;
+   typedef typename internal_type::index_ops_t                       index_ops_t;
    typedef group_functions<node_traits>                              group_functions_t;
    typedef node_functions<node_traits>                               node_functions_t;
 
@@ -2358,14 +2393,11 @@ class hashtable_impl
    private:
    void default_init_actions()
    {
-      this->priv_set_sentinel_bucket();
-      this->priv_init_buckets_and_cache();
+      const size_type bucket_sz = this->bucket_count();
+      node_ops_t::priv_init_bucket_array
+         (this->priv_bucket_pointer(), this->priv_bucket_traits().bucket_count(), power_2_buckets);
+      this->priv_init_cache();
       this->priv_size_traits().set_size(size_type(0));
-      size_type bucket_sz = this->bucket_count();
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(bucket_sz != 0);
-      //Check power of two bucket array if the option is activated
-      BOOST_INTRUSIVE_INVARIANT_ASSERT
-         (!power_2_buckets || (0 == (bucket_sz & (bucket_sz - 1))));
       this->split_count(this->initial_split_from_bucket_count(bucket_sz));
    }
 
@@ -3859,8 +3891,8 @@ class hashtable_impl
                }
 
                //Now calculate the new bucket position
-               const size_type new_n = (size_type)hash_to_bucket_split<power_2_buckets, incremental>
-                  (hash_value, new_bucket_count, split, fastmod_buckets_t());
+               const size_type new_n = (size_type)index_ops_t::hash_to_bucket
+                  (hash_value, new_bucket_count, split);
 
                //Update first used bucket cache
                if(cache_begin && new_n < new_first_bucket_num)
@@ -3891,8 +3923,8 @@ class hashtable_impl
             }
          }
          else{
-            const size_type new_n = (size_type)hash_to_bucket_split<power_2_buckets, incremental>
-                                       (n, new_bucket_count, split, fastmod_buckets_t());
+            const size_type new_n = (size_type)index_ops_t::hash_to_bucket
+                                       (n, new_bucket_count, split);
             //Empty buckets must not update the first used bucket cache
             if(cache_begin && new_n < new_first_bucket_num && !slist_node_algorithms::is_empty(old_bucket.get_node_ptr()))
                new_first_bucket_num = new_n;
@@ -3996,8 +4028,8 @@ class hashtable_impl
             ; constructed < src_bucket_count
             ; ++constructed){
 
-            const size_type new_n = (size_type)hash_to_bucket_split<power_2_buckets, incremental>
-               (constructed, dst_bucket_count, this->split_count(), fastmod_buckets_t());
+            const size_type new_n = (size_type)index_ops_t::hash_to_bucket
+               (constructed, dst_bucket_count, this->split_count());
             bucket_type &src_b = src.priv_bucket(constructed);
             for( siterator b(node_ops_t::priv_bucket_lbegin(src_b)), e(node_ops_t::priv_bucket_lend(src_b)); b != e; ++b){
                typedef typename detail::if_c
