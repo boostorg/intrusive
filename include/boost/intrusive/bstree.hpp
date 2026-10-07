@@ -31,6 +31,7 @@
 #include <boost/intrusive/detail/reverse_iterator.hpp>
 #include <boost/intrusive/detail/exception_disposer.hpp>
 #include <boost/intrusive/detail/node_cloner_disposer.hpp>
+#include <boost/intrusive/detail/value_traits_holder.hpp>
 #include <boost/intrusive/detail/key_nodeptr_comp.hpp>
 #include <boost/intrusive/detail/simple_disposers.hpp>
 #include <boost/intrusive/detail/size_holder.hpp>
@@ -110,6 +111,135 @@ struct bstree_node_ops
    }
 };
 
+//Header and size of a tree. The size is only stored if ConstantTimeSize is true, so that
+//this class never starts with an empty base (without empty_bases, MSVC adds padding
+//when a base class that is not the first base starts with an empty base).
+template<class HeaderHolder, class SizeType, bool ConstantTimeSize>
+struct bstree_header_size
+   : public size_holder<true, SizeType>
+{
+   typedef size_holder<true, SizeType>                         size_traits;
+   typedef size_traits &                                       size_traits_ref;
+   typedef const size_traits &                                 const_size_traits_ref;
+
+   HeaderHolder m_header;
+
+   inline size_traits_ref sz_traits() BOOST_NOEXCEPT
+   {  return *this;  }
+
+   inline const_size_traits_ref sz_traits() const BOOST_NOEXCEPT
+   {  return *this;  }
+};
+
+template<class HeaderHolder, class SizeType>
+struct bstree_header_size<HeaderHolder, SizeType, false>
+{
+   //The size holder is empty and it's returned by value
+   typedef size_holder<false, SizeType>                        size_traits;
+   typedef size_traits                                         size_traits_ref;
+   typedef size_traits                                         const_size_traits_ref;
+
+   HeaderHolder m_header;
+
+   inline size_traits sz_traits() const BOOST_NOEXCEPT
+   {  return size_traits();  }
+};
+
+//Holds the size and the header of bstree_impl. Its members only depend on the node type,
+//the algorithms, the header holder, the size type and the link mode (not on ValueTraits
+//or the comparison), so that they are instantiated only once for all trees that share
+//the same node type.
+template< class NodeTraits, algo_types AlgoType, class HeaderHolder, class SizeType
+        , bool ConstantTimeSize, bool SafeModeOrAutoUnlink>
+class bstree_node_base
+   : public bstree_header_size<HeaderHolder, SizeType, ConstantTimeSize>
+{
+   typedef bstree_header_size<HeaderHolder, SizeType, ConstantTimeSize>   header_size_t;
+
+   public:
+   typedef SizeType                                            size_type;
+   typedef typename header_size_t::size_traits                 size_traits;
+   typedef typename header_size_t::size_traits_ref             size_traits_ref;
+   typedef typename header_size_t::const_size_traits_ref       const_size_traits_ref;
+   typedef typename get_algo<AlgoType, NodeTraits>::type       node_algorithms;
+   typedef bstree_node_ops
+      <node_algorithms, size_traits, SafeModeOrAutoUnlink>     node_ops;
+   typedef typename NodeTraits::node_ptr                       node_ptr;
+   typedef typename NodeTraits::const_node_ptr                 const_node_ptr;
+   typedef HeaderHolder                                        header_holder_type;
+
+   inline bstree_node_base() BOOST_NOEXCEPT
+   {
+      this->sz_traits().set_size(size_type(0));
+      node_algorithms::init_header(this->header_ptr());
+   }
+
+   //Detach all inserted nodes. This will add exception safety to bstree_impl
+   //constructors inserting elements.
+   ~bstree_node_base()
+   #if defined(BOOST_INTRUSIVE_CONCEPTS_BASED_OVERLOADING)
+      requires (SafeModeOrAutoUnlink)
+   #endif
+   {
+      BOOST_IF_CONSTEXPR(SafeModeOrAutoUnlink){
+         node_algorithms::clear_and_dispose
+            (this->header_ptr(), node_null_disposer<node_algorithms>(null_disposer(), 0));
+         node_algorithms::init(this->header_ptr());
+      }
+   }
+
+   #if defined(BOOST_INTRUSIVE_CONCEPTS_BASED_OVERLOADING)
+   //Default destructor for normal links (allows conditional triviality)
+   ~bstree_node_base() requires (!SafeModeOrAutoUnlink) = default;
+   #endif
+
+   inline node_ptr header_ptr() BOOST_NOEXCEPT
+   { return this->m_header.get_node(); }
+
+   inline const_node_ptr header_ptr() const BOOST_NOEXCEPT
+   { return this->m_header.get_node(); }
+
+   //Obtains the base from the header holder of the end node
+   static bstree_node_base &priv_base_from_end_node(node_ptr p) BOOST_NOEXCEPT
+   {
+      header_holder_type* h = header_holder_type::get_holder(p);
+      return static_cast<bstree_node_base&>
+         (*boost::intrusive::get_parent_from_member<header_size_t, header_holder_type>(h, &header_size_t::m_header));
+   }
+
+   private:
+   //noncopyable
+   bstree_node_base(const bstree_node_base &);
+   bstree_node_base &operator=(const bstree_node_base &);
+
+   public:
+   bool empty() const BOOST_NOEXCEPT
+   {
+      BOOST_IF_CONSTEXPR(ConstantTimeSize){
+         return !this->sz_traits().get_size();
+      }
+      else{
+         return node_algorithms::unique(this->header_ptr());
+      }
+   }
+
+   size_type size() const BOOST_NOEXCEPT
+   {  return node_ops::size(this->header_ptr(), this->sz_traits());   }
+
+   void clear() BOOST_NOEXCEPT
+   {
+      BOOST_IF_CONSTEXPR(SafeModeOrAutoUnlink){
+         node_algorithms::clear_and_dispose
+            (this->header_ptr(), node_null_disposer<node_algorithms>(null_disposer(), 0));
+      }
+      node_algorithms::init_header(this->header_ptr());
+      this->sz_traits().set_size(size_type(0));
+   }
+
+   inline void rebalance() BOOST_NOEXCEPT
+   {  node_algorithms::rebalance(this->header_ptr()); }
+};
+
 }  //namespace detail{
 
 struct default_bstree_hook_applier
@@ -131,7 +261,7 @@ struct bstree_defaults
    typedef void header_holder_type;
 };
 
-template<class ValueTraits, algo_types AlgoType, typename HeaderHolder>
+template<class ValueTraits, algo_types AlgoType, typename HeaderHolder, class SizeType, bool ConstantTimeSize>
 struct bstbase3
 {
    typedef ValueTraits                                               value_traits;
@@ -154,45 +284,65 @@ struct bstbase3
       < value_traits,HeaderHolder >::type                                                       header_holder_type;
 
    static const bool safemode_or_autounlink = is_safe_autounlink<value_traits::link_mode>::value;
+   typedef detail::bstree_node_base
+      < node_traits, AlgoType, header_holder_type, SizeType, ConstantTimeSize
+      , safemode_or_autounlink>                                                                node_base_t;
    static const bool stateful_value_traits = detail::is_stateful_value_traits<value_traits>::value;
    static const bool has_container_from_iterator =
         detail::is_same< header_holder_type, detail::default_header_holder< node_traits > >::value;
 
-   struct holder_t : public ValueTraits
+   //The (usually empty) value traits are the first base of a member so that the comparison
+   //functor (an empty base of bstbase2) and the value traits use no space, even with MSVC
+   //compilers without empty_bases support.
+   struct BOOST_INTRUSIVE_EMPTY_BASES holder_t
+      : public ValueTraits
+      , public node_base_t
    {
       inline explicit holder_t(const ValueTraits &vtraits)
-         : ValueTraits(vtraits)
+         : ValueTraits(vtraits), node_base_t()
       {}
-      header_holder_type root;
    } holder;
 
    static bstbase3 &get_tree_base_from_end_iterator(const const_iterator &end_iterator)
    {
       BOOST_INTRUSIVE_STATIC_ASSERT(has_container_from_iterator);
-      node_ptr p = end_iterator.pointed_node();
-      header_holder_type* h = header_holder_type::get_holder(p);
-      holder_t *holder = get_parent_from_member<holder_t, header_holder_type>(h, &holder_t::root);
-      bstbase3 *base   = get_parent_from_member<bstbase3, holder_t> (holder, &bstbase3::holder);
-      return *base;
+      holder_t *h = static_cast<holder_t*>(&node_base_t::priv_base_from_end_node(end_iterator.pointed_node()));
+      return *get_parent_from_member<bstbase3, holder_t>(h, &bstbase3::holder);
    }
 
    inline bstbase3(const ValueTraits &vtraits)
       : holder(vtraits)
-   {
-      node_algorithms::init_header(this->header_ptr());
-   }
-
-   inline node_ptr header_ptr()
-   { return holder.root.get_node(); }
-
-   inline const_node_ptr header_ptr() const
-   { return holder.root.get_node(); }
+   {}
 
    inline const value_traits &get_value_traits() const
    {  return this->holder;  }
 
    inline value_traits &get_value_traits()
    {  return this->holder;  }
+
+   inline node_ptr header_ptr() BOOST_NOEXCEPT
+   { return this->holder.header_ptr(); }
+
+   inline const_node_ptr header_ptr() const BOOST_NOEXCEPT
+   { return this->holder.header_ptr(); }
+
+   inline typename node_base_t::size_traits_ref sz_traits() BOOST_NOEXCEPT
+   {  return this->holder.sz_traits();  }
+
+   inline typename node_base_t::const_size_traits_ref sz_traits() const BOOST_NOEXCEPT
+   {  return this->holder.sz_traits();  }
+
+   inline bool empty() const BOOST_NOEXCEPT
+   {  return this->holder.empty();  }
+
+   inline SizeType size() const BOOST_NOEXCEPT
+   {  return this->holder.size();  }
+
+   inline void clear() BOOST_NOEXCEPT
+   {  this->holder.clear();  }
+
+   inline void rebalance() BOOST_NOEXCEPT
+   {  this->holder.rebalance();  }
 
    typedef typename boost::intrusive::value_traits_pointers
       <ValueTraits>::const_value_traits_ptr const_value_traits_ptr;
@@ -260,9 +410,6 @@ struct bstbase3
          node_algorithms::init(replace_this.pointed_node());
    }
 
-   inline void rebalance() BOOST_NOEXCEPT
-   {  node_algorithms::rebalance(this->header_ptr()); }
-
    iterator rebalance_subtree(iterator r) BOOST_NOEXCEPT
    {  return this->priv_to_it(node_algorithms::rebalance_subtree(r.pointed_node())); }
 
@@ -328,7 +475,7 @@ struct bst_key_types
       <ValuePtr, key_compare, key_of_value>           value_compare;
 };
 
-template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyComp, algo_types AlgoType, typename HeaderHolder>
+template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyComp, algo_types AlgoType, typename HeaderHolder, class SizeType, bool ConstantTimeSize>
 struct BOOST_INTRUSIVE_EMPTY_BASES bstbase2
    //Put the (possibly empty) functor in the first position to get EBO in MSVC
    //Use public inheritance to avoid MSVC bugs with closures
@@ -340,9 +487,9 @@ struct BOOST_INTRUSIVE_EMPTY_BASES bstbase2
                
                >::value_compare
             >
-   , public bstbase3<ValueTraits, AlgoType, HeaderHolder>
+   , public bstbase3<ValueTraits, AlgoType, HeaderHolder, SizeType, ConstantTimeSize>
 {
-   typedef bstbase3<ValueTraits, AlgoType, HeaderHolder>             treeheader_t;
+   typedef bstbase3<ValueTraits, AlgoType, HeaderHolder, SizeType, ConstantTimeSize>   treeheader_t;
    typedef bst_key_types< typename ValueTraits::pointer
                         , VoidOrKeyOfValue
                         , VoidOrKeyComp>                             key_types;
@@ -636,99 +783,6 @@ struct BOOST_INTRUSIVE_EMPTY_BASES bstbase2
    }
 };
 
-//Due to MSVC's EBO implementation, to save space and maintain the ABI, we must put the non-empty size member
-//in the first position, but if size is not going to be stored then we'll use an specialization
-//that doesn't inherit from size_holder
-template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyComp, bool ConstantTimeSize, class SizeType, algo_types AlgoType, typename HeaderHolder>
-struct BOOST_INTRUSIVE_EMPTY_BASES bstbase_hack
-   : public detail::size_holder<ConstantTimeSize, SizeType>
-   , public bstbase2 < ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, AlgoType, HeaderHolder>
-{
-   typedef bstbase2< ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, AlgoType, HeaderHolder> base_type;
-   typedef typename base_type::key_compare         key_compare;
-   typedef typename base_type::value_compare       value_compare;
-   typedef SizeType                                size_type;
-   typedef typename base_type::node_traits         node_traits;
-   typedef typename get_algo
-      <AlgoType, node_traits>::type                algo_type;
-
-   inline bstbase_hack(const key_compare & comp, const ValueTraits &vtraits)
-      : base_type(comp, vtraits)
-   {
-      this->sz_traits().set_size(size_type(0));
-   }
-
-   typedef detail::size_holder<ConstantTimeSize, SizeType>     size_traits;
-
-   inline size_traits &sz_traits()
-   {  return static_cast<size_traits &>(*this);  }
-
-   inline const size_traits &sz_traits() const
-   {  return static_cast<const size_traits &>(*this);  }
-};
-
-//Specialization for ConstantTimeSize == false
-template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyComp, class SizeType, algo_types AlgoType, typename HeaderHolder>
-struct bstbase_hack<ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, false, SizeType, AlgoType, HeaderHolder>
-   : public bstbase2 < ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, AlgoType, HeaderHolder>
-{
-   typedef bstbase2< ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, AlgoType, HeaderHolder> base_type;
-   typedef typename base_type::value_compare       value_compare;
-   typedef typename base_type::key_compare         key_compare;
-   inline bstbase_hack(const key_compare & comp, const ValueTraits &vtraits)
-      : base_type(comp, vtraits)
-   {}
-
-   typedef detail::size_holder<false, SizeType>     size_traits;
-
-   inline size_traits sz_traits() const
-   {  return size_traits();  }
-};
-
-//This class will
-template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyComp, bool ConstantTimeSize, class SizeType, algo_types AlgoType, typename HeaderHolder>
-struct bstbase
-   : public bstbase_hack< ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, ConstantTimeSize, SizeType, AlgoType, HeaderHolder>
-{
-   typedef bstbase_hack< ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, ConstantTimeSize, SizeType, AlgoType, HeaderHolder> base_type;
-   typedef ValueTraits                             value_traits;
-   typedef typename base_type::value_compare       value_compare;
-   typedef typename base_type::key_compare         key_compare;
-   typedef typename base_type::const_reference     const_reference;
-   typedef typename base_type::reference           reference;
-   typedef typename base_type::iterator            iterator;
-   typedef typename base_type::const_iterator      const_iterator;
-   typedef typename base_type::node_traits         node_traits;
-   typedef typename get_algo
-      <AlgoType, node_traits>::type                node_algorithms;
-   typedef SizeType                                size_type;
-
-   inline bstbase(const key_compare & comp, const ValueTraits &vtraits)
-      : base_type(comp, vtraits)
-   {}
-
-   //Detach all inserted nodes. This will add exception safety to bstree_impl
-   //constructors inserting elements.
-   ~bstbase()
-   #if defined(BOOST_INTRUSIVE_CONCEPTS_BASED_OVERLOADING)
-      requires (ValueTraits::link_mode != normal_link)
-   #endif
-   {
-      BOOST_IF_CONSTEXPR(is_safe_autounlink<value_traits::link_mode>::value){
-         node_algorithms::clear_and_dispose
-            ( this->header_ptr()
-            , typename detail::get_node_disposer<detail::null_disposer, value_traits, AlgoType>::type
-               (detail::null_disposer(), &this->get_value_traits()));
-         node_algorithms::init(this->header_ptr());
-      }
-   }
-
-   #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) && defined(BOOST_INTRUSIVE_CONCEPTS_BASED_OVERLOADING)
-   //Default destructor for normal links (allows conditional triviality)
-   ~bstbase() requires (ValueTraits::link_mode == normal_link) = default;
-   #endif
-};
-
 
 /// @endcond
 
@@ -754,12 +808,12 @@ template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyComp, class S
 #endif
 class bstree_impl
    /// @cond
-   :  public bstbase<ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, ConstantTimeSize, SizeType, AlgoType, HeaderHolder>
+   :  public bstbase2<ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, AlgoType, HeaderHolder, SizeType, ConstantTimeSize>
    /// @endcond
 {
    public:
    /// @cond
-   typedef bstbase<ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, ConstantTimeSize, SizeType, AlgoType, HeaderHolder> data_type;
+   typedef bstbase2<ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, AlgoType, HeaderHolder, SizeType, ConstantTimeSize> data_type;
    typedef tree_iterator<ValueTraits, false> iterator_type;
    typedef tree_iterator<ValueTraits, true>  const_iterator_type;
    /// @endcond
@@ -1083,15 +1137,11 @@ class bstree_impl
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   bool empty() const BOOST_NOEXCEPT
-   {
-      BOOST_IF_CONSTEXPR(constant_time_size){
-         return !this->data_type::sz_traits().get_size();
-      }
-      else{
-         return algo_type::unique(this->header_ptr());
-      }
-   }
+   #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
+   bool empty() const BOOST_NOEXCEPT;
+   #else
+   using data_type::empty;
+   #endif
 
    //! <b>Effects</b>: Returns the number of elements stored in the container.
    //!
@@ -1099,8 +1149,11 @@ class bstree_impl
    //!   if constant-time size option is disabled. Constant time otherwise.
    //!
    //! <b>Throws</b>: Nothing.
-   size_type size() const BOOST_NOEXCEPT
-   {  return node_ops::size(this->header_ptr(), this->sz_traits());   }
+   #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
+   size_type size() const BOOST_NOEXCEPT;
+   #else
+   using data_type::size;
+   #endif
 
    //! <b>Effects</b>: Swaps the contents of two containers.
    //!   Swaps also the comparison functor and the value traits.
@@ -1714,16 +1767,11 @@ class bstree_impl
    //!
    //! <b>Note</b>: Invalidates the iterators (but not the references)
    //!    to the erased elements. No destructors are called.
-   void clear() BOOST_NOEXCEPT
-   {
-      BOOST_IF_CONSTEXPR(safemode_or_autounlink){
-         this->clear_and_dispose(detail::null_disposer());
-      }
-      else{
-         node_algorithms::init_header(this->header_ptr());
-         this->sz_traits().set_size(0);
-      }
-   }
+   #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
+   void clear() BOOST_NOEXCEPT;
+   #else
+   using data_type::clear;
+   #endif
 
    //! <b>Effects</b>: Erases all of the elements calling disposer(p) for
    //!   each node to be erased.

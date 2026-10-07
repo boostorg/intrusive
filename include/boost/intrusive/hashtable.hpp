@@ -855,7 +855,6 @@ struct hashtable_node_ops
 //bucket_plus_vtraits stores ValueTraits + BucketTraits
 template<class ValueTraits, class BucketTraits, bool LinearBuckets>
 struct bucket_plus_vtraits
-   : public hashtable_node_ops<typename ValueTraits::node_traits, LinearBuckets>
 {
    private:
    BOOST_MOVABLE_BUT_NOT_COPYABLE(bucket_plus_vtraits)
@@ -928,11 +927,6 @@ struct bucket_plus_vtraits
    static const std::size_t bucket_overhead = LinearBuckets ? 1u : 0u;
 
    typedef hashtable_node_ops<node_traits, LinearBuckets> node_ops_t;
-   using node_ops_t::priv_bucket_lbegin;
-   using node_ops_t::priv_bucket_lbbegin;
-   using node_ops_t::priv_bucket_lend;
-   using node_ops_t::priv_bucket_size;
-   using node_ops_t::priv_bucket_empty;
 
    inline bucket_plus_vtraits(const ValueTraits &val_traits, const bucket_traits &b_traits)
       : m_data(val_traits, b_traits)
@@ -1044,10 +1038,10 @@ struct bucket_plus_vtraits
    {  siterator s(this->priv_bucket_lbbegin(n)); return ++s; }
 
    inline siterator priv_bucket_lbbegin(std::size_t n) const
-   {  return this->sit_bbegin(this->priv_bucket(n));  }
+   {  return node_ops_t::sit_bbegin(this->priv_bucket(n));  }
 
    inline siterator priv_bucket_lend(std::size_t n) const
-   {  return this->sit_end(this->priv_bucket(n));  }
+   {  return node_ops_t::sit_end(this->priv_bucket(n));  }
 
    inline std::size_t priv_bucket_size(std::size_t n) const
    {  return slist_node_algorithms::count(this->priv_bucket(n).get_node_ptr())-1u;  }
@@ -1067,17 +1061,17 @@ struct bucket_plus_vtraits
       siterator last_step_before_it;
       if(first_bucket != last_bucket){
          bucket_type *b = &this->priv_bucket(0);
-         num_erased += this->priv_erase_from_single_bucket
+         num_erased += node_ops_t::priv_erase_from_single_bucket
             (b[first_bucket], before_first_it, this->priv_bucket_lend(first_bucket), node_disposer, optimize_multikey_tag);
          for(std::size_t i = 0, n = (last_bucket - first_bucket - 1); i != n; ++i){
-            num_erased += this->priv_erase_whole_bucket(b[first_bucket+i+1], node_disposer);
+            num_erased += node_ops_t::priv_erase_whole_bucket(b[first_bucket+i+1], node_disposer);
          }
          last_step_before_it = this->priv_bucket_lbbegin(last_bucket);
       }
       else{
          last_step_before_it = before_first_it;
       }
-      num_erased += this->priv_erase_from_single_bucket
+      num_erased += node_ops_t::priv_erase_from_single_bucket
                   (this->priv_bucket(last_bucket), last_step_before_it, last_it, node_disposer, optimize_multikey_tag);
       return num_erased;
    }
@@ -1316,6 +1310,7 @@ struct BOOST_INTRUSIVE_EMPTY_BASES bucket_hash_equal_t
                         , LinearBuckets>                    bucket_hash_type;
    typedef bucket_plus_vtraits
       <ValueTraits, BucketTraits, LinearBuckets>            bucket_plus_vtraits_t;
+   typedef typename bucket_plus_vtraits_t::node_ops_t       node_ops_t;
    typedef ValueTraits                                      value_traits;
    typedef typename equal_holder_t::functor_type            key_equal;
    typedef typename bucket_hash_type::hasher                hasher;
@@ -1362,7 +1357,7 @@ struct BOOST_INTRUSIVE_EMPTY_BASES bucket_hash_equal_t
       for (n = 0; n < bucket_cnt; ++n){
          bucket_type &b = this->priv_bucket(n);
          if(!slist_node_algorithms::is_empty(b.get_node_ptr())){
-            pbucketptr = this->to_ptr(b);
+            pbucketptr = node_ops_t::to_ptr(b);
             return siterator(b.begin_ptr());
          }
       }
@@ -1639,6 +1634,7 @@ struct hashdata_internal
    typedef typename split_bucket_hash_equal_t::hasher                   hasher;
    typedef bucket_plus_vtraits
       <ValueTraits, BucketTraits, linear_buckets>           bucket_plus_vtraits_t;
+   typedef typename bucket_plus_vtraits_t::node_ops_t       node_ops_t;
    typedef SizeType                                         size_type;
    typedef typename split_bucket_hash_equal_t::size_traits              split_traits;
    typedef typename bucket_plus_vtraits_t::bucket_ptr       bucket_ptr;
@@ -1725,7 +1721,7 @@ struct hashdata_internal
 
    void priv_init_buckets_and_cache()
    {
-      this->priv_init_buckets(this->priv_bucket_pointer(), this->priv_usable_bucket_count());
+      node_ops_t::priv_init_buckets(this->priv_bucket_pointer(), this->priv_usable_bucket_count());
       this->priv_init_cache();
    }
    
@@ -2064,6 +2060,7 @@ class hashtable_impl
    /// @cond
    typedef bucket_plus_vtraits
          <ValueTraits, BucketTraits, linear_buckets_flag>            bucket_plus_vtraits_t;
+   typedef typename bucket_plus_vtraits_t::node_ops_t       node_ops_t;
    typedef typename bucket_plus_vtraits_t::const_value_traits_ptr    const_value_traits_ptr;
 
    typedef detail::bool_<linear_buckets_flag>                        linear_buckets_t;
@@ -2696,7 +2693,7 @@ class hashtable_impl
       this->priv_insertion_update_cache(bucket_num);
       group_functions_t::insert_in_group(n, n, optimize_multikey_t());
       slist_node_algorithms::link_after(b.get_node_ptr(), n);
-      return this->build_iterator(siterator(n), this->to_ptr(b));
+      return this->build_iterator(siterator(n), node_ops_t::to_ptr(b));
    }
 
    //! <b>Requires</b>: value must be an lvalue of type value_type. commit_data
@@ -2731,7 +2728,7 @@ class hashtable_impl
       group_functions_t::insert_in_group(n, n, optimize_multikey_t());
       bucket_type& b = this->priv_bucket(commit_data.bucket_idx);
       slist_node_algorithms::link_after(b.get_node_ptr(), n);
-      return this->build_iterator(siterator(n), this->to_ptr(b));
+      return this->build_iterator(siterator(n), node_ops_t::to_ptr(b));
    }
 
    //! <b>Effects</b>: Erases the element pointed to by i.
@@ -2817,7 +2814,7 @@ class hashtable_impl
    {
       //Get the bucket number and local iterator for both iterators
       const bucket_ptr bp = this->priv_get_bucket_ptr(i);
-      this->priv_erase_node(*bp, i.slist_it(), this->make_node_disposer(disposer), optimize_multikey_t());
+      node_ops_t::priv_erase_node(*bp, i.slist_it(), this->make_node_disposer(disposer), optimize_multikey_t());
       this->priv_size_dec();
       this->priv_erasure_update_cache(bp);
    }
@@ -2842,7 +2839,7 @@ class hashtable_impl
          size_type first_bucket_num = this->priv_get_bucket_num(b);
 
          siterator before_first_local_it
-            = this->priv_get_previous(this->priv_bucket(first_bucket_num), b.slist_it(), optimize_multikey_t());
+            = node_ops_t::priv_get_previous(this->priv_bucket(first_bucket_num), b.slist_it(), optimize_multikey_t());
          size_type last_bucket_num;
          siterator last_local_it;
 
@@ -2850,7 +2847,7 @@ class hashtable_impl
          //of the last bucket
          if(e == this->end()){
             last_bucket_num   = size_type(this->bucket_count() - 1u);
-            last_local_it     = this->sit_end(this->priv_bucket(last_bucket_num));
+            last_local_it     = node_ops_t::sit_end(this->priv_bucket(last_bucket_num));
          }
          else{
             last_local_it     = e.slist_it();
@@ -3667,7 +3664,7 @@ class hashtable_impl
             p = new_buckets;
             c = new_bucket_count;
          }
-         internal_type::priv_init_buckets(p, c);
+         node_ops_t::priv_init_buckets(p, c);
       }
    }
 
@@ -3731,7 +3728,7 @@ class hashtable_impl
          if(!fast_shrink){
             siterator before_i(old_bucket.get_node_ptr());
             siterator i(before_i); ++i;
-            siterator end_sit(this->sit_end(old_bucket));
+            siterator end_sit(node_ops_t::sit_end(old_bucket));
             for( //
                ; i != end_sit
                ; i = before_i, ++i){
@@ -3787,7 +3784,7 @@ class hashtable_impl
             if(cache_begin && new_n < new_first_bucket_num && !slist_node_algorithms::is_empty(old_bucket.get_node_ptr()))
                new_first_bucket_num = new_n;
             bucket_type &new_b = new_buckets[difference_type(new_n)];
-            siterator last = this->priv_get_last(old_bucket, optimize_multikey_t());
+            siterator last = node_ops_t::priv_get_last(old_bucket, optimize_multikey_t());
             slist_node_algorithms::transfer_after(new_b.get_node_ptr(), old_bucket.get_node_ptr(), last.pointed_node());
          }
       }
@@ -3889,12 +3886,12 @@ class hashtable_impl
             const size_type new_n = (size_type)hash_to_bucket_split<power_2_buckets, incremental>
                (constructed, dst_bucket_count, this->split_count(), fastmod_buckets_t());
             bucket_type &src_b = src.priv_bucket(constructed);
-            for( siterator b(this->priv_bucket_lbegin(src_b)), e(this->priv_bucket_lend(src_b)); b != e; ++b){
+            for( siterator b(node_ops_t::priv_bucket_lbegin(src_b)), e(node_ops_t::priv_bucket_lend(src_b)); b != e; ++b){
                typedef typename detail::if_c
                   <detail::is_const<MaybeConstHashtableImpl>::value, const_reference, reference>::type reference_type;
                reference_type r = this->priv_value_from_siterator(b);
                this->priv_clone_front_in_bucket<reference_type>
-                  (new_n, r, this->priv_stored_hash(b, store_hash_t()), cloner);
+                  (new_n, r, node_ops_t::priv_stored_hash(b, store_hash_t()), cloner);
             }
          }
       }
@@ -3940,9 +3937,9 @@ class hashtable_impl
 
       bucket_number = this->priv_hash_to_nbucket(h);
       bucket_type& b = this->priv_bucket(bucket_number);
-      siterator prev = this->sit_bbegin(b);
+      siterator prev = node_ops_t::sit_bbegin(b);
       siterator it = prev;
-      siterator const endit = this->sit_end(b);
+      siterator const endit = node_ops_t::sit_end(b);
 
       while (++it != endit) {
          if (this->priv_is_value_equal_to_key
@@ -3962,8 +3959,8 @@ class hashtable_impl
    siterator priv_find_in_bucket  //In case it is not found previt is priv_end_sit()
       (bucket_type &b, const KeyType& key, KeyEqual equal_func, const std::size_t h) const
    {
-      siterator it(this->sit_begin(b));
-      siterator const endit(this->sit_end(b));
+      siterator it(node_ops_t::sit_begin(b));
+      siterator const endit(node_ops_t::sit_end(b));
 
       for (; it != endit; (priv_go_to_last_in_group)(it, optimize_multikey_t()), ++it) {
          if (BOOST_LIKELY(this->priv_is_value_equal_to_key
@@ -4048,7 +4045,7 @@ class hashtable_impl
 
       if(first != this->priv_end_sit()){
          BOOST_IF_CONSTEXPR(optimize_multikey){
-            cnt = this->priv_erase_from_single_bucket
+            cnt = node_ops_t::priv_erase_from_single_bucket
                ( this->priv_bucket(bucket_num), prev, last
                , this->make_node_disposer(disposer), optimize_multikey_t());
          }
@@ -4150,7 +4147,7 @@ class hashtable_impl
    {  return this->priv_get_bucket_num_hash_dispatch(it.slist_it(), store_hash_t());  }
 
    inline size_type priv_get_bucket_num_hash_dispatch(siterator it, detail::true_) BOOST_NOEXCEPT    //store_hash
-   {  return (size_type)this->priv_hash_to_nbucket(this->priv_stored_hash(it, store_hash_t()));  }
+   {  return (size_type)this->priv_hash_to_nbucket(node_ops_t::priv_stored_hash(it, store_hash_t()));  }
 
    size_type priv_get_bucket_num_hash_dispatch(siterator it, detail::false_) BOOST_NOEXCEPT   //NO store_hash
    {

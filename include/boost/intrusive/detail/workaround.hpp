@@ -148,8 +148,8 @@ template<unsigned> struct static_assert_test {};
 #endif
 
 //MSVC only applies the empty base optimization to the first empty base
-//in multiple inheritance unless this attribute is used (VS2015 Update 2)
-#if defined(_MSC_VER) && (_MSC_FULL_VER >= 190023918)
+//in multiple inheritance unless this attribute is used (VS2015 Update 2).
+#if !defined(BOOST_INTRUSIVE_DISABLE_EMPTY_BASES) && defined(_MSC_VER) && (_MSC_FULL_VER >= 190023918)
 #  define BOOST_INTRUSIVE_EMPTY_BASES __declspec(empty_bases)
 #else
 #  define BOOST_INTRUSIVE_EMPTY_BASES
