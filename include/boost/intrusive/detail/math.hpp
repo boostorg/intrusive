@@ -21,6 +21,8 @@
 #  pragma once
 #endif
 
+#include <boost/intrusive/detail/workaround.hpp>
+
 #include <cstddef>
 #include <climits>
 #include <boost/intrusive/detail/mpl.hpp>
@@ -92,7 +94,7 @@ namespace detail {
    template<>
    struct builtin_clz_dispatch< ::boost::ulong_long_type >
    {
-      static ::boost::ulong_long_type call(::boost::ulong_long_type n)
+      BOOST_INTRUSIVE_FORCEINLINE static ::boost::ulong_long_type call(::boost::ulong_long_type n)
       {  return (::boost::ulong_long_type)__builtin_clzll(n); }
    };
    #endif
@@ -100,18 +102,18 @@ namespace detail {
    template<>
    struct builtin_clz_dispatch<unsigned long>
    {
-      static unsigned long call(unsigned long n)
+      BOOST_INTRUSIVE_FORCEINLINE static unsigned long call(unsigned long n)
       {  return (unsigned long)__builtin_clzl(n); }
    };
 
    template<>
    struct builtin_clz_dispatch<unsigned int>
    {
-      static unsigned int call(unsigned int n)
+      BOOST_INTRUSIVE_FORCEINLINE static unsigned int call(unsigned int n)
       {  return (unsigned int)__builtin_clz(n); }
    };
 
-   inline std::size_t floor_log2(std::size_t n)
+   BOOST_INTRUSIVE_FORCEINLINE std::size_t floor_log2(std::size_t n)
    {
       return sizeof(std::size_t)*CHAR_BIT - std::size_t(1) - builtin_clz_dispatch<std::size_t>::call(n);
    }
@@ -122,10 +124,10 @@ namespace detail {
 // Generic method
 ////////////////////////////
 
-   inline std::size_t floor_log2_get_shift(std::size_t n, true_ )//power of two size_t
+   BOOST_INTRUSIVE_FORCEINLINE std::size_t floor_log2_get_shift(std::size_t n, true_ )//power of two size_t
    {  return n >> 1;  }
 
-   inline std::size_t floor_log2_get_shift(std::size_t n, false_ )//non-power of two size_t
+   BOOST_INTRUSIVE_FORCEINLINE std::size_t floor_log2_get_shift(std::size_t n, false_ )//non-power of two size_t
    {  return (n >> 1) + ((n & 1u) & (n != 1)); }
 
    template<std::size_t N>
@@ -175,7 +177,7 @@ inline float fast_log2 (float val)
    return val + static_cast<float>(log_2);
 }
 
-inline bool is_pow2(std::size_t x)
+BOOST_INTRUSIVE_FORCEINLINE bool is_pow2(std::size_t x)
 {  return (x & (x-1)) == 0;  }
 
 template<std::size_t N>

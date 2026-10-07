@@ -31,7 +31,7 @@ class null_disposer
 {
    public:
    template <class Pointer>
-   void operator()(Pointer)
+   BOOST_INTRUSIVE_FORCEINLINE void operator()(Pointer)
    {}
 };
 
@@ -41,7 +41,7 @@ class init_disposer
    typedef typename NodeAlgorithms::node_ptr node_ptr;
 
    public:
-   inline void operator()(node_ptr p)
+   BOOST_INTRUSIVE_FORCEINLINE void operator()(node_ptr p)
    {  NodeAlgorithms::init(p);   }
 };
 

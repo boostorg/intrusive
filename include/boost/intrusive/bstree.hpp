@@ -124,10 +124,10 @@ struct bstree_header_size
 
    HeaderHolder m_header;
 
-   inline size_traits_ref sz_traits() BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE size_traits_ref sz_traits() BOOST_NOEXCEPT
    {  return *this;  }
 
-   inline const_size_traits_ref sz_traits() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE const_size_traits_ref sz_traits() const BOOST_NOEXCEPT
    {  return *this;  }
 };
 
@@ -141,7 +141,7 @@ struct bstree_header_size<HeaderHolder, SizeType, false>
 
    HeaderHolder m_header;
 
-   inline size_traits sz_traits() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE size_traits sz_traits() const BOOST_NOEXCEPT
    {  return size_traits();  }
 };
 
@@ -193,10 +193,10 @@ class bstree_node_base
    ~bstree_node_base() requires (!SafeModeOrAutoUnlink) = default;
    #endif
 
-   inline node_ptr header_ptr() BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE node_ptr header_ptr() BOOST_NOEXCEPT
    { return this->m_header.get_node(); }
 
-   inline const_node_ptr header_ptr() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE const_node_ptr header_ptr() const BOOST_NOEXCEPT
    { return this->m_header.get_node(); }
 
    //Obtains the base from the header holder of the end node
@@ -223,7 +223,7 @@ class bstree_node_base
       }
    }
 
-   size_type size() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE size_type size() const BOOST_NOEXCEPT
    {  return node_ops::size(this->header_ptr(), this->sz_traits());   }
 
    void clear() BOOST_NOEXCEPT
@@ -236,7 +236,7 @@ class bstree_node_base
       this->sz_traits().set_size(size_type(0));
    }
 
-   inline void rebalance() BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE void rebalance() BOOST_NOEXCEPT
    {  node_algorithms::rebalance(this->header_ptr()); }
 };
 
@@ -298,7 +298,7 @@ struct bstbase3
       : public ValueTraits
       , public node_base_t
    {
-      inline explicit holder_t(const ValueTraits &vtraits)
+      BOOST_INTRUSIVE_FORCEINLINE explicit holder_t(const ValueTraits &vtraits)
          : ValueTraits(vtraits), node_base_t()
       {}
    } holder;
@@ -310,95 +310,95 @@ struct bstbase3
       return *get_parent_from_member<bstbase3, holder_t>(h, &bstbase3::holder);
    }
 
-   inline bstbase3(const ValueTraits &vtraits)
+   BOOST_INTRUSIVE_FORCEINLINE bstbase3(const ValueTraits &vtraits)
       : holder(vtraits)
    {}
 
-   inline const value_traits &get_value_traits() const
+   BOOST_INTRUSIVE_FORCEINLINE const value_traits &get_value_traits() const
    {  return this->holder;  }
 
-   inline value_traits &get_value_traits()
+   BOOST_INTRUSIVE_FORCEINLINE value_traits &get_value_traits()
    {  return this->holder;  }
 
-   inline node_ptr header_ptr() BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE node_ptr header_ptr() BOOST_NOEXCEPT
    { return this->holder.header_ptr(); }
 
-   inline const_node_ptr header_ptr() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE const_node_ptr header_ptr() const BOOST_NOEXCEPT
    { return this->holder.header_ptr(); }
 
-   inline typename node_base_t::size_traits_ref sz_traits() BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE typename node_base_t::size_traits_ref sz_traits() BOOST_NOEXCEPT
    {  return this->holder.sz_traits();  }
 
-   inline typename node_base_t::const_size_traits_ref sz_traits() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE typename node_base_t::const_size_traits_ref sz_traits() const BOOST_NOEXCEPT
    {  return this->holder.sz_traits();  }
 
-   inline bool empty() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE bool empty() const BOOST_NOEXCEPT
    {  return this->holder.empty();  }
 
-   inline SizeType size() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE SizeType size() const BOOST_NOEXCEPT
    {  return this->holder.size();  }
 
-   inline void clear() BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE void clear() BOOST_NOEXCEPT
    {  this->holder.clear();  }
 
-   inline void rebalance() BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE void rebalance() BOOST_NOEXCEPT
    {  this->holder.rebalance();  }
 
    typedef typename boost::intrusive::value_traits_pointers
       <ValueTraits>::const_value_traits_ptr const_value_traits_ptr;
 
-   inline const_value_traits_ptr priv_value_traits_ptr() const
+   BOOST_INTRUSIVE_FORCEINLINE const_value_traits_ptr priv_value_traits_ptr() const
    {  return pointer_traits<const_value_traits_ptr>::pointer_to(this->get_value_traits());  }
 
-   inline iterator priv_to_it(node_ptr n)
+   BOOST_INTRUSIVE_FORCEINLINE iterator priv_to_it(node_ptr n)
    {  return iterator(n, this->priv_value_traits_ptr());  }
 
-   inline const_iterator priv_to_cit(node_ptr n) const
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator priv_to_cit(node_ptr n) const
    {  return const_iterator(n, this->priv_value_traits_ptr());  }
 
-   inline iterator begin() BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE iterator begin() BOOST_NOEXCEPT
    {  return this->priv_to_it(node_algorithms::begin_node(this->header_ptr()));   }
 
-   inline const_iterator begin() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator begin() const BOOST_NOEXCEPT
    {  return cbegin();   }
 
-   inline const_iterator cbegin() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator cbegin() const BOOST_NOEXCEPT
    {  return this->priv_to_cit(node_algorithms::begin_node(this->header_ptr()));   }
 
-   inline iterator end() BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE iterator end() BOOST_NOEXCEPT
    {  return this->priv_to_it(node_algorithms::end_node(this->header_ptr()));   }
 
-   inline const_iterator end() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator end() const BOOST_NOEXCEPT
    {  return cend();  }
 
-   inline const_iterator cend() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator cend() const BOOST_NOEXCEPT
    {  return this->priv_to_cit(node_algorithms::end_node(this->header_ptr()));   }
 
-   inline iterator root()
+   BOOST_INTRUSIVE_FORCEINLINE iterator root()
    {  return this->priv_to_it(node_algorithms::root_node(this->header_ptr()));   }
 
-   inline const_iterator root() const
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator root() const
    {  return croot();   }
 
-   inline const_iterator croot() const
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator croot() const
    {  return this->priv_to_cit(node_algorithms::root_node(this->header_ptr()));   }
 
-   inline reverse_iterator rbegin()
+   BOOST_INTRUSIVE_FORCEINLINE reverse_iterator rbegin()
    {  return reverse_iterator(end());  }
 
-   inline const_reverse_iterator rbegin() const
+   BOOST_INTRUSIVE_FORCEINLINE const_reverse_iterator rbegin() const
    {  return const_reverse_iterator(end());  }
 
-   inline const_reverse_iterator crbegin() const
+   BOOST_INTRUSIVE_FORCEINLINE const_reverse_iterator crbegin() const
    {  return const_reverse_iterator(end());  }
 
-   inline reverse_iterator rend()
+   BOOST_INTRUSIVE_FORCEINLINE reverse_iterator rend()
    {  return reverse_iterator(begin());   }
 
-   inline const_reverse_iterator rend() const
+   BOOST_INTRUSIVE_FORCEINLINE const_reverse_iterator rend() const
    {  return const_reverse_iterator(begin());   }
 
-   inline const_reverse_iterator crend() const
+   BOOST_INTRUSIVE_FORCEINLINE const_reverse_iterator crend() const
    {  return const_reverse_iterator(begin());   }
 
    void replace_node(iterator replace_this, reference with_this)
@@ -410,7 +410,7 @@ struct bstbase3
          node_algorithms::init(replace_this.pointed_node());
    }
 
-   iterator rebalance_subtree(iterator r) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE iterator rebalance_subtree(iterator r) BOOST_NOEXCEPT
    {  return this->priv_to_it(node_algorithms::rebalance_subtree(r.pointed_node())); }
 
    static iterator s_iterator_to(reference value) BOOST_NOEXCEPT
@@ -425,13 +425,13 @@ struct bstbase3
       return const_iterator (value_traits::to_node_ptr(*pointer_traits<pointer>::const_cast_from(pointer_traits<const_pointer>::pointer_to(value))), const_value_traits_ptr());
    }
 
-   iterator iterator_to(reference value) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE iterator iterator_to(reference value) BOOST_NOEXCEPT
    {  return this->priv_to_it(this->get_value_traits().to_node_ptr(value)); }
 
-   const_iterator iterator_to(const_reference value) const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator iterator_to(const_reference value) const BOOST_NOEXCEPT
    {  return this->priv_to_cit(this->get_value_traits().to_node_ptr(*pointer_traits<pointer>::const_cast_from(pointer_traits<const_pointer>::pointer_to(value)))); }
 
-   inline static void init_node(reference value)
+   BOOST_INTRUSIVE_FORCEINLINE static void init_node(reference value)
    { node_algorithms::init(value_traits::to_node_ptr(value)); }
 
 };
@@ -505,14 +505,14 @@ struct BOOST_INTRUSIVE_EMPTY_BASES bstbase2
    typedef typename treeheader_t::node_ptr                           node_ptr;
    typedef typename treeheader_t::const_node_ptr                     const_node_ptr;
 
-   bstbase2(const key_compare &comp, const ValueTraits &vtraits)
+   BOOST_INTRUSIVE_FORCEINLINE bstbase2(const key_compare &comp, const ValueTraits &vtraits)
       : detail::ebo_functor_holder<value_compare>(value_compare(comp)), treeheader_t(vtraits)
    {}
 
-   const value_compare &get_comp() const
+   BOOST_INTRUSIVE_FORCEINLINE const value_compare &get_comp() const
    {  return this->get();  }
 
-   value_compare &get_comp()
+   BOOST_INTRUSIVE_FORCEINLINE value_compare &get_comp()
    {  return this->get();  }
 
    typedef BOOST_INTRUSIVE_IMPDEF(typename value_traits::pointer)                               pointer;
@@ -522,64 +522,64 @@ struct BOOST_INTRUSIVE_EMPTY_BASES bstbase2
    typedef BOOST_INTRUSIVE_IMPDEF(typename pointer_traits<const_pointer>::difference_type)      difference_type;
    typedef BOOST_INTRUSIVE_IMPDEF(typename node_algorithms::insert_commit_data)   insert_commit_data;
 
-   inline value_compare value_comp() const
+   BOOST_INTRUSIVE_FORCEINLINE value_compare value_comp() const
    {  return this->get_comp();   }
 
-   inline key_compare key_comp() const
+   BOOST_INTRUSIVE_FORCEINLINE key_compare key_comp() const
    {  return this->get_comp().key_comp();   }
 
    //Overloads taking key_type call node algorithms directly instead of the
    //overloads taking a comparison functor, to avoid instantiating both.
 
    //lower_bound
-   inline iterator lower_bound(const key_type &key)
+   BOOST_INTRUSIVE_FORCEINLINE iterator lower_bound(const key_type &key)
    {
       return this->priv_to_it(node_algorithms::lower_bound
          (this->header_ptr(), key, this->key_node_comp(this->key_comp())));
    }
 
-   inline const_iterator lower_bound(const key_type &key) const
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator lower_bound(const key_type &key) const
    {
       return this->priv_to_cit(node_algorithms::lower_bound
          (this->header_ptr(), key, this->key_node_comp(this->key_comp())));
    }
 
    template<class KeyType, class KeyTypeKeyCompare>
-   iterator lower_bound(const KeyType &key, KeyTypeKeyCompare comp)
+   BOOST_INTRUSIVE_FORCEINLINE iterator lower_bound(const KeyType &key, KeyTypeKeyCompare comp)
    {
       return this->priv_to_it(node_algorithms::lower_bound
          (this->header_ptr(), key, this->key_node_comp(comp)));
    }
 
    template<class KeyType, class KeyTypeKeyCompare>
-   const_iterator lower_bound(const KeyType &key, KeyTypeKeyCompare comp) const
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator lower_bound(const KeyType &key, KeyTypeKeyCompare comp) const
    {
       return this->priv_to_cit(node_algorithms::lower_bound
          (this->header_ptr(), key, this->key_node_comp(comp)));
    }
 
    //upper_bound
-   inline iterator upper_bound(const key_type &key)
+   BOOST_INTRUSIVE_FORCEINLINE iterator upper_bound(const key_type &key)
    {
       return this->priv_to_it(node_algorithms::upper_bound
          (this->header_ptr(), key, this->key_node_comp(this->key_comp())));
    }
 
    template<class KeyType, class KeyTypeKeyCompare>
-   iterator upper_bound(const KeyType &key, KeyTypeKeyCompare comp)
+   BOOST_INTRUSIVE_FORCEINLINE iterator upper_bound(const KeyType &key, KeyTypeKeyCompare comp)
    {
       return this->priv_to_it(node_algorithms::upper_bound
          (this->header_ptr(), key, this->key_node_comp(comp)));
    }
 
-   inline const_iterator upper_bound(const key_type &key) const
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator upper_bound(const key_type &key) const
    {
       return this->priv_to_cit(node_algorithms::upper_bound
          (this->header_ptr(), key, this->key_node_comp(this->key_comp())));
    }
 
    template<class KeyType, class KeyTypeKeyCompare>
-   const_iterator upper_bound(const KeyType &key, KeyTypeKeyCompare comp) const
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator upper_bound(const KeyType &key, KeyTypeKeyCompare comp) const
    {
       return this->priv_to_cit(node_algorithms::upper_bound
          (this->header_ptr(), key, this->key_node_comp(comp)));
@@ -590,30 +590,30 @@ struct BOOST_INTRUSIVE_EMPTY_BASES bstbase2
    {  typedef detail::key_nodeptr_comp<KeyTypeKeyCompare, value_traits, key_of_value> type;  };
 
    template<class KeyTypeKeyCompare>
-   inline typename key_node_comp_ret<KeyTypeKeyCompare>::type key_node_comp(KeyTypeKeyCompare comp) const
+   BOOST_INTRUSIVE_FORCEINLINE typename key_node_comp_ret<KeyTypeKeyCompare>::type key_node_comp(KeyTypeKeyCompare comp) const
    {
       return detail::key_nodeptr_comp<KeyTypeKeyCompare, value_traits, key_of_value>(comp, &this->get_value_traits());
    }
 
    //find
-   inline iterator find(const key_type &key)
+   BOOST_INTRUSIVE_FORCEINLINE iterator find(const key_type &key)
    {
       return this->priv_to_it(node_algorithms::find(this->header_ptr(), key, this->key_node_comp(this->key_comp())));
    }
 
    template<class KeyType, class KeyTypeKeyCompare>
-   iterator find(const KeyType &key, KeyTypeKeyCompare comp)
+   BOOST_INTRUSIVE_FORCEINLINE iterator find(const KeyType &key, KeyTypeKeyCompare comp)
    {
       return this->priv_to_it(node_algorithms::find(this->header_ptr(), key, this->key_node_comp(comp)));
    }
 
-   inline const_iterator find(const key_type &key) const
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator find(const key_type &key) const
    {
       return this->priv_to_cit(node_algorithms::find(this->header_ptr(), key, this->key_node_comp(this->key_comp())));
    }
 
    template<class KeyType, class KeyTypeKeyCompare>
-   const_iterator find(const KeyType &key, KeyTypeKeyCompare comp) const
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator find(const KeyType &key, KeyTypeKeyCompare comp) const
    {
       return this->priv_to_cit(node_algorithms::find(this->header_ptr(), key, this->key_node_comp(comp)));
    }
@@ -876,7 +876,7 @@ class bstree_impl
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks)
    //!   or the copy constructor of the key_compare object throws. Basic guarantee.
-   bstree_impl()
+   BOOST_INTRUSIVE_FORCEINLINE bstree_impl()
       :  data_type(key_compare(), value_traits())
    {}
 
@@ -887,7 +887,7 @@ class bstree_impl
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks)
    //!   or the copy constructor of the key_compare object throws. Basic guarantee.
-   explicit bstree_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
+   BOOST_INTRUSIVE_FORCEINLINE explicit bstree_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  data_type(cmp, v_traits)
    {}
 
@@ -925,7 +925,7 @@ class bstree_impl
    //! <b>Throws</b>: If value_traits::node_traits::node's
    //!   move constructor throws (this does not happen with predefined Boost.Intrusive hooks)
    //!   or the move constructor of the comparison objet throws.
-   bstree_impl(BOOST_RV_REF(bstree_impl) x)
+   BOOST_INTRUSIVE_FORCEINLINE bstree_impl(BOOST_RV_REF(bstree_impl) x)
       : data_type(::boost::move(x.get_comp()), ::boost::move(x.get_value_traits()))
    {
       this->swap(x);
@@ -933,7 +933,7 @@ class bstree_impl
 
    //! <b>Effects</b>: Equivalent to swap
    //!
-   inline bstree_impl& operator=(BOOST_RV_REF(bstree_impl) x)
+   BOOST_INTRUSIVE_FORCEINLINE bstree_impl& operator=(BOOST_RV_REF(bstree_impl) x)
    {  this->swap(x); return *this;  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -944,7 +944,7 @@ class bstree_impl
    //! <b>Complexity</b>: Linear to elements contained in *this.
    //!
    //! <b>Throws</b>: Nothing.
-   ~bstree_impl()
+   BOOST_INTRUSIVE_FORCEINLINE ~bstree_impl()
    {}
 
    //! <b>Effects</b>: Returns an iterator pointing to the beginning of the container.
@@ -1069,7 +1069,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Constant.
    BOOST_INTRUSIVE_NO_DANGLING
-   static bstree_impl& container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bstree_impl& container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT
    {
       return static_cast<bstree_impl&>
                (data_type::get_tree_base_from_end_iterator(end_iterator));
@@ -1084,7 +1084,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Constant.
    BOOST_INTRUSIVE_NO_DANGLING
-   static const bstree_impl & container_from_end_iterator(const_iterator end_iterator) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static const bstree_impl & container_from_end_iterator(const_iterator end_iterator) BOOST_NOEXCEPT
    {
       return static_cast<bstree_impl&>
                (data_type::get_tree_base_from_end_iterator(end_iterator));
@@ -1099,7 +1099,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    BOOST_INTRUSIVE_NO_DANGLING
-   static bstree_impl & container_from_iterator(iterator it) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bstree_impl & container_from_iterator(iterator it) BOOST_NOEXCEPT
    {  return container_from_end_iterator(it.end_iterator_from_it());   }
 
    //! <b>Precondition</b>: it must be a valid end const_iterator
@@ -1111,7 +1111,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: Logarithmic.
    BOOST_INTRUSIVE_NO_DANGLING
-   static const bstree_impl & container_from_iterator(const_iterator it) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static const bstree_impl & container_from_iterator(const_iterator it) BOOST_NOEXCEPT
    {  return container_from_end_iterator(it.end_iterator_from_it());   }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -1624,7 +1624,7 @@ class bstree_impl
    //!
    //! <b>Note</b>: Invalidates the iterators (but not the references)
    //!    to the erased elements. No destructors are called.
-   iterator erase(const_iterator b, const_iterator e) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE iterator erase(const_iterator b, const_iterator e) BOOST_NOEXCEPT
    {  size_type n;   return this->private_erase(b, e, n);   }
 
    //! <b>Effects</b>: Erases all the elements with the given value.
@@ -1726,7 +1726,7 @@ class bstree_impl
    //! <b>Note</b>: Invalidates the iterators
    //!    to the erased elements.
    template<class Disposer>
-   iterator erase_and_dispose(const_iterator b, const_iterator e, Disposer disposer) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE iterator erase_and_dispose(const_iterator b, const_iterator e, Disposer disposer) BOOST_NOEXCEPT
    {  size_type n;   return this->private_erase(b, e, n, disposer);   }
 
    //! <b>Requires</b>: key is a value such that `*this` is partitioned with respect to
@@ -1797,7 +1797,7 @@ class bstree_impl
    //!   to number of objects with the given value.
    //!
    //! <b>Throws</b>: If `key_compare` throws.
-   size_type count(const key_type &key) const
+   BOOST_INTRUSIVE_FORCEINLINE size_type count(const key_type &key) const
    {  return size_type(node_algorithms::count(this->header_ptr(), key, this->key_node_comp(this->key_comp())));   }
 
    //! <b>Requires</b>: key is a value such that `*this` is partitioned with respect to
@@ -1811,18 +1811,18 @@ class bstree_impl
    //!
    //! <b>Throws</b>: If `comp` throws.
    template<class KeyType, class KeyTypeKeyCompare>
-   size_type count(const KeyType &key, KeyTypeKeyCompare comp) const
+   BOOST_INTRUSIVE_FORCEINLINE size_type count(const KeyType &key, KeyTypeKeyCompare comp) const
    {  return size_type(node_algorithms::count(this->header_ptr(), key, this->key_node_comp(comp)));   }
 
    #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
    //Add non-const overloads to theoretically const members
    //as some algorithms have different behavior when non-const versions are used (like splay trees).
-   size_type count(const key_type &key)
+   BOOST_INTRUSIVE_FORCEINLINE size_type count(const key_type &key)
    {  return size_type(node_algorithms::count(this->header_ptr(), key, this->key_node_comp(this->key_comp())));   }
 
    template<class KeyType, class KeyTypeKeyCompare>
-   size_type count(const KeyType &key, KeyTypeKeyCompare comp)
+   BOOST_INTRUSIVE_FORCEINLINE size_type count(const KeyType &key, KeyTypeKeyCompare comp)
    {  return size_type(node_algorithms::count(this->header_ptr(), key, this->key_node_comp(comp)));   }
 
    #else //defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
@@ -2249,7 +2249,7 @@ class bstree_impl
    //!
    //! <b>Note</b>: The method has no effect when asserts are turned off (e.g., with NDEBUG).
    //!   Experimental function, interface might change in future versions.
-   void check() const
+   BOOST_INTRUSIVE_FORCEINLINE void check() const
    {
       check(detail::empty_node_checker<ValueTraits>());
    }
@@ -2263,22 +2263,22 @@ class bstree_impl
       return boost::intrusive::algo_equal(x.cbegin(), x.cend(), y.cbegin(), y.cend());
    }
 
-   friend bool operator!=(const bstree_impl &x, const bstree_impl &y)
+   BOOST_INTRUSIVE_FORCEINLINE friend bool operator!=(const bstree_impl &x, const bstree_impl &y)
    {  return !(x == y); }
 
-   friend bool operator<(const bstree_impl &x, const bstree_impl &y)
+   BOOST_INTRUSIVE_FORCEINLINE friend bool operator<(const bstree_impl &x, const bstree_impl &y)
    {  return ::boost::intrusive::algo_lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
 
-   friend bool operator>(const bstree_impl &x, const bstree_impl &y)
+   BOOST_INTRUSIVE_FORCEINLINE friend bool operator>(const bstree_impl &x, const bstree_impl &y)
    {  return y < x;  }
 
-   friend bool operator<=(const bstree_impl &x, const bstree_impl &y)
+   BOOST_INTRUSIVE_FORCEINLINE friend bool operator<=(const bstree_impl &x, const bstree_impl &y)
    {  return !(x > y);  }
 
-   friend bool operator>=(const bstree_impl &x, const bstree_impl &y)
+   BOOST_INTRUSIVE_FORCEINLINE friend bool operator>=(const bstree_impl &x, const bstree_impl &y)
    {  return !(x < y);  }
 
-   friend void swap(bstree_impl &x, bstree_impl &y)
+   BOOST_INTRUSIVE_FORCEINLINE friend void swap(bstree_impl &x, bstree_impl &y)
    {  x.swap(y);  }
 
    /// @cond
@@ -2386,11 +2386,11 @@ class bstree
    //Assert if passed value traits are compatible with the type
    BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
-   inline bstree()
+   BOOST_INTRUSIVE_FORCEINLINE bstree()
       :  Base()
    {}
 
-   inline explicit bstree( const key_compare &cmp, const value_traits &v_traits = value_traits())
+   BOOST_INTRUSIVE_FORCEINLINE explicit bstree( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  Base(cmp, v_traits)
    {}
 
@@ -2401,35 +2401,35 @@ class bstree
       :  Base(unique, b, e, cmp, v_traits)
    {}
 
-   inline bstree(BOOST_RV_REF(bstree) x)
+   BOOST_INTRUSIVE_FORCEINLINE bstree(BOOST_RV_REF(bstree) x)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
-   inline bstree& operator=(BOOST_RV_REF(bstree) x)
+   BOOST_INTRUSIVE_FORCEINLINE bstree& operator=(BOOST_RV_REF(bstree) x)
    {  return static_cast<bstree &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    template <class Cloner, class Disposer>
-   inline void clone_from(const bstree &src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(const bstree &src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(src, cloner, disposer);  }
 
    template <class Cloner, class Disposer>
-   inline void clone_from(BOOST_RV_REF(bstree) src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(bstree) src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static bstree &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bstree &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT
    {  return static_cast<bstree &>(Base::container_from_end_iterator(end_iterator));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static const bstree &container_from_end_iterator(const_iterator end_iterator) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static const bstree &container_from_end_iterator(const_iterator end_iterator) BOOST_NOEXCEPT
    {  return static_cast<const bstree &>(Base::container_from_end_iterator(end_iterator));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static bstree &container_from_iterator(iterator it) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bstree &container_from_iterator(iterator it) BOOST_NOEXCEPT
    {  return static_cast<bstree &>(Base::container_from_iterator(it));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static const bstree &container_from_iterator(const_iterator it) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static const bstree &container_from_iterator(const_iterator it) BOOST_NOEXCEPT
    {  return static_cast<const bstree &>(Base::container_from_iterator(it));   }
 };
 

@@ -31,7 +31,7 @@ namespace intrusive {
 namespace adldft {
 
 template<class T, class U>
-inline bool priority_order(const T &t, const U &u)
+BOOST_INTRUSIVE_FORCEINLINE bool priority_order(const T &t, const U &u)
 {  return t < u;  }
 
 }  //namespace adldft {

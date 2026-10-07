@@ -110,12 +110,12 @@ class splaytree_impl
    typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::insert_commit_data)       insert_commit_data;
 
    //! @copydoc ::boost::intrusive::bstree::bstree()
-   splaytree_impl()
+   BOOST_INTRUSIVE_FORCEINLINE splaytree_impl()
       :  tree_type()
    {}
 
    //! @copydoc ::boost::intrusive::bstree::bstree(const key_compare &,const value_traits &)
-   explicit splaytree_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
+   BOOST_INTRUSIVE_FORCEINLINE explicit splaytree_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  tree_type(cmp, v_traits)
    {}
 
@@ -133,12 +133,12 @@ class splaytree_impl
    }
 
    //! @copydoc ::boost::intrusive::bstree::bstree(bstree &&)
-   splaytree_impl(BOOST_RV_REF(splaytree_impl) x)
+   BOOST_INTRUSIVE_FORCEINLINE splaytree_impl(BOOST_RV_REF(splaytree_impl) x)
       :  tree_type(BOOST_MOVE_BASE(tree_type, x))
    {}
 
    //! @copydoc ::boost::intrusive::bstree::operator=(bstree &&)
-   splaytree_impl& operator=(BOOST_RV_REF(splaytree_impl) x)
+   BOOST_INTRUSIVE_FORCEINLINE splaytree_impl& operator=(BOOST_RV_REF(splaytree_impl) x)
    {  return static_cast<splaytree_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x))); }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -229,7 +229,7 @@ class splaytree_impl
 
    //! @copydoc ::boost::intrusive::bstree::clone_from(bstree&&,Cloner,Disposer)
    template <class Cloner, class Disposer>
-   void clone_from(BOOST_RV_REF(splaytree_impl) src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(splaytree_impl) src, Cloner cloner, Disposer disposer)
    {  tree_type::clone_from(BOOST_MOVE_BASE(tree_type, src), cloner, disposer);  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -589,7 +589,7 @@ class splaytree_impl
    //! <b>Complexity</b>: Amortized logarithmic.
    //!
    //! <b>Throws</b>: Nothing.
-   void splay_up(iterator i) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE void splay_up(iterator i) BOOST_NOEXCEPT
    {  return node_algorithms::splay_up(i.pointed_node(), tree_type::header_ptr());   }
 
    //! <b>Effects</b>: Rearranges the container so that if *this stores an element
@@ -618,7 +618,7 @@ class splaytree_impl
    //! <b>Returns</b>: An iterator to the new root of the tree, end() if the tree is empty.
    //!
    //! <b>Throws</b>: If the predicate throws.
-   iterator splay_down(const key_type &key)
+   BOOST_INTRUSIVE_FORCEINLINE iterator splay_down(const key_type &key)
    {  return this->splay_down(key, this->key_comp());   }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -719,11 +719,11 @@ class splaytree
    //Assert if passed value traits are compatible with the type
    BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
-   inline splaytree()
+   BOOST_INTRUSIVE_FORCEINLINE splaytree()
       :  Base()
    {}
 
-   inline explicit splaytree( const key_compare &cmp, const value_traits &v_traits = value_traits())
+   BOOST_INTRUSIVE_FORCEINLINE explicit splaytree( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  Base(cmp, v_traits)
    {}
 
@@ -734,35 +734,35 @@ class splaytree
       :  Base(unique, b, e, cmp, v_traits)
    {}
 
-   inline splaytree(BOOST_RV_REF(splaytree) x)
+   BOOST_INTRUSIVE_FORCEINLINE splaytree(BOOST_RV_REF(splaytree) x)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
-   inline splaytree& operator=(BOOST_RV_REF(splaytree) x)
+   BOOST_INTRUSIVE_FORCEINLINE splaytree& operator=(BOOST_RV_REF(splaytree) x)
    {  return static_cast<splaytree &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    template <class Cloner, class Disposer>
-   inline void clone_from(const splaytree &src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(const splaytree &src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(src, cloner, disposer);  }
 
    template <class Cloner, class Disposer>
-   inline void clone_from(BOOST_RV_REF(splaytree) src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(splaytree) src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static splaytree &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static splaytree &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT
    {  return static_cast<splaytree &>(Base::container_from_end_iterator(end_iterator));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static const splaytree &container_from_end_iterator(const_iterator end_iterator) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static const splaytree &container_from_end_iterator(const_iterator end_iterator) BOOST_NOEXCEPT
    {  return static_cast<const splaytree &>(Base::container_from_end_iterator(end_iterator));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static splaytree &container_from_iterator(iterator it) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static splaytree &container_from_iterator(iterator it) BOOST_NOEXCEPT
    {  return static_cast<splaytree &>(Base::container_from_iterator(it));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static const splaytree &container_from_iterator(const_iterator it) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static const splaytree &container_from_iterator(const_iterator it) BOOST_NOEXCEPT
    {  return static_cast<const splaytree &>(Base::container_from_iterator(it));   }
 };
 

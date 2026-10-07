@@ -82,22 +82,22 @@ struct unordered_node_traits
    static const bool store_hash        = StoreHash;
    static const bool optimize_multikey = OptimizeMultiKey;
 
-   inline static node_ptr get_next(const_node_ptr n) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_next(const_node_ptr n) BOOST_NOEXCEPT
    {  return pointer_traits<node_ptr>::static_cast_from(n->next_);  }
 
-   inline static void set_next(node_ptr n, node_ptr next) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static void set_next(node_ptr n, node_ptr next) BOOST_NOEXCEPT
    {  n->next_ = next;  }
 
-   inline static node_ptr get_prev_in_group(const_node_ptr n) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_prev_in_group(const_node_ptr n) BOOST_NOEXCEPT
    {  return n->prev_in_group_;  }
 
-   inline static void set_prev_in_group(node_ptr n, node_ptr prev) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static void set_prev_in_group(node_ptr n, node_ptr prev) BOOST_NOEXCEPT
    {  n->prev_in_group_ = prev;  }
 
-   inline static std::size_t get_hash(const_node_ptr n) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t get_hash(const_node_ptr n) BOOST_NOEXCEPT
    {  return n->hash_;  }
 
-   inline static void set_hash(node_ptr n, std::size_t h) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static void set_hash(node_ptr n, std::size_t h) BOOST_NOEXCEPT
    {  n->hash_ = h;  }
 };
 
@@ -108,10 +108,10 @@ struct unordered_group_adapter
    typedef typename NodeTraits::node_ptr        node_ptr;
    typedef typename NodeTraits::const_node_ptr  const_node_ptr;
 
-   inline static node_ptr get_next(const_node_ptr n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_next(const_node_ptr n)
    {  return NodeTraits::get_prev_in_group(n);  }
 
-   inline static void set_next(node_ptr n, node_ptr next)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_next(node_ptr n, node_ptr next)
    {  NodeTraits::set_prev_in_group(n, next);   }
 };
 

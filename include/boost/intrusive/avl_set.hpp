@@ -91,12 +91,12 @@ class avl_set_impl
    public:
 
    //! @copydoc ::boost::intrusive::avltree::avltree()
-   avl_set_impl()
+   BOOST_INTRUSIVE_FORCEINLINE avl_set_impl()
       :  tree_type()
    {}
 
    //! @copydoc ::boost::intrusive::avltree::avltree(const key_compare &,const value_traits &)
-   explicit avl_set_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
+   BOOST_INTRUSIVE_FORCEINLINE explicit avl_set_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  tree_type(cmp, v_traits)
    {}
 
@@ -109,12 +109,12 @@ class avl_set_impl
    {}
 
    //! @copydoc ::boost::intrusive::avltree::avltree(avltree &&)
-   avl_set_impl(BOOST_RV_REF(avl_set_impl) x)
+   BOOST_INTRUSIVE_FORCEINLINE avl_set_impl(BOOST_RV_REF(avl_set_impl) x)
       :  tree_type(BOOST_MOVE_BASE(tree_type, x))
    {}
 
    //! @copydoc ::boost::intrusive::avltree::operator=(avltree &&)
-   avl_set_impl& operator=(BOOST_RV_REF(avl_set_impl) x)
+   BOOST_INTRUSIVE_FORCEINLINE avl_set_impl& operator=(BOOST_RV_REF(avl_set_impl) x)
    {  return static_cast<avl_set_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x))); }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -206,48 +206,48 @@ class avl_set_impl
 
    //! @copydoc ::boost::intrusive::avltree::clone_from(avltree&&,Cloner,Disposer)
    template <class Cloner, class Disposer>
-   void clone_from(BOOST_RV_REF(avl_set_impl) src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(avl_set_impl) src, Cloner cloner, Disposer disposer)
    {  tree_type::clone_from(BOOST_MOVE_BASE(tree_type, src), cloner, disposer);  }
 
    //! @copydoc ::boost::intrusive::avltree::insert_unique(reference)
-   std::pair<iterator, bool> insert(reference value)
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<iterator, bool> insert(reference value)
    {  return tree_type::insert_unique(value);  }
 
    //! @copydoc ::boost::intrusive::avltree::insert_unique(const_iterator,reference)
-   iterator insert(const_iterator hint, reference value)
+   BOOST_INTRUSIVE_FORCEINLINE iterator insert(const_iterator hint, reference value)
    {  return tree_type::insert_unique(hint, value);  }
 
    //! @copydoc ::boost::intrusive::avltree::insert_unique_check(const key_type&,insert_commit_data&)
-   std::pair<iterator, bool> insert_check
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<iterator, bool> insert_check
       (const key_type &key, insert_commit_data &commit_data)
    {  return tree_type::insert_unique_check(key, commit_data); }
 
    //! @copydoc ::boost::intrusive::avltree::insert_unique_check(const_iterator,const key_type&,insert_commit_data&)
-   std::pair<iterator, bool> insert_check
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<iterator, bool> insert_check
       (const_iterator hint, const key_type &key
       ,insert_commit_data &commit_data)
    {  return tree_type::insert_unique_check(hint, key, commit_data); }
 
    //! @copydoc ::boost::intrusive::avltree::insert_unique_check(const KeyType&,KeyTypeKeyCompare,insert_commit_data&)
    template<class KeyType, class KeyTypeKeyCompare>
-   std::pair<iterator, bool> insert_check
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<iterator, bool> insert_check
       (const KeyType &key, KeyTypeKeyCompare comp, insert_commit_data &commit_data)
    {  return tree_type::insert_unique_check(key, comp, commit_data); }
 
    //! @copydoc ::boost::intrusive::avltree::insert_unique_check(const_iterator,const KeyType&,KeyTypeKeyCompare,insert_commit_data&)
    template<class KeyType, class KeyTypeKeyCompare>
-   std::pair<iterator, bool> insert_check
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<iterator, bool> insert_check
       (const_iterator hint, const KeyType &key
       ,KeyTypeKeyCompare comp, insert_commit_data &commit_data)
    {  return tree_type::insert_unique_check(hint, key, comp, commit_data); }
 
    //! @copydoc ::boost::intrusive::avltree::insert_unique(Iterator,Iterator)
    template<class Iterator>
-   void insert(Iterator b, Iterator e)
+   BOOST_INTRUSIVE_FORCEINLINE void insert(Iterator b, Iterator e)
    {  tree_type::insert_unique(b, e);  }
 
    //! @copydoc ::boost::intrusive::avltree::insert_unique_commit
-   iterator insert_commit(reference value, const insert_commit_data &commit_data) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE iterator insert_commit(reference value, const insert_commit_data &commit_data) BOOST_NOEXCEPT
    {  return tree_type::insert_unique_commit(value, commit_data);  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -303,24 +303,24 @@ class avl_set_impl
 
    //Only key_comp() guarantees at most one equivalent element (a KeyTypeKeyCompare can be
    //coarser), so the key_type overloads can erase the unique element.
-   size_type erase(const key_type &key)
+   BOOST_INTRUSIVE_FORCEINLINE size_type erase(const key_type &key)
    {  return tree_type::priv_erase_unique(*this, key, detail::null_disposer());  }
 
    template<class Disposer>
-   size_type erase_and_dispose(const key_type &key, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE size_type erase_and_dispose(const key_type &key, Disposer disposer)
    {  return tree_type::priv_erase_unique(*this, key, disposer);  }
 
    #endif   //   #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::avltree::count(const key_type &)const
-   size_type count(const key_type &key) const
+   BOOST_INTRUSIVE_FORCEINLINE size_type count(const key_type &key) const
    {  return static_cast<size_type>(this->tree_type::find(key) != this->tree_type::cend()); }
 
    //! @copydoc ::boost::intrusive::avltree::count(const KeyType&,KeyTypeKeyCompare)const
    //!
    //! <b>Note</b>: A KeyTypeKeyCompare coarser than key_comp() can find several elements.
    template<class KeyType, class KeyTypeKeyCompare>
-   size_type count(const KeyType& key, KeyTypeKeyCompare comp) const
+   BOOST_INTRUSIVE_FORCEINLINE size_type count(const KeyType& key, KeyTypeKeyCompare comp) const
    {  return this->tree_type::count(key, comp);  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -370,22 +370,22 @@ class avl_set_impl
    #endif   //   #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::avltree::equal_range(const key_type &)
-   std::pair<iterator,iterator> equal_range(const key_type &key)
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<iterator,iterator> equal_range(const key_type &key)
    {  return this->tree_type::lower_bound_range(key); }
 
    //! @copydoc ::boost::intrusive::avltree::equal_range(const KeyType&,KeyTypeKeyCompare)
    template<class KeyType, class KeyTypeKeyCompare>
-   std::pair<iterator,iterator> equal_range(const KeyType& key, KeyTypeKeyCompare comp)
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<iterator,iterator> equal_range(const KeyType& key, KeyTypeKeyCompare comp)
    {  return this->tree_type::equal_range(key, comp); }
 
    //! @copydoc ::boost::intrusive::avltree::equal_range(const key_type &)const
-   std::pair<const_iterator, const_iterator>
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<const_iterator, const_iterator>
       equal_range(const key_type &key) const
    {  return this->tree_type::lower_bound_range(key); }
 
    //! @copydoc ::boost::intrusive::avltree::equal_range(const KeyType&,KeyTypeKeyCompare)const
    template<class KeyType, class KeyTypeKeyCompare>
-   std::pair<const_iterator, const_iterator>
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<const_iterator, const_iterator>
       equal_range(const KeyType& key, KeyTypeKeyCompare comp) const
    {  return this->tree_type::equal_range(key, comp); }
 
@@ -444,12 +444,12 @@ class avl_set_impl
    #else
 
    template<class Compare2>
-   void merge(avl_set_impl<ValueTraits, VoidOrKeyOfValue, Compare2, SizeType, ConstantTimeSize, HeaderHolder> &source)
+   BOOST_INTRUSIVE_FORCEINLINE void merge(avl_set_impl<ValueTraits, VoidOrKeyOfValue, Compare2, SizeType, ConstantTimeSize, HeaderHolder> &source)
    {  return tree_type::merge_unique(source);  }
 
 
    template<class Compare2>
-   void merge(avl_multiset_impl<ValueTraits, VoidOrKeyOfValue, Compare2, SizeType, ConstantTimeSize, HeaderHolder> &source)
+   BOOST_INTRUSIVE_FORCEINLINE void merge(avl_multiset_impl<ValueTraits, VoidOrKeyOfValue, Compare2, SizeType, ConstantTimeSize, HeaderHolder> &source)
    {  return tree_type::merge_unique(source);  }
 
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -544,11 +544,11 @@ class avl_set
    //Assert if passed value traits are compatible with the type
    BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
-   inline avl_set()
+   BOOST_INTRUSIVE_FORCEINLINE avl_set()
       :  Base()
    {}
 
-   inline explicit avl_set( const key_compare &cmp, const value_traits &v_traits = value_traits())
+   BOOST_INTRUSIVE_FORCEINLINE explicit avl_set( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  Base(cmp, v_traits)
    {}
 
@@ -559,35 +559,35 @@ class avl_set
       :  Base(b, e, cmp, v_traits)
    {}
 
-   inline avl_set(BOOST_RV_REF(avl_set) x)
+   BOOST_INTRUSIVE_FORCEINLINE avl_set(BOOST_RV_REF(avl_set) x)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
-   inline avl_set& operator=(BOOST_RV_REF(avl_set) x)
+   BOOST_INTRUSIVE_FORCEINLINE avl_set& operator=(BOOST_RV_REF(avl_set) x)
    {  return static_cast<avl_set &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    template <class Cloner, class Disposer>
-   inline void clone_from(const avl_set &src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(const avl_set &src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(src, cloner, disposer);  }
 
    template <class Cloner, class Disposer>
-   inline void clone_from(BOOST_RV_REF(avl_set) src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(avl_set) src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static avl_set &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static avl_set &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT
    {  return static_cast<avl_set &>(Base::container_from_end_iterator(end_iterator));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static const avl_set &container_from_end_iterator(const_iterator end_iterator) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static const avl_set &container_from_end_iterator(const_iterator end_iterator) BOOST_NOEXCEPT
    {  return static_cast<const avl_set &>(Base::container_from_end_iterator(end_iterator));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static avl_set &container_from_iterator(iterator it) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static avl_set &container_from_iterator(iterator it) BOOST_NOEXCEPT
    {  return static_cast<avl_set &>(Base::container_from_iterator(it));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static const avl_set &container_from_iterator(const_iterator it) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static const avl_set &container_from_iterator(const_iterator it) BOOST_NOEXCEPT
    {  return static_cast<const avl_set &>(Base::container_from_iterator(it));   }
 };
 
@@ -653,12 +653,12 @@ class avl_multiset_impl
 
    public:
    //! @copydoc ::boost::intrusive::avltree::avltree()
-   avl_multiset_impl()
+   BOOST_INTRUSIVE_FORCEINLINE avl_multiset_impl()
       :  tree_type()
    {}
 
    //! @copydoc ::boost::intrusive::avltree::avltree(const key_compare &,const value_traits &)
-   explicit avl_multiset_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
+   BOOST_INTRUSIVE_FORCEINLINE explicit avl_multiset_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  tree_type(cmp, v_traits)
    {}
 
@@ -671,12 +671,12 @@ class avl_multiset_impl
    {}
 
    //! @copydoc ::boost::intrusive::avltree::avltree(avltree &&)
-   avl_multiset_impl(BOOST_RV_REF(avl_multiset_impl) x)
+   BOOST_INTRUSIVE_FORCEINLINE avl_multiset_impl(BOOST_RV_REF(avl_multiset_impl) x)
       :  tree_type(BOOST_MOVE_BASE(tree_type, x))
    {}
 
    //! @copydoc ::boost::intrusive::avltree::operator=(avltree &&)
-   avl_multiset_impl& operator=(BOOST_RV_REF(avl_multiset_impl) x)
+   BOOST_INTRUSIVE_FORCEINLINE avl_multiset_impl& operator=(BOOST_RV_REF(avl_multiset_impl) x)
    {  return static_cast<avl_multiset_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x))); }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -767,20 +767,20 @@ class avl_multiset_impl
 
    //! @copydoc ::boost::intrusive::avltree::clone_from(avltree&&,Cloner,Disposer)
    template <class Cloner, class Disposer>
-   void clone_from(BOOST_RV_REF(avl_multiset_impl) src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(avl_multiset_impl) src, Cloner cloner, Disposer disposer)
    {  tree_type::clone_from(BOOST_MOVE_BASE(tree_type, src), cloner, disposer);  }
 
    //! @copydoc ::boost::intrusive::avltree::insert_equal(reference)
-   iterator insert(reference value)
+   BOOST_INTRUSIVE_FORCEINLINE iterator insert(reference value)
    {  return tree_type::insert_equal(value);  }
 
    //! @copydoc ::boost::intrusive::avltree::insert_equal(const_iterator,reference)
-   iterator insert(const_iterator hint, reference value)
+   BOOST_INTRUSIVE_FORCEINLINE iterator insert(const_iterator hint, reference value)
    {  return tree_type::insert_equal(hint, value);  }
 
    //! @copydoc ::boost::intrusive::avltree::insert_equal(Iterator,Iterator)
    template<class Iterator>
-   void insert(Iterator b, Iterator e)
+   BOOST_INTRUSIVE_FORCEINLINE void insert(Iterator b, Iterator e)
    {  tree_type::insert_equal(b, e);  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -947,11 +947,11 @@ class avl_multiset_impl
    #else
 
    template<class Compare2>
-   void merge(avl_multiset_impl<ValueTraits, VoidOrKeyOfValue, Compare2, SizeType, ConstantTimeSize, HeaderHolder> &source)
+   BOOST_INTRUSIVE_FORCEINLINE void merge(avl_multiset_impl<ValueTraits, VoidOrKeyOfValue, Compare2, SizeType, ConstantTimeSize, HeaderHolder> &source)
    {  return tree_type::merge_equal(source);  }
 
    template<class Compare2>
-   void merge(avl_set_impl<ValueTraits, VoidOrKeyOfValue, Compare2, SizeType, ConstantTimeSize, HeaderHolder> &source)
+   BOOST_INTRUSIVE_FORCEINLINE void merge(avl_set_impl<ValueTraits, VoidOrKeyOfValue, Compare2, SizeType, ConstantTimeSize, HeaderHolder> &source)
    {  return tree_type::merge_equal(source);  }
 
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -1047,11 +1047,11 @@ class avl_multiset
    //Assert if passed value traits are compatible with the type
    BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
-   inline avl_multiset()
+   BOOST_INTRUSIVE_FORCEINLINE avl_multiset()
       :  Base()
    {}
 
-   inline explicit avl_multiset( const key_compare &cmp, const value_traits &v_traits = value_traits())
+   BOOST_INTRUSIVE_FORCEINLINE explicit avl_multiset( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  Base(cmp, v_traits)
    {}
 
@@ -1062,35 +1062,35 @@ class avl_multiset
       :  Base(b, e, cmp, v_traits)
    {}
 
-   inline avl_multiset(BOOST_RV_REF(avl_multiset) x)
+   BOOST_INTRUSIVE_FORCEINLINE avl_multiset(BOOST_RV_REF(avl_multiset) x)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
-   inline avl_multiset& operator=(BOOST_RV_REF(avl_multiset) x)
+   BOOST_INTRUSIVE_FORCEINLINE avl_multiset& operator=(BOOST_RV_REF(avl_multiset) x)
    {  return static_cast<avl_multiset &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    template <class Cloner, class Disposer>
-   inline void clone_from(const avl_multiset &src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(const avl_multiset &src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(src, cloner, disposer);  }
 
    template <class Cloner, class Disposer>
-   inline void clone_from(BOOST_RV_REF(avl_multiset) src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(avl_multiset) src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static avl_multiset &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static avl_multiset &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT
    {  return static_cast<avl_multiset &>(Base::container_from_end_iterator(end_iterator));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static const avl_multiset &container_from_end_iterator(const_iterator end_iterator) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static const avl_multiset &container_from_end_iterator(const_iterator end_iterator) BOOST_NOEXCEPT
    {  return static_cast<const avl_multiset &>(Base::container_from_end_iterator(end_iterator));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static avl_multiset &container_from_iterator(iterator it) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static avl_multiset &container_from_iterator(iterator it) BOOST_NOEXCEPT
    {  return static_cast<avl_multiset &>(Base::container_from_iterator(it));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static const avl_multiset &container_from_iterator(const_iterator it) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static const avl_multiset &container_from_iterator(const_iterator it) BOOST_NOEXCEPT
    {  return static_cast<const avl_multiset &>(Base::container_from_iterator(it));   }
 };
 

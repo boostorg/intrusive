@@ -33,25 +33,25 @@ struct size_holder
    static const bool constant_time_size = ConstantSize;
    typedef SizeType  size_type;
 
-   inline SizeType get_size() const
+   BOOST_INTRUSIVE_FORCEINLINE SizeType get_size() const
    {  return size_;  }
 
-   inline void set_size(SizeType size)
+   BOOST_INTRUSIVE_FORCEINLINE void set_size(SizeType size)
    {  size_ = size; }
 
-   inline void decrement()
+   BOOST_INTRUSIVE_FORCEINLINE void decrement()
    {  --size_; }
 
-   inline void increment()
+   BOOST_INTRUSIVE_FORCEINLINE void increment()
    {  ++size_; }
 
-   inline void increase(SizeType n)
+   BOOST_INTRUSIVE_FORCEINLINE void increase(SizeType n)
    {  size_ += n; }
 
-   inline void decrease(SizeType n)
+   BOOST_INTRUSIVE_FORCEINLINE void decrease(SizeType n)
    {  size_ -= n; }
 
-   inline void swap(size_holder &other)
+   BOOST_INTRUSIVE_FORCEINLINE void swap(size_holder &other)
    {  SizeType tmp(size_); size_ = other.size_; other.size_ = tmp; }
 
    SizeType size_;
@@ -63,25 +63,25 @@ struct size_holder<false, SizeType, Tag>
    static const bool constant_time_size = false;
    typedef SizeType  size_type;
 
-   inline size_type get_size() const
+   BOOST_INTRUSIVE_FORCEINLINE size_type get_size() const
    {  return 0;  }
 
-   inline void set_size(size_type)
+   BOOST_INTRUSIVE_FORCEINLINE void set_size(size_type)
    {}
 
-   inline void decrement()
+   BOOST_INTRUSIVE_FORCEINLINE void decrement()
    {}
 
-   inline void increment()
+   BOOST_INTRUSIVE_FORCEINLINE void increment()
    {}
 
-   inline void increase(SizeType)
+   BOOST_INTRUSIVE_FORCEINLINE void increase(SizeType)
    {}
 
-   inline void decrease(SizeType)
+   BOOST_INTRUSIVE_FORCEINLINE void decrease(SizeType)
    {}
 
-   inline void swap(size_holder){}
+   BOOST_INTRUSIVE_FORCEINLINE void swap(size_holder){}
 };
 
 }  //namespace detail{

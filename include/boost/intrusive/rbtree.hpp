@@ -125,12 +125,12 @@ class rbtree_impl
    typedef BOOST_INTRUSIVE_IMPDEF(typename implementation_defined::insert_commit_data)       insert_commit_data;
 
    //! @copydoc ::boost::intrusive::bstree::bstree()
-   rbtree_impl()
+   BOOST_INTRUSIVE_FORCEINLINE rbtree_impl()
       :  tree_type()
    {}
 
    //! @copydoc ::boost::intrusive::bstree::bstree(const key_compare &,const value_traits &)
-   explicit rbtree_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
+   BOOST_INTRUSIVE_FORCEINLINE explicit rbtree_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  tree_type(cmp, v_traits)
    {}
 
@@ -143,12 +143,12 @@ class rbtree_impl
    {}
 
    //! @copydoc ::boost::intrusive::bstree::bstree(bstree &&)
-   rbtree_impl(BOOST_RV_REF(rbtree_impl) x)
+   BOOST_INTRUSIVE_FORCEINLINE rbtree_impl(BOOST_RV_REF(rbtree_impl) x)
       :  tree_type(BOOST_MOVE_BASE(tree_type, x))
    {}
 
    //! @copydoc ::boost::intrusive::bstree::operator=(bstree &&)
-   rbtree_impl& operator=(BOOST_RV_REF(rbtree_impl) x)
+   BOOST_INTRUSIVE_FORCEINLINE rbtree_impl& operator=(BOOST_RV_REF(rbtree_impl) x)
    {  return static_cast<rbtree_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x))); }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -239,7 +239,7 @@ class rbtree_impl
 
    //! @copydoc ::boost::intrusive::bstree::clone_from(bstree&&,Cloner,Disposer)
    template <class Cloner, class Disposer>
-   void clone_from(BOOST_RV_REF(rbtree_impl) src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(rbtree_impl) src, Cloner cloner, Disposer disposer)
    {  tree_type::clone_from(BOOST_MOVE_BASE(tree_type, src), cloner, disposer);  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -537,11 +537,11 @@ class rbtree
    //Assert if passed value traits are compatible with the type
    BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
-   inline rbtree()
+   BOOST_INTRUSIVE_FORCEINLINE rbtree()
       :  Base()
    {}
 
-   inline explicit rbtree( const key_compare &cmp, const value_traits &v_traits = value_traits())
+   BOOST_INTRUSIVE_FORCEINLINE explicit rbtree( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  Base(cmp, v_traits)
    {}
 
@@ -552,35 +552,35 @@ class rbtree
       :  Base(unique, b, e, cmp, v_traits)
    {}
 
-   inline rbtree(BOOST_RV_REF(rbtree) x)
+   BOOST_INTRUSIVE_FORCEINLINE rbtree(BOOST_RV_REF(rbtree) x)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
-   inline rbtree& operator=(BOOST_RV_REF(rbtree) x)
+   BOOST_INTRUSIVE_FORCEINLINE rbtree& operator=(BOOST_RV_REF(rbtree) x)
    {  return static_cast<rbtree &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    template <class Cloner, class Disposer>
-   inline void clone_from(const rbtree &src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(const rbtree &src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(src, cloner, disposer);  }
 
    template <class Cloner, class Disposer>
-   inline void clone_from(BOOST_RV_REF(rbtree) src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(rbtree) src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static rbtree &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static rbtree &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT
    {  return static_cast<rbtree &>(Base::container_from_end_iterator(end_iterator));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static const rbtree &container_from_end_iterator(const_iterator end_iterator) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static const rbtree &container_from_end_iterator(const_iterator end_iterator) BOOST_NOEXCEPT
    {  return static_cast<const rbtree &>(Base::container_from_end_iterator(end_iterator));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static rbtree &container_from_iterator(iterator it) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static rbtree &container_from_iterator(iterator it) BOOST_NOEXCEPT
    {  return static_cast<rbtree &>(Base::container_from_iterator(it));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static const rbtree &container_from_iterator(const_iterator it) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static const rbtree &container_from_iterator(const_iterator it) BOOST_NOEXCEPT
    {  return static_cast<const rbtree &>(Base::container_from_iterator(it));   }
 };
 

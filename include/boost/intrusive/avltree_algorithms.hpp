@@ -42,7 +42,7 @@ struct avltree_node_cloner
    typedef typename NodeTraits::node_ptr  node_ptr;
    typedef detail::ebo_functor_holder<F>  base_t;
 
-   inline avltree_node_cloner(F f)
+   BOOST_INTRUSIVE_FORCEINLINE avltree_node_cloner(F f)
       :  base_t(f)
    {}
 
@@ -75,11 +75,11 @@ struct avltree_node_checker
    struct return_type
          : public base_checker_t::return_type
    {
-      return_type() : height(0) {}
+      BOOST_INTRUSIVE_FORCEINLINE return_type() : height(0) {}
       int height;
    };
 
-   avltree_node_checker(const NodePtrCompare& comp, ExtraChecker extra_checker)
+   BOOST_INTRUSIVE_FORCEINLINE avltree_node_checker(const NodePtrCompare& comp, ExtraChecker extra_checker)
       : base_checker_t(comp, extra_checker)
    {}
 
@@ -421,7 +421,7 @@ class avltree_algorithms
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::is_header
-   static bool is_header(const_node_ptr p) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bool is_header(const_node_ptr p) BOOST_NOEXCEPT
    {  return NodeTraits::get_balance(p) == NodeTraits::zero() && bstree_algo::is_header(p);  }
 
 

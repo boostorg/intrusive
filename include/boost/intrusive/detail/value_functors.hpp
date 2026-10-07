@@ -18,6 +18,8 @@
 #  pragma once
 #endif
 
+#include <boost/intrusive/detail/workaround.hpp>
+
 #include <cstddef>
 
 namespace boost {
@@ -27,7 +29,7 @@ namespace intrusive {
 template<class ValueType>
 struct value_less
 {
-   bool operator()(const ValueType &a, const ValueType &b) const
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const ValueType &a, const ValueType &b) const
       {  return a < b;  }
 };
 
@@ -35,14 +37,14 @@ struct value_less
 template<class T>
 struct value_less<T*>
 {
-   bool operator()(const T *a, const T* b) const
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const T *a, const T* b) const
       {  return std::size_t(a) < std::size_t(b);  }
 };
 
 template<class ValueType>
 struct value_equal
 {
-   bool operator()(const ValueType &a, const ValueType &b) const
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const ValueType &a, const ValueType &b) const
       {  return a == b;  }
 };
 

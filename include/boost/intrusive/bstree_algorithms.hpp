@@ -38,7 +38,7 @@ namespace intrusive {
 template <class NodePtr>
 struct insert_commit_data_t
 {
-   inline insert_commit_data_t()
+   BOOST_INTRUSIVE_FORCEINLINE insert_commit_data_t()
       : link_left(false), node()
    {}
    bool     link_left;
@@ -67,7 +67,7 @@ struct bstree_node_checker
    struct return_type
       : public base_checker_t::return_type
    {
-      inline return_type()
+      BOOST_INTRUSIVE_FORCEINLINE return_type()
          : min_key_node_ptr(const_node_ptr()), max_key_node_ptr(const_node_ptr()), node_count(0)
       {}
 
@@ -76,7 +76,7 @@ struct bstree_node_checker
       size_t   node_count;
    };
 
-   inline bstree_node_checker(const NodePtrCompare& comp, ExtraChecker extra_checker)
+   BOOST_INTRUSIVE_FORCEINLINE bstree_node_checker(const NodePtrCompare& comp, ExtraChecker extra_checker)
       : base_checker_t(extra_checker), comp_(comp)
    {}
 
@@ -188,11 +188,11 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    template<class Disposer>
    struct dispose_subtree_disposer
    {
-      inline dispose_subtree_disposer(Disposer &disp, node_ptr subtree)
+      BOOST_INTRUSIVE_FORCEINLINE dispose_subtree_disposer(Disposer &disp, node_ptr subtree)
          : disposer_(&disp), subtree_(subtree)
       {}
 
-      inline void release()
+      BOOST_INTRUSIVE_FORCEINLINE void release()
       {  disposer_ = 0;  }
 
       inline ~dispose_subtree_disposer()
@@ -215,7 +215,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant time.
    //!
    //! <b>Throws</b>: Nothing.
-   inline static node_ptr begin_node(const_node_ptr header) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr begin_node(const_node_ptr header) BOOST_NOEXCEPT
    {  return node_traits::get_left(header);   }
 
    //! <b>Requires</b>: 'header' is the header node of a tree.
@@ -225,7 +225,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant time.
    //!
    //! <b>Throws</b>: Nothing.
-   inline static node_ptr end_node(const_node_ptr header) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr end_node(const_node_ptr header) BOOST_NOEXCEPT
    {  return detail::uncast(header);   }
 
    //! <b>Requires</b>: 'header' is the header node of a tree.
@@ -249,7 +249,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant time.
    //!
    //! <b>Throws</b>: Nothing.
-   inline static bool unique(const_node_ptr n) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bool unique(const_node_ptr n) BOOST_NOEXCEPT
    { return !NodeTraits::get_parent(n); }
 
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
@@ -458,7 +458,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!   new_node is not equivalent to node_to_be_replaced according to the
    //!   ordering rules. This function is faster than erasing and inserting
    //!   the node, since no rebalancing and comparison is needed. Experimental function
-   inline static void replace_node(node_ptr node_to_be_replaced, node_ptr new_node) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static void replace_node(node_ptr node_to_be_replaced, node_ptr new_node) BOOST_NOEXCEPT
    {
       replace_node(node_to_be_replaced, base_type::get_header(node_to_be_replaced), new_node);
    }
@@ -578,7 +578,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   static bool inited(const_node_ptr n)
+   BOOST_INTRUSIVE_FORCEINLINE static bool inited(const_node_ptr n)
    {
       return !NodeTraits::get_parent(n) &&
              !NodeTraits::get_left(n)   &&
@@ -1636,7 +1636,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   inline static bool is_left_child(node_ptr p) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bool is_left_child(node_ptr p) BOOST_NOEXCEPT
    {  return NodeTraits::get_left(NodeTraits::get_parent(p)) == p;  }
 
    //! <b>Requires</b>: p is a node of a tree.
@@ -1646,7 +1646,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   inline static bool is_right_child(node_ptr p) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bool is_right_child(node_ptr p) BOOST_NOEXCEPT
    {  return NodeTraits::get_right(NodeTraits::get_parent(p)) == p;  }
 
    static void insert_before_check

@@ -37,11 +37,11 @@ class exception_disposer
    exception_disposer &operator=(const exception_disposer&);
 
    public:
-   exception_disposer(Container &cont, Disposer &disp)
+   BOOST_INTRUSIVE_FORCEINLINE exception_disposer(Container &cont, Disposer &disp)
       :  cont_(&cont), disp_(disp)
    {}
 
-   inline void release()
+   BOOST_INTRUSIVE_FORCEINLINE void release()
    {  cont_ = 0;  }
 
    ~exception_disposer()

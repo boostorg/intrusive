@@ -39,7 +39,7 @@ struct node_chain_sort
    //Linking policies: "link(a, b)" makes b the node that follows a
    struct next_linker
    {
-      static void link(node_ptr a, node_ptr b)
+      BOOST_INTRUSIVE_FORCEINLINE static void link(node_ptr a, node_ptr b)
       {  NodeTraits::set_next(a, b);  }
    };
 
@@ -57,13 +57,13 @@ struct node_chain_sort
    struct chain
    {
       //Does not initialize the members, so arrays of chains cost nothing to create
-      chain() {}
-      chain(node_ptr h, node_ptr t) : head(h), tail(t) {}
+      BOOST_INTRUSIVE_FORCEINLINE chain() {}
+      BOOST_INTRUSIVE_FORCEINLINE chain(node_ptr h, node_ptr t) : head(h), tail(t) {}
 
-      bool empty() const
+      BOOST_INTRUSIVE_FORCEINLINE bool empty() const
       {  return head == node_ptr();  }
 
-      void clear()
+      BOOST_INTRUSIVE_FORCEINLINE void clear()
       {  head = node_ptr();  }
 
       //Links "other" after the last node of this chain

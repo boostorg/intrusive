@@ -62,32 +62,32 @@ class slist_iterator
    typedef typename types_t::iterator_type::reference          reference;
    typedef typename types_t::iterator_type::iterator_category  iterator_category;
 
-   inline slist_iterator()
+   BOOST_INTRUSIVE_FORCEINLINE slist_iterator()
    {}
 
-   inline slist_iterator(node_ptr nodeptr, const_value_traits_ptr traits_ptr)
+   BOOST_INTRUSIVE_FORCEINLINE slist_iterator(node_ptr nodeptr, const_value_traits_ptr traits_ptr)
       : members_(nodeptr, traits_ptr)
    {}
 
-   inline explicit slist_iterator(node_ptr nodeptr)
+   BOOST_INTRUSIVE_FORCEINLINE explicit slist_iterator(node_ptr nodeptr)
       : members_(nodeptr, const_value_traits_ptr())
    {  BOOST_INTRUSIVE_STATIC_ASSERT((stateful_value_traits == false));  }
 
    //Implicit copy operations: keeps the iterator trivially copyable (passed in registers)
-   inline slist_iterator(const nonconst_iterator &other)
+   BOOST_INTRUSIVE_FORCEINLINE slist_iterator(const nonconst_iterator &other)
       :  members_(other.pointed_node(), other.get_value_traits())
    {}
 
-   inline node_ptr pointed_node() const
+   BOOST_INTRUSIVE_FORCEINLINE node_ptr pointed_node() const
    { return members_.nodeptr_; }
 
-   inline slist_iterator &operator=(node_ptr n)
+   BOOST_INTRUSIVE_FORCEINLINE slist_iterator &operator=(node_ptr n)
    {  members_.nodeptr_ = n;  return static_cast<slist_iterator&>(*this);  }
 
-   inline const_value_traits_ptr get_value_traits() const
+   BOOST_INTRUSIVE_FORCEINLINE const_value_traits_ptr get_value_traits() const
    {  return members_.get_ptr(); }
 
-   inline bool operator!() const
+   BOOST_INTRUSIVE_FORCEINLINE bool operator!() const
    {  return !members_.nodeptr_; }
 
    public:
@@ -104,27 +104,27 @@ class slist_iterator
       return result;
    }
 
-   inline friend bool operator== (const slist_iterator& l, const slist_iterator& r)
+   BOOST_INTRUSIVE_FORCEINLINE friend bool operator== (const slist_iterator& l, const slist_iterator& r)
    {  return l.pointed_node() == r.pointed_node();   }
 
-   inline friend bool operator!= (const slist_iterator& l, const slist_iterator& r)
+   BOOST_INTRUSIVE_FORCEINLINE friend bool operator!= (const slist_iterator& l, const slist_iterator& r)
    {  return l.pointed_node() != r.pointed_node();   }
 
-   inline reference operator*() const
+   BOOST_INTRUSIVE_FORCEINLINE reference operator*() const
    {  return *operator->();   }
 
-   inline pointer operator->() const
+   BOOST_INTRUSIVE_FORCEINLINE pointer operator->() const
    { return this->operator_arrow(detail::bool_<stateful_value_traits>()); }
 
-   inline slist_iterator<ValueTraits, false> unconst() const
+   BOOST_INTRUSIVE_FORCEINLINE slist_iterator<ValueTraits, false> unconst() const
    {  return slist_iterator<ValueTraits, false>(this->pointed_node(), this->get_value_traits());   }
 
    private:
 
-   inline pointer operator_arrow(detail::false_) const
+   BOOST_INTRUSIVE_FORCEINLINE pointer operator_arrow(detail::false_) const
    { return ValueTraits::to_value_ptr(members_.nodeptr_); }
 
-   inline pointer operator_arrow(detail::true_) const
+   BOOST_INTRUSIVE_FORCEINLINE pointer operator_arrow(detail::true_) const
    { return this->get_value_traits()->to_value_ptr(members_.nodeptr_); }
 
    iiterator_members<node_ptr, const_value_traits_ptr, stateful_value_traits> members_;

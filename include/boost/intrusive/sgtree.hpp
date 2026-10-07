@@ -70,14 +70,14 @@ inline std::size_t calculate_h_sqrt2 (std::size_t n)
 
 struct h_alpha_sqrt2_t
 {
-   h_alpha_sqrt2_t(void){}
-   std::size_t operator()(std::size_t n) const
+   BOOST_INTRUSIVE_FORCEINLINE h_alpha_sqrt2_t(void){}
+   BOOST_INTRUSIVE_FORCEINLINE std::size_t operator()(std::size_t n) const
    {  return calculate_h_sqrt2(n);  }
 };
 
 struct alpha_0_75_by_max_size_t
 {
-   alpha_0_75_by_max_size_t(void){}
+   BOOST_INTRUSIVE_FORCEINLINE alpha_0_75_by_max_size_t(void){}
 
    std::size_t operator()(std::size_t max_tree_size) const
    {
@@ -94,7 +94,7 @@ struct alpha_0_75_by_max_size_t
 
 struct h_alpha_t
 {
-   explicit h_alpha_t(float inv_minus_logalpha)
+   BOOST_INTRUSIVE_FORCEINLINE explicit h_alpha_t(float inv_minus_logalpha)
       :  inv_minus_logalpha_(inv_minus_logalpha)
    {}
 
@@ -119,11 +119,11 @@ struct h_alpha_t
 
 struct alpha_by_max_size_t
 {
-   explicit alpha_by_max_size_t(float alpha)
+   BOOST_INTRUSIVE_FORCEINLINE explicit alpha_by_max_size_t(float alpha)
       :  alpha_(alpha)
    {}
 
-   float operator()(std::size_t max_tree_size) const
+   BOOST_INTRUSIVE_FORCEINLINE float operator()(std::size_t max_tree_size) const
    {  return float(max_tree_size)*alpha_;   }
 
    private:
@@ -149,13 +149,13 @@ struct alpha_holder
       inv_minus_logalpha_ = 1/(-detail::fast_log2(alpha));
    }
 
-   h_alpha_t get_h_alpha_t() const
+   BOOST_INTRUSIVE_FORCEINLINE h_alpha_t get_h_alpha_t() const
    {  return h_alpha_t(inv_minus_logalpha_);  }
 
-   multiply_by_alpha_t get_multiply_by_alpha_t() const
+   BOOST_INTRUSIVE_FORCEINLINE multiply_by_alpha_t get_multiply_by_alpha_t() const
    {  return multiply_by_alpha_t(alpha_);  }
 
-   SizeType &get_max_tree_size()
+   BOOST_INTRUSIVE_FORCEINLINE SizeType &get_max_tree_size()
    {  return max_tree_size_;  }
 
    protected:
@@ -173,11 +173,11 @@ struct alpha_holder<false, SizeType>
    typedef boost::intrusive::detail::h_alpha_sqrt2_t           h_alpha_t;
    typedef boost::intrusive::detail::alpha_0_75_by_max_size_t  multiply_by_alpha_t;
 
-   alpha_holder()
+   BOOST_INTRUSIVE_FORCEINLINE alpha_holder()
       : max_tree_size_()
    {}
 
-   float get_alpha() const
+   BOOST_INTRUSIVE_FORCEINLINE float get_alpha() const
    {  return 0.70710677f;  }
 
    void set_alpha(float)
@@ -185,13 +185,13 @@ struct alpha_holder<false, SizeType>
       BOOST_INTRUSIVE_INVARIANT_ASSERT(0);
    }
 
-   h_alpha_t get_h_alpha_t() const
+   BOOST_INTRUSIVE_FORCEINLINE h_alpha_t get_h_alpha_t() const
    {  return h_alpha_t();  }
 
-   multiply_by_alpha_t get_multiply_by_alpha_t() const
+   BOOST_INTRUSIVE_FORCEINLINE multiply_by_alpha_t get_multiply_by_alpha_t() const
    {  return multiply_by_alpha_t();  }
 
-   SizeType &get_max_tree_size()
+   BOOST_INTRUSIVE_FORCEINLINE SizeType &get_max_tree_size()
    {  return max_tree_size_;  }
 
    protected:
@@ -288,12 +288,12 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
    typedef BOOST_INTRUSIVE_IMPDEF(typename node_algorithms::insert_commit_data) insert_commit_data;
 
    //! @copydoc ::boost::intrusive::bstree::bstree()
-   sgtree_impl()
+   BOOST_INTRUSIVE_FORCEINLINE sgtree_impl()
       :  tree_type()
    {}
 
    //! @copydoc ::boost::intrusive::bstree::bstree(const key_compare &,const value_traits &)
-   explicit sgtree_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
+   BOOST_INTRUSIVE_FORCEINLINE explicit sgtree_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  tree_type(cmp, v_traits)
    {}
 
@@ -311,7 +311,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
    }
 
    //! @copydoc ::boost::intrusive::bstree::bstree(bstree &&)
-   sgtree_impl(BOOST_RV_REF(sgtree_impl) x)
+   BOOST_INTRUSIVE_FORCEINLINE sgtree_impl(BOOST_RV_REF(sgtree_impl) x)
       :  tree_type(BOOST_MOVE_BASE(tree_type, x)), alpha_traits(x.get_alpha_traits())
    {  ::boost::adl_move_swap(this->get_alpha_traits(), x.get_alpha_traits());   }
 
@@ -325,16 +325,16 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
    /// @cond
    private:
 
-   const alpha_traits &get_alpha_traits() const
+   BOOST_INTRUSIVE_FORCEINLINE const alpha_traits &get_alpha_traits() const
    {  return *this;  }
 
-   alpha_traits &get_alpha_traits()
+   BOOST_INTRUSIVE_FORCEINLINE alpha_traits &get_alpha_traits()
    {  return *this;  }
 
-   h_alpha_t get_h_alpha_func() const
+   BOOST_INTRUSIVE_FORCEINLINE h_alpha_t get_h_alpha_func() const
    {  return this->get_alpha_traits().get_h_alpha_t();  }
 
-   multiply_by_alpha_t get_alpha_by_max_size_func() const
+   BOOST_INTRUSIVE_FORCEINLINE multiply_by_alpha_t get_alpha_by_max_size_func() const
    {  return this->get_alpha_traits().get_multiply_by_alpha_t(); }
 
    /// @endcond
@@ -529,12 +529,12 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
    }
 
    //! @copydoc ::boost::intrusive::bstree::insert_unique_check(const key_type&,insert_commit_data&)
-   std::pair<iterator, bool> insert_unique_check
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<iterator, bool> insert_unique_check
       (const key_type &key, insert_commit_data &commit_data)
    {  return this->insert_unique_check(key, this->key_comp(), commit_data);   }
 
    //! @copydoc ::boost::intrusive::bstree::insert_unique_check(const_iterator,const key_type&,insert_commit_data&)
-   std::pair<iterator, bool> insert_unique_check
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<iterator, bool> insert_unique_check
       (const_iterator hint, const key_type &key, insert_commit_data &commit_data)
    {  return this->insert_unique_check(hint, key, this->key_comp(), commit_data);   }
 
@@ -627,11 +627,11 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
    }
 
    //! @copydoc ::boost::intrusive::bstree::erase(const_iterator,const_iterator)
-   iterator erase(const_iterator b, const_iterator e) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE iterator erase(const_iterator b, const_iterator e) BOOST_NOEXCEPT
    {  size_type n;   return private_erase(b, e, n);   }
 
    //! @copydoc ::boost::intrusive::bstree::erase(const key_type &)
-   size_type erase(const key_type &key)
+   BOOST_INTRUSIVE_FORCEINLINE size_type erase(const key_type &key)
    {  return this->erase(key, this->key_comp());   }
 
    //! @copydoc ::boost::intrusive::bstree::erase(const KeyType&,KeyTypeKeyCompare)
@@ -658,13 +658,13 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
 
    #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
    template<class Disposer>
-   iterator erase_and_dispose(iterator i, Disposer disposer) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE iterator erase_and_dispose(iterator i, Disposer disposer) BOOST_NOEXCEPT
    {  return this->erase_and_dispose(const_iterator(i), disposer);   }
    #endif
 
    //! @copydoc ::boost::intrusive::bstree::erase_and_dispose(const_iterator,const_iterator,Disposer)
    template<class Disposer>
-   iterator erase_and_dispose(const_iterator b, const_iterator e, Disposer disposer) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE iterator erase_and_dispose(const_iterator b, const_iterator e, Disposer disposer) BOOST_NOEXCEPT
    {  size_type n;   return private_erase(b, e, n, disposer);   }
 
    //! @copydoc ::boost::intrusive::bstree::erase_and_dispose(const key_type &, Disposer)
@@ -903,7 +903,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
    //! <b>Throws</b>: Nothing.
    //!
    //! <b>Complexity</b>: Constant.
-   float balance_factor() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE float balance_factor() const BOOST_NOEXCEPT
    {  return this->get_alpha_traits().get_alpha(); }
 
    //! <b>Requires</b>: new_alpha must be a value between 0.5 and 1.0
@@ -1024,11 +1024,11 @@ class sgtree
    //Assert if passed value traits are compatible with the type
    BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
-   inline sgtree()
+   BOOST_INTRUSIVE_FORCEINLINE sgtree()
       :  Base()
    {}
 
-   inline explicit sgtree(const key_compare &cmp, const value_traits &v_traits = value_traits())
+   BOOST_INTRUSIVE_FORCEINLINE explicit sgtree(const key_compare &cmp, const value_traits &v_traits = value_traits())
       :  Base(cmp, v_traits)
    {}
 
@@ -1039,35 +1039,35 @@ class sgtree
       :  Base(unique, b, e, cmp, v_traits)
    {}
 
-   inline sgtree(BOOST_RV_REF(sgtree) x)
+   BOOST_INTRUSIVE_FORCEINLINE sgtree(BOOST_RV_REF(sgtree) x)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
-   inline sgtree& operator=(BOOST_RV_REF(sgtree) x)
+   BOOST_INTRUSIVE_FORCEINLINE sgtree& operator=(BOOST_RV_REF(sgtree) x)
    {  return static_cast<sgtree &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    template <class Cloner, class Disposer>
-   inline void clone_from(const sgtree &src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(const sgtree &src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(src, cloner, disposer);  }
 
    template <class Cloner, class Disposer>
-   inline void clone_from(BOOST_RV_REF(sgtree) src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(sgtree) src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static sgtree &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static sgtree &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT
    {  return static_cast<sgtree &>(Base::container_from_end_iterator(end_iterator));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static const sgtree &container_from_end_iterator(const_iterator end_iterator) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static const sgtree &container_from_end_iterator(const_iterator end_iterator) BOOST_NOEXCEPT
    {  return static_cast<const sgtree &>(Base::container_from_end_iterator(end_iterator));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static sgtree &container_from_iterator(iterator it) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static sgtree &container_from_iterator(iterator it) BOOST_NOEXCEPT
    {  return static_cast<sgtree &>(Base::container_from_iterator(it));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static const sgtree &container_from_iterator(const_iterator it) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static const sgtree &container_from_iterator(const_iterator it) BOOST_NOEXCEPT
    {  return static_cast<const sgtree &>(Base::container_from_iterator(it));   }
 };
 

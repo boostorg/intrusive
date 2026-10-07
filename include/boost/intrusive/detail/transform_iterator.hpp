@@ -33,11 +33,11 @@ namespace detail {
 template <class PseudoReference>
 struct operator_arrow_proxy
 {
-   inline operator_arrow_proxy(const PseudoReference &px)
+   BOOST_INTRUSIVE_FORCEINLINE operator_arrow_proxy(const PseudoReference &px)
       :  m_value(px)
    {}
 
-   inline PseudoReference* operator->() const { return &m_value; }
+   BOOST_INTRUSIVE_FORCEINLINE PseudoReference* operator->() const { return &m_value; }
    // This function is needed for MWCW and BCC, which won't call operator->
    // again automatically per 13.3.1.2 para 8
 //   operator T*() const { return &m_value; }
@@ -47,11 +47,11 @@ struct operator_arrow_proxy
 template <class T>
 struct operator_arrow_proxy<T&>
 {
-   inline operator_arrow_proxy(T &px)
+   BOOST_INTRUSIVE_FORCEINLINE operator_arrow_proxy(T &px)
       :  m_value(px)
    {}
 
-   inline T* operator->() const { return &m_value; }
+   BOOST_INTRUSIVE_FORCEINLINE T* operator->() const { return &m_value; }
    // This function is needed for MWCW and BCC, which won't call operator->
    // again automatically per 13.3.1.2 para 8
 //   operator T*() const { return &m_value; }
@@ -68,29 +68,29 @@ class transform_iterator
    typedef operator_arrow_proxy<typename UnaryFunction::result_type>                      pointer;
    typedef typename UnaryFunction::result_type                                            reference;
    
-   explicit transform_iterator(const Iterator &it, const UnaryFunction &f = UnaryFunction())
+   BOOST_INTRUSIVE_FORCEINLINE explicit transform_iterator(const Iterator &it, const UnaryFunction &f = UnaryFunction())
       :  members_(it, f)
    {}
 
-   transform_iterator()
+   BOOST_INTRUSIVE_FORCEINLINE transform_iterator()
       :  members_()
    {}
 
    //Conversion from an iterator with a convertible functor (e.g. local_iterator -> const_local_iterator)
    template<class OtherUnaryFunction>
-   transform_iterator( const transform_iterator<Iterator, OtherUnaryFunction> &other
+   BOOST_INTRUSIVE_FORCEINLINE transform_iterator( const transform_iterator<Iterator, OtherUnaryFunction> &other
                      , typename enable_if_convertible<OtherUnaryFunction, UnaryFunction>::type* = 0)
       :  members_(other.get_it(), other.get_functor())
    {}
 
-   inline Iterator get_it() const
+   BOOST_INTRUSIVE_FORCEINLINE Iterator get_it() const
    {  return members_.m_it;   }
 
-   inline const UnaryFunction &get_functor() const
+   BOOST_INTRUSIVE_FORCEINLINE const UnaryFunction &get_functor() const
    {  return members_;   }
 
    //Constructors
-   inline transform_iterator& operator++()
+   BOOST_INTRUSIVE_FORCEINLINE transform_iterator& operator++()
    { increment();   return *this;   }
 
    inline transform_iterator operator++(int)
@@ -100,13 +100,13 @@ class transform_iterator
       return result;
    }
 
-   inline friend bool operator== (const transform_iterator& i, const transform_iterator& i2)
+   BOOST_INTRUSIVE_FORCEINLINE friend bool operator== (const transform_iterator& i, const transform_iterator& i2)
    { return i.equal(i2); }
 
-   inline friend bool operator!= (const transform_iterator& i, const transform_iterator& i2)
+   BOOST_INTRUSIVE_FORCEINLINE friend bool operator!= (const transform_iterator& i, const transform_iterator& i2)
    { return !(i == i2); }
 
-   inline friend typename Iterator::difference_type operator- (const transform_iterator& i, const transform_iterator& i2)
+   BOOST_INTRUSIVE_FORCEINLINE friend typename Iterator::difference_type operator- (const transform_iterator& i, const transform_iterator& i2)
    { return i.distance_to(i2); }
 
    //Arithmetic
@@ -120,16 +120,16 @@ class transform_iterator
       return other;
    }
 
-   inline friend transform_iterator operator+(typename Iterator::difference_type off, const transform_iterator& right)
+   BOOST_INTRUSIVE_FORCEINLINE friend transform_iterator operator+(typename Iterator::difference_type off, const transform_iterator& right)
    {  return right + off; }
 
-   inline transform_iterator& operator-=(typename Iterator::difference_type off)
+   BOOST_INTRUSIVE_FORCEINLINE transform_iterator& operator-=(typename Iterator::difference_type off)
    {  this->advance(-off); return *this;   }
 
-   inline transform_iterator operator-(typename Iterator::difference_type off) const
+   BOOST_INTRUSIVE_FORCEINLINE transform_iterator operator-(typename Iterator::difference_type off) const
    {  return *this + (-off);  }
 
-   inline typename UnaryFunction::result_type operator*() const
+   BOOST_INTRUSIVE_FORCEINLINE typename UnaryFunction::result_type operator*() const
    { return dereference(); }
 
    inline operator_arrow_proxy<typename UnaryFunction::result_type>
@@ -140,36 +140,36 @@ class transform_iterator
    struct members
       :  UnaryFunction
    {
-      inline members(const Iterator &it, const UnaryFunction &f)
+      BOOST_INTRUSIVE_FORCEINLINE members(const Iterator &it, const UnaryFunction &f)
          :  UnaryFunction(f), m_it(it)
       {}
 
-      inline members()
+      BOOST_INTRUSIVE_FORCEINLINE members()
       {}
 
       Iterator m_it;
    } members_;
 
 
-   inline void increment()
+   BOOST_INTRUSIVE_FORCEINLINE void increment()
    { ++members_.m_it; }
 
-   inline void decrement()
+   BOOST_INTRUSIVE_FORCEINLINE void decrement()
    { --members_.m_it; }
 
-   inline bool equal(const transform_iterator &other) const
+   BOOST_INTRUSIVE_FORCEINLINE bool equal(const transform_iterator &other) const
    {  return members_.m_it == other.members_.m_it;   }
 
-   inline bool less(const transform_iterator &other) const
+   BOOST_INTRUSIVE_FORCEINLINE bool less(const transform_iterator &other) const
    {  return other.members_.m_it < members_.m_it;   }
 
-   typename UnaryFunction::result_type dereference() const
+   BOOST_INTRUSIVE_FORCEINLINE typename UnaryFunction::result_type dereference() const
    { return members_(*members_.m_it); }
 
-   void advance(typename Iterator::difference_type n)
+   BOOST_INTRUSIVE_FORCEINLINE void advance(typename Iterator::difference_type n)
    {  boost::intrusive::iterator_advance(members_.m_it, n); }
 
-   typename Iterator::difference_type distance_to(const transform_iterator &other)const
+   BOOST_INTRUSIVE_FORCEINLINE typename Iterator::difference_type distance_to(const transform_iterator &other)const
    {  return boost::intrusive::iterator_distance(other.members_.m_it, members_.m_it); }
 };
 

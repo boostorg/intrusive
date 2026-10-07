@@ -53,7 +53,7 @@ class tree_iterator
 
    static const bool stateful_value_traits = types_t::stateful_value_traits;
 
-   void unspecified_bool_type_func() const {}
+   BOOST_INTRUSIVE_FORCEINLINE void unspecified_bool_type_func() const {}
    typedef void (tree_iterator::*unspecified_bool_type)() const;
    class nat;
    typedef typename
@@ -68,22 +68,22 @@ class tree_iterator
    typedef typename types_t::iterator_type::reference          reference;
    typedef typename types_t::iterator_type::iterator_category  iterator_category;
 
-   inline tree_iterator()
+   BOOST_INTRUSIVE_FORCEINLINE tree_iterator()
    {}
 
-   inline explicit tree_iterator(node_ptr nodeptr, const_value_traits_ptr traits_ptr)
+   BOOST_INTRUSIVE_FORCEINLINE explicit tree_iterator(node_ptr nodeptr, const_value_traits_ptr traits_ptr)
       : members_(nodeptr, traits_ptr)
    {}
 
    //Implicit copy operations: keeps the iterator trivially copyable (passed in registers)
-   inline tree_iterator(const nonconst_iterator &other)
+   BOOST_INTRUSIVE_FORCEINLINE tree_iterator(const nonconst_iterator &other)
       :  members_(other.pointed_node(), other.get_value_traits())
    {}
 
-   inline tree_iterator &operator=(node_ptr nodeptr)
+   BOOST_INTRUSIVE_FORCEINLINE tree_iterator &operator=(node_ptr nodeptr)
    {  members_.nodeptr_ = nodeptr;  return *this;  }
 
-   inline node_ptr pointed_node() const
+   BOOST_INTRUSIVE_FORCEINLINE node_ptr pointed_node() const
    { return members_.nodeptr_; }
 
    public:
@@ -131,40 +131,40 @@ class tree_iterator
       return *this;
    }
 
-   inline operator unspecified_bool_type() const
+   BOOST_INTRUSIVE_FORCEINLINE operator unspecified_bool_type() const
    {  return members_.nodeptr_ ? &tree_iterator::unspecified_bool_type_func : 0;   }
 
-   inline bool operator! () const
+   BOOST_INTRUSIVE_FORCEINLINE bool operator! () const
    {  return !members_.nodeptr_;   }
 
-   inline friend bool operator== (const tree_iterator& l, const tree_iterator& r)
+   BOOST_INTRUSIVE_FORCEINLINE friend bool operator== (const tree_iterator& l, const tree_iterator& r)
    { return l.pointed_node() == r.pointed_node(); }
 
-   inline friend bool operator!= (const tree_iterator& l, const tree_iterator& r)
+   BOOST_INTRUSIVE_FORCEINLINE friend bool operator!= (const tree_iterator& l, const tree_iterator& r)
    {  return !(l == r);   }
 
-   inline reference operator*() const
+   BOOST_INTRUSIVE_FORCEINLINE reference operator*() const
    {  return *operator->();   }
 
-   inline pointer operator->() const
+   BOOST_INTRUSIVE_FORCEINLINE pointer operator->() const
    { return this->operator_arrow(detail::bool_<stateful_value_traits>()); }
 
-   inline const_value_traits_ptr get_value_traits() const
+   BOOST_INTRUSIVE_FORCEINLINE const_value_traits_ptr get_value_traits() const
    {  return members_.get_ptr();  }
 
-   tree_iterator end_iterator_from_it() const
+   BOOST_INTRUSIVE_FORCEINLINE tree_iterator end_iterator_from_it() const
    {
       return tree_iterator(node_algorithms::get_header(this->pointed_node()), this->get_value_traits());
    }
 
-   tree_iterator<value_traits, false> unconst() const
+   BOOST_INTRUSIVE_FORCEINLINE tree_iterator<value_traits, false> unconst() const
    {  return tree_iterator<value_traits, false>(this->pointed_node(), this->get_value_traits());   }
 
    private:
-   inline pointer operator_arrow(detail::false_) const
+   BOOST_INTRUSIVE_FORCEINLINE pointer operator_arrow(detail::false_) const
    { return ValueTraits::to_value_ptr(members_.nodeptr_); }
 
-   inline pointer operator_arrow(detail::true_) const
+   BOOST_INTRUSIVE_FORCEINLINE pointer operator_arrow(detail::true_) const
    { return this->get_value_traits()->to_value_ptr(members_.nodeptr_); }
 
    iiterator_members<node_ptr, const_value_traits_ptr, stateful_value_traits> members_;

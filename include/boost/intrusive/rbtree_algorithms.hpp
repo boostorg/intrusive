@@ -50,7 +50,7 @@ struct rbtree_node_cloner
    typedef typename NodeTraits::node_ptr  node_ptr;
    typedef detail::ebo_functor_holder<F>  base_t;
 
-   explicit rbtree_node_cloner(F f)
+   BOOST_INTRUSIVE_FORCEINLINE explicit rbtree_node_cloner(F f)
       :  base_t(f)
    {}
 
@@ -77,11 +77,11 @@ struct rbtree_node_checker
    struct return_type
          : public base_checker_t::return_type
    {
-      return_type() : black_count_(0) {}
+      BOOST_INTRUSIVE_FORCEINLINE return_type() : black_count_(0) {}
       std::size_t black_count_;
    };
 
-   rbtree_node_checker(const NodePtrCompare& comp, ExtraChecker extra_checker)
+   BOOST_INTRUSIVE_FORCEINLINE rbtree_node_checker(const NodePtrCompare& comp, ExtraChecker extra_checker)
       : base_checker_t(comp, extra_checker)
    {}
 

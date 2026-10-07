@@ -21,6 +21,8 @@
 #  pragma once
 #endif
 
+#include <boost/intrusive/detail/workaround.hpp>
+
 //A tiny utility to avoid pulling std::pair / utility for
 //very simple algorithms/types
 
@@ -31,11 +33,11 @@ template <class T>
 struct twin
 {
    typedef T type;
-   twin()
+   BOOST_INTRUSIVE_FORCEINLINE twin()
       : first(), second()
    {}
 
-   twin(const type &f, const type &s)
+   BOOST_INTRUSIVE_FORCEINLINE twin(const type &f, const type &s)
       : first(f), second(s)
    {}
 

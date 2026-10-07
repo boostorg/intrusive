@@ -45,7 +45,7 @@ struct treap_node_extra_checker
 
    typedef typename base_checker_t::return_type    return_type;
 
-   treap_node_extra_checker(const NodePtrPrioCompare& prio_comp, ExtraChecker extra_checker)
+   BOOST_INTRUSIVE_FORCEINLINE treap_node_extra_checker(const NodePtrPrioCompare& prio_comp, ExtraChecker extra_checker)
       : base_checker_t(extra_checker), prio_comp_(prio_comp)
    {}
 
@@ -130,7 +130,7 @@ class treap_algorithms
       rerotate_on_destroy& operator=(const rerotate_on_destroy&);
 
       public:
-      rerotate_on_destroy(node_ptr header, node_ptr p, std::size_t &n)
+      BOOST_INTRUSIVE_FORCEINLINE rerotate_on_destroy(node_ptr header, node_ptr p, std::size_t &n)
          :  header_(header), p_(p), n_(n), remove_it_(true)
       {}
 
@@ -141,7 +141,7 @@ class treap_algorithms
          }
       }
 
-      void release()
+      BOOST_INTRUSIVE_FORCEINLINE void release()
       {  remove_it_ = false;  }
 
       const node_ptr header_;
@@ -177,7 +177,7 @@ class treap_algorithms
       /// @endcond
    {
       /// @cond
-      inline insert_commit_data()
+      BOOST_INTRUSIVE_FORCEINLINE insert_commit_data()
          : bstree_algo::insert_commit_data(), rotations()
       {}
 

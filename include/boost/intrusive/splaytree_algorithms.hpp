@@ -54,7 +54,7 @@ struct splaydown_assemble_and_fix_header
 {
    typedef typename NodeTraits::node_ptr node_ptr;
 
-   splaydown_assemble_and_fix_header(node_ptr t, node_ptr header, node_ptr leftmost, node_ptr rightmost) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE splaydown_assemble_and_fix_header(node_ptr t, node_ptr header, node_ptr leftmost, node_ptr rightmost) BOOST_NOEXCEPT
       : t_(t)
       , null_node_(header)
       , l_(null_node_)
@@ -315,7 +315,7 @@ class splaytree_algorithms
    //!
    //! <b>Note</b>: No splaying is performed.
    template<class KeyType, class KeyNodePtrCompare>
-   static std::size_t count
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t count
       (const_node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {  return bstree_algo::count(header, key, comp);  }
 
@@ -337,7 +337,7 @@ class splaytree_algorithms
    //!
    //! <b>Note</b>: No splaying is performed.
    template<class KeyType, class KeyNodePtrCompare>
-   static node_ptr lower_bound
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr lower_bound
       (const_node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {  return bstree_algo::lower_bound(header, key, comp);  }
 
@@ -359,7 +359,7 @@ class splaytree_algorithms
    //!
    //! <b>Note</b>: No splaying is performed.
    template<class KeyType, class KeyNodePtrCompare>
-   static node_ptr upper_bound
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr upper_bound
       (const_node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {  return bstree_algo::upper_bound(header, key, comp);  }
 
@@ -380,7 +380,7 @@ class splaytree_algorithms
    //!
    //! <b>Note</b>: No splaying is performed.
    template<class KeyType, class KeyNodePtrCompare>
-   static node_ptr find
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr find
       (const_node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {  return bstree_algo::find(header, key, comp);  }
 
@@ -406,7 +406,7 @@ class splaytree_algorithms
    //!
    //! <b>Note</b>: No splaying is performed.
    template<class KeyType, class KeyNodePtrCompare>
-   static std::pair<node_ptr, node_ptr> equal_range
+   BOOST_INTRUSIVE_FORCEINLINE static std::pair<node_ptr, node_ptr> equal_range
       (const_node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {  return bstree_algo::equal_range(header, key, comp);  }
 
@@ -432,7 +432,7 @@ class splaytree_algorithms
    //!
    //! <b>Note</b>: No splaying is performed.
    template<class KeyType, class KeyNodePtrCompare>
-   static std::pair<node_ptr, node_ptr> lower_bound_range
+   BOOST_INTRUSIVE_FORCEINLINE static std::pair<node_ptr, node_ptr> lower_bound_range
       (const_node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
    {  return bstree_algo::lower_bound_range(header, key, comp);  }
 
@@ -533,7 +533,7 @@ class splaytree_algorithms
    //!
    //! <b>Note</b>: No splaying is performed.
    template<class KeyType, class KeyNodePtrCompare>
-   static std::pair<node_ptr, node_ptr> bounded_range
+   BOOST_INTRUSIVE_FORCEINLINE static std::pair<node_ptr, node_ptr> bounded_range
       (const_node_ptr header, const KeyType &lower_key, const KeyType &upper_key, KeyNodePtrCompare comp
       , bool left_closed, bool right_closed)
    {  return bstree_algo::bounded_range(header, lower_key, upper_key, comp, left_closed, right_closed);  }
@@ -691,7 +691,7 @@ class splaytree_algorithms
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    // bottom-up splay, use data_ as parent for n    | complexity : logarithmic    | exception : nothrow
-   static void splay_up(node_ptr n, node_ptr header) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static void splay_up(node_ptr n, node_ptr header) BOOST_NOEXCEPT
    {  priv_splay_up(n, header); }
 
    // top-down splay | complexity : logarithmic    | exception : strong, note A
@@ -711,7 +711,7 @@ class splaytree_algorithms
 
    //After a priv_splay_down that did not find key, root r is its predecessor or successor
    //(or header if the tree is empty), so lower_bound(key) == upper_bound(key)
-   static node_ptr priv_bound_from_root(node_ptr header, node_ptr r, bool before) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr priv_bound_from_root(node_ptr header, node_ptr r, bool before) BOOST_NOEXCEPT
    {  return (r == header || before) ? r : priv_next_of_root(header, r);  }
 
    //Splays the node immediately before or after the upper bound (if UpperBound) or
@@ -746,7 +746,7 @@ class splaytree_algorithms
 
    //Returns prev(hint), or header if there is no previous node (hint is the leftmost node
    //or the tree is empty). Avoids prev_node's climb for the leftmost node and the header.
-   static node_ptr priv_prev_of_hint(node_ptr header, node_ptr hint) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr priv_prev_of_hint(node_ptr header, node_ptr hint) BOOST_NOEXCEPT
    {
       return hint == NodeTraits::get_left(header) ? header
            : hint == header ? NodeTraits::get_right(header)
@@ -847,16 +847,16 @@ class splaytree_algorithms
    {
       static const bool is_total = false;
 
-      explicit splay_three_way_comp(KeyNodePtrCompare &comp)
+      BOOST_INTRUSIVE_FORCEINLINE explicit splay_three_way_comp(KeyNodePtrCompare &comp)
          : comp_(comp)
       {}
 
       KeyNodePtrCompare &comp_;
 
-      bool comp_left(const KeyType &key, node_ptr n) const
+      BOOST_INTRUSIVE_FORCEINLINE bool comp_left(const KeyType &key, node_ptr n) const
       {  return comp_(key, n);  }
 
-      bool comp_right(node_ptr n, const KeyType &key) const
+      BOOST_INTRUSIVE_FORCEINLINE bool comp_right(node_ptr n, const KeyType &key) const
       {  return comp_(n, key);  }
    };
 
@@ -866,13 +866,13 @@ class splaytree_algorithms
    {
       static const bool is_total = true;
 
-      explicit splay_bound_comp(KeyNodePtrCompare &comp)
+      BOOST_INTRUSIVE_FORCEINLINE explicit splay_bound_comp(KeyNodePtrCompare &comp)
          : comp_(comp)
       {}
 
       KeyNodePtrCompare &comp_;
 
-      bool comp_left(const KeyType &key, node_ptr n) const
+      BOOST_INTRUSIVE_FORCEINLINE bool comp_left(const KeyType &key, node_ptr n) const
       {  return UpperBound ? comp_(key, n) : !comp_(n, key);  }
 
       bool comp_right(node_ptr, const KeyType &) const
@@ -912,7 +912,7 @@ class splaytree_algorithms
 
    //Position of key relative to n
    template<class KeyType, class Comp>
-   static splay_dir priv_splay_dir(const KeyType &key, node_ptr n, const Comp &c)
+   BOOST_INTRUSIVE_FORCEINLINE static splay_dir priv_splay_dir(const KeyType &key, node_ptr n, const Comp &c)
    {
       return c.comp_left(key, n) ? splay_left
            : (Comp::is_total || c.comp_right(n, key)) ? splay_right : splay_found;

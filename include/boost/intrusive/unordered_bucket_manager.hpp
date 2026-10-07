@@ -50,10 +50,10 @@ struct operator_new_allocator
    typedef T *                   pointer;
    typedef std::size_t           size_type;
 
-   pointer allocate(size_type n)
+   BOOST_INTRUSIVE_FORCEINLINE pointer allocate(size_type n)
    {  return static_cast<pointer>(::operator new(n * sizeof(T)));  }
 
-   void deallocate(pointer p, size_type)
+   BOOST_INTRUSIVE_FORCEINLINE void deallocate(pointer p, size_type)
    {  ::operator delete(static_cast<void *>(p));  }
 };
 
@@ -111,13 +111,13 @@ class bucket_array_base
 
    static const size_type bucket_overhead = size_type(BucketOverhead);
 
-   bucket_ptr buckets() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE bucket_ptr buckets() const BOOST_NOEXCEPT
    {  return m_buckets;  }
 
-   size_type bucket_count() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE size_type bucket_count() const BOOST_NOEXCEPT
    {  return m_bucket_count;  }
 
-   float max_load_factor() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE float max_load_factor() const BOOST_NOEXCEPT
    {  return m_max_load_factor;  }
 
    void max_load_factor(float mlf)
@@ -129,7 +129,7 @@ class bucket_array_base
       }
    }
 
-   float load_factor(size_type element_count) const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE float load_factor(size_type element_count) const BOOST_NOEXCEPT
    {  return float(element_count) / float(m_bucket_count);  }
 
    //Returns true and the new bucket count if the array is too small to hold
@@ -159,13 +159,13 @@ class bucket_array_base
 
    //Rounds `n` up to a bucket count the container accepts, limited
    //to max_count().
-   static size_type suggested_count(size_type n)
+   BOOST_INTRUSIVE_FORCEINLINE static size_type suggested_count(size_type n)
    {
       return priv_suggested_count(n ? n : size_type(1u), bool_<Power2Buckets>());
    }
 
    protected:
-   bucket_array_base()
+   BOOST_INTRUSIVE_FORCEINLINE bucket_array_base()
       :  m_buckets()
       ,  m_bucket_count(0u)
       ,  m_max_load_factor(1.0f)
@@ -174,7 +174,7 @@ class bucket_array_base
 
    //Used to implement move operations: the source must be reset afterwards
    //with set_buckets(bucket_ptr(), 0u)
-   bucket_array_base(const bucket_array_base &x)
+   BOOST_INTRUSIVE_FORCEINLINE bucket_array_base(const bucket_array_base &x)
       :  m_buckets(x.m_buckets)
       ,  m_bucket_count(x.m_bucket_count)
       ,  m_max_load_factor(x.m_max_load_factor)
@@ -293,7 +293,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES bucket_array_manager
       this->set_buckets(this->create_buckets(n), n);
    }
 
-   bucket_array_manager(BOOST_RV_REF(bucket_array_manager) x)
+   BOOST_INTRUSIVE_FORCEINLINE bucket_array_manager(BOOST_RV_REF(bucket_array_manager) x)
       :  base_t(static_cast<const base_t &>(x))
       ,  alloc_holder_t(static_cast<const alloc_holder_t &>(x))
    {
@@ -312,7 +312,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES bucket_array_manager
       return *this;
    }
 
-   ~bucket_array_manager()
+   BOOST_INTRUSIVE_FORCEINLINE ~bucket_array_manager()
    {  this->destroy_buckets(this->buckets(), this->bucket_count());  }
 
    void swap(bucket_array_manager &x)
@@ -321,7 +321,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES bucket_array_manager
       base_t::swap(x);
    }
 
-   allocator_type get_allocator() const
+   BOOST_INTRUSIVE_FORCEINLINE allocator_type get_allocator() const
    {  return allocator_type(this->priv_alloc());  }
 
    //Allocates and default-constructs `n` usable buckets plus the overhead buckets.
@@ -496,7 +496,7 @@ class unordered_bucket_manager
    //!   allocation.
    //!
    //! <b>Throws</b>: If the allocator throws.
-   explicit unordered_bucket_manager
+   BOOST_INTRUSIVE_FORCEINLINE explicit unordered_bucket_manager
       ( size_type bucket_count_hint = 0u
       , const allocator_type &a = allocator_type())
       :  base_t(bucket_count_hint, a)
@@ -508,7 +508,7 @@ class unordered_bucket_manager
    //!   owns no buckets and shall only be destroyed, assigned to or swapped.
    //!
    //! <b>Throws</b>: If the allocator's copy constructor throws.
-   unordered_bucket_manager(BOOST_RV_REF(unordered_bucket_manager) x)
+   BOOST_INTRUSIVE_FORCEINLINE unordered_bucket_manager(BOOST_RV_REF(unordered_bucket_manager) x)
       :  base_t(::boost::move(static_cast<base_t&>(x)))
    {}
 
@@ -539,10 +539,10 @@ class unordered_bucket_manager
    //!   manager become associated with the other one.
    //!
    //! <b>Throws</b>: Nothing (assuming the allocator's swap doesn't throw).
-   void swap(unordered_bucket_manager &x)
+   BOOST_INTRUSIVE_FORCEINLINE void swap(unordered_bucket_manager &x)
    {  base_t::swap(x);  }
 
-   friend void swap(unordered_bucket_manager &l, unordered_bucket_manager &r) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE friend void swap(unordered_bucket_manager &l, unordered_bucket_manager &r) BOOST_NOEXCEPT
    {  l.swap(r);  }
 
    //////////////////////////////////////////////
@@ -567,7 +567,7 @@ class unordered_bucket_manager
    //!   owned array, suitable to construct the associated container.
    //!
    //! <b>Throws</b>: Nothing.
-   bucket_traits_type traits() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE bucket_traits_type traits() const BOOST_NOEXCEPT
    {
       return bucket_traits_type
          (this->buckets(), size_type(base_t::bucket_count() + base_t::bucket_overhead));
@@ -594,7 +594,7 @@ class unordered_bucket_manager
    #endif
 
    //! <b>Effects</b>: Returns the current load factor of the container.
-   float load_factor(const hashtable_type &c) const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE float load_factor(const hashtable_type &c) const BOOST_NOEXCEPT
    {  return base_t::load_factor(c.size());  }
 
    //////////////////////////////////////////////
@@ -643,7 +643,7 @@ class unordered_bucket_manager
    //! <b>Throws</b>: If the allocator throws, or if the container's hasher
    //!   throws during rehashing. Only the basic guarantee is provided if the
    //!   hasher throws: the container is left empty (see the note of rehash()).
-   bool reserve_additional(hashtable_type &c, size_type extra_elements = 1u)
+   BOOST_INTRUSIVE_FORCEINLINE bool reserve_additional(hashtable_type &c, size_type extra_elements = 1u)
    {  return this->reserve(c, size_type(c.size() + extra_elements));  }
 
    //! <b>Effects</b>: Sets the bucket count to the suggested count nearest
@@ -685,7 +685,7 @@ class unordered_bucket_manager
    //! <b>Throws</b>: If the allocator throws, or if the container's hasher
    //!   throws during rehashing. Only the basic guarantee is provided if the
    //!   hasher throws: the container is left empty (see the note of rehash()).
-   bool shrink_to_fit(hashtable_type &c)
+   BOOST_INTRUSIVE_FORCEINLINE bool shrink_to_fit(hashtable_type &c)
    {  return this->rehash(c, 0u);  }
 
    #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED

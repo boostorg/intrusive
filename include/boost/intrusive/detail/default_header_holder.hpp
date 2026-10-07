@@ -38,16 +38,16 @@ struct default_header_holder : public NodeTraits::node
    typedef typename node_traits::node_ptr node_ptr;
    typedef typename node_traits::const_node_ptr const_node_ptr;
 
-   default_header_holder() : node() {}
+   BOOST_INTRUSIVE_FORCEINLINE default_header_holder() : node() {}
 
-   inline const_node_ptr get_node() const
+   BOOST_INTRUSIVE_FORCEINLINE const_node_ptr get_node() const
    { return pointer_traits< const_node_ptr >::pointer_to(*static_cast< const node* >(this)); }
 
-   inline node_ptr get_node()
+   BOOST_INTRUSIVE_FORCEINLINE node_ptr get_node()
    { return pointer_traits< node_ptr >::pointer_to(*static_cast< node* >(this)); }
 
    // (unsafe) downcast used to implement container-from-iterator
-   inline static default_header_holder* get_holder(node_ptr p)
+   BOOST_INTRUSIVE_FORCEINLINE static default_header_holder* get_holder(node_ptr p)
    { return static_cast< default_header_holder* >(boost::movelib::to_raw_pointer(p)); }
 };
 

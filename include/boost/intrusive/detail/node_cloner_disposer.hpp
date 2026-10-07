@@ -21,6 +21,8 @@
 #  pragma once
 #endif
 
+#include <boost/intrusive/detail/workaround.hpp>
+
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/ebo_functor_holder.hpp>
@@ -55,7 +57,7 @@ struct node_cloner
       <const_pointer>::reference                            const_reference;
    typedef typename if_c<IsConst, const_reference, reference>::type reference_type;
 
-   node_cloner(F f, const ValueTraits *traits)
+   BOOST_INTRUSIVE_FORCEINLINE node_cloner(F f, const ValueTraits *traits)
       :  base_t(f), traits_(traits)
    {}
 
@@ -86,7 +88,7 @@ struct node_disposer
    static const bool safemode_or_autounlink =
       is_safe_autounlink<value_traits::link_mode>::value;
 
-   inline node_disposer(F f, const ValueTraits *cont)
+   BOOST_INTRUSIVE_FORCEINLINE node_disposer(F f, const ValueTraits *cont)
       :  base_t(f), traits_(cont)
    {}
 
@@ -106,10 +108,10 @@ struct node_null_disposer
 {
    typedef typename NodeAlgorithms::node_ptr    node_ptr;
 
-   inline node_null_disposer(null_disposer, const void *)
+   BOOST_INTRUSIVE_FORCEINLINE node_null_disposer(null_disposer, const void *)
    {}
 
-   inline void operator()(node_ptr p)
+   BOOST_INTRUSIVE_FORCEINLINE void operator()(node_ptr p)
    {  NodeAlgorithms::init(p);   }
 };
 
@@ -123,11 +125,11 @@ struct get_node_disposer
 //is normal_link. No dependencies
 struct node_noop_disposer
 {
-   inline node_noop_disposer(null_disposer, const void *)
+   BOOST_INTRUSIVE_FORCEINLINE node_noop_disposer(null_disposer, const void *)
    {}
 
    template<class NodePtr>
-   inline void operator()(const NodePtr &)
+   BOOST_INTRUSIVE_FORCEINLINE void operator()(const NodePtr &)
    {}
 };
 

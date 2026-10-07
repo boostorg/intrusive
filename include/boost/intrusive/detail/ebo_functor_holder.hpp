@@ -38,20 +38,20 @@ class ebo_functor_holder
    public:
    typedef T functor_type;
 
-   inline ebo_functor_holder()
+   BOOST_INTRUSIVE_FORCEINLINE ebo_functor_holder()
       : T()
    {}
 
-   inline explicit ebo_functor_holder(const T &t)
+   BOOST_INTRUSIVE_FORCEINLINE explicit ebo_functor_holder(const T &t)
       : T(t)
    {}
 
-   inline explicit ebo_functor_holder(BOOST_RV_REF(T) t)
+   BOOST_INTRUSIVE_FORCEINLINE explicit ebo_functor_holder(BOOST_RV_REF(T) t)
       : T(::boost::move(t))
    {}
 
    template<class Arg1, class Arg2>
-   inline ebo_functor_holder(BOOST_FWD_REF(Arg1) arg1, BOOST_FWD_REF(Arg2) arg2)
+   BOOST_INTRUSIVE_FORCEINLINE ebo_functor_holder(BOOST_FWD_REF(Arg1) arg1, BOOST_FWD_REF(Arg2) arg2)
       : T(::boost::forward<Arg1>(arg1), ::boost::forward<Arg2>(arg2))
    {}
 
@@ -60,7 +60,7 @@ class ebo_functor_holder
    inline ebo_functor_holder(const ebo_functor_holder &x) = default;
    inline ebo_functor_holder& operator=(const ebo_functor_holder &x) = default;
    #else
-   inline ebo_functor_holder(const ebo_functor_holder &x)
+   BOOST_INTRUSIVE_FORCEINLINE ebo_functor_holder(const ebo_functor_holder &x)
       : T(static_cast<const T&>(x))
    {}
 
@@ -76,7 +76,7 @@ class ebo_functor_holder
    inline ebo_functor_holder(ebo_functor_holder &&x) = default;
    inline ebo_functor_holder& operator=(ebo_functor_holder &&x) = default;
    #else
-   inline ebo_functor_holder(BOOST_RV_REF(ebo_functor_holder) x)
+   BOOST_INTRUSIVE_FORCEINLINE ebo_functor_holder(BOOST_RV_REF(ebo_functor_holder) x)
       : T(BOOST_MOVE_BASE(T, x))
    {}
 
@@ -99,8 +99,8 @@ class ebo_functor_holder
       return *this;
    }
 
-   inline T&       get(){return *this;}
-   inline const T& get()const{return *this;}
+   BOOST_INTRUSIVE_FORCEINLINE T&       get(){return *this;}
+   BOOST_INTRUSIVE_FORCEINLINE const T& get()const{return *this;}
 };
 
 template<typename T, typename Tag>
@@ -111,11 +111,11 @@ class ebo_functor_holder<T *, Tag>
    public:
    typedef T functor_type;
 
-   inline ebo_functor_holder()
+   BOOST_INTRUSIVE_FORCEINLINE ebo_functor_holder()
       : t_()
    {}
 
-   inline explicit ebo_functor_holder(T * t)
+   BOOST_INTRUSIVE_FORCEINLINE explicit ebo_functor_holder(T * t)
       : t_(t)
    {}
 
@@ -124,7 +124,7 @@ class ebo_functor_holder<T *, Tag>
    inline ebo_functor_holder(const ebo_functor_holder &x) = default;
    inline ebo_functor_holder& operator=(const ebo_functor_holder &x) = default;
    #else
-   inline ebo_functor_holder(const ebo_functor_holder &x)
+   BOOST_INTRUSIVE_FORCEINLINE ebo_functor_holder(const ebo_functor_holder &x)
       : t_(x.t_)
    {}
 
@@ -139,7 +139,7 @@ class ebo_functor_holder<T *, Tag>
    inline ebo_functor_holder(ebo_functor_holder &&x) = default;
    inline ebo_functor_holder& operator=(ebo_functor_holder &&x) = default;
    #else
-   inline ebo_functor_holder(BOOST_RV_REF(ebo_functor_holder) x)
+   BOOST_INTRUSIVE_FORCEINLINE ebo_functor_holder(BOOST_RV_REF(ebo_functor_holder) x)
       : t_(x.t_)
    {}
 
@@ -156,7 +156,7 @@ class ebo_functor_holder<T *, Tag>
       return *this;
    }
 
-   inline T&       get(){return *t_;}
+   BOOST_INTRUSIVE_FORCEINLINE T&       get(){return *t_;}
 
    private:
    T * t_;

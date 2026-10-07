@@ -81,7 +81,7 @@ class circular_list_algorithms
    //! <b>Complexity</b>: Constant
    //!
    //! <b>Throws</b>: Nothing.
-   inline static bool inited(const_node_ptr this_node) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bool inited(const_node_ptr this_node) BOOST_NOEXCEPT
    {  return !NodeTraits::get_next(this_node); }
 
    //! <b>Effects</b>: Constructs an empty list, making this_node the only
@@ -103,7 +103,7 @@ class circular_list_algorithms
    //! <b>Complexity</b>: Constant
    //!
    //! <b>Throws</b>: Nothing.
-   inline static bool is_empty(const_node_ptr this_node) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bool is_empty(const_node_ptr this_node) BOOST_NOEXCEPT
    {
       return NodeTraits::get_next(this_node) == this_node;
    }

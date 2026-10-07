@@ -21,20 +21,22 @@
 #  pragma once
 #endif
 
+#include <boost/intrusive/detail/workaround.hpp>
+
 namespace boost {
 namespace intrusive {
 
 struct algo_pred_equal
 {
    template<class T, class T2>
-   bool operator()(const T &x, const T2 &y) const
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const T &x, const T2 &y) const
    {  return x == y;  }
 };
 
 struct algo_pred_less
 {
    template<class T, class T2>
-   bool operator()(const T &x, const T2 &y) const
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const T &x, const T2 &y) const
    {  return x < y;  }
 };
 
@@ -59,11 +61,11 @@ bool algo_equal(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2
 }
 
 template<class InputIt1, class InputIt2>
-bool algo_equal(InputIt1 first1, InputIt1 last1, InputIt2 first2)
+BOOST_INTRUSIVE_FORCEINLINE bool algo_equal(InputIt1 first1, InputIt1 last1, InputIt2 first2)
 {  return (algo_equal)(first1, last1, first2, algo_pred_equal());  }
 
 template<class InputIt1, class InputIt2>
-bool algo_equal(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2)
+BOOST_INTRUSIVE_FORCEINLINE bool algo_equal(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2)
 {  return (algo_equal)(first1, last1, first2, last2, algo_pred_equal());  }
 
 template <class InputIterator1, class InputIterator2, class BinaryPredicate>
@@ -80,7 +82,7 @@ template <class InputIterator1, class InputIterator2, class BinaryPredicate>
 }
 
 template <class InputIterator1, class InputIterator2>
-  bool algo_lexicographical_compare (InputIterator1 first1, InputIterator1 last1,
+  BOOST_INTRUSIVE_FORCEINLINE bool algo_lexicographical_compare (InputIterator1 first1, InputIterator1 last1,
                                      InputIterator2 first2, InputIterator2 last2)
 {  return (algo_lexicographical_compare)(first1, last1, first2, last2, algo_pred_less());  }
 

@@ -21,6 +21,7 @@
 #include <cstddef>
 #include <climits>
 #include <boost/intrusive/detail/mpl.hpp>
+#include <boost/intrusive/detail/workaround.hpp>
 
 namespace boost {
 namespace intrusive {
@@ -37,7 +38,7 @@ struct hash_integral_impl;
 template<class T, bool is_unsigned, std::size_t size_t_bits, std::size_t type_bits>
 struct hash_integral_impl<T, false, is_unsigned, size_t_bits, type_bits>
 {
-    static std::size_t fn( T v )
+    BOOST_INTRUSIVE_FORCEINLINE static std::size_t fn( T v )
     {
         return static_cast<std::size_t>( v );
     }
@@ -106,7 +107,7 @@ struct hash_integral_impl<T, true, true, 64, 128>
 };
 
 template <typename T>
-typename enable_if_c<is_integral<T>::value, std::size_t>::type
+BOOST_INTRUSIVE_FORCEINLINE typename enable_if_c<is_integral<T>::value, std::size_t>::type
     hash_value( T v )
 {
     return hash_integral_impl<T>::fn( v );

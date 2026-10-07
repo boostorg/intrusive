@@ -151,7 +151,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    typedef detail::key_nodeptr_comp<priority_compare, value_traits, priority_of_value> prio_node_prio_comp_t;
 
    template<class PrioPrioComp>
-   detail::key_nodeptr_comp<PrioPrioComp, value_traits, priority_of_value> prio_node_prio_comp(PrioPrioComp priopriocomp) const
+   BOOST_INTRUSIVE_FORCEINLINE detail::key_nodeptr_comp<PrioPrioComp, value_traits, priority_of_value> prio_node_prio_comp(PrioPrioComp priopriocomp) const
    {  return detail::key_nodeptr_comp<PrioPrioComp, value_traits, priority_of_value>(priopriocomp, &this->get_value_traits());  }
 
    /// @cond
@@ -170,10 +170,10 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //so the heap order of the priorities would be broken
    BOOST_INTRUSIVE_STATIC_ASSERT(((int)value_traits::link_mode != (int)auto_unlink));
 
-   const priority_compare &priv_pcomp() const
+   BOOST_INTRUSIVE_FORCEINLINE const priority_compare &priv_pcomp() const
    {  return static_cast<const prio_base&>(*this).get();  }
 
-   priority_compare &priv_pcomp()
+   BOOST_INTRUSIVE_FORCEINLINE priority_compare &priv_pcomp()
    {  return static_cast<prio_base&>(*this).get();  }
 
    /// @endcond
@@ -188,7 +188,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks)
    //!   or the copy constructor of the value_compare/priority_compare objects throw. Basic guarantee.
-   treap_impl()
+   BOOST_INTRUSIVE_FORCEINLINE treap_impl()
       : tree_type(), prio_base()
    {}
 
@@ -232,7 +232,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    }
 
    //! @copydoc ::boost::intrusive::bstree::bstree(bstree &&)
-   treap_impl(BOOST_RV_REF(treap_impl) x)
+   BOOST_INTRUSIVE_FORCEINLINE treap_impl(BOOST_RV_REF(treap_impl) x)
       : tree_type(BOOST_MOVE_BASE(tree_type, x))
       , prio_base(::boost::move(x.priv_pcomp()))
    {}
@@ -269,7 +269,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   inline iterator top() BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE iterator top() BOOST_NOEXCEPT
    {  return this->tree_type::root();   }
 
    //! <b>Effects</b>: Returns a const_iterator pointing to the highest priority object of the treap..
@@ -277,7 +277,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   inline const_iterator top() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator top() const BOOST_NOEXCEPT
    {  return this->ctop();   }
 
    //! <b>Effects</b>: Returns a const_iterator pointing to the highest priority object of the treap..
@@ -285,7 +285,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   inline const_iterator ctop() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator ctop() const BOOST_NOEXCEPT
    {  return this->tree_type::root();   }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -324,7 +324,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   inline reverse_iterator rtop() BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE reverse_iterator rtop() BOOST_NOEXCEPT
    {  return reverse_iterator(this->top());  }
 
    //! <b>Effects</b>: Returns a const_reverse_iterator pointing to the highest priority objec
@@ -333,7 +333,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   inline const_reverse_iterator rtop() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE const_reverse_iterator rtop() const BOOST_NOEXCEPT
    {  return const_reverse_iterator(this->top());  }
 
    //! <b>Effects</b>: Returns a const_reverse_iterator pointing to the highest priority object
@@ -342,7 +342,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   inline const_reverse_iterator crtop() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE const_reverse_iterator crtop() const BOOST_NOEXCEPT
    {  return const_reverse_iterator(this->top());  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -376,7 +376,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: If priority_compare copy-constructor throws.
-   priority_compare priority_comp() const
+   BOOST_INTRUSIVE_FORCEINLINE priority_compare priority_comp() const
    {  return this->priv_pcomp();   }
 
    //! <b>Effects</b>: Swaps the contents of two treaps.
@@ -612,7 +612,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //!
    //!   "commit_data" remains valid for a subsequent "insert_commit" only if no more
    //!   objects are inserted or erased from the container.
-   std::pair<iterator, bool> insert_unique_check
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<iterator, bool> insert_unique_check
       ( const key_type &key, const priority_type &prio, insert_commit_data &commit_data)
    {  return this->insert_unique_check(key, this->key_comp(), prio, this->priv_pcomp(), commit_data); }
 
@@ -644,7 +644,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //!
    //!   "commit_data" remains valid for a subsequent "insert_commit" only if no more
    //!   objects are inserted or erased from the container.
-   std::pair<iterator, bool> insert_unique_check
+   BOOST_INTRUSIVE_FORCEINLINE std::pair<iterator, bool> insert_unique_check
       ( const_iterator hint, const key_type &key, const priority_type &prio, insert_commit_data &commit_data)
    {  return this->insert_unique_check(hint, key, this->key_comp(), prio, this->priv_pcomp(), commit_data); }
 
@@ -885,7 +885,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //!
    //! <b>Note</b>: Invalidates the iterators (but not the references)
    //!    to the erased elements. No destructors are called.
-   iterator erase(const_iterator b, const_iterator e)
+   BOOST_INTRUSIVE_FORCEINLINE iterator erase(const_iterator b, const_iterator e)
    {  size_type n;   return private_erase(b, e, n);   }
 
    //! <b>Effects</b>: Erases all the elements with the given value.
@@ -898,7 +898,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //!
    //! <b>Note</b>: Invalidates the iterators (but not the references)
    //!    to the erased elements. No destructors are called.
-   size_type erase(const key_type &key)
+   BOOST_INTRUSIVE_FORCEINLINE size_type erase(const key_type &key)
    {  return this->erase(key, this->key_comp());   }
 
    //! <b>Effects</b>: Erases all the elements with the given key.
@@ -946,7 +946,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
 
    #if !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
    template<class Disposer>
-   iterator erase_and_dispose(iterator i, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE iterator erase_and_dispose(iterator i, Disposer disposer)
    {  return this->erase_and_dispose(const_iterator(i), disposer);   }
    #endif
 
@@ -963,7 +963,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //! <b>Note</b>: Invalidates the iterators
    //!    to the erased elements.
    template<class Disposer>
-   iterator erase_and_dispose(const_iterator b, const_iterator e, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE iterator erase_and_dispose(const_iterator b, const_iterator e, Disposer disposer)
    {  size_type n;   return private_erase(b, e, n, disposer);   }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
@@ -1024,7 +1024,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //!
    //! <b>Note</b>: Invalidates the iterators (but not the references)
    //!    to the erased elements. No destructors are called.
-   void clear() BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE void clear() BOOST_NOEXCEPT
    {  tree_type::clear(); }
 
    //! <b>Effects</b>: Erases all of the elements calling disposer(p) for
@@ -1140,7 +1140,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    }
 
    //! @copydoc ::boost::intrusive::bstree::check()const
-   void check() const
+   BOOST_INTRUSIVE_FORCEINLINE void check() const
    {  check(detail::empty_node_checker<ValueTraits>());  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -1374,7 +1374,7 @@ class treap
    //Assert if passed value traits are compatible with the type
    BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
-   inline treap()
+   BOOST_INTRUSIVE_FORCEINLINE treap()
       :  Base()
    {}
 
@@ -1392,35 +1392,35 @@ class treap
       :  Base(unique, b, e, cmp, pcmp, v_traits)
    {}
 
-   inline treap(BOOST_RV_REF(treap) x)
+   BOOST_INTRUSIVE_FORCEINLINE treap(BOOST_RV_REF(treap) x)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
-   inline treap& operator=(BOOST_RV_REF(treap) x)
+   BOOST_INTRUSIVE_FORCEINLINE treap& operator=(BOOST_RV_REF(treap) x)
    {  return static_cast<treap&>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    template <class Cloner, class Disposer>
-   inline void clone_from(const treap &src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(const treap &src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(src, cloner, disposer);  }
 
    template <class Cloner, class Disposer>
-   inline void clone_from(BOOST_RV_REF(treap) src, Cloner cloner, Disposer disposer)
+   BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(treap) src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static treap &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static treap &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT
    {  return static_cast<treap &>(Base::container_from_end_iterator(end_iterator));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static const treap &container_from_end_iterator(const_iterator end_iterator) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static const treap &container_from_end_iterator(const_iterator end_iterator) BOOST_NOEXCEPT
    {  return static_cast<const treap &>(Base::container_from_end_iterator(end_iterator));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static treap &container_from_iterator(iterator it) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static treap &container_from_iterator(iterator it) BOOST_NOEXCEPT
    {  return static_cast<treap &>(Base::container_from_iterator(it));   }
 
    BOOST_INTRUSIVE_NO_DANGLING
-   inline static const treap &container_from_iterator(const_iterator it) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static const treap &container_from_iterator(const_iterator it) BOOST_NOEXCEPT
    {  return static_cast<const treap &>(Base::container_from_iterator(it));   }
 };
 

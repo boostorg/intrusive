@@ -295,11 +295,11 @@ inline InputIt iterator_unext(InputIt it, typename iterator_traits<InputIt>::siz
 ////////////////////////////////////////
 
 template<class I>
-inline typename iterator_traits<I>::pointer iterator_arrow_result(const I &i)
+BOOST_INTRUSIVE_FORCEINLINE typename iterator_traits<I>::pointer iterator_arrow_result(const I &i)
 {  return i.operator->();  }
 
 template<class T>
-inline T * iterator_arrow_result(T *p)
+BOOST_INTRUSIVE_FORCEINLINE T * iterator_arrow_result(T *p)
 {  return p;   }
 
 } //namespace intrusive

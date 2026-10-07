@@ -55,21 +55,21 @@ struct prime_list_holder
 
    //Maximum value of SizeType that std::size_t can represent
    template <class SizeType>
-   static inline std::size_t max_size_type_value()
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t max_size_type_value()
    {  return sizeof(SizeType) < sizeof(std::size_t) ? std::size_t(SizeType(-1)) : std::size_t(-1);  }
 
    //Converts n to std::size_t, saturating values that std::size_t can't represent
    template <class SizeType>
-   static inline std::size_t saturate_to_size_t(SizeType n)
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t saturate_to_size_t(SizeType n)
    {  return saturate_to_size_t(n, detail::bool_<(sizeof(SizeType) > sizeof(std::size_t))>());  }
 
    //SizeType is not wider than std::size_t, no saturation needed
    template <class SizeType>
-   static inline std::size_t saturate_to_size_t(SizeType n, detail::false_)
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t saturate_to_size_t(SizeType n, detail::false_)
    {  return std::size_t(n);  }
 
    template <class SizeType>
-   static inline std::size_t saturate_to_size_t(SizeType n, detail::true_)
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t saturate_to_size_t(SizeType n, detail::true_)
    {  return n > SizeType(std::size_t(-1)) ? std::size_t(-1) : std::size_t(n);  }
 
    static const std::size_t prime_list[];
@@ -102,32 +102,32 @@ struct prime_list_holder
    public:
 
    template <class SizeType>
-   static inline SizeType suggested_upper_bucket_count(SizeType n)
+   BOOST_INTRUSIVE_FORCEINLINE static SizeType suggested_upper_bucket_count(SizeType n)
    {
       return static_cast<SizeType>
          (*suggested_upper_bucket_count_ptr(saturate_to_size_t(n), max_size_type_value<SizeType>()));
    }
 
    template <class SizeType>
-   static inline SizeType suggested_lower_bucket_count(SizeType n)
+   BOOST_INTRUSIVE_FORCEINLINE static SizeType suggested_lower_bucket_count(SizeType n)
    {  return static_cast<SizeType>(*suggested_lower_bucket_count_ptr(saturate_to_size_t(n)));   }
 
    template <class SizeType>
-   static inline std::size_t suggested_lower_bucket_count_idx(SizeType n)
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t suggested_lower_bucket_count_idx(SizeType n)
    {  return static_cast<std::size_t>(suggested_lower_bucket_count_ptr(saturate_to_size_t(n)) - &prime_list[0]); }
 
    template <class SizeType>
-   static inline std::size_t suggested_upper_bucket_count_idx(SizeType n)
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t suggested_upper_bucket_count_idx(SizeType n)
    {
       return static_cast<std::size_t>
          (suggested_upper_bucket_count_ptr(saturate_to_size_t(n), max_size_type_value<SizeType>()) - &prime_list[0]);
    }
 
-   static inline std::size_t size_from_index(std::size_t n)
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t size_from_index(std::size_t n)
    {  return prime_list[std::ptrdiff_t(n)]; }
 
    template<std::size_t SizeIndex>
-   inline static std::size_t modfunc(std::size_t hash) { return hash % SizeIndex; }
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t modfunc(std::size_t hash) { return hash % SizeIndex; }
 
    static std::size_t(*const positions[])(std::size_t);
 
@@ -137,14 +137,14 @@ struct prime_list_holder
    #endif
 
    template <class SizeType>
-   inline static std::size_t lower_size_index(SizeType n)
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t lower_size_index(SizeType n)
    {   return prime_list_holder<>::suggested_lower_bucket_count_idx(n);  }
 
    template <class SizeType>
-   inline static std::size_t upper_size_index(SizeType n)
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t upper_size_index(SizeType n)
    {   return prime_list_holder<>::suggested_upper_bucket_count_idx(n);  }
 
-   inline static std::size_t size(std::size_t size_index)
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t size(std::size_t size_index)
    {   return prime_list_holder<>::size_from_index(size_index);  }
 
    #if BOOST_INTRUSIVE_64_BIT_SIZE_T

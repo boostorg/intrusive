@@ -57,7 +57,7 @@ struct hash;
 namespace boost_intrusive_adl
 {
    template<class T>
-   inline std::size_t hash_value(const T& v)
+   BOOST_INTRUSIVE_FORCEINLINE std::size_t hash_value(const T& v)
    {
       return boost::hash<T>()(v);
    }
@@ -78,7 +78,7 @@ inline typename detail::disable_if_c<detail::is_scalar<T>::value, std::size_t>::
 }
 
 template <typename T>
-typename enable_if_c<is_enum<T>::value, std::size_t>::type
+BOOST_INTRUSIVE_FORCEINLINE typename enable_if_c<is_enum<T>::value, std::size_t>::type
    hash_value( T v )
 {
    return static_cast<std::size_t>( v );
@@ -181,7 +181,7 @@ template<class T> struct hash_float_impl<T, 128>
 #endif   //#if (LDBL_MAX_10_EXP  == 4932)
 
 template <typename T>
-typename enable_if_c<is_floating_point<T>::value, std::size_t>::type
+BOOST_INTRUSIVE_FORCEINLINE typename enable_if_c<is_floating_point<T>::value, std::size_t>::type
    hash_value( T v )
 {
    return boost::intrusive::detail::hash_float_impl<T>::fn( v + 0 );
@@ -206,7 +206,7 @@ template <class T> std::size_t hash_value( T* const& v )
 ////////////////////////////////////////////////////////////
 #if !defined(BOOST_NO_CXX11_NULLPTR)
 template <typename T>
-typename enable_if_c<is_same<T, std::nullptr_t>::value, std::size_t>::type
+BOOST_INTRUSIVE_FORCEINLINE typename enable_if_c<is_same<T, std::nullptr_t>::value, std::size_t>::type
    hash_value( T const &)
 {
    return (hash_value)( static_cast<void*>( nullptr ) );
@@ -261,7 +261,7 @@ inline typename detail::enable_if_c<detail::is_scalar<T>::value, std::size_t>::t
 template<class T>
 struct internal_hash_functor
 {
-   inline std::size_t operator()(T const& val) const
+   BOOST_INTRUSIVE_FORCEINLINE std::size_t operator()(T const& val) const
    {
       return ::boost::intrusive::detail::hash_value_dispatch(val);
    }

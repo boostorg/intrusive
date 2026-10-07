@@ -21,6 +21,8 @@
 #  pragma once
 #endif
 
+#include <boost/intrusive/detail/workaround.hpp>
+
 namespace boost {
 namespace intrusive {
 namespace detail {
@@ -34,7 +36,7 @@ struct empty_node_checker
 
    struct return_type {};
 
-   void operator () (const_node_ptr, const return_type&, const return_type&, return_type&) {}
+   BOOST_INTRUSIVE_FORCEINLINE void operator () (const_node_ptr, const return_type&, const return_type&, return_type&) {}
 };
 
 }  //namespace detail{

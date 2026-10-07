@@ -21,6 +21,8 @@
 #  pragma once
 #endif
 
+#include <boost/intrusive/detail/workaround.hpp>
+
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/tree_value_compare.hpp>
 
@@ -77,19 +79,19 @@ public:
       static const bool value = same_type || is_convertible<P1, const_node_ptr>::value;
    };
 
-   inline const base_t &base() const
+   BOOST_INTRUSIVE_FORCEINLINE const base_t &base() const
    {  return *this; }
 
-   inline base_t &base()
+   BOOST_INTRUSIVE_FORCEINLINE base_t &base()
    {  return *this; }
 
-   inline key_nodeptr_comp(KeyTypeKeyCompare kcomp, const ValueTraits *traits)
+   BOOST_INTRUSIVE_FORCEINLINE key_nodeptr_comp(KeyTypeKeyCompare kcomp, const ValueTraits *traits)
       :  base_t(kcomp), traits_(traits)
    {}
 
    //pred(pnode)
    template<class T1>
-   inline bool operator()(const T1 &t1, typename enable_if_c< is_same_or_nodeptr_convertible<T1>::value, sfinae_type* >::type = 0) const
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const T1 &t1, typename enable_if_c< is_same_or_nodeptr_convertible<T1>::value, sfinae_type* >::type = 0) const
    {  return base().get()(key_of_value()(*traits_->to_value_ptr(t1)));  }
 
    //operator() 2 arg

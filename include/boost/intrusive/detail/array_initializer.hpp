@@ -71,10 +71,10 @@ class array_initializer
       BOOST_INTRUSIVE_CATCH_END
    }
 
-   operator T* ()
+   BOOST_INTRUSIVE_FORCEINLINE operator T* ()
    {  return (T*)(rawbuf);  }
 
-   operator const T*() const
+   BOOST_INTRUSIVE_FORCEINLINE operator const T*() const
    {  return (const T*)(rawbuf);  }
 
    ~array_initializer()

@@ -234,7 +234,7 @@ template<class VoidPointer>
 class any_algorithms
 {
    template <class T>
-   static void function_not_available_for_any_hooks(typename detail::enable_if<detail::is_same<T, bool> >::type)
+   BOOST_INTRUSIVE_FORCEINLINE static void function_not_available_for_any_hooks(typename detail::enable_if<detail::is_same<T, bool> >::type)
    {}
 
    public:
@@ -263,16 +263,16 @@ class any_algorithms
    inline static bool inited(const_node_ptr n)
    {  return !n->node_ptr_1;  };
 
-   inline static bool unique(const_node_ptr n) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bool unique(const_node_ptr n) BOOST_NOEXCEPT
    {  return !n->node_ptr_1; }
 
-   static void unlink(node_ptr)
+   BOOST_INTRUSIVE_FORCEINLINE static void unlink(node_ptr)
    {
       //Auto-unlink hooks and unlink() are not available for any hooks
       any_algorithms<VoidPointer>::template function_not_available_for_any_hooks<node_ptr>();
    }
 
-   static void swap_nodes(node_ptr, node_ptr)
+   BOOST_INTRUSIVE_FORCEINLINE static void swap_nodes(node_ptr, node_ptr)
    {
       //Any nodes have no swap_nodes capability because they don't know
       //what algorithm they must use to unlink the node from the container

@@ -52,7 +52,7 @@ class common_slist_algorithms
       return p;
    }
 
-   inline static void init(node_ptr this_node) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static void init(node_ptr this_node) BOOST_NOEXCEPT
    {  NodeTraits::set_next(this_node, node_ptr());  }
 
    static bool unique(const_node_ptr this_node) BOOST_NOEXCEPT
@@ -61,7 +61,7 @@ class common_slist_algorithms
       return !next || next == this_node;
    }
 
-   inline static bool inited(const_node_ptr this_node) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bool inited(const_node_ptr this_node) BOOST_NOEXCEPT
    {  return !NodeTraits::get_next(this_node); }
 
    inline static void unlink_after(node_ptr prev_node) BOOST_NOEXCEPT
@@ -70,7 +70,7 @@ class common_slist_algorithms
       NodeTraits::set_next(prev_node, NodeTraits::get_next(this_node));
    }
 
-   inline static void unlink_after(node_ptr prev_node, node_ptr last_node) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static void unlink_after(node_ptr prev_node, node_ptr last_node) BOOST_NOEXCEPT
    {  NodeTraits::set_next(prev_node, last_node);  }
 
    static void link_after(node_ptr prev_node, node_ptr this_node) BOOST_NOEXCEPT

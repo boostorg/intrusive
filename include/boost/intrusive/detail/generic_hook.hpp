@@ -49,11 +49,11 @@ inline void destructor_impl(Hook &hook, detail::link_dispatch<safe_link>)
 }
 
 template<class Hook>
-inline void destructor_impl(Hook &hook, detail::link_dispatch<auto_unlink>)
+BOOST_INTRUSIVE_FORCEINLINE void destructor_impl(Hook &hook, detail::link_dispatch<auto_unlink>)
 {  hook.unlink();  }
 
 template<class Hook>
-inline void destructor_impl(Hook &, detail::link_dispatch<normal_link>)
+BOOST_INTRUSIVE_FORCEINLINE void destructor_impl(Hook &, detail::link_dispatch<normal_link>)
 {}
 
 }  //namespace detail {
@@ -161,10 +161,10 @@ class BOOST_INTRUSIVE_EMPTY_BASES generic_hook
       < NodeTraits
       , Tag, LinkMode, BaseHookType>                  hooktags;
 
-   inline node_ptr this_ptr() BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE node_ptr this_ptr() BOOST_NOEXCEPT
    {  return pointer_traits<node_ptr>::pointer_to(static_cast<node&>(*this)); }
 
-   inline const_node_ptr this_ptr() const BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE const_node_ptr this_ptr() const BOOST_NOEXCEPT
    {  return pointer_traits<const_node_ptr>::pointer_to(static_cast<const node&>(*this)); }
 
    public:
@@ -192,7 +192,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES generic_hook
       }
    }
 
-   inline generic_hook& operator=(const generic_hook& ) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE generic_hook& operator=(const generic_hook& ) BOOST_NOEXCEPT
    {  return *this;  }
 
    inline ~generic_hook()
@@ -209,7 +209,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES generic_hook
    ~generic_hook() requires (LinkMode == normal_link) = default;
    #endif
 
-   inline void swap_nodes(generic_hook &other) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE void swap_nodes(generic_hook &other) BOOST_NOEXCEPT
    {
       node_algorithms::swap_nodes
          (this->this_ptr(), other.this_ptr());

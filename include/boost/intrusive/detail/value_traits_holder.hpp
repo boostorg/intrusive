@@ -21,6 +21,8 @@
 #  pragma once
 #endif
 
+#include <boost/intrusive/detail/workaround.hpp>
+
 namespace boost {
 namespace intrusive {
 namespace detail {
@@ -31,7 +33,7 @@ template<class ValueTraits>
 struct value_traits_holder
    : public ValueTraits
 {
-   inline explicit value_traits_holder(const ValueTraits &val_traits)
+   BOOST_INTRUSIVE_FORCEINLINE explicit value_traits_holder(const ValueTraits &val_traits)
       :  ValueTraits(val_traits)
    {}
 };
