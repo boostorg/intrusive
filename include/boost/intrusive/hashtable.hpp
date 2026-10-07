@@ -856,6 +856,138 @@ struct hashtable_node_ops
          slist_node_algorithms::init_header(buckets_it->get_node_ptr());
       }
    }
+
+   //Bucket array operations. "buckets" is the bucket array and "usable_cnt" the
+   //number of buckets that can hold elements (the sentinel bucket of linear
+   //buckets is not included).
+
+   //The bucket pointer is null in a moved-from container: convert it without dereferencing it
+   BOOST_INTRUSIVE_FORCEINLINE static siterator priv_end_sit(bucket_ptr buckets, std::size_t usable_cnt)
+   {
+      (void)usable_cnt;
+      BOOST_IF_CONSTEXPR(LinearBuckets)
+         return siterator(buckets + std::ptrdiff_t(usable_cnt));
+      else
+         return siterator(pointer_traits<slist_node_ptr>::static_cast_from(buckets));
+   }
+
+   BOOST_INTRUSIVE_FORCEINLINE static bucket_ptr priv_invalid_bucket_ptr(bucket_ptr buckets, std::size_t usable_cnt)
+   {
+      (void)buckets; (void)usable_cnt;
+      BOOST_IF_CONSTEXPR(LinearBuckets)
+         return bucket_ptr();
+      else
+         return buckets + std::ptrdiff_t(usable_cnt);
+   }
+
+   //Linear buckets: marks the last bucket of the array ("bucket_cnt" is the total count)
+   //as the sentinel that ends the iteration
+   static void priv_set_sentinel_bucket(bucket_ptr buckets, std::size_t bucket_cnt)
+   {
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(bucket_cnt > 1);
+      slist_node_algorithms::set_sentinel(buckets[std::ptrdiff_t(bucket_cnt - 1u)].get_node_ptr());
+   }
+
+   static void priv_unset_sentinel_bucket(bucket_ptr buckets, std::size_t bucket_cnt)
+   {
+      //A moved-from container has no bucket array and no sentinel bucket
+      if(!bucket_cnt)
+         return;
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(bucket_cnt > 1);
+      slist_node_algorithms::init_header(buckets[std::ptrdiff_t(bucket_cnt - 1u)].get_node_ptr());
+   }
+
+   //Unlinks all the nodes of "bucket_cnt" buckets. Nodes are initialized if the link mode requires it.
+   template<bool SafeModeOrAutoUnlink>
+   static void priv_clear_buckets(const bucket_ptr buckets_ptr, const std::size_t bucket_cnt)
+   {
+      //Same type as the node disposer that containers build from null_disposer, to share instantiations
+      typedef node_cast_adaptor
+         < detail::node_null_disposer<typename get_algo<CommonSListAlgorithms, node_traits>::type>
+         , slist_node_ptr, node_ptr>                     init_disposer_t;
+      bucket_ptr buckets_it = buckets_ptr;
+      for(std::size_t bucket_i = 0; bucket_i != bucket_cnt; ++buckets_it, ++bucket_i){
+         BOOST_IF_CONSTEXPR(SafeModeOrAutoUnlink){
+            slist_node_algorithms::detach_and_dispose
+               (buckets_it->get_node_ptr(), init_disposer_t(detail::null_disposer(), static_cast<const void*>(0)));
+         }
+         else{
+            slist_node_algorithms::init_header(buckets_it->get_node_ptr());
+         }
+      }
+   }
+
+   //Returns the first element of the first non-empty bucket, searching from bucket "n",
+   //and stores that bucket in "pbucketptr". If all buckets are empty, returns the end
+   //iterator and stores the invalid bucket pointer.
+   static siterator priv_begin_from(bucket_ptr buckets, std::size_t n, std::size_t usable_cnt, bucket_ptr &pbucketptr)
+   {
+      for (; n < usable_cnt; ++n){
+         bucket_type &b = buckets[std::ptrdiff_t(n)];
+         if(!slist_node_algorithms::is_empty(b.get_node_ptr())){
+            pbucketptr = to_ptr(b);
+            return siterator(b.begin_ptr());
+         }
+      }
+      pbucketptr = priv_invalid_bucket_ptr(buckets, usable_cnt);
+      return priv_end_sit(buckets, usable_cnt);
+   }
+
+   //Advances "cache" to the first non-empty bucket in [cache, cache_end)
+   static void priv_skip_empty_buckets(bucket_ptr &cache, const bucket_ptr cache_end)
+   {
+      while( cache != cache_end) {
+         if (!slist_node_algorithms::is_empty(cache->get_node_ptr())) {
+            return;
+         }
+         ++cache;
+      }
+   }
+
+   static std::size_t priv_count_elements(bucket_ptr buckets, std::size_t usable_cnt)
+   {
+      std::size_t len = 0;
+      for (std::size_t n = 0; n < usable_cnt; ++n){
+         len += slist_node_algorithms::count(buckets[std::ptrdiff_t(n)].get_node_ptr()) - 1u;
+      }
+      return len;
+   }
+
+   static bool priv_all_buckets_empty(bucket_ptr buckets, std::size_t usable_cnt)
+   {
+      for (std::size_t n = 0; n < usable_cnt; ++n){
+         if(!slist_node_algorithms::is_empty(buckets[std::ptrdiff_t(n)].get_node_ptr())){
+            return false;
+         }
+      }
+      return true;
+   }
+
+   template<class NodeDisposer, bool OptimizeMultikey>
+   static std::size_t priv_erase_node_range
+      ( bucket_ptr buckets
+      , siterator const &before_first_it,  std::size_t const first_bucket
+      , siterator const &last_it,          std::size_t const last_bucket
+      , NodeDisposer node_disposer, detail::bool_<OptimizeMultikey> optimize_multikey_tag)
+   {
+      std::size_t num_erased(0);
+      siterator last_step_before_it;
+      if(first_bucket != last_bucket){
+         bucket_type &fb = buckets[std::ptrdiff_t(first_bucket)];
+         num_erased += priv_erase_from_single_bucket
+            (fb, before_first_it, sit_end(fb), node_disposer, optimize_multikey_tag);
+         for(std::size_t i = first_bucket + 1u; i != last_bucket; ++i){
+            num_erased += priv_erase_whole_bucket(buckets[std::ptrdiff_t(i)], node_disposer);
+         }
+         last_step_before_it = sit_bbegin(buckets[std::ptrdiff_t(last_bucket)]);
+      }
+      else{
+         last_step_before_it = before_first_it;
+      }
+      num_erased += priv_erase_from_single_bucket
+                  (buckets[std::ptrdiff_t(last_bucket)], last_step_before_it, last_it, node_disposer, optimize_multikey_tag);
+      return num_erased;
+   }
 };
 
 //bucket_plus_vtraits stores ValueTraits + BucketTraits
@@ -999,7 +1131,7 @@ struct bucket_plus_vtraits
    BOOST_INTRUSIVE_FORCEINLINE bucket_ptr priv_past_usable_bucket_ptr() const
    {  return this->priv_bucket_pointer() + std::ptrdiff_t(priv_usable_bucket_count()); }
 
-   inline bucket_ptr priv_invalid_bucket_ptr() const
+   BOOST_INTRUSIVE_FORCEINLINE bucket_ptr priv_invalid_bucket_ptr() const
    {
       BOOST_IF_CONSTEXPR(LinearBuckets) {
          return bucket_ptr();
@@ -1009,24 +1141,17 @@ struct bucket_plus_vtraits
       }
    }
 
-   inline void priv_set_sentinel_bucket() const
+   BOOST_INTRUSIVE_FORCEINLINE void priv_set_sentinel_bucket() const
    {
       BOOST_IF_CONSTEXPR(LinearBuckets) {
-         BOOST_INTRUSIVE_INVARIANT_ASSERT(this->priv_bucket_traits().bucket_count() > 1);
-         bucket_type &b = this->priv_bucket_pointer()[std::ptrdiff_t(this->priv_usable_bucket_count())];
-         slist_node_algorithms::set_sentinel(b.get_node_ptr());
+         node_ops_t::priv_set_sentinel_bucket(this->priv_bucket_pointer(), this->priv_bucket_traits().bucket_count());
       }
    }
 
-   inline void priv_unset_sentinel_bucket() const
+   BOOST_INTRUSIVE_FORCEINLINE void priv_unset_sentinel_bucket() const
    {
       BOOST_IF_CONSTEXPR(LinearBuckets) {
-         //A moved-from container has no bucket array and no sentinel bucket
-         if(!this->priv_bucket_traits().bucket_count())
-            return;
-         BOOST_INTRUSIVE_INVARIANT_ASSERT(this->priv_bucket_traits().bucket_count() > 1);
-         bucket_type& b = this->priv_bucket_pointer()[std::ptrdiff_t(this->priv_usable_bucket_count())];
-         slist_node_algorithms::init_header(b.get_node_ptr());
+         node_ops_t::priv_unset_sentinel_bucket(this->priv_bucket_pointer(), this->priv_bucket_traits().bucket_count());
       }
    }
 
@@ -1059,27 +1184,14 @@ struct bucket_plus_vtraits
    {  return slist_node_algorithms::is_empty(p->get_node_ptr());  }
 
    template<class NodeDisposer, bool OptimizeMultikey>
-   std::size_t priv_erase_node_range( siterator const &before_first_it,  std::size_t const first_bucket
-                        , siterator const &last_it,          std::size_t const last_bucket
-                        , NodeDisposer node_disposer, detail::bool_<OptimizeMultikey> optimize_multikey_tag)
+   BOOST_INTRUSIVE_FORCEINLINE std::size_t priv_erase_node_range
+      ( siterator const &before_first_it,  std::size_t const first_bucket
+      , siterator const &last_it,          std::size_t const last_bucket
+      , NodeDisposer node_disposer, detail::bool_<OptimizeMultikey> optimize_multikey_tag)
    {
-      std::size_t num_erased(0);
-      siterator last_step_before_it;
-      if(first_bucket != last_bucket){
-         bucket_type *b = &this->priv_bucket(0);
-         num_erased += node_ops_t::priv_erase_from_single_bucket
-            (b[first_bucket], before_first_it, this->priv_bucket_lend(first_bucket), node_disposer, optimize_multikey_tag);
-         for(std::size_t i = 0, n = (last_bucket - first_bucket - 1); i != n; ++i){
-            num_erased += node_ops_t::priv_erase_whole_bucket(b[first_bucket+i+1], node_disposer);
-         }
-         last_step_before_it = this->priv_bucket_lbbegin(last_bucket);
-      }
-      else{
-         last_step_before_it = before_first_it;
-      }
-      num_erased += node_ops_t::priv_erase_from_single_bucket
-                  (this->priv_bucket(last_bucket), last_step_before_it, last_it, node_disposer, optimize_multikey_tag);
-      return num_erased;
+      return node_ops_t::priv_erase_node_range
+         ( this->priv_bucket_pointer(), before_first_it, first_bucket, last_it, last_bucket
+         , node_disposer, optimize_multikey_tag);
    }
 
    template<class Disposer>
@@ -1115,20 +1227,6 @@ struct bucket_plus_vtraits
 
    BOOST_INTRUSIVE_FORCEINLINE const_reference priv_value_from_siterator(siterator s) const
    {  return *this->priv_value_traits().to_value_ptr(dcast_bucket_ptr<node>(s.pointed_node())); }
-
-   void priv_clear_buckets(const bucket_ptr buckets_ptr, const std::size_t bucket_cnt)
-   {
-      bucket_ptr buckets_it = buckets_ptr;
-      for(std::size_t bucket_i = 0; bucket_i != bucket_cnt; ++buckets_it, ++bucket_i){
-         bucket_type &b = *buckets_it;
-         BOOST_IF_CONSTEXPR(safemode_or_autounlink){
-            slist_node_algorithms::detach_and_dispose(b.get_node_ptr(), this->make_node_disposer(detail::null_disposer()));
-         }
-         else{
-            slist_node_algorithms::init_header(b.get_node_ptr());
-         }
-      }
-   }
 
    BOOST_INTRUSIVE_FORCEINLINE std::size_t priv_stored_or_compute_hash(const value_type &v, detail::true_) const   //For store_hash == true
    {  return node_traits::get_hash(this->priv_value_traits().to_node_ptr(v));  }
@@ -1225,56 +1323,68 @@ struct hash_key_equal
 
 {};
 
-//bucket_hash_t
-//Stores bucket_plus_vtraits plust the hash function
-template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyHash, class BucketTraits, bool LinearBuckets>
-struct BOOST_INTRUSIVE_EMPTY_BASES bucket_hash_t
+struct hashtable_hasher_tag;
+struct hashtable_equal_tag;
+
+//bucket_hash_equal_t
+//Stores the hash function, bucket_plus_vtraits and the equality function.
+//The hash function is the first base and the equality function the last one
+//so that compilers without __declspec(empty_bases) don't add padding.
+template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyHash, class VoidOrKeyEqual, class BucketTraits, bool LinearBuckets>
+struct BOOST_INTRUSIVE_EMPTY_BASES bucket_hash_equal_t
    //Use public inheritance to avoid MSVC bugs with closures
    : public detail::ebo_functor_holder
-      <typename hash_key_hash < typename bucket_plus_vtraits<ValueTraits,BucketTraits, LinearBuckets >::value_traits::value_type
-                              , VoidOrKeyOfValue
-                              , VoidOrKeyHash
-                              >::type
-      >
-   , bucket_plus_vtraits<ValueTraits, BucketTraits, LinearBuckets>  //4
+      < typename hash_key_hash<typename ValueTraits::value_type, VoidOrKeyOfValue, VoidOrKeyHash>::type
+      , hashtable_hasher_tag>
+   , public bucket_plus_vtraits<ValueTraits, BucketTraits, LinearBuckets>
+   , public detail::ebo_functor_holder
+      < typename hash_key_equal<typename ValueTraits::value_type, VoidOrKeyOfValue, VoidOrKeyEqual>::type
+      , hashtable_equal_tag>
 {
    private:
-   BOOST_MOVABLE_BUT_NOT_COPYABLE(bucket_hash_t)
+   BOOST_MOVABLE_BUT_NOT_COPYABLE(bucket_hash_equal_t)
 
    public:
-
-   typedef typename bucket_plus_vtraits
-      <ValueTraits,BucketTraits, LinearBuckets>::value_traits                       value_traits;
+   typedef ValueTraits                                                              value_traits;
    typedef typename value_traits::value_type                                        value_type;
-   typedef typename value_traits::node_traits                                       node_traits;
-   typedef hash_key_hash
-      < value_type, VoidOrKeyOfValue, VoidOrKeyHash>                                hash_key_hash_t;
-   typedef typename hash_key_hash_t::type                                           hasher;
+   typedef typename hash_key_hash
+      <value_type, VoidOrKeyOfValue, VoidOrKeyHash>::type                           hasher;
+   typedef typename hash_key_equal
+      <value_type, VoidOrKeyOfValue, VoidOrKeyEqual>::type                          key_equal;
    typedef typename hash_key_types_base<value_type, VoidOrKeyOfValue>::key_of_value key_of_value;
+   typedef detail::ebo_functor_holder<hasher, hashtable_hasher_tag>                 hasher_holder_t;
+   typedef detail::ebo_functor_holder<key_equal, hashtable_equal_tag>               equal_holder_t;
+   typedef BucketTraits                                                             bucket_traits;
+   typedef bucket_plus_vtraits<ValueTraits, BucketTraits, LinearBuckets>            bucket_plus_vtraits_t;
 
-   typedef BucketTraits bucket_traits;
-   typedef bucket_plus_vtraits<ValueTraits, BucketTraits, LinearBuckets> bucket_plus_vtraits_t;
-   typedef detail::ebo_functor_holder<hasher> base_t;
-
-   BOOST_INTRUSIVE_FORCEINLINE bucket_hash_t(const ValueTraits &val_traits, const bucket_traits &b_traits, const hasher & h)
-      : base_t(h)
+   BOOST_INTRUSIVE_FORCEINLINE bucket_hash_equal_t
+      (const ValueTraits &val_traits, const bucket_traits &b_traits, const hasher & h, const key_equal &e)
+      : hasher_holder_t(h)
       , bucket_plus_vtraits_t(val_traits, b_traits)
+      , equal_holder_t(e)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE bucket_hash_t(BOOST_RV_REF(bucket_hash_t) other)
-      : base_t(BOOST_MOVE_BASE(base_t, other))
+   BOOST_INTRUSIVE_FORCEINLINE bucket_hash_equal_t(BOOST_RV_REF(bucket_hash_equal_t) other)
+      : hasher_holder_t(BOOST_MOVE_BASE(hasher_holder_t, other))
       , bucket_plus_vtraits_t(BOOST_MOVE_BASE(bucket_plus_vtraits_t, other))
+      , equal_holder_t(BOOST_MOVE_BASE(equal_holder_t, other))
    {}
 
    template<class K>
    BOOST_INTRUSIVE_FORCEINLINE std::size_t priv_hash(const K &k) const
-   {  return this->base_t::operator()(k);  }
+   {  return this->hasher_holder_t::operator()(k);  }
 
    BOOST_INTRUSIVE_FORCEINLINE const hasher &priv_hasher() const
-   {  return this->base_t::get();  }
+   {  return this->hasher_holder_t::get();  }
 
    BOOST_INTRUSIVE_FORCEINLINE hasher &priv_hasher()
-   {  return this->base_t::get();  }
+   {  return this->hasher_holder_t::get();  }
+
+   BOOST_INTRUSIVE_FORCEINLINE const key_equal &priv_equal() const
+   {  return this->equal_holder_t::get();  }
+
+   BOOST_INTRUSIVE_FORCEINLINE key_equal &priv_equal()
+   {  return this->equal_holder_t::get();  }
 
    using bucket_plus_vtraits_t::priv_stored_or_compute_hash;   //For store_hash == true
 
@@ -1282,237 +1392,145 @@ struct BOOST_INTRUSIVE_EMPTY_BASES bucket_hash_t
    {  return this->priv_hasher()(key_of_value()(v));   }
 };
 
-template<class ValueTraits, class BucketTraits, class VoidOrKeyOfValue, class VoidOrKeyEqual, bool LinearBuckets>
-struct hashtable_equal_holder
+//Optional members of the hashtable: the first non-empty bucket (only if cache_begin<true>)
+//and the split count (only if incremental<true> or fastmod_buckets<true>).
+//If the first non-empty bucket is not cached, get_cache returns the first bucket.
+template<class BucketPtr, class SizeType, bool CacheBegin, bool HasSplit>
+struct hashtable_state_members
 {
-   typedef detail::ebo_functor_holder
-      < typename hash_key_equal  < typename bucket_plus_vtraits
-                                       <ValueTraits, BucketTraits, LinearBuckets>::value_traits::value_type
-                                 , VoidOrKeyOfValue
-                                 , VoidOrKeyEqual
-                                 >::type
-      > type;
+   typedef detail::size_holder<true, SizeType>  split_traits;
+   typedef split_traits &                       split_traits_t;
+   typedef const split_traits &                 split_traits_const_t;
+
+   BOOST_INTRUSIVE_FORCEINLINE BucketPtr get_cache(BucketPtr) const
+   {  return cached_begin_;  }
+
+   BOOST_INTRUSIVE_FORCEINLINE void set_cache(BucketPtr p)
+   {  cached_begin_ = p;  }
+
+   BOOST_INTRUSIVE_FORCEINLINE split_traits_t get_split_traits()
+   {  return split_;  }
+
+   BOOST_INTRUSIVE_FORCEINLINE split_traits_const_t get_split_traits() const
+   {  return split_;  }
+
+   BucketPtr      cached_begin_;
+   split_traits   split_;
 };
 
-
-//bucket_hash_equal_t
-//Stores bucket_hash_t and the equality function when the first
-//non-empty bucket shall not be cached.
-template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyHash, class VoidOrKeyEqual, class BucketTraits, bool LinearBuckets, bool>
-struct BOOST_INTRUSIVE_EMPTY_BASES bucket_hash_equal_t
-   //Use public inheritance to avoid MSVC bugs with closures
-   : public bucket_hash_t<ValueTraits, VoidOrKeyOfValue, VoidOrKeyHash, BucketTraits, LinearBuckets> //3
-   , public hashtable_equal_holder<ValueTraits, BucketTraits, VoidOrKeyOfValue, VoidOrKeyEqual, LinearBuckets>::type //equal
+template<class BucketPtr, class SizeType>
+struct hashtable_state_members<BucketPtr, SizeType, true, false>
 {
-   private:
-   BOOST_MOVABLE_BUT_NOT_COPYABLE(bucket_hash_equal_t)
+   typedef detail::size_holder<false, SizeType> split_traits;
+   typedef split_traits                         split_traits_t;
+   typedef split_traits                         split_traits_const_t;
 
-   public:
-   typedef typename hashtable_equal_holder
-      < ValueTraits, BucketTraits, VoidOrKeyOfValue
-      , VoidOrKeyEqual, LinearBuckets>::type                equal_holder_t;
-   typedef bucket_hash_t< ValueTraits, VoidOrKeyOfValue
-                        , VoidOrKeyHash, BucketTraits
-                        , LinearBuckets>                    bucket_hash_type;
-   typedef bucket_plus_vtraits
-      <ValueTraits, BucketTraits, LinearBuckets>            bucket_plus_vtraits_t;
-   typedef typename bucket_plus_vtraits_t::node_ops_t       node_ops_t;
-   typedef ValueTraits                                      value_traits;
-   typedef typename equal_holder_t::functor_type            key_equal;
-   typedef typename bucket_hash_type::hasher                hasher;
-   typedef BucketTraits                                     bucket_traits;
-   typedef typename bucket_plus_vtraits_t::siterator        siterator;
-   typedef typename bucket_plus_vtraits_t::const_siterator  const_siterator;
-   typedef typename bucket_plus_vtraits_t::bucket_type      bucket_type;
-   typedef typename bucket_plus_vtraits_t::slist_node_algorithms  slist_node_algorithms;
-   typedef typename unordered_bucket_ptr_impl
-      <value_traits>::type                                  bucket_ptr;
+   BOOST_INTRUSIVE_FORCEINLINE BucketPtr get_cache(BucketPtr) const
+   {  return cached_begin_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE bucket_hash_equal_t(const ValueTraits &val_traits, const bucket_traits &b_traits, const hasher & h, const key_equal &e)
-      : bucket_hash_type(val_traits, b_traits, h)
-      , equal_holder_t(e)
-   {}
+   BOOST_INTRUSIVE_FORCEINLINE void set_cache(BucketPtr p)
+   {  cached_begin_ = p;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE bucket_hash_equal_t(BOOST_RV_REF(bucket_hash_equal_t) other)
-      : bucket_hash_type(BOOST_MOVE_BASE(bucket_hash_type, other))
-      , equal_holder_t(BOOST_MOVE_BASE(equal_holder_t, other))
-   {}
+   BOOST_INTRUSIVE_FORCEINLINE split_traits_t get_split_traits() const
+   {  return split_traits();  }
 
-   BOOST_INTRUSIVE_FORCEINLINE bucket_ptr priv_get_cache()
-   {  return this->priv_bucket_pointer();   }
-
-   BOOST_INTRUSIVE_FORCEINLINE void priv_set_cache(bucket_ptr)
-   {}
-
-   BOOST_INTRUSIVE_FORCEINLINE void priv_set_cache_bucket_num(std::size_t)
-   {}
-
-   BOOST_INTRUSIVE_FORCEINLINE std::size_t priv_get_cache_bucket_num()
-   {  return 0u;  }
-
-   BOOST_INTRUSIVE_FORCEINLINE void priv_init_cache()
-   {}
-
-   BOOST_INTRUSIVE_FORCEINLINE void priv_swap_cache(bucket_hash_equal_t &)
-   {}
-
-   siterator priv_begin(bucket_ptr &pbucketptr) const
-   {
-      std::size_t n = 0;
-      std::size_t bucket_cnt = this->priv_usable_bucket_count();
-      for (n = 0; n < bucket_cnt; ++n){
-         bucket_type &b = this->priv_bucket(n);
-         if(!slist_node_algorithms::is_empty(b.get_node_ptr())){
-            pbucketptr = node_ops_t::to_ptr(b);
-            return siterator(b.begin_ptr());
-         }
-      }
-      pbucketptr = this->priv_invalid_bucket_ptr();
-      return this->priv_end_sit();
-   }
-
-   BOOST_INTRUSIVE_FORCEINLINE void priv_insertion_update_cache(std::size_t)
-   {}
-
-   BOOST_INTRUSIVE_FORCEINLINE void priv_erasure_update_cache_range(std::size_t, std::size_t)
-   {}
-
-   BOOST_INTRUSIVE_FORCEINLINE void priv_erasure_update_cache(bucket_ptr)
-   {}
-
-   BOOST_INTRUSIVE_FORCEINLINE void priv_erasure_update_cache()
-   {}
-
-   BOOST_INTRUSIVE_FORCEINLINE const key_equal &priv_equal() const
-   {  return this->equal_holder_t::get();  }
-
-   BOOST_INTRUSIVE_FORCEINLINE key_equal &priv_equal()
-   {  return this->equal_holder_t::get();  }
+   BucketPtr      cached_begin_;
 };
 
-//bucket_hash_equal_t
-//Stores bucket_hash_t and the equality function when the first
-//non-empty bucket shall be cached.
-template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyHash, class VoidOrKeyEqual, class BucketTraits, bool LinearBuckets>  //cache_begin == true version
-struct BOOST_INTRUSIVE_EMPTY_BASES bucket_hash_equal_t<ValueTraits, VoidOrKeyOfValue, VoidOrKeyHash, VoidOrKeyEqual, BucketTraits, LinearBuckets, true>
-   //Use public inheritance to avoid MSVC bugs with closures
-   : public bucket_hash_t<ValueTraits, VoidOrKeyOfValue, VoidOrKeyHash, BucketTraits, LinearBuckets> //2
-   , public hashtable_equal_holder<ValueTraits, BucketTraits, VoidOrKeyOfValue, VoidOrKeyEqual, LinearBuckets>::type
+template<class BucketPtr, class SizeType>
+struct hashtable_state_members<BucketPtr, SizeType, false, true>
+{
+   typedef detail::size_holder<true, SizeType>  split_traits;
+   typedef split_traits &                       split_traits_t;
+   typedef const split_traits &                 split_traits_const_t;
+
+   BOOST_INTRUSIVE_FORCEINLINE BucketPtr get_cache(BucketPtr first_bucket) const
+   {  return first_bucket;  }
+
+   BOOST_INTRUSIVE_FORCEINLINE void set_cache(BucketPtr)
+   {}
+
+   BOOST_INTRUSIVE_FORCEINLINE split_traits_t get_split_traits()
+   {  return split_;  }
+
+   BOOST_INTRUSIVE_FORCEINLINE split_traits_const_t get_split_traits() const
+   {  return split_;  }
+
+   split_traits   split_;
+};
+
+template<class BucketPtr, class SizeType>
+struct hashtable_state_members<BucketPtr, SizeType, false, false>
+{
+   typedef detail::size_holder<false, SizeType> split_traits;
+   typedef split_traits                         split_traits_t;
+   typedef split_traits                         split_traits_const_t;
+
+   BOOST_INTRUSIVE_FORCEINLINE BucketPtr get_cache(BucketPtr first_bucket) const
+   {  return first_bucket;  }
+
+   BOOST_INTRUSIVE_FORCEINLINE void set_cache(BucketPtr)
+   {}
+
+   BOOST_INTRUSIVE_FORCEINLINE split_traits_t get_split_traits() const
+   {  return split_traits();  }
+};
+
+//Adds hashtable_state_members to Base as a data member, only if it has data,
+//to maintain minimal container size with compilers like MSVC
+//that have problems with EBO and multiple empty base classes
+template<class Base, class BucketPtr, class SizeType, bool CacheBegin, bool HasSplit>
+struct hashtable_state_wrapper
+   : public Base
 {
    private:
-   BOOST_MOVABLE_BUT_NOT_COPYABLE(bucket_hash_equal_t)
+   BOOST_MOVABLE_BUT_NOT_COPYABLE(hashtable_state_wrapper)
 
    public:
+   typedef hashtable_state_members<BucketPtr, SizeType, CacheBegin, HasSplit>  state_members_t;
 
-   typedef typename hashtable_equal_holder
-      < ValueTraits, BucketTraits
-      , VoidOrKeyOfValue, VoidOrKeyEqual, LinearBuckets>::type       equal_holder_t;
-
-   typedef bucket_plus_vtraits
-      < ValueTraits, BucketTraits, LinearBuckets>                    bucket_plus_vtraits_t;
-   typedef ValueTraits                                               value_traits;
-   typedef typename equal_holder_t::functor_type                     key_equal;
-   typedef bucket_hash_t
-      < ValueTraits, VoidOrKeyOfValue
-      , VoidOrKeyHash, BucketTraits, LinearBuckets>                  bucket_hash_type;
-   typedef typename bucket_hash_type::hasher                         hasher;
-   typedef BucketTraits                                              bucket_traits;
-   typedef typename bucket_plus_vtraits_t::siterator                 siterator;
-   typedef typename bucket_plus_vtraits_t::slist_node_algorithms     slist_node_algorithms;
-
-   BOOST_INTRUSIVE_FORCEINLINE bucket_hash_equal_t(const ValueTraits &val_traits, const bucket_traits &b_traits, const hasher & h, const key_equal &e)
-      : bucket_hash_type(val_traits, b_traits, h)
-      , equal_holder_t(e)
+   template<class Arg0, class Arg1, class Arg2, class Arg3>
+   BOOST_INTRUSIVE_FORCEINLINE hashtable_state_wrapper
+      ( const Arg0 &arg0, const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3)
+      :  Base(arg0, arg1, arg2, arg3)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE bucket_hash_equal_t(BOOST_RV_REF(bucket_hash_equal_t) other)
-      : bucket_hash_type(BOOST_MOVE_BASE(bucket_hash_type, other))
-      , equal_holder_t(BOOST_MOVE_BASE(equal_holder_t, other))
+   BOOST_INTRUSIVE_FORCEINLINE hashtable_state_wrapper(BOOST_RV_REF(hashtable_state_wrapper) other)
+      : Base(BOOST_MOVE_BASE(Base, other))
    {}
 
-   typedef typename unordered_bucket_ptr_impl
-      <typename bucket_hash_type::value_traits>::type bucket_ptr;
+   BOOST_INTRUSIVE_FORCEINLINE state_members_t &priv_state()
+   {  return state_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE bucket_ptr priv_get_cache() const
-   {  return cached_begin_;   }
+   BOOST_INTRUSIVE_FORCEINLINE const state_members_t &priv_state() const
+   {  return state_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE void priv_set_cache(bucket_ptr p)
-   {  cached_begin_ = p;   }
+   private:
+   state_members_t state_;
+};
 
-   inline void priv_set_cache_bucket_num(std::size_t insertion_bucket)
-   {
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(insertion_bucket <= this->priv_usable_bucket_count());
-      this->cached_begin_ = this->priv_bucket_pointer() + std::ptrdiff_t(insertion_bucket);
-   }
+template<class Base, class BucketPtr, class SizeType>
+struct hashtable_state_wrapper<Base, BucketPtr, SizeType, false, false>
+   : public Base
+{
+   private:
+   BOOST_MOVABLE_BUT_NOT_COPYABLE(hashtable_state_wrapper)
 
-   BOOST_INTRUSIVE_FORCEINLINE std::size_t priv_get_cache_bucket_num()
-   {  return std::size_t(this->cached_begin_ - this->priv_bucket_pointer());  }
+   public:
+   typedef hashtable_state_members<BucketPtr, SizeType, false, false>  state_members_t;
 
-   BOOST_INTRUSIVE_FORCEINLINE void priv_init_cache()
-   {  this->cached_begin_ = this->priv_past_usable_bucket_ptr();  }
+   template<class Arg0, class Arg1, class Arg2, class Arg3>
+   BOOST_INTRUSIVE_FORCEINLINE hashtable_state_wrapper
+      ( const Arg0 &arg0, const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3)
+      :  Base(arg0, arg1, arg2, arg3)
+   {}
 
-   BOOST_INTRUSIVE_FORCEINLINE void priv_swap_cache(bucket_hash_equal_t &other)
-   {  ::boost::adl_move_swap(this->cached_begin_, other.cached_begin_);  }
+   BOOST_INTRUSIVE_FORCEINLINE hashtable_state_wrapper(BOOST_RV_REF(hashtable_state_wrapper) other)
+      : Base(BOOST_MOVE_BASE(Base, other))
+   {}
 
-   siterator priv_begin(bucket_ptr& pbucketptr) const
-   {
-      pbucketptr = this->cached_begin_;
-      if(this->cached_begin_ == this->priv_past_usable_bucket_ptr()){
-         return this->priv_end_sit();
-      }
-      else{
-         return siterator(cached_begin_->begin_ptr());
-      }
-   }
-
-   void priv_insertion_update_cache(std::size_t insertion_bucket)
-   {
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(insertion_bucket < this->priv_usable_bucket_count());
-      bucket_ptr p = this->priv_bucket_pointer() + std::ptrdiff_t(insertion_bucket);
-      if(p < this->cached_begin_){
-         this->cached_begin_ = p;
-      }
-   }
-
-   BOOST_INTRUSIVE_FORCEINLINE const key_equal &priv_equal() const
-   {  return this->equal_holder_t::get();  }
-
-   BOOST_INTRUSIVE_FORCEINLINE key_equal &priv_equal()
-   {  return this->equal_holder_t::get();  }
-
-   void priv_erasure_update_cache_range(std::size_t first_bucket_num, std::size_t last_bucket_num)
-   {
-      //If the last bucket is the end, the cache must be updated
-      //to the last position if all
-      if(this->priv_get_cache_bucket_num() == first_bucket_num   &&
-         this->priv_bucket_empty(first_bucket_num) ){
-         this->priv_set_cache(this->priv_bucket_pointer() + std::ptrdiff_t(last_bucket_num));
-         this->priv_erasure_update_cache();
-      }
-   }
-
-   void priv_erasure_update_cache(bucket_ptr first_bucket)
-   {
-      //If the last bucket is the end, the cache must be updated
-      //to the last position if all
-      if (this->priv_get_cache() == first_bucket &&
-         this->priv_bucket_empty(first_bucket)) {
-         this->priv_erasure_update_cache();
-      }
-   }
-
-   void priv_erasure_update_cache()
-   {
-      const bucket_ptr cache_end = this->priv_past_usable_bucket_ptr();
-      while( cached_begin_ != cache_end) {
-         if (!slist_node_algorithms::is_empty(cached_begin_->get_node_ptr())) {
-            return;
-         }
-         ++cached_begin_;
-      }
-   }
-
-   bucket_ptr cached_begin_;
+   BOOST_INTRUSIVE_FORCEINLINE state_members_t priv_state() const
+   {  return state_members_t();  }
 };
 
 //This wrapper around size_traits is used
@@ -1585,26 +1603,27 @@ struct hashtable_size_wrapper<DeriveFrom, SizeType, false>
 template< class ValueTraits,    class VoidOrKeyOfValue, class VoidOrKeyHash
         , class VoidOrKeyEqual, class BucketTraits,     class SizeType
         , std::size_t BoolFlags>
-struct get_hashtable_size_wrapper_bucket
+struct get_hashtable_state_wrapper
 {
-   typedef hashtable_size_wrapper
+   typedef hashtable_state_wrapper
       < bucket_hash_equal_t
          < ValueTraits, VoidOrKeyOfValue, VoidOrKeyHash, VoidOrKeyEqual
          , BucketTraits
          , 0 != (BoolFlags & hash_bool_flags::linear_buckets_pos)
-         , 0 != (BoolFlags & hash_bool_flags::cache_begin_pos)
-         >   //2
+         >
+      , typename unordered_bucket_ptr_impl<ValueTraits>::type
       , SizeType
+      , 0 != (BoolFlags & hash_bool_flags::cache_begin_pos)
       , (BoolFlags & hash_bool_flags::incremental_pos)     != 0 ||
         (BoolFlags & hash_bool_flags::fastmod_buckets_pos) != 0
       > type;
 };
 
 //hashdata_internal
-//Stores bucket_hash_equal_t and split_traits
+//Stores bucket_hash_equal_t, the cached first non-empty bucket and the split count
 template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyHash, class VoidOrKeyEqual, class BucketTraits, class SizeType, std::size_t BoolFlags>
 struct hashdata_internal
-   : public get_hashtable_size_wrapper_bucket
+   : public get_hashtable_state_wrapper
                <ValueTraits, VoidOrKeyOfValue, VoidOrKeyHash, VoidOrKeyEqual, BucketTraits, SizeType, BoolFlags>::type
 {
    private:
@@ -1612,16 +1631,18 @@ struct hashdata_internal
 
    public:
    static const bool linear_buckets = 0 != (BoolFlags & hash_bool_flags::linear_buckets_pos);
-   typedef typename get_hashtable_size_wrapper_bucket
+   static const bool cache_begin = 0 != (BoolFlags & hash_bool_flags::cache_begin_pos);
+   typedef typename get_hashtable_state_wrapper
       <ValueTraits, VoidOrKeyOfValue, VoidOrKeyHash, VoidOrKeyEqual, BucketTraits, SizeType, BoolFlags>::type split_bucket_hash_equal_t;
-   
+
    typedef typename split_bucket_hash_equal_t::key_equal                key_equal;
    typedef typename split_bucket_hash_equal_t::hasher                   hasher;
    typedef bucket_plus_vtraits
       <ValueTraits, BucketTraits, linear_buckets>           bucket_plus_vtraits_t;
    typedef typename bucket_plus_vtraits_t::node_ops_t       node_ops_t;
    typedef SizeType                                         size_type;
-   typedef typename split_bucket_hash_equal_t::size_traits              split_traits;
+   typedef typename split_bucket_hash_equal_t::state_members_t          state_members_t;
+   typedef typename state_members_t::split_traits                       split_traits;
    typedef typename bucket_plus_vtraits_t::bucket_ptr       bucket_ptr;
    typedef typename bucket_plus_vtraits_t::const_value_traits_ptr   const_value_traits_ptr;
    typedef typename bucket_plus_vtraits_t::siterator        siterator;
@@ -1672,11 +1693,11 @@ struct hashdata_internal
       : split_bucket_hash_equal_t(BOOST_MOVE_BASE(split_bucket_hash_equal_t, other))
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE typename split_bucket_hash_equal_t::size_traits_t priv_split_traits()
-   {  return this->priv_size_traits();  }
+   BOOST_INTRUSIVE_FORCEINLINE typename state_members_t::split_traits_t priv_split_traits()
+   {  return this->priv_state().get_split_traits();  }
 
-   BOOST_INTRUSIVE_FORCEINLINE typename split_bucket_hash_equal_t::size_traits_const_t priv_split_traits() const
-   {  return this->priv_size_traits();  }
+   BOOST_INTRUSIVE_FORCEINLINE typename state_members_t::split_traits_const_t priv_split_traits() const
+   {  return this->priv_state().get_split_traits();  }
 
    ~hashdata_internal()
    #if defined(BOOST_INTRUSIVE_CONCEPTS_BASED_OVERLOADING)
@@ -1693,12 +1714,11 @@ struct hashdata_internal
    ~hashdata_internal() requires (ValueTraits::link_mode == normal_link) = default;
    #endif
 
-   using split_bucket_hash_equal_t::priv_clear_buckets;
-
    void priv_clear_buckets()
    {
       const std::size_t cache_num = this->priv_get_cache_bucket_num();
-      this->priv_clear_buckets(this->priv_get_cache(), this->priv_usable_bucket_count() - cache_num);
+      node_ops_t::template priv_clear_buckets<safemode_or_autounlink>
+         (this->priv_get_cache(), this->priv_usable_bucket_count() - cache_num);
    }
 
    void priv_clear_buckets_and_cache()
@@ -1711,6 +1731,113 @@ struct hashdata_internal
    {
       node_ops_t::priv_init_buckets(this->priv_bucket_pointer(), this->priv_usable_bucket_count());
       this->priv_init_cache();
+   }
+
+   //Cached first non-empty bucket. If cache_begin<> is not active, the cache is
+   //always the first bucket and update operations do nothing.
+   BOOST_INTRUSIVE_FORCEINLINE bucket_ptr priv_get_cache() const
+   {
+      BOOST_IF_CONSTEXPR(cache_begin)
+         return this->priv_state().get_cache(bucket_ptr());
+      else
+         return this->priv_bucket_pointer();
+   }
+
+   BOOST_INTRUSIVE_FORCEINLINE void priv_set_cache(bucket_ptr p)
+   {  this->priv_state().set_cache(p);   }
+
+   void priv_set_cache_bucket_num(std::size_t insertion_bucket)
+   {
+      (void)insertion_bucket;
+      BOOST_IF_CONSTEXPR(cache_begin){
+         BOOST_INTRUSIVE_INVARIANT_ASSERT(insertion_bucket <= this->priv_usable_bucket_count());
+         this->priv_set_cache(this->priv_bucket_pointer() + std::ptrdiff_t(insertion_bucket));
+      }
+   }
+
+   BOOST_INTRUSIVE_FORCEINLINE std::size_t priv_get_cache_bucket_num() const
+   {
+      BOOST_IF_CONSTEXPR(cache_begin)
+         return std::size_t(this->priv_get_cache() - this->priv_bucket_pointer());
+      else
+         return 0u;
+   }
+
+   BOOST_INTRUSIVE_FORCEINLINE void priv_init_cache()
+   {
+      BOOST_IF_CONSTEXPR(cache_begin){
+         this->priv_set_cache(this->priv_past_usable_bucket_ptr());
+      }
+   }
+
+   void priv_swap_cache(hashdata_internal &other)
+   {
+      (void)other;
+      BOOST_IF_CONSTEXPR(cache_begin){
+         const bucket_ptr tmp(this->priv_get_cache());
+         this->priv_set_cache(other.priv_get_cache());
+         other.priv_set_cache(tmp);
+      }
+   }
+
+   siterator priv_begin(bucket_ptr &pbucketptr) const
+   {
+      BOOST_IF_CONSTEXPR(cache_begin){
+         pbucketptr = this->priv_get_cache();
+         return pbucketptr == this->priv_past_usable_bucket_ptr()
+            ? this->priv_end_sit() : siterator(pbucketptr->begin_ptr());
+      }
+      else{
+         return node_ops_t::priv_begin_from(this->priv_bucket_pointer(), 0u, this->priv_usable_bucket_count(), pbucketptr);
+      }
+   }
+
+   void priv_insertion_update_cache(std::size_t insertion_bucket)
+   {
+      (void)insertion_bucket;
+      BOOST_IF_CONSTEXPR(cache_begin){
+         BOOST_INTRUSIVE_INVARIANT_ASSERT(insertion_bucket < this->priv_usable_bucket_count());
+         bucket_ptr p = this->priv_bucket_pointer() + std::ptrdiff_t(insertion_bucket);
+         if(p < this->priv_get_cache()){
+            this->priv_set_cache(p);
+         }
+      }
+   }
+
+   void priv_erasure_update_cache_range(std::size_t first_bucket_num, std::size_t last_bucket_num)
+   {
+      (void)first_bucket_num; (void)last_bucket_num;
+      //If the last bucket is the end, the cache must be updated
+      //to the last position if all
+      BOOST_IF_CONSTEXPR(cache_begin){
+         if(this->priv_get_cache_bucket_num() == first_bucket_num   &&
+            this->priv_bucket_empty(first_bucket_num) ){
+            this->priv_set_cache(this->priv_bucket_pointer() + std::ptrdiff_t(last_bucket_num));
+            this->priv_erasure_update_cache();
+         }
+      }
+   }
+
+   void priv_erasure_update_cache(bucket_ptr first_bucket)
+   {
+      (void)first_bucket;
+      //If the last bucket is the end, the cache must be updated
+      //to the last position if all
+      BOOST_IF_CONSTEXPR(cache_begin){
+         if (this->priv_get_cache() == first_bucket &&
+            this->priv_bucket_empty(first_bucket)) {
+            this->priv_erasure_update_cache();
+         }
+      }
+   }
+
+   void priv_erasure_update_cache()
+   {
+      BOOST_IF_CONSTEXPR(cache_begin){
+         bucket_ptr cache = this->priv_get_cache();
+         node_ops_t::priv_skip_empty_buckets(cache, this->priv_past_usable_bucket_ptr());
+         this->priv_set_cache(cache);
+      }
    }
    
    typedef typename bucket_plus_vtraits_t::iterator         iterator;
@@ -2362,14 +2489,7 @@ class hashtable_impl
          return this->begin() == this->end();
       }
       else{
-         size_type bucket_cnt = this->bucket_count();
-         const bucket_type *b = boost::movelib::to_raw_pointer(this->priv_bucket_pointer());
-         for (size_type n = 0; n < bucket_cnt; ++n, ++b){
-            if(!slist_node_algorithms::is_empty(b->get_node_ptr())){
-               return false;
-            }
-         }
-         return true;
+         return node_ops_t::priv_all_buckets_empty(this->priv_bucket_pointer(), this->priv_usable_bucket_count());
       }
    }
 
@@ -2384,12 +2504,7 @@ class hashtable_impl
       BOOST_IF_CONSTEXPR(constant_time_size)
          return this->priv_size_traits().get_size();
       else{
-         std::size_t len = 0;
-         std::size_t bucket_cnt = this->bucket_count();
-         const bucket_type *b = boost::movelib::to_raw_pointer(this->priv_bucket_pointer());
-         for (std::size_t n = 0; n < bucket_cnt; ++n, ++b){
-            len += slist_node_algorithms::count(b->get_node_ptr()) - 1u;
-         }
+         const std::size_t len = node_ops_t::priv_count_elements(this->priv_bucket_pointer(), this->priv_usable_bucket_count());
          BOOST_INTRUSIVE_INVARIANT_ASSERT((len <= SizeType(-1)));
          return size_type(len);
       }
