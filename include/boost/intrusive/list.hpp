@@ -92,6 +92,7 @@ struct list_node_ops
       BOOST_IF_CONSTEXPR(SafeModeOrAutoUnlink || constant_time_size){
          while(b != e){
             node_ptr to_erase(b);
+            (void)to_erase;
             b = NodeTraits::get_next(b);
             BOOST_IF_CONSTEXPR(SafeModeOrAutoUnlink)
                node_algorithms::init(to_erase);

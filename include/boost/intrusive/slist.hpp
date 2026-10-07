@@ -107,6 +107,7 @@ struct slist_node_ops
    {
       (void)plast;
       node_ptr const to_erase(NodeTraits::get_next(prev_n));
+      (void)to_erase;
       node_algorithms::unlink_after(prev_n);
       BOOST_IF_CONSTEXPR(CacheLast){
          if(to_erase == *plast){
@@ -121,7 +122,7 @@ struct slist_node_ops
    //Unlinks (bfp, lp) and initializes the nodes, if needed
    static void erase_after(node_ptr bfp, node_ptr lp, node_ptr header, node_ptr *plast, SizeTraits &sz) BOOST_NOEXCEPT
    {
-      (void)header; (void)plast;
+      (void)header; (void)plast; (void)sz;
       BOOST_IF_CONSTEXPR(CacheLast){
          if(lp == node_algorithms::end_node(header)){
             *plast = bfp;
@@ -132,6 +133,7 @@ struct slist_node_ops
       BOOST_IF_CONSTEXPR(SafeModeOrAutoUnlink || constant_time_size){
          while(fp != lp){
             node_ptr to_erase(fp);
+            (void)to_erase;
             fp = NodeTraits::get_next(fp);
             BOOST_IF_CONSTEXPR(SafeModeOrAutoUnlink)
                node_algorithms::init(to_erase);
@@ -221,6 +223,7 @@ struct slist_node_ops
       , node_ptr before_f_n, node_ptr before_l_n
       , node_ptr xheader, node_ptr *xplast, SizeTraits &xsz) BOOST_NOEXCEPT
    {
+      (void)sz; (void)xsz;
       BOOST_IF_CONSTEXPR(constant_time_size)
          slist_node_ops::splice_after
             ( prev_pos_n, header, plast, sz, before_f_n, before_l_n
@@ -254,6 +257,7 @@ struct slist_node_ops
    //Links [first_n, before_l_n] after prev_pos_n
    static void incorporate_after(node_ptr prev_pos_n, node_ptr first_n, node_ptr before_l_n, node_ptr *plast, SizeTraits &sz) BOOST_NOEXCEPT
    {
+      (void)sz;
       BOOST_IF_CONSTEXPR(constant_time_size)
          slist_node_ops::incorporate_after
             (prev_pos_n, first_n, before_l_n, size_type(node_algorithms::distance(first_n, before_l_n) + 1u), plast, sz);
