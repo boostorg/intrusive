@@ -731,6 +731,34 @@ struct node_cast_adaptor
    }
 };
  
+//Hash functor for node-level rehash operations: returns the hash value stored in the node.
+//It does not depend on the value type.
+template<class NodeTraits>
+struct hashtable_stored_hash
+{
+   BOOST_INTRUSIVE_FORCEINLINE std::size_t operator()(const typename NodeTraits::node_ptr &n) const
+   {  return NodeTraits::get_hash(n);  }
+};
+
+//Hash functor for node-level rehash operations: calculates the hash value of the value of the node.
+//It's a temporary object that refers to the value traits and the hasher of the container.
+template<class ValueTraits, class Hasher, class KeyOfValue>
+struct hashtable_value_hasher
+{
+   BOOST_INTRUSIVE_FORCEINLINE hashtable_value_hasher(const ValueTraits &vtraits, Hasher &hasher)
+      : vtraits_(vtraits), hasher_(hasher)
+   {}
+
+   BOOST_INTRUSIVE_FORCEINLINE std::size_t operator()(const typename ValueTraits::node_traits::node_ptr &n) const
+   {  return hasher_(KeyOfValue()(*vtraits_.to_value_ptr(n)));  }
+
+   private:
+   hashtable_value_hasher &operator=(const hashtable_value_hasher &);
+
+   const ValueTraits &vtraits_;
+   Hasher &hasher_;
+};
+
 //hashtable_node_ops contains the bucket and node operations of bucket_plus_vtraits
 //that don't depend on ValueTraits/BucketTraits
 template<class NodeTraits, bool LinearBuckets>
@@ -1139,6 +1167,103 @@ struct hashtable_node_ops
       num_erased += priv_erase_from_single_bucket
                   (buckets[std::ptrdiff_t(last_bucket)], last_step_before_it, last_it, node_disposer, optimize_multikey_tag);
       return num_erased;
+   }
+
+   //Moves the nodes of buckets [old_first, old_cnt) of "old_buckets" to "new_buckets" (both arrays
+   //can be the same buffer). "IndexOps" maps hashes to buckets of the new array. If "fast_shrink"
+   //is true, the old bucket count is a multiple of the new one and whole buckets are moved without
+   //hashing. Otherwise "node_hash" obtains the hash of each node and, if "store_new_hash" is true,
+   //the hash is stored in the group of nodes. Returns the minimum of "new_first_bucket_num" and the
+   //first new bucket that receives nodes.
+   //
+   //If "node_hash" throws, nodes already moved are in the new buckets and the rest in the old ones.
+   template<bool OptimizeMultikey, class IndexOps, class NodeHash>
+   static std::size_t priv_rehash_nodes
+      ( bucket_ptr old_buckets, std::size_t old_first, std::size_t old_cnt
+      , bucket_ptr new_buckets, std::size_t new_cnt, std::size_t split
+      , bool fast_shrink, bool store_new_hash, std::size_t new_first_bucket_num, NodeHash node_hash)
+   {
+      typedef detail::bool_<OptimizeMultikey> optimize_multikey_t;
+      typedef detail::bool_<store_hash_is_true<node_traits>::value> store_hash_t;
+      (void)store_new_hash;
+      const bool same_buffer = old_buckets == new_buckets;
+      for(std::size_t n = old_first; n < old_cnt; ++n){
+         bucket_type &old_bucket = old_buckets[std::ptrdiff_t(n)];
+         if(!fast_shrink){
+            siterator before_i(old_bucket.get_node_ptr());
+            siterator i(before_i); ++i;
+            siterator const end_sit(sit_end(old_bucket));
+            for( //
+               ; i != end_sit
+               ; i = before_i, ++i){
+               node_ptr const first_n = dcast_bucket_ptr<node>(i.pointed_node());
+               const std::size_t hash_value = node_hash(first_n);
+               const std::size_t new_n = IndexOps::hash_to_bucket(hash_value, new_cnt, split);
+
+               //Update first used bucket
+               if(new_n < new_first_bucket_num)
+                  new_first_bucket_num = new_n;
+
+               //Transfer the whole group
+               siterator const last(group_functions_t::get_last_in_group(first_n, optimize_multikey_t()));
+
+               //All nodes of the group have the same key, so store the new hash in all of them
+               BOOST_IF_CONSTEXPR(store_hash_t::value){
+                  if(store_new_hash){
+                     for(siterator it = i; ; ++it){
+                        node_functions<node_traits>::store_hash
+                           (dcast_bucket_ptr<node>(it.pointed_node()), hash_value, store_hash_t());
+                        if(it == last)
+                           break;
+                     }
+                  }
+               }
+
+               if(same_buffer && new_n == n){
+                  before_i = last;
+               }
+               else{
+                  bucket_type &new_b = new_buckets[std::ptrdiff_t(new_n)];
+                  slist_node_algorithms::transfer_after(new_b.get_node_ptr(), before_i.pointed_node(), last.pointed_node());
+               }
+            }
+         }
+         else{
+            const std::size_t new_n = IndexOps::hash_to_bucket(n, new_cnt, split);
+            //Empty buckets must not update the first used bucket
+            if(new_n < new_first_bucket_num && !slist_node_algorithms::is_empty(old_bucket.get_node_ptr()))
+               new_first_bucket_num = new_n;
+            bucket_type &new_b = new_buckets[std::ptrdiff_t(new_n)];
+            siterator const last = priv_get_last(old_bucket, optimize_multikey_t());
+            slist_node_algorithms::transfer_after(new_b.get_node_ptr(), old_bucket.get_node_ptr(), last.pointed_node());
+         }
+      }
+      return new_first_bucket_num;
+   }
+
+   //Incremental rehash: moves the nodes of bucket "bucket_to_rehash" whose hash ("node_hash")
+   //maps to another bucket. "usable_cnt" and "split" are the values after the split count increment.
+   template<bool OptimizeMultikey, class IndexOps, class NodeHash>
+   static void priv_split_bucket
+      (bucket_ptr buckets, std::size_t usable_cnt, std::size_t split, std::size_t bucket_to_rehash, NodeHash node_hash)
+   {
+      typedef detail::bool_<OptimizeMultikey> optimize_multikey_t;
+      bucket_type &old_bucket = buckets[std::ptrdiff_t(bucket_to_rehash)];
+      siterator before_i(old_bucket.get_node_ptr());
+      siterator i(before_i); ++i;
+      siterator const end_sit = LinearBuckets ? siterator() : before_i;
+      for( ; i != end_sit; i = before_i, ++i){
+         node_ptr const first_n = dcast_bucket_ptr<node>(i.pointed_node());
+         const std::size_t new_n = IndexOps::hash_to_bucket(node_hash(first_n), usable_cnt, split);
+         siterator const last(group_functions_t::get_last_in_group(first_n, optimize_multikey_t()));
+         if(new_n == bucket_to_rehash){
+            before_i = last;
+         }
+         else{
+            bucket_type &new_b = buckets[std::ptrdiff_t(new_n)];
+            slist_node_algorithms::transfer_after(new_b.get_node_ptr(), before_i.pointed_node(), last.pointed_node());
+         }
+      }
    }
 };
 
@@ -3553,7 +3678,7 @@ class hashtable_impl
    //! <b>Throws</b>: If the hasher functor throws. Basic guarantee: all the elements
    //!   are unlinked (no destructors are called) and the container is left empty.
    BOOST_INTRUSIVE_FORCEINLINE void rehash(const bucket_traits &new_bucket_traits)
-   {  this->priv_rehash_impl(new_bucket_traits, false); }
+   {  this->priv_rehash_impl(new_bucket_traits, false, detail::bool_<store_hash>()); }
 
    //! <b>Note</b>: This function is used when keys from inserted elements are changed 
    //!  (e.g. a language change when key is a string) but uniqueness and hash properties are
@@ -3580,7 +3705,7 @@ class hashtable_impl
    {
       //A moved-from container has no bucket array and nothing to rehash
       if(this->priv_bucket_traits().bucket_count())
-         this->priv_rehash_impl(this->priv_bucket_traits(), true);
+         this->priv_rehash_impl(this->priv_bucket_traits(), true, detail::false_());
    }
 
    //! <b>Effects</b>: Let s be this->split_count() and n be this->bucket_count().
@@ -3622,23 +3747,9 @@ class hashtable_impl
             //elements are moved back to the original one.
             incremental_rehash_rollback<bucket_type, split_traits, slist_node_algorithms> rollback
                ( this->priv_bucket(split_idx), old_bucket, this->priv_split_traits());
-            siterator before_i(old_bucket.get_node_ptr());
-            siterator i(before_i); ++i;
-            siterator end_sit = linear_buckets ? siterator() : before_i;
-            for( ; i != end_sit; i = before_i, ++i){
-               const value_type &v = this->priv_value_from_siterator(i);
-               const std::size_t hash_value = this->priv_stored_or_compute_hash(v, store_hash_t());
-               const std::size_t new_n = this->priv_hash_to_nbucket(hash_value);
-               siterator last = i;
-               (priv_go_to_last_in_group)(last, optimize_multikey_t());
-               if(new_n == bucket_to_rehash){
-                  before_i = last;
-               }
-               else{
-                  bucket_type &new_b = this->priv_bucket(new_n);
-                  slist_node_algorithms::transfer_after(new_b.get_node_ptr(), before_i.pointed_node(), last.pointed_node());
-               }
-            }
+            node_ops_t::template priv_split_bucket<optimize_multikey, index_ops_t>
+               ( this->priv_bucket_pointer(), this->priv_usable_bucket_count(), this->split_count()
+               , bucket_to_rehash, this->priv_node_hasher(detail::bool_<store_hash>()));
             rollback.release();
             this->priv_erasure_update_cache();
          }
@@ -3813,7 +3924,20 @@ class hashtable_impl
       , bucket_ptr new_buckets, size_type new_bucket_count)
    {  node_ops_t::priv_initialize_new_buckets(old_buckets, old_bucket_count, new_buckets, new_bucket_count);  }
 
-   void priv_rehash_impl(const bucket_traits &new_bucket_traits, bool do_full_rehash)
+   //Hash functor for the node-level rehash operations: the stored hash value
+   //(shared by all value types) or the hash value calculated with the hasher
+   typedef hashtable_value_hasher<value_traits, hasher, key_of_value>   value_hasher_t;
+
+   BOOST_INTRUSIVE_FORCEINLINE hashtable_stored_hash<node_traits> priv_node_hasher(detail::true_)
+   {  return hashtable_stored_hash<node_traits>();  }
+
+   BOOST_INTRUSIVE_FORCEINLINE value_hasher_t priv_node_hasher(detail::false_)
+   {  return value_hasher_t(this->priv_value_traits(), this->priv_hasher());  }
+
+   //If "do_full_rehash" is true, hash values are recalculated and stored again in nodes that store
+   //the hash. If UseStoredHash is true (only if !do_full_rehash), stored hash values are used.
+   template<bool UseStoredHash>
+   void priv_rehash_impl(const bucket_traits &new_bucket_traits, bool do_full_rehash, detail::bool_<UseStoredHash> use_stored_hash)
    {
       const std::size_t nbc             = new_bucket_traits.bucket_count() - bucket_overhead;
       BOOST_INTRUSIVE_INVARIANT_ASSERT(sizeof(SizeType) >= sizeof(std::size_t) || nbc <= SizeType(-1));
@@ -3867,72 +3991,10 @@ class hashtable_impl
 
       const size_type split = this->rehash_split_from_bucket_count(new_bucket_count);
 
-      //Iterate through nodes
-      for(size_type n = old_bucket_cache; n < old_bucket_count; ++n){
-         bucket_type &old_bucket = old_buckets[difference_type(n)];
-         if(!fast_shrink){
-            siterator before_i(old_bucket.get_node_ptr());
-            siterator i(before_i); ++i;
-            siterator end_sit(node_ops_t::sit_end(old_bucket));
-            for( //
-               ; i != end_sit
-               ; i = before_i, ++i){
-
-               //First obtain hash value (and store it if do_full_rehash)
-               std::size_t hash_value;
-               if(do_full_rehash){
-                  value_type &v = this->priv_value_from_siterator(i);
-                  hash_value = this->priv_hasher()(key_of_value()(v));
-                  node_functions_t::store_hash(this->priv_value_to_node_ptr(v), hash_value, store_hash_t());
-               }
-               else{
-                  const value_type &v = this->priv_value_from_siterator(i);
-                  hash_value = this->priv_stored_or_compute_hash(v, store_hash_t());
-               }
-
-               //Now calculate the new bucket position
-               const size_type new_n = (size_type)index_ops_t::hash_to_bucket
-                  (hash_value, new_bucket_count, split);
-
-               //Update first used bucket cache
-               if(cache_begin && new_n < new_first_bucket_num)
-                  new_first_bucket_num = new_n;
-
-               //If the target bucket is new, transfer the whole group
-               siterator last = i;
-               (priv_go_to_last_in_group)(last, optimize_multikey_t());
-
-               //All nodes of the group have the same key, so store the new hash in the rest of the group
-               BOOST_IF_CONSTEXPR(store_hash && optimize_multikey){
-                  if(do_full_rehash){
-                     for(siterator it = i; it != last;){
-                        ++it;
-                        node_functions_t::store_hash
-                           (dcast_bucket_ptr<node>(it.pointed_node()), hash_value, store_hash_t());
-                     }
-                  }
-               }
-
-               if(same_buffer && new_n == n){
-                  before_i = last;
-               }
-               else{
-                  bucket_type &new_b = new_buckets[difference_type(new_n)];
-                  slist_node_algorithms::transfer_after(new_b.get_node_ptr(), before_i.pointed_node(), last.pointed_node());
-               }
-            }
-         }
-         else{
-            const size_type new_n = (size_type)index_ops_t::hash_to_bucket
-                                       (n, new_bucket_count, split);
-            //Empty buckets must not update the first used bucket cache
-            if(cache_begin && new_n < new_first_bucket_num && !slist_node_algorithms::is_empty(old_bucket.get_node_ptr()))
-               new_first_bucket_num = new_n;
-            bucket_type &new_b = new_buckets[difference_type(new_n)];
-            siterator last = node_ops_t::priv_get_last(old_bucket, optimize_multikey_t());
-            slist_node_algorithms::transfer_after(new_b.get_node_ptr(), old_bucket.get_node_ptr(), last.pointed_node());
-         }
-      }
+      //Move the nodes to the new buckets
+      new_first_bucket_num = (size_type)node_ops_t::template priv_rehash_nodes<optimize_multikey, index_ops_t>
+         ( old_buckets, old_bucket_cache, old_bucket_count, new_buckets, new_bucket_count, split
+         , fast_shrink, do_full_rehash && store_hash, new_first_bucket_num, this->priv_node_hasher(use_stored_hash));
 
       this->priv_size_traits().set_size(size_backup);
       this->split_count(split);
