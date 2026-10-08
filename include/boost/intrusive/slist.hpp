@@ -1242,7 +1242,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //! <b>Effects</b>: Erases all the elements from *this
    //!   calling Disposer::operator()(pointer), clones all the
    //!   elements from src calling Cloner::operator()(const_reference )
-   //!   and inserts them on *this.
+   //!   and inserts them on *this. If &src == this, there are no effects.
    //!
    //!   If cloner throws, all cloned elements are unlinked and disposed
    //!   calling Disposer::operator()(pointer).
@@ -1253,6 +1253,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    template <class Cloner, class Disposer>
    void clone_from(const slist_impl &src, Cloner cloner, Disposer disposer)
    {
+      if(BOOST_UNLIKELY(&src == this))
+         return;
       this->clear_and_dispose(disposer);
       detail::exception_disposer<slist_impl, Disposer>
          rollback(*this, disposer);
@@ -1270,7 +1272,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //! <b>Effects</b>: Erases all the elements from *this
    //!   calling Disposer::operator()(pointer), clones all the
    //!   elements from src calling Cloner::operator()(reference)
-   //!   and inserts them on *this.
+   //!   and inserts them on *this. If &src == this, there are no effects.
    //!
    //!   If cloner throws, all cloned elements are unlinked and disposed
    //!   calling Disposer::operator()(pointer).
@@ -1281,6 +1283,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    template <class Cloner, class Disposer>
    void clone_from(BOOST_RV_REF(slist_impl) src, Cloner cloner, Disposer disposer)
    {
+      if(BOOST_UNLIKELY(&src == this))
+         return;
       this->clear_and_dispose(disposer);
       detail::exception_disposer<slist_impl, Disposer>
          rollback(*this, disposer);
@@ -1708,7 +1712,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    }
 
    //! <b>Requires</b>: prev must point to an element contained by this list or
-   //!   to the before_begin() element
+   //!   to the before_begin() element. &x != this.
    //!
    //! <b>Effects</b>: Transfers all the elements of list x to this list, after the
    //! the element pointed by prev. No destructors or copy constructors are called.
@@ -1738,6 +1742,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
          if(l) *l = this->previous(this->cend());
       }
       else{
+         BOOST_INTRUSIVE_INVARIANT_ASSERT(&x != this);
          node_ptr const last_x_n = node_ops::splice_after_all
             ( prev.pointed_node(), this->get_root_node(), this->priv_last_ptr(), this->priv_size_traits()
             , x.get_root_node(), x.priv_last_ptr(), x.priv_size_traits());
@@ -1807,7 +1812,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
          , x.get_root_node(), x.priv_last_ptr(), x.priv_size_traits());
    }
 
-   //! <b>Requires</b>: it is an iterator to an element in *this.
+   //! <b>Requires</b>: it is an iterator to an element in *this. &x != this.
    //!
    //! <b>Effects</b>: Transfers all the elements of list x to this list, before the
    //! the element pointed by it. No destructors or copy constructors are called.
@@ -1939,10 +1944,10 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
 
    //! <b>Requires</b>: p must be a comparison function that induces a strict weak
    //!   ordering and both *this and x must be sorted according to that ordering
-   //!   The lists x and *this must be distinct.
    //!
-   //! <b>Effects</b>: This function removes all of x's elements and inserts them
-   //!   in order into *this. The merge is stable; that is, if an element from *this is
+   //! <b>Effects</b>: If &x == this, there are no effects. Otherwise, this function
+   //!   removes all of x's elements and inserts them in order into *this.
+   //!   The merge is stable; that is, if an element from *this is
    //!   equivalent to one from x, then the element from *this will precede the one from x.
    //!
    //! <b>Returns</b>: Nothing.
@@ -1955,10 +1960,14 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //! <b>Note</b>: Iterators and references are not invalidated.
    //!
    //! <b>Additional note</b>: If optional "l" argument is passed, it is assigned
-   //! to an iterator to the last transferred value or end() is x is empty.
+   //! to an iterator to the last transferred value or end() is x is empty or &x == this.
    template<class Predicate>
    void merge(slist_impl& x, Predicate p, const_iterator *l = 0)
    {
+      if(BOOST_UNLIKELY(&x == this)){
+         if(l) *l = this->cend();
+         return;
+      }
       detail::key_nodeptr_comp<Predicate, value_traits> comp(p, &this->priv_value_traits());
       node_ptr last_x = node_ptr();
       BOOST_INTRUSIVE_TRY{
@@ -1987,7 +1996,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
       if(l) *l = last_x != node_ptr() ? const_iterator(last_x, this->priv_value_traits_ptr()) : this->cend();
    }
 
-   //! <b>Effects</b>: This function removes all of x's elements and inserts them
+   //! <b>Effects</b>: If &x == this, there are no effects. Otherwise, this function
+   //!   removes all of x's elements and inserts them
    //!   in order into *this according to operator<. The merge is stable;
    //!   that is, if an element from *this is equivalent to one from x, then the element
    //!   from *this will precede the one from x.

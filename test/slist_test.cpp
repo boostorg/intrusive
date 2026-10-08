@@ -160,6 +160,22 @@ void test_slist< ListType, ValueContainer >
    TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );
    testlist1.clear();
 
+   //Merge with itself has no effects
+   {
+      list_type l (values.begin(), values.begin() + 5);
+      l.merge(l);
+      std::size_t count = 0;
+      test::counting_less less = { &count };
+      typename list_type::const_iterator last = l.cbegin();
+      l.merge(l, less, &last);
+      BOOST_TEST(count == 0u);
+      BOOST_TEST(last == l.cend());
+      BOOST_TEST(l.size() == 5u);
+      int self_values [] = { 1, 2, 3, 4, 5 };
+      TEST_INTRUSIVE_SEQUENCE( self_values, l.begin() );
+      l.clear();
+   }
+
    //The merge performs at most size() + x.size() - 1 comparisons
    {
       static const int first [4][4] = { {0, 2, 4, -1}, {1, 3, -1, -1}, {0, 1, -1, -1}, {2, 3, 4, -1} };
@@ -447,6 +463,14 @@ void test_slist< ListType, ValueContainer >
          TEST_INTRUSIVE_SEQUENCE( init_values, testlist2.begin() );  }
    }
 
+   {  //swap with itself has no effects
+      list_type testlist1 (values.begin(), values.begin() + 3);
+      testlist1.swap(testlist1);
+      BOOST_TEST(testlist1.size() == 3u);
+      {  int init_values [] = { 1, 2, 3 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
+   }
+
    {  //Now test swap when testlist2 is empty
       list_type testlist1 (values.begin(), values.begin() + 2);
       list_type testlist2;
@@ -706,6 +730,12 @@ void test_slist< ListType, ValueContainer >
 {
       list_type testlist1 (values.begin(), values.begin() + std::ptrdiff_t(values.size()));
       list_type testlist2;
+
+      //clone_from itself has no effects
+      testlist1.clone_from(testlist1, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+      testlist1.clone_from(boost::move(testlist1), test::new_nonconst_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST (testlist1.size() == values.size());
+      BOOST_TEST (std::equal(testlist1.begin(), testlist1.end(), values.begin()));
 
       testlist2.clone_from(testlist1, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
       BOOST_TEST (testlist2 == testlist1);

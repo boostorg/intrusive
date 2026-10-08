@@ -1181,6 +1181,7 @@ class bstree_impl
    //!   calling Disposer::operator()(pointer), clones all the
    //!   elements from src calling Cloner::operator()(const_reference )
    //!   and inserts them on *this. Copies the predicate from the source container.
+   //!   If &src == this, there are no effects.
    //!
    //!   If cloner throws, all cloned elements are unlinked and disposed
    //!   calling Disposer::operator()(pointer).
@@ -1191,6 +1192,8 @@ class bstree_impl
    template <class Cloner, class Disposer>
    void clone_from(const bstree_impl &src, Cloner cloner, Disposer disposer)
    {
+      if(BOOST_UNLIKELY(&src == this))
+         return;
       this->clear_and_dispose(disposer);
       this->get_comp() = src.get_comp();
       if(!src.empty()){
@@ -1213,6 +1216,7 @@ class bstree_impl
    //!   calling Disposer::operator()(pointer), clones all the
    //!   elements from src calling Cloner::operator()(reference)
    //!   and inserts them on *this. Copies the predicate from the source container.
+   //!   If &src == this, there are no effects.
    //!
    //!   If cloner throws, all cloned elements are unlinked and disposed
    //!   calling Disposer::operator()(pointer).
@@ -1226,6 +1230,8 @@ class bstree_impl
    template <class Cloner, class Disposer>
    void clone_from(BOOST_RV_REF(bstree_impl) src, Cloner cloner, Disposer disposer)
    {
+      if(BOOST_UNLIKELY(&src == this))
+         return;
       this->clear_and_dispose(disposer);
       this->get_comp() = src.get_comp();
       if(!src.empty()){
@@ -2173,7 +2179,7 @@ class bstree_impl
       <ValueTraits, VoidOrKeyOfValue, Compare2, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> &source)
    #endif
    {
-      if(static_cast<const void*>(&source) == static_cast<const void*>(this))
+      if(BOOST_UNLIKELY(static_cast<const void*>(&source) == static_cast<const void*>(this)))
          return;
       node_ptr it   (node_algorithms::begin_node(source.header_ptr()))
              , itend(node_algorithms::end_node  (source.header_ptr()));
@@ -2211,7 +2217,7 @@ class bstree_impl
       <ValueTraits, VoidOrKeyOfValue, Compare2, SizeType, ConstantTimeSize, AlgoType, HeaderHolder> &source)
    #endif
    {
-      if(static_cast<const void*>(&source) == static_cast<const void*>(this))
+      if(BOOST_UNLIKELY(static_cast<const void*>(&source) == static_cast<const void*>(this)))
          return;
       node_ptr it   (node_algorithms::begin_node(source.header_ptr()))
              , itend(node_algorithms::end_node  (source.header_ptr()));

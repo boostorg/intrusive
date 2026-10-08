@@ -1155,6 +1155,17 @@ void test_unordered<ContainerDefiner>::test_clone(value_cont_type& values)
       //clone_from must not modify split_count as the bucket array of the target does not change
       const typename unordered_type::size_type split = testset2.split_count();
 
+      //clone_from itself has no effects
+      {
+         std_multiset_t before(testset1.begin(), testset1.end());
+         const typename unordered_type::size_type split1 = testset1.split_count();
+         testset1.clone_from(testset1, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+         testset1.clone_from(boost::move(testset1), test::new_nonconst_cloner<value_type>(), test::delete_disposer<value_type>());
+         BOOST_TEST(testset1.split_count() == split1);
+         std_multiset_t after(testset1.begin(), testset1.end());
+         BOOST_TEST(before.size() == after.size() && std::equal(before.begin(), before.end(), after.begin()));
+      }
+
       testset2.clone_from(testset1, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
       BOOST_TEST(testset2.split_count() == split);
       BOOST_TEST(testset1 == testset2);

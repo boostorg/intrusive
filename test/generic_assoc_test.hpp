@@ -454,6 +454,14 @@ void test_generic_assoc<ContainerDefiner>::test_clone(value_cont_type& values)
 
 
       size_type const testset1_oldsize = testset1.size();
+      //clone_from itself has no effects
+      testset1.clone_from(testset1, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
+      testset1.clone_from(boost::move(testset1), test::new_nonconst_cloner<value_type>(), test::delete_disposer<value_type>());
+      BOOST_TEST (testset1.size() == testset1_oldsize);
+      for(typename value_cont_type::iterator it = values.begin(); it != values.end(); ++it){
+         BOOST_TEST (testset1.find(typename assoc_type::key_of_value()(*it)) != testset1.end());
+      }
+
       testset2.clone_from(testset1, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
       BOOST_TEST (testset1.size() == testset1_oldsize);
       BOOST_TEST (testset2 == testset1);

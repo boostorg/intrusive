@@ -2760,7 +2760,7 @@ class hashtable_impl
    //!   calling Disposer::operator()(pointer), clones all the
    //!   elements from src calling Cloner::operator()(const_reference )
    //!   and inserts them on *this. The hash function and the equality
-   //!   predicate are copied from the source.
+   //!   predicate are copied from the source. If &src == this, there are no effects.
    //!
    //!   If store_hash option is true, this method does not use the hash function.
    //!
@@ -2783,7 +2783,7 @@ class hashtable_impl
    //!   calling Disposer::operator()(pointer), clones all the
    //!   elements from src calling Cloner::operator()(reference)
    //!   and inserts them on *this. The hash function and the equality
-   //!   predicate are copied from the source.
+   //!   predicate are copied from the source. If &src == this, there are no effects.
    //!
    //!   If store_hash option is true, this method does not use the hash function.
    //!
@@ -4010,6 +4010,8 @@ class hashtable_impl
    template <class MaybeConstHashtableImpl, class Cloner, class Disposer>
    void priv_clone_from(MaybeConstHashtableImpl &src, Cloner cloner, Disposer disposer)
    {
+      if(BOOST_UNLIKELY(&src == this))
+         return;
       this->clear_and_dispose(disposer);
       this->priv_hasher() = src.priv_hasher();
       this->priv_equal()  = src.priv_equal();
