@@ -109,7 +109,7 @@ class ebo_functor_holder<T *, Tag>
    BOOST_COPYABLE_AND_MOVABLE(ebo_functor_holder)
 
    public:
-   typedef T functor_type;
+   typedef T* functor_type;
 
    BOOST_INTRUSIVE_FORCEINLINE ebo_functor_holder()
       : t_()
@@ -156,7 +156,9 @@ class ebo_functor_holder<T *, Tag>
       return *this;
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE T&       get(){return *t_;}
+   //The functor is the pointer itself (e.g. a function pointer), not the pointee
+   BOOST_INTRUSIVE_FORCEINLINE functor_type &       get()    {return t_;}
+   BOOST_INTRUSIVE_FORCEINLINE functor_type const& get()const{return t_;}
 
    private:
    T * t_;
