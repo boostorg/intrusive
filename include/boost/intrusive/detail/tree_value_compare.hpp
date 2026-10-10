@@ -73,7 +73,7 @@ struct tree_value_compare
    {  this->base_t::get() = x;   return *this;  }
 
    BOOST_INTRUSIVE_FORCEINLINE const key_compare &key_comp() const
-   {  return static_cast<const key_compare &>(*this);  }
+   {  return this->base_t::get();  }
 
    BOOST_INTRUSIVE_FORCEINLINE Ret operator()(const key_type &key) const
    {  return this->key_comp()(key);   }
@@ -146,7 +146,7 @@ struct tree_value_compare<ValuePtr, KeyCompare, KeyOfValue, Ret, true>
    {  this->base_t::get() = x;   return *this;  }
 
    BOOST_INTRUSIVE_FORCEINLINE const key_compare &key_comp() const
-   {  return static_cast<const key_compare &>(*this);  }
+   {  return this->base_t::get();  }
 
    BOOST_INTRUSIVE_FORCEINLINE Ret operator()(const key_type &key) const
    {  return this->key_comp()(key);   }
