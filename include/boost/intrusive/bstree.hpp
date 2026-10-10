@@ -926,7 +926,7 @@ class bstree_impl
    //!   move constructor throws (this does not happen with predefined Boost.Intrusive hooks)
    //!   or the move constructor of the comparison objet throws.
    BOOST_INTRUSIVE_FORCEINLINE bstree_impl(BOOST_RV_REF(bstree_impl) x)
-      : data_type(::boost::move(x.get_comp()), ::boost::move(x.get_value_traits()))
+      : data_type(x.get_comp().key_comp(), ::boost::move(x.get_value_traits()))
    {
       this->swap(x);
    }
@@ -1195,7 +1195,7 @@ class bstree_impl
       if(BOOST_UNLIKELY(&src == this))
          return;
       this->clear_and_dispose(disposer);
-      this->get_comp() = src.get_comp();
+      this->get_comp() = src.get_comp().key_comp();
       if(!src.empty()){
          detail::exception_disposer<bstree_impl, Disposer>
             rollback(*this, disposer);
@@ -1233,7 +1233,7 @@ class bstree_impl
       if(BOOST_UNLIKELY(&src == this))
          return;
       this->clear_and_dispose(disposer);
-      this->get_comp() = src.get_comp();
+      this->get_comp() = src.get_comp().key_comp();
       if(!src.empty()){
          detail::exception_disposer<bstree_impl, Disposer>
             rollback(*this, disposer);
