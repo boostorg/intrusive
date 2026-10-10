@@ -38,6 +38,8 @@
 #define BOOST_INTRUSIVE_DOC1ST(TYPE1, TYPE2) TYPE2
 #define BOOST_INTRUSIVE_I ,
 #define BOOST_INTRUSIVE_DOCIGN(T1) T1
+//Read-only pointer parameter (see detail::ptr_cparam): "PTR_cparam" for code, "PTR" for documentation
+#define BOOST_INTRUSIVE_CPARAM(PTR) PTR##_cparam
 
 //#define BOOST_INTRUSIVE_DISABLE_FORCEINLINE
 

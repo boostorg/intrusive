@@ -72,6 +72,17 @@ using boost::move_detail::is_enum;
 using boost::move_detail::is_floating_point;
 using boost::move_detail::is_scalar;
 using boost::move_detail::is_unsigned;
+using boost::move_detail::is_trivially_copyable;
+
+//Parameter type for a pointer that the function only reads (it writes no node):
+//by value if the pointer is trivially copyable, else by const reference to avoid
+//the copy of non-trivial pointers (e.g. offset_ptr). Do not use it in functions
+//that modify nodes: the reference can alias a pointer stored in a node.
+template<class Ptr>
+struct ptr_cparam
+{
+   typedef typename if_c<is_trivially_copyable<Ptr>::value, Ptr, const Ptr&>::type type;
+};
 
 template<std::size_t S>
 struct ls_zeros

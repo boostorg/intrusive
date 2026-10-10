@@ -178,6 +178,8 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    typedef NodeTraits                           node_traits;
    typedef typename NodeTraits::node_ptr        node_ptr;
    typedef typename NodeTraits::const_node_ptr  const_node_ptr;
+   typedef typename detail::ptr_cparam<node_ptr>::type        node_ptr_cparam;
+   typedef typename detail::ptr_cparam<const_node_ptr>::type  const_node_ptr_cparam;
    typedef BOOST_INTRUSIVE_IMPDEF(insert_commit_data_t<node_ptr>) insert_commit_data;
    typedef data_for_rebalance_t<node_ptr>       data_for_rebalance;
 
@@ -215,7 +217,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant time.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr begin_node(const_node_ptr header) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr begin_node(BOOST_INTRUSIVE_CPARAM(const_node_ptr) header) BOOST_NOEXCEPT
    {  return node_traits::get_left(header);   }
 
    //! <b>Requires</b>: 'header' is the header node of a tree.
@@ -225,7 +227,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant time.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr end_node(const_node_ptr header) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr end_node(BOOST_INTRUSIVE_CPARAM(const_node_ptr) header) BOOST_NOEXCEPT
    {  return detail::uncast(header);   }
 
    //! <b>Requires</b>: 'header' is the header node of a tree.
@@ -235,7 +237,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant time.
    //!
    //! <b>Throws</b>: Nothing.
-   inline static node_ptr root_node(const_node_ptr header) BOOST_NOEXCEPT
+   inline static node_ptr root_node(BOOST_INTRUSIVE_CPARAM(const_node_ptr) header) BOOST_NOEXCEPT
    {
       node_ptr p = node_traits::get_parent(header);
       return p ? p : detail::uncast(header);
@@ -249,7 +251,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant time.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static bool unique(const_node_ptr n) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bool unique(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    { return !NodeTraits::get_parent(n); }
 
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
@@ -260,7 +262,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Logarithmic.
    //!
    //! <b>Throws</b>: Nothing.
-   static node_ptr get_header(const_node_ptr n);
+   static node_ptr get_header(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n);
    #endif
 
    //! <b>Requires</b>: node1 and node2 can't be header nodes
@@ -527,7 +529,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Average constant time.
    //!
    //! <b>Throws</b>: Nothing.
-   static node_ptr next_node(node_ptr n) BOOST_NOEXCEPT;
+   static node_ptr next_node(BOOST_INTRUSIVE_CPARAM(node_ptr) n) BOOST_NOEXCEPT;
 
    //! <b>Requires</b>: 'n' is a node from the tree except the leftmost node.
    //!
@@ -536,7 +538,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Average constant time.
    //!
    //! <b>Throws</b>: Nothing.
-   static node_ptr prev_node(node_ptr n) BOOST_NOEXCEPT;
+   static node_ptr prev_node(BOOST_INTRUSIVE_CPARAM(node_ptr) n) BOOST_NOEXCEPT;
 
    //! <b>Requires</b>: 'n' is a node of a tree but not the header.
    //!
@@ -545,7 +547,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Logarithmic to the size of the subtree.
    //!
    //! <b>Throws</b>: Nothing.
-   static node_ptr minimum(node_ptr n);
+   static node_ptr minimum(BOOST_INTRUSIVE_CPARAM(node_ptr) n);
 
    //! <b>Requires</b>: 'n' is a node of a tree but not the header.
    //!
@@ -554,7 +556,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Logarithmic to the size of the subtree.
    //!
    //! <b>Throws</b>: Nothing.
-   static node_ptr maximum(node_ptr n);
+   static node_ptr maximum(BOOST_INTRUSIVE_CPARAM(node_ptr) n);
    #endif
 
    //! <b>Requires</b>: 'n' must not be part of any tree.
@@ -578,7 +580,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static bool inited(const_node_ptr n)
+   BOOST_INTRUSIVE_FORCEINLINE static bool inited(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
    {
       return !NodeTraits::get_parent(n) &&
              !NodeTraits::get_left(n)   &&
@@ -673,7 +675,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Linear time.
    //!
    //! <b>Throws</b>: Nothing.
-   static std::size_t size(const_node_ptr header) BOOST_NOEXCEPT
+   static std::size_t size(BOOST_INTRUSIVE_CPARAM(const_node_ptr) header) BOOST_NOEXCEPT
    {
       node_ptr beg(begin_node(header));
       node_ptr end(end_node(header));
@@ -739,7 +741,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   static bool is_header(const_node_ptr p) BOOST_NOEXCEPT;
+   static bool is_header(BOOST_INTRUSIVE_CPARAM(const_node_ptr) p) BOOST_NOEXCEPT;
    #endif
 
    //! <b>Requires</b>: "header" must be the header node of a tree.
@@ -755,7 +757,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Throws</b>: If "comp" throws.
    template<class KeyType, class KeyNodePtrCompare>
    static node_ptr find
-      (const_node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
+      (BOOST_INTRUSIVE_CPARAM(const_node_ptr) header, const KeyType &key, KeyNodePtrCompare comp)
    {
       node_ptr end = detail::uncast(header);
       node_ptr y = lower_bound(header, key, comp);
@@ -785,7 +787,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Note</b>: Experimental function, the interface might change.
    template< class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, node_ptr> bounded_range
-      ( const_node_ptr header
+      ( BOOST_INTRUSIVE_CPARAM(const_node_ptr) header
       , const KeyType &lower_key
       , const KeyType &upper_key
       , KeyNodePtrCompare comp
@@ -852,7 +854,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Throws</b>: If "comp" throws.
    template<class KeyType, class KeyNodePtrCompare>
    static std::size_t count
-      (const_node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
+      (BOOST_INTRUSIVE_CPARAM(const_node_ptr) header, const KeyType &key, KeyNodePtrCompare comp)
    {
       std::pair<node_ptr, node_ptr> ret = equal_range(header, key, comp);
       std::size_t n = 0;
@@ -878,7 +880,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Throws</b>: If "comp" throws.
    template<class KeyType, class KeyNodePtrCompare>
    inline static std::pair<node_ptr, node_ptr> equal_range
-      (const_node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
+      (BOOST_INTRUSIVE_CPARAM(const_node_ptr) header, const KeyType &key, KeyNodePtrCompare comp)
    {
       return bounded_range(header, key, key, comp, true, true);
    }
@@ -898,7 +900,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Throws</b>: If "comp" throws.
    template<class KeyType, class KeyNodePtrCompare>
    static std::pair<node_ptr, node_ptr> lower_bound_range
-      (const_node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
+      (BOOST_INTRUSIVE_CPARAM(const_node_ptr) header, const KeyType &key, KeyNodePtrCompare comp)
    {
       node_ptr const lb(lower_bound(header, key, comp));
       std::pair<node_ptr, node_ptr> ret_ii(lb, lb);
@@ -922,7 +924,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Throws</b>: If "comp" throws.
    template<class KeyType, class KeyNodePtrCompare>
    inline static node_ptr lower_bound
-      (const_node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
+      (BOOST_INTRUSIVE_CPARAM(const_node_ptr) header, const KeyType &key, KeyNodePtrCompare comp)
    {
       return lower_bound_loop(NodeTraits::get_parent(header), detail::uncast(header), key, comp);
    }
@@ -940,7 +942,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Throws</b>: If "comp" throws.
    template<class KeyType, class KeyNodePtrCompare>
    inline static node_ptr upper_bound
-      (const_node_ptr header, const KeyType &key, KeyNodePtrCompare comp)
+      (BOOST_INTRUSIVE_CPARAM(const_node_ptr) header, const KeyType &key, KeyNodePtrCompare comp)
    {
       return upper_bound_loop(NodeTraits::get_parent(header), detail::uncast(header), key, comp);
    }
@@ -1593,7 +1595,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Linear time.
    //!
    //! <b>Throws</b>: Nothing.
-   static std::size_t subtree_size(const_node_ptr subtree) BOOST_NOEXCEPT
+   static std::size_t subtree_size(BOOST_INTRUSIVE_CPARAM(const_node_ptr) subtree) BOOST_NOEXCEPT
    {
       std::size_t count = 0;
       if (subtree){
@@ -1636,7 +1638,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static bool is_left_child(node_ptr p) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bool is_left_child(BOOST_INTRUSIVE_CPARAM(node_ptr) p) BOOST_NOEXCEPT
    {  return NodeTraits::get_left(NodeTraits::get_parent(p)) == p;  }
 
    //! <b>Requires</b>: p is a node of a tree.
@@ -1646,7 +1648,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static bool is_right_child(node_ptr p) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bool is_right_child(BOOST_INTRUSIVE_CPARAM(node_ptr) p) BOOST_NOEXCEPT
    {  return NodeTraits::get_right(NodeTraits::get_parent(p)) == p;  }
 
    static void insert_before_check

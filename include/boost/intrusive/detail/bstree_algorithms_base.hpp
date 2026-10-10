@@ -21,7 +21,9 @@
 #  pragma once
 #endif
 
+#include <boost/intrusive/detail/workaround.hpp>
 #include <boost/intrusive/detail/uncast.hpp>
+#include <boost/intrusive/detail/mpl.hpp>
 
 namespace boost {
 namespace intrusive {
@@ -34,6 +36,8 @@ class bstree_algorithms_base
    typedef NodeTraits                           node_traits;
    typedef typename NodeTraits::node_ptr        node_ptr;
    typedef typename NodeTraits::const_node_ptr  const_node_ptr;
+   typedef typename detail::ptr_cparam<node_ptr>::type        node_ptr_cparam;
+   typedef typename detail::ptr_cparam<const_node_ptr>::type  const_node_ptr_cparam;
 
    //! <b>Requires</b>: 'n' is a node from the tree except the header.
    //!
@@ -42,7 +46,7 @@ class bstree_algorithms_base
    //! <b>Complexity</b>: Average constant time.
    //!
    //! <b>Throws</b>: Nothing.
-   static node_ptr next_node(node_ptr n) BOOST_NOEXCEPT
+   static node_ptr next_node(BOOST_INTRUSIVE_CPARAM(node_ptr) n) BOOST_NOEXCEPT
    {
       node_ptr const n_right(NodeTraits::get_right(n));
       if(n_right){
@@ -50,11 +54,16 @@ class bstree_algorithms_base
       }
       else {
          node_ptr p(NodeTraits::get_parent(n));
-         while(n == NodeTraits::get_right(p)){
-            n = p;
+         //n is a left child: the parent is the next node
+         if(n != NodeTraits::get_right(p))
+            return p;
+         node_ptr x(p);
+         p = NodeTraits::get_parent(p);
+         while(x == NodeTraits::get_right(p)){
+            x = p;
             p = NodeTraits::get_parent(p);
          }
-         return NodeTraits::get_right(n) != p ? p : n;
+         return NodeTraits::get_right(x) != p ? p : x;
       }
    }
 
@@ -65,7 +74,7 @@ class bstree_algorithms_base
    //! <b>Complexity</b>: Average constant time.
    //!
    //! <b>Throws</b>: Nothing.
-   static node_ptr prev_node(node_ptr n) BOOST_NOEXCEPT
+   static node_ptr prev_node(BOOST_INTRUSIVE_CPARAM(node_ptr) n) BOOST_NOEXCEPT
    {
       node_ptr x(NodeTraits::get_parent(n));
       node_ptr const l(NodeTraits::get_left(n));
@@ -77,9 +86,15 @@ class bstree_algorithms_base
       else if(l){
          return maximum(l);
       }
+      //n is a right child: the parent is the previous node
+      else if(n != NodeTraits::get_left(x)){
+         return x;
+      }
       else {
-         while(n == NodeTraits::get_left(x)){
-            n = x;
+         node_ptr y(x);
+         x = NodeTraits::get_parent(x);
+         while(y == NodeTraits::get_left(x)){
+            y = x;
             x = NodeTraits::get_parent(x);
          }
          return x;
@@ -93,14 +108,17 @@ class bstree_algorithms_base
    //! <b>Complexity</b>: Logarithmic to the size of the subtree.
    //!
    //! <b>Throws</b>: Nothing.
-   static node_ptr minimum(node_ptr n)
+   static node_ptr minimum(BOOST_INTRUSIVE_CPARAM(node_ptr) n)
    {
-      for(node_ptr p_left = NodeTraits::get_left(n)
-         ;p_left
-         ;p_left = NodeTraits::get_left(n)){
-         n = p_left;
-      }
-      return n;
+      node_ptr p_left(NodeTraits::get_left(n));
+      if(!p_left)
+         return n;
+      node_ptr m;
+      do{
+         m = p_left;
+         p_left = NodeTraits::get_left(m);
+      }while(p_left);
+      return m;
    }
 
    //! <b>Requires</b>: 'n' is a node of a tree but not the header.
@@ -110,14 +128,17 @@ class bstree_algorithms_base
    //! <b>Complexity</b>: Logarithmic to the size of the subtree.
    //!
    //! <b>Throws</b>: Nothing.
-   static node_ptr maximum(node_ptr n)
+   static node_ptr maximum(BOOST_INTRUSIVE_CPARAM(node_ptr) n)
    {
-      for(node_ptr p_right = NodeTraits::get_right(n)
-         ;p_right
-         ;p_right = NodeTraits::get_right(n)){
-         n = p_right;
-      }
-      return n;
+      node_ptr p_right(NodeTraits::get_right(n));
+      if(!p_right)
+         return n;
+      node_ptr m;
+      do{
+         m = p_right;
+         p_right = NodeTraits::get_right(m);
+      }while(p_right);
+      return m;
    }
 
    //! <b>Requires</b>: p is a node of a tree.
@@ -127,7 +148,7 @@ class bstree_algorithms_base
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   static bool is_header(const_node_ptr p) BOOST_NOEXCEPT
+   static bool is_header(BOOST_INTRUSIVE_CPARAM(const_node_ptr) p) BOOST_NOEXCEPT
    {
       node_ptr const p_parent(NodeTraits::get_parent(p));
       if(!p_parent)
@@ -148,7 +169,7 @@ class bstree_algorithms_base
    //! <b>Complexity</b>: Logarithmic.
    //!
    //! <b>Throws</b>: Nothing.
-   static node_ptr get_header(const_node_ptr n)
+   static node_ptr get_header(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
    {
       node_ptr nn(detail::uncast(n));
       node_ptr p(NodeTraits::get_parent(n));

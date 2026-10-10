@@ -156,6 +156,7 @@ class avltree_algorithms
    /// @cond
    private:
    typedef bstree_algorithms<NodeTraits>  bstree_algo;
+   typedef typename bstree_algo::const_node_ptr_cparam  const_node_ptr_cparam;
 
    //Not supported: they build a new shape for the tree without restoring the balance factors
    using bstree_algo::rebalance;
@@ -421,7 +422,7 @@ class avltree_algorithms
    }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::is_header
-   BOOST_INTRUSIVE_FORCEINLINE static bool is_header(const_node_ptr p) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bool is_header(BOOST_INTRUSIVE_CPARAM(const_node_ptr) p) BOOST_NOEXCEPT
    {  return NodeTraits::get_balance(p) == NodeTraits::zero() && bstree_algo::is_header(p);  }
 
 
