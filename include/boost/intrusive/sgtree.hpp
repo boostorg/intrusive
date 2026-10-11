@@ -715,26 +715,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
    {
       if(static_cast<const void*>(&source) == static_cast<const void*>(this))
          return;
-      node_ptr it   (node_algorithms::begin_node(source.header_ptr()))
-             , itend(node_algorithms::end_node  (source.header_ptr()));
-
-      while(it != itend){
-         node_ptr const p(it);
-         BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || !node_algorithms::unique(p));
-         it = node_algorithms::next_node(it);
-
-         std::size_t max_tree1_size = this->max_tree_size_;
-         std::size_t max_tree2_size = source.get_max_tree_size();
-         if( node_algorithms::transfer_unique
-               ( this->header_ptr(), this->key_node_comp(this->key_comp()), this->size(), max_tree1_size
-               , source.header_ptr(), p, source.size(), max_tree2_size
-               , this->get_h_alpha_func(), this->get_alpha_by_max_size_func()) ){
-            this->max_tree_size_  = (size_type)max_tree1_size;
-            this->sz_traits().increment();
-            source.get_max_tree_size() = (size_type)max_tree2_size;
-            source.sz_traits().decrement();
-         }
-      }
+      tree_type::priv_merge_unique_distinct
+         (*this, source, detail::bool_<tree_type::template merge_in_order<Compare2>::value>());
    }
 
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
@@ -748,24 +730,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
    {
       if(static_cast<const void*>(&source) == static_cast<const void*>(this))
          return;
-      node_ptr it   (node_algorithms::begin_node(source.header_ptr()))
-             , itend(node_algorithms::end_node  (source.header_ptr()));
-
-      while(it != itend){
-         node_ptr const p(it);
-         BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || !node_algorithms::unique(p));
-         it = node_algorithms::next_node(it);
-         std::size_t max_tree1_size = this->max_tree_size_;
-         std::size_t max_tree2_size = source.get_max_tree_size();
-         node_algorithms::transfer_equal
-            ( this->header_ptr(), this->key_node_comp(this->key_comp()), this->size(), max_tree1_size
-            , source.header_ptr(), p, source.size(), max_tree2_size
-            , this->get_h_alpha_func(), this->get_alpha_by_max_size_func());
-         this->max_tree_size_  = (size_type)max_tree1_size;
-         this->sz_traits().increment();
-         source.get_max_tree_size() = (size_type)max_tree2_size;
-         source.sz_traits().decrement();
-      }
+      tree_type::priv_merge_equal_distinct
+         (*this, source, detail::bool_<tree_type::template merge_in_order<Compare2>::value>());
    }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED

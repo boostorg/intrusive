@@ -37,6 +37,7 @@ struct test_generic_multiset
    static void test_insert(value_cont_type&);
    static void test_swap(value_cont_type&);
    static void test_merge(value_cont_type&);
+   static void test_merge_same_order(value_cont_type&);
    static void test_find(value_cont_type&);
    static void test_impl();
 };
@@ -67,6 +68,7 @@ void test_generic_multiset<ContainerDefiner>::test_all ()
    test_insert(values);
    test_swap(values);
    test_merge(values);
+   test_merge_same_order(values);
    test_find(values);
    test_impl();
    test_generic_assoc<ContainerDefiner>::test_all(values);
@@ -231,6 +233,64 @@ void test_generic_multiset<ContainerDefiner>::test_merge(value_cont_type& values
       TEST_INTRUSIVE_SEQUENCE( init_values, testset1.begin() );  }
    BOOST_TEST (*testset1.find(key_of_value()(cmp_val)) == values[5]);
    BOOST_TEST (&*(++testset1.find(key_of_value()(cmp_val))) == &values[1]);
+}
+
+//Both containers use the same comparison type: merge visits the source in order
+template<class ContainerDefiner>
+void test_generic_multiset<ContainerDefiner>::test_merge_same_order(value_cont_type& values)
+{
+   typedef typename ContainerDefiner::template container
+      <>::type multiset_type;
+   typedef typename multiset_type::key_of_value key_of_value;
+
+   //original vector: 3, 2, 4, 1, 5, 2
+   //2, 3
+   multiset_type testset1 (values.begin(), values.begin() + 2);
+   //1, 2, 4, 5
+   multiset_type testset2 (values.begin() + 2, values.begin() + 6);
+
+   //The transferred elements go after the equivalent elements of the destination
+   testset2.merge(testset1);
+   testset1.check();
+   testset2.check();
+
+   BOOST_TEST (testset1.empty());
+   BOOST_TEST (testset2.size() == 6);
+   {  int init_values [] = { 1, 2, 2, 3, 4, 5 };
+      TEST_INTRUSIVE_SEQUENCE( init_values, testset2.begin() );  }
+   BOOST_TEST (&*testset2.find(key_of_value()(values[1])) == &values[5]);
+   BOOST_TEST (&*(++testset2.find(key_of_value()(values[1]))) == &values[1]);
+
+   //Merge into an empty container: the order of equivalent elements does not change
+   testset1.merge(testset2);
+   testset1.check();
+   testset2.check();
+
+   BOOST_TEST (testset2.empty());
+   BOOST_TEST (testset1.size() == 6);
+   {  int init_values [] = { 1, 2, 2, 3, 4, 5 };
+      TEST_INTRUSIVE_SEQUENCE( init_values, testset1.begin() );  }
+   BOOST_TEST (&*testset1.find(key_of_value()(values[1])) == &values[5]);
+   BOOST_TEST (&*(++testset1.find(key_of_value()(values[1]))) == &values[1]);
+
+   //Equivalent elements in both containers
+   testset1.clear();
+   //2 (values[1])
+   multiset_type testset3 (values.begin() + 1, values.begin() + 2);
+   //2 (values[5]), 3, 5
+   multiset_type testset4;
+   testset4.insert(values[5]);
+   testset4.insert(values[0]);
+   testset4.insert(values[4]);
+   testset3.merge(testset4);
+   testset3.check();
+   testset4.check();
+   BOOST_TEST (testset4.empty());
+   BOOST_TEST (testset3.size() == 4);
+   {  int init_values [] = { 2, 2, 3, 5 };
+      TEST_INTRUSIVE_SEQUENCE( init_values, testset3.begin() );  }
+   BOOST_TEST (&*testset3.begin() == &values[1]);
+   BOOST_TEST (&*(++testset3.begin()) == &values[5]);
 }
 
 //test: find, equal_range (lower_bound, upper_bound):

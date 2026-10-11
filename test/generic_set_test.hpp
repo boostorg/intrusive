@@ -40,6 +40,7 @@ struct test_generic_set
    static void test_insert_advanced(value_cont_type&, detail::false_type);
    static void test_swap(value_cont_type&);
    static void test_merge(value_cont_type&);
+   static void test_merge_same_order(value_cont_type&);
    static void test_find(value_cont_type&);
    static void test_impl();
 };
@@ -75,6 +76,7 @@ void test_generic_set<ContainerDefiner>::test_all()
       test_insert_advanced(values, detail::bool_< is_treap< set_type >::value >());
       test_swap(values);
       test_merge(values);
+      test_merge_same_order(values);
       test_find(values);
       test_impl();
       test_generic_assoc<ContainerDefiner>::test_all(values);
@@ -307,6 +309,58 @@ void test_generic_set<ContainerDefiner>::test_merge(value_cont_type& values)
    BOOST_TEST (testset1.size() == 5);
    {  int init_values [] = { 1, 2, 3, 4, 5 };
       TEST_INTRUSIVE_SEQUENCE( init_values, testset1.begin() );  }
+}
+
+//Both containers use the same comparison type: merge visits the source in order
+template<class ContainerDefiner>
+void test_generic_set<ContainerDefiner>::test_merge_same_order(value_cont_type& values)
+{
+   typedef typename ContainerDefiner::template container
+      <>::type set_type;
+   typedef typename set_type::key_of_value key_of_value;
+
+   //original vector: 3, 2, 4, 1, 5, 2
+   //2, 3
+   set_type testset1 (values.begin(), values.begin() + 2);
+   //1, 2, 4, 5
+   set_type testset2 (values.begin() + 2, values.begin() + 6);
+
+   //3 is transferred, the 2 of testset1 (values[1]) stays in testset1
+   testset2.merge(testset1);
+   testset1.check();
+   testset2.check();
+
+   BOOST_TEST (testset1.size() == 1);
+   BOOST_TEST (&*testset1.begin() == &values[1]);
+   BOOST_TEST (testset2.size() == 5);
+   {  int init_values [] = { 1, 2, 3, 4, 5 };
+      TEST_INTRUSIVE_SEQUENCE( init_values, testset2.begin() );  }
+   BOOST_TEST (&*testset2.find(key_of_value()(values[1])) == &values[5]);
+
+   //All elements except 2 (values[5]) are transferred
+   testset1.merge(testset2);
+   testset1.check();
+   testset2.check();
+
+   BOOST_TEST (testset1.size() == 5);
+   {  int init_values [] = { 1, 2, 3, 4, 5 };
+      TEST_INTRUSIVE_SEQUENCE( init_values, testset1.begin() );  }
+   BOOST_TEST (&*testset1.find(key_of_value()(values[1])) == &values[1]);
+   BOOST_TEST (testset2.size() == 1);
+   BOOST_TEST (&*testset2.begin() == &values[5]);
+
+   //Merge into an empty container and from an empty container
+   set_type testset3;
+   testset3.merge(testset1);
+   testset1.check();
+   testset3.check();
+   BOOST_TEST (testset1.empty());
+   BOOST_TEST (testset3.size() == 5);
+   {  int init_values [] = { 1, 2, 3, 4, 5 };
+      TEST_INTRUSIVE_SEQUENCE( init_values, testset3.begin() );  }
+   testset3.merge(testset1);
+   testset3.check();
+   BOOST_TEST (testset3.size() == 5);
 }
 
 //test: find, equal_range (lower_bound, upper_bound), bounded_range, count:

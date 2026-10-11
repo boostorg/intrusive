@@ -2170,7 +2170,12 @@ class bstree_impl
    //!
    //! <b>Throws</b>: Nothing unless the comparison object throws.
    //!
-   //! <b>Complexity</b>: N log(a.size() + N) (N has the value source.size())
+   //! <b>Complexity</b>: N log(a.size() + N) (N has the value source.size()).
+   //!   If the comparison objects of both containers have the same type and that type is
+   //!   an empty class (except in splay trees and treaps), the position of each element is
+   //!   searched starting from the position of the previous element. Then the number of
+   //!   comparisons is lower: when N and a.size() are similar, it is a small constant number
+   //!   per element.
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
    template<class T, class ...Options2> void merge_unique(bstree<T, Options2...> &)
    #else
@@ -2181,18 +2186,7 @@ class bstree_impl
    {
       if(BOOST_UNLIKELY(static_cast<const void*>(&source) == static_cast<const void*>(this)))
          return;
-      node_ptr it   (node_algorithms::begin_node(source.header_ptr()))
-             , itend(node_algorithms::end_node  (source.header_ptr()));
-
-      while(it != itend){
-         node_ptr const p(it);
-         BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || !node_algorithms::unique(p));
-         it = node_algorithms::next_node(it);
-         if( node_algorithms::transfer_unique(this->header_ptr(), this->key_node_comp(this->key_comp()), source.header_ptr(), p) ){
-            source.sz_traits().decrement();
-            this->sz_traits().increment();
-         }
-      }
+      bstree_impl::priv_merge_unique_distinct(*this, source, detail::bool_<merge_in_order<Compare2>::value>());
    }
 
    //! <b>Requires</b>: "source" container's Options can only can differ in the comparison
@@ -2208,7 +2202,12 @@ class bstree_impl
    //!
    //! <b>Throws</b>: Nothing unless the comparison object throws.
    //!
-   //! <b>Complexity</b>: N log(a.size() + N) (N has the value source.size())
+   //! <b>Complexity</b>: N log(a.size() + N) (N has the value source.size()).
+   //!   If the comparison objects of both containers have the same type and that type is
+   //!   an empty class (except in splay trees and treaps), the position of each element is
+   //!   searched starting from the position of the previous element. Then the number of
+   //!   comparisons is lower: when N and a.size() are similar, it is a small constant number
+   //!   per element.
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
    template<class T, class ...Options2> void merge_equal(bstree<T, Options2...> &)
    #else
@@ -2219,17 +2218,7 @@ class bstree_impl
    {
       if(BOOST_UNLIKELY(static_cast<const void*>(&source) == static_cast<const void*>(this)))
          return;
-      node_ptr it   (node_algorithms::begin_node(source.header_ptr()))
-             , itend(node_algorithms::end_node  (source.header_ptr()));
-
-      while(it != itend){
-         node_ptr const p(it);
-         BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || !node_algorithms::unique(p));
-         it = node_algorithms::next_node(it);
-         node_algorithms::transfer_equal(this->header_ptr(), this->key_node_comp(this->key_comp()), source.header_ptr(), p);
-         source.sz_traits().decrement();
-         this->sz_traits().increment();
-      }
+      bstree_impl::priv_merge_equal_distinct(*this, source, detail::bool_<merge_in_order<Compare2>::value>());
    }
 
    //! <b>Effects</b>: Asserts the integrity of the container with additional checks provided by the user.
@@ -2300,6 +2289,102 @@ class bstree_impl
          return 0;
       c.erase_and_dispose(i, disposer);
       return 1;
+   }
+
+   //Two trees with the same comparison type order the elements in the same way if the
+   //comparison type has no state (an empty class). Then merge can visit the source in order
+   //and search the position of each element from the position of the previous element.
+   //Splay trees already take advantage of the in order access of the general algorithm.
+   template<class Compare2>
+   struct merge_in_order
+   {
+      static const bool value =
+         detail::is_same<typename get_compare<Compare2, key_type>::type, key_compare>::value &&
+         detail::is_empty<key_compare>::value && AlgoType != SplayTreeAlgorithms;
+   };
+
+   //Implementations of merge_unique and merge_equal for two different containers.
+   //Dst and Src are different types because the comparison objects can be different.
+   //"dst" is *this, with the derived type, so that the erase and insert functions of
+   //the derived type are used. They must not throw.
+
+   //Both trees have the same order: the source is visited in order and the position
+   //of each element is searched from the position of the previous element.
+   template<class Dst, class Src>
+   static void priv_merge_unique_distinct(Dst &dst, Src &src, detail::true_)
+   {
+      bstree_impl &d = dst;
+      node_ptr const header(d.header_ptr());
+      typename data_type::template key_node_comp_ret<key_compare>::type comp(d.key_node_comp(d.key_comp()));
+      //pos: lower bound of the last searched node, or the last transferred node.
+      //All nodes before pos are less than the next source node.
+      node_ptr pos(node_algorithms::begin_node(header));
+      typename Src::iterator it(src.begin()), itend(src.end());
+      while(it != itend){
+         node_ptr const p(it.pointed_node());
+         pos = node_algorithms::lower_bound_from(header, pos, p, comp);
+         //Transfer p if pos is not equivalent to p
+         if(pos == header || comp(p, pos)){
+            reference value = *it;
+            it = src.erase(it);
+            dst.insert_before(d.priv_to_cit(pos), value);
+            pos = p;
+         }
+         else{
+            ++it;
+         }
+      }
+   }
+
+   //The trees can have a different order: a full search for each element.
+   template<class Dst, class Src>
+   static void priv_merge_unique_distinct(Dst &dst, Src &src, detail::false_)
+   {
+      typename Src::iterator it(src.begin()), itend(src.end());
+      while(it != itend){
+         typename Dst::insert_commit_data commit_data;
+         if(dst.insert_unique_check(key_of_value()(*it), commit_data).second){
+            reference value = *it;
+            it = src.erase(it);
+            dst.insert_unique_commit(value, commit_data);
+         }
+         else{
+            ++it;
+         }
+      }
+   }
+
+   //Both trees have the same order: the source is visited in order and the position
+   //of each element is searched from the position of the previous element.
+   template<class Dst, class Src>
+   static void priv_merge_equal_distinct(Dst &dst, Src &src, detail::true_)
+   {
+      bstree_impl &d = dst;
+      node_ptr const header(d.header_ptr());
+      typename data_type::template key_node_comp_ret<key_compare>::type comp(d.key_node_comp(d.key_comp()));
+      //pos: upper bound of the last transferred node
+      node_ptr pos(node_algorithms::begin_node(header));
+      typename Src::iterator it(src.begin()), itend(src.end());
+      while(it != itend){
+         pos = node_algorithms::upper_bound_from(header, pos, it.pointed_node(), comp);
+         reference value = *it;
+         it = src.erase(it);
+         dst.insert_before(d.priv_to_cit(pos), value);
+      }
+   }
+
+   //The trees can have a different order: a full search for each element.
+   template<class Dst, class Src>
+   static void priv_merge_equal_distinct(Dst &dst, Src &src, detail::false_)
+   {
+      typename Src::iterator it(src.begin()), itend(src.end());
+      while(it != itend){
+         //const version: splay trees do not splay, as insert_before splays the inserted node
+         const_iterator const pos(static_cast<const Dst&>(dst).upper_bound(key_of_value()(*it)));
+         reference value = *it;
+         it = src.erase(it);
+         dst.insert_before(pos, value);
+      }
    }
 
    private:

@@ -947,6 +947,50 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       return upper_bound_loop(NodeTraits::get_parent(header), detail::uncast(header), key, comp);
    }
 
+   //! <b>Requires</b>: "header" must be the header node of a tree and "start" a node
+   //!   of that tree or "header". All nodes before "start" must be less than "key".
+   //!   KeyNodePtrCompare is a function object that induces a strict weak
+   //!   ordering compatible with the strict weak ordering used to create the
+   //!   the tree. KeyNodePtrCompare can compare KeyType with tree's node_ptrs.
+   //!
+   //! <b>Effects</b>: Returns a node_ptr to the first element that is
+   //!   not less than "key" according to "comp" or "header" if that element does
+   //!   not exist (the same result as lower_bound). The search starts at "start", not at the root.
+   //!
+   //! <b>Complexity</b>: Logarithmic. Few comparisons if the result is near "start".
+   //!   At most 2*height + 1 comparisons.
+   //!
+   //! <b>Throws</b>: If "comp" throws.
+   template<class KeyType, class KeyNodePtrCompare>
+   inline static node_ptr lower_bound_from
+      ( BOOST_INTRUSIVE_CPARAM(const_node_ptr) header, BOOST_INTRUSIVE_CPARAM(node_ptr) start
+      , const KeyType &key, KeyNodePtrCompare comp)
+   {
+      return bound_from<false>(header, start, key, comp);
+   }
+
+   //! <b>Requires</b>: "header" must be the header node of a tree and "start" a node
+   //!   of that tree or "header". All nodes before "start" must not be greater than "key".
+   //!   KeyNodePtrCompare is a function object that induces a strict weak
+   //!   ordering compatible with the strict weak ordering used to create the
+   //!   the tree. KeyNodePtrCompare can compare KeyType with tree's node_ptrs.
+   //!
+   //! <b>Effects</b>: Returns a node_ptr to the first element that is greater
+   //!   than "key" according to "comp" or "header" if that element does not exist
+   //!   (the same result as upper_bound). The search starts at "start", not at the root.
+   //!
+   //! <b>Complexity</b>: Logarithmic. Few comparisons if the result is near "start".
+   //!   At most 2*height + 1 comparisons.
+   //!
+   //! <b>Throws</b>: If "comp" throws.
+   template<class KeyType, class KeyNodePtrCompare>
+   inline static node_ptr upper_bound_from
+      ( BOOST_INTRUSIVE_CPARAM(const_node_ptr) header, BOOST_INTRUSIVE_CPARAM(node_ptr) start
+      , const KeyType &key, KeyNodePtrCompare comp)
+   {
+      return bound_from<true>(header, start, key, comp);
+   }
+
    //! <b>Requires</b>: "header" must be the header node of a tree.
    //!   "commit_data" must have been obtained from a previous call to
    //!   "insert_unique_check". No objects should have been inserted or erased
@@ -2045,6 +2089,38 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
          }
       }
       return y;
+   }
+
+   //Implementation of lower_bound_from (Upper is false) and upper_bound_from (Upper is true).
+   //A node is after "key" if comp(key, node) (Upper is true) or if !comp(node, key) (Upper is false).
+   template<bool Upper, class KeyType, class KeyNodePtrCompare>
+   static node_ptr bound_from
+      ( BOOST_INTRUSIVE_CPARAM(const_node_ptr) header, BOOST_INTRUSIVE_CPARAM(node_ptr) start
+      , const KeyType &key, KeyNodePtrCompare comp)
+   {
+      //Precondition: the node before start is not after key (then no node before start is after key)
+      BOOST_INTRUSIVE_INVARIANT_ASSERT
+         ( start == begin_node(header) ||
+           (Upper ? !comp(key, base_type::prev_node(start)) : comp(base_type::prev_node(start), key)) );
+      if(start == header || (Upper ? comp(key, start) : !comp(start, key)))
+         return start;
+      //"a" is not after key: the result is in the right subtree of "a" or it is
+      //the first ancestor "y" that is after the subtree of "a".
+      node_ptr a(start), y;
+      for(;;){
+         node_ptr x(a), p(NodeTraits::get_parent(a));
+         while(p != header && x == NodeTraits::get_right(p)){
+            x = p;
+            p = NodeTraits::get_parent(p);
+         }
+         if(p == header || (Upper ? comp(key, p) : !comp(p, key))){
+            y = p;
+            break;
+         }
+         a = p;
+      }
+      return Upper ? upper_bound_loop(NodeTraits::get_right(a), y, key, comp)
+                   : lower_bound_loop(NodeTraits::get_right(a), y, key, comp);
    }
 
    private:
