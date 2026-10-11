@@ -1527,9 +1527,12 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    /// @cond
    protected:
 
+   //Some protected functions below take node pointers as BOOST_INTRUSIVE_CPARAM although they
+   //write nodes (condition 2 of detail::ptr_cparam): keep the callers as described there.
+
    template<class NodePtrCompare>
    static bool transfer_unique
-      (node_ptr header1, NodePtrCompare comp, node_ptr header2, node_ptr z, data_for_rebalance &info)
+      (BOOST_INTRUSIVE_CPARAM(node_ptr) header1, NodePtrCompare comp, BOOST_INTRUSIVE_CPARAM(node_ptr) header2, BOOST_INTRUSIVE_CPARAM(node_ptr) z, data_for_rebalance &info)
    {
       insert_commit_data commit_data;
       bool const transferable = insert_unique_check(header1, z, comp, commit_data).second;
@@ -1542,7 +1545,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
 
    template<class NodePtrCompare>
    static void transfer_equal
-      (node_ptr header1, NodePtrCompare comp, node_ptr header2, node_ptr z, data_for_rebalance &info)
+      (BOOST_INTRUSIVE_CPARAM(node_ptr) header1, NodePtrCompare comp, BOOST_INTRUSIVE_CPARAM(node_ptr) header2, BOOST_INTRUSIVE_CPARAM(node_ptr) z, data_for_rebalance &info)
    {
       insert_commit_data commit_data;
       insert_equal_upper_bound_check(header1, z, comp, commit_data);
@@ -1550,7 +1553,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       insert_commit(header1, z, commit_data);
    }
 
-   static void erase(node_ptr header, node_ptr z, data_for_rebalance &info)
+   static void erase(BOOST_INTRUSIVE_CPARAM(node_ptr) header, BOOST_INTRUSIVE_CPARAM(node_ptr) z, data_for_rebalance &info)
    {
       node_ptr y(z);
       node_ptr x;
@@ -1696,7 +1699,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    {  return NodeTraits::get_right(NodeTraits::get_parent(p)) == p;  }
 
    static void insert_before_check
-      (node_ptr header, node_ptr pos
+      (BOOST_INTRUSIVE_CPARAM(node_ptr) header, BOOST_INTRUSIVE_CPARAM(node_ptr) pos
       , insert_commit_data &commit_data
          #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
          , std::size_t *pdepth = 0
@@ -1715,7 +1718,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    }
 
    static void push_back_check
-      (node_ptr header, insert_commit_data &commit_data
+      (BOOST_INTRUSIVE_CPARAM(node_ptr) header, insert_commit_data &commit_data
          #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
          , std::size_t *pdepth = 0
          #endif
@@ -1730,7 +1733,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    }
 
    static void push_front_check
-      (node_ptr header, insert_commit_data &commit_data
+      (BOOST_INTRUSIVE_CPARAM(node_ptr) header, insert_commit_data &commit_data
          #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
          , std::size_t *pdepth = 0
          #endif
@@ -1746,7 +1749,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
 
    template<class NodePtrCompare>
    static void insert_equal_check
-      (node_ptr header, node_ptr hint, node_ptr new_node, NodePtrCompare comp
+      (BOOST_INTRUSIVE_CPARAM(node_ptr) header, BOOST_INTRUSIVE_CPARAM(node_ptr) hint, BOOST_INTRUSIVE_CPARAM(node_ptr) new_node, NodePtrCompare comp
       , insert_commit_data &commit_data
       /// @cond
       , std::size_t *pdepth = 0
@@ -1775,7 +1778,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
 
    template<class NodePtrCompare>
    static void insert_equal_upper_bound_check
-      (node_ptr h, node_ptr new_node, NodePtrCompare comp, insert_commit_data & commit_data, std::size_t *pdepth = 0)
+      (BOOST_INTRUSIVE_CPARAM(node_ptr) h, BOOST_INTRUSIVE_CPARAM(node_ptr) new_node, NodePtrCompare comp, insert_commit_data & commit_data, std::size_t *pdepth = 0)
    {
       std::size_t depth = 0;
       node_ptr y(h);
@@ -1797,7 +1800,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
 
    template<class NodePtrCompare>
    static void insert_equal_lower_bound_check
-      (node_ptr h, node_ptr new_node, NodePtrCompare comp, insert_commit_data & commit_data, std::size_t *pdepth = 0)
+      (BOOST_INTRUSIVE_CPARAM(node_ptr) h, BOOST_INTRUSIVE_CPARAM(node_ptr) new_node, NodePtrCompare comp, insert_commit_data & commit_data, std::size_t *pdepth = 0)
    {
       std::size_t depth = 0;
       node_ptr y(h);
@@ -1818,7 +1821,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    }
 
    static void insert_commit
-      (node_ptr header, node_ptr new_node, const insert_commit_data &commit_data) BOOST_NOEXCEPT
+      (BOOST_INTRUSIVE_CPARAM(node_ptr) header, BOOST_INTRUSIVE_CPARAM(node_ptr) new_node, const insert_commit_data &commit_data) BOOST_NOEXCEPT
    {
       //Check if commit_data has not been initialized by a insert_unique_check call.
       BOOST_INTRUSIVE_INVARIANT_ASSERT(commit_data.node != node_ptr());
@@ -1844,7 +1847,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    }
 
    //Fix header and own's parent data when replacing x with own, providing own's old data with parent
-   static void set_child(node_ptr header, node_ptr new_child, node_ptr new_parent, const bool link_left) BOOST_NOEXCEPT
+   static void set_child(BOOST_INTRUSIVE_CPARAM(node_ptr) header, BOOST_INTRUSIVE_CPARAM(node_ptr) new_child, BOOST_INTRUSIVE_CPARAM(node_ptr) new_parent, const bool link_left) BOOST_NOEXCEPT
    {
       if(new_parent == header)
          NodeTraits::set_parent(header, new_child);
@@ -1855,7 +1858,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    }
 
    // rotate p to left (no header and p's parent fixup)
-   static void rotate_left_no_parent_fix(node_ptr p, node_ptr p_right) BOOST_NOEXCEPT
+   static void rotate_left_no_parent_fix(BOOST_INTRUSIVE_CPARAM(node_ptr) p, BOOST_INTRUSIVE_CPARAM(node_ptr) p_right) BOOST_NOEXCEPT
    {
       node_ptr p_right_left(NodeTraits::get_left(p_right));
       NodeTraits::set_right(p, p_right_left);
@@ -1867,7 +1870,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    }
 
    // rotate p to left (with header and p's parent fixup)
-   static void rotate_left(node_ptr p, node_ptr p_right, node_ptr p_parent, node_ptr header) BOOST_NOEXCEPT
+   static void rotate_left(BOOST_INTRUSIVE_CPARAM(node_ptr) p, BOOST_INTRUSIVE_CPARAM(node_ptr) p_right, BOOST_INTRUSIVE_CPARAM(node_ptr) p_parent, BOOST_INTRUSIVE_CPARAM(node_ptr) header) BOOST_NOEXCEPT
    {
       const bool p_was_left(NodeTraits::get_left(p_parent) == p);
       rotate_left_no_parent_fix(p, p_right);
@@ -1876,7 +1879,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    }
 
    // rotate p to right (no header and p's parent fixup)
-   static void rotate_right_no_parent_fix(node_ptr p, node_ptr p_left) BOOST_NOEXCEPT
+   static void rotate_right_no_parent_fix(BOOST_INTRUSIVE_CPARAM(node_ptr) p, BOOST_INTRUSIVE_CPARAM(node_ptr) p_left) BOOST_NOEXCEPT
    {
       node_ptr p_left_right(NodeTraits::get_right(p_left));
       NodeTraits::set_left(p, p_left_right);
@@ -1888,7 +1891,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    }
 
    // rotate p to right (with header and p's parent fixup)
-   static void rotate_right(node_ptr p, node_ptr p_left, node_ptr p_parent, node_ptr header) BOOST_NOEXCEPT
+   static void rotate_right(BOOST_INTRUSIVE_CPARAM(node_ptr) p, BOOST_INTRUSIVE_CPARAM(node_ptr) p_left, BOOST_INTRUSIVE_CPARAM(node_ptr) p_parent, BOOST_INTRUSIVE_CPARAM(node_ptr) header) BOOST_NOEXCEPT
    {
       const bool p_was_left(NodeTraits::get_left(p_parent) == p);
       rotate_right_no_parent_fix(p, p_left);

@@ -74,15 +74,20 @@ using boost::move_detail::is_scalar;
 using boost::move_detail::is_unsigned;
 using boost::move_detail::is_trivially_copyable;
 
-//Parameter type for a pointer that the function only reads, it does not write:
-//    - a node
-//    - A pointer visible to the caller, e.g. out parameters or commit data:
+//Parameter type for a pointer that the function only reads. If the pointer is trivially
+//copyable, it is a value. Else it is a const reference, to avoid the inefficient copy of
+//non-trivial pointers (e.g. offset_ptr).
 //
-//If the pointer is trivially copyable is a value, else a const reference to avoid
-//the inneficient copy of non-trivial pointers (e.g. offset_ptr).
+//A const reference can alias the object that the function writes. Use it only if one
+//of these conditions is true:
+//    1. The function does not write nodes or caller-visible pointers (e.g. out
+//       parameters or commit data).
+//    2. The function is not public (an internal helper) and all its callers pass a
+//       by-value parameter, a local or a temporary, never a pointer stored in a node
+//       or in an object that the function writes. The function must not change the
+//       parameter (a parameter that the function reassigns stays by value).
 //
-//If wrongly used in functions that write nodes or caller-visible pointers
-//the aliasing can lead to UB.
+//If wrongly used, the aliasing can lead to UB.
 template<class Ptr>
 struct ptr_cparam
 {

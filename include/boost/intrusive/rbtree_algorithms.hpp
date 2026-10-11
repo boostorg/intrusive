@@ -180,6 +180,7 @@ class rbtree_algorithms
 
    typedef bstree_algorithms<NodeTraits>  bstree_algo;
    typedef typename bstree_algo::const_node_ptr_cparam  const_node_ptr_cparam;
+   typedef typename bstree_algo::node_ptr_cparam        node_ptr_cparam;
 
    //Not supported: they build a new shape for the tree without restoring the colors
    using bstree_algo::rebalance;
@@ -449,8 +450,9 @@ class rbtree_algorithms
    /// @cond
    private:
 
+   //BOOST_INTRUSIVE_CPARAM in functions that write nodes: condition 2 of detail::ptr_cparam
    static void rebalance_after_erasure
-      ( node_ptr header, node_ptr z, const typename bstree_algo::data_for_rebalance &info) BOOST_NOEXCEPT
+      ( BOOST_INTRUSIVE_CPARAM(node_ptr) header, BOOST_INTRUSIVE_CPARAM(node_ptr) z, const typename bstree_algo::data_for_rebalance &info) BOOST_NOEXCEPT
    {
       color new_z_color;
       if(info.y != z){
@@ -466,7 +468,7 @@ class rbtree_algorithms
       }
    }
 
-   static void rebalance_after_erasure_restore_invariants(node_ptr header, node_ptr x, node_ptr x_parent) BOOST_NOEXCEPT
+   static void rebalance_after_erasure_restore_invariants(BOOST_INTRUSIVE_CPARAM(node_ptr) header, node_ptr x, node_ptr x_parent) BOOST_NOEXCEPT
    {
       while(1){
          if(x_parent == header || (x && NodeTraits::get_color(x) != NodeTraits::black())){
@@ -551,7 +553,7 @@ class rbtree_algorithms
          NodeTraits::set_color(x, NodeTraits::black());
    }
 
-   static void rebalance_after_insertion(node_ptr header, node_ptr p) BOOST_NOEXCEPT
+   static void rebalance_after_insertion(BOOST_INTRUSIVE_CPARAM(node_ptr) header, node_ptr p) BOOST_NOEXCEPT
    {
       NodeTraits::set_color(p, NodeTraits::red());
       while(1){

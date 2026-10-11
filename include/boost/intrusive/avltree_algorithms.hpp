@@ -157,6 +157,7 @@ class avltree_algorithms
    private:
    typedef bstree_algorithms<NodeTraits>  bstree_algo;
    typedef typename bstree_algo::const_node_ptr_cparam  const_node_ptr_cparam;
+   typedef typename bstree_algo::node_ptr_cparam        node_ptr_cparam;
 
    //Not supported: they build a new shape for the tree without restoring the balance factors
    using bstree_algo::rebalance;
@@ -484,8 +485,9 @@ class avltree_algorithms
       return true;
    }
 
+   //BOOST_INTRUSIVE_CPARAM in functions that write nodes: condition 2 of detail::ptr_cparam
    static void rebalance_after_erasure
-      ( node_ptr header, node_ptr z, const typename bstree_algo::data_for_rebalance &info) BOOST_NOEXCEPT
+      ( BOOST_INTRUSIVE_CPARAM(node_ptr) header, BOOST_INTRUSIVE_CPARAM(node_ptr) z, const typename bstree_algo::data_for_rebalance &info) BOOST_NOEXCEPT
    {
       if(info.y != z){
          NodeTraits::set_balance(info.y, NodeTraits::get_balance(z));
@@ -494,7 +496,7 @@ class avltree_algorithms
       rebalance_after_erasure_restore_invariants(header, info.x, info.x_parent);
    }
 
-   static void rebalance_after_erasure_restore_invariants(node_ptr header, node_ptr x, node_ptr x_parent) BOOST_NOEXCEPT
+   static void rebalance_after_erasure_restore_invariants(BOOST_INTRUSIVE_CPARAM(node_ptr) header, node_ptr x, node_ptr x_parent) BOOST_NOEXCEPT
    {
       while(x_parent != header){
          const balance x_parent_balance = NodeTraits::get_balance(x_parent);
@@ -566,7 +568,7 @@ class avltree_algorithms
       }
    }
 
-   static void rebalance_after_insertion(node_ptr header, node_ptr x) BOOST_NOEXCEPT
+   static void rebalance_after_insertion(BOOST_INTRUSIVE_CPARAM(node_ptr) header, node_ptr x) BOOST_NOEXCEPT
    {
       NodeTraits::set_balance(x, NodeTraits::zero());
       // Rebalance.
@@ -610,7 +612,7 @@ class avltree_algorithms
       }
    }
 
-   static void left_right_balancing(node_ptr a, node_ptr b, node_ptr c) BOOST_NOEXCEPT
+   static void left_right_balancing(BOOST_INTRUSIVE_CPARAM(node_ptr) a, BOOST_INTRUSIVE_CPARAM(node_ptr) b, BOOST_INTRUSIVE_CPARAM(node_ptr) c) BOOST_NOEXCEPT
    {
       // balancing...
       const balance c_balance = NodeTraits::get_balance(c);
@@ -635,7 +637,7 @@ class avltree_algorithms
       }
    }
 
-   static node_ptr avl_rotate_left_right(const node_ptr a, const node_ptr a_oldleft, const node_ptr a_parent, node_ptr hdr) BOOST_NOEXCEPT
+   static node_ptr avl_rotate_left_right(BOOST_INTRUSIVE_CPARAM(node_ptr) a, BOOST_INTRUSIVE_CPARAM(node_ptr) a_oldleft, BOOST_INTRUSIVE_CPARAM(node_ptr) a_parent, BOOST_INTRUSIVE_CPARAM(node_ptr) hdr) BOOST_NOEXCEPT
    {  // [note: 'a_oldleft' is 'b']
       //             |                               |         //
       //             a(-2)                           c         //
@@ -655,7 +657,7 @@ class avltree_algorithms
       return c;
    }
 
-   static node_ptr avl_rotate_right_left(const node_ptr a, const node_ptr a_oldright, const node_ptr a_parent, node_ptr hdr) BOOST_NOEXCEPT
+   static node_ptr avl_rotate_right_left(BOOST_INTRUSIVE_CPARAM(node_ptr) a, BOOST_INTRUSIVE_CPARAM(node_ptr) a_oldright, BOOST_INTRUSIVE_CPARAM(node_ptr) a_parent, BOOST_INTRUSIVE_CPARAM(node_ptr) hdr) BOOST_NOEXCEPT
    {  // [note: 'a_oldright' is 'b']
       //              |                               |           //
       //              a(pos)                          c           //
@@ -675,7 +677,7 @@ class avltree_algorithms
       return c;
    }
 
-   static void avl_rotate_left(node_ptr x, node_ptr x_oldright, node_ptr x_parent, node_ptr hdr) BOOST_NOEXCEPT
+   static void avl_rotate_left(BOOST_INTRUSIVE_CPARAM(node_ptr) x, BOOST_INTRUSIVE_CPARAM(node_ptr) x_oldright, BOOST_INTRUSIVE_CPARAM(node_ptr) x_parent, BOOST_INTRUSIVE_CPARAM(node_ptr) hdr) BOOST_NOEXCEPT
    {
       bstree_algo::rotate_left(x, x_oldright, x_parent, hdr);
 
@@ -690,7 +692,7 @@ class avltree_algorithms
       }
    }
 
-   static void avl_rotate_right(node_ptr x, node_ptr x_oldleft, node_ptr x_parent, node_ptr hdr) BOOST_NOEXCEPT
+   static void avl_rotate_right(BOOST_INTRUSIVE_CPARAM(node_ptr) x, BOOST_INTRUSIVE_CPARAM(node_ptr) x_oldleft, BOOST_INTRUSIVE_CPARAM(node_ptr) x_parent, BOOST_INTRUSIVE_CPARAM(node_ptr) hdr) BOOST_NOEXCEPT
    {
       bstree_algo::rotate_right(x, x_oldleft, x_parent, hdr);
 
