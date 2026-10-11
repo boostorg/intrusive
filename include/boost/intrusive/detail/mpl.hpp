@@ -74,10 +74,15 @@ using boost::move_detail::is_scalar;
 using boost::move_detail::is_unsigned;
 using boost::move_detail::is_trivially_copyable;
 
-//Parameter type for a pointer that the function only reads (it writes no node):
-//by value if the pointer is trivially copyable, else by const reference to avoid
-//the copy of non-trivial pointers (e.g. offset_ptr). Do not use it in functions
-//that modify nodes: the reference can alias a pointer stored in a node.
+//Parameter type for a pointer that the function only reads, it does not write:
+//    - a node
+//    - A pointer visible to the caller, e.g. out parameters or commit data:
+//
+//If the pointer is trivially copyable is a value, else a const reference to avoid
+//the inneficient copy of non-trivial pointers (e.g. offset_ptr).
+//
+//If wrongly used in functions that write nodes or caller-visible pointers
+//the aliasing can lead to UB.
 template<class Ptr>
 struct ptr_cparam
 {
