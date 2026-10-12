@@ -94,12 +94,23 @@ public:
    BOOST_INTRUSIVE_FORCEINLINE bool operator()(const T1 &t1, typename enable_if_c< is_same_or_nodeptr_convertible<T1>::value, sfinae_type* >::type = 0) const
    {  return base().get()(key_of_value()(*traits_->to_value_ptr(t1)));  }
 
+   //pred(pnode), non-const version to support predicates with non-const operator()
+   template<class T1>
+   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const T1 &t1, typename enable_if_c< is_same_or_nodeptr_convertible<T1>::value, sfinae_type* >::type = 0)
+   {  return base().get()(key_of_value()(*traits_->to_value_ptr(t1)));  }
+
    //operator() 2 arg
    //pred(pnode, pnode)
    template<class T1, class T2>
    inline bool operator()
       (const T1 &t1, const T2 &t2, typename enable_if_c< is_same_or_nodeptr_convertible<T1>::value && is_same_or_nodeptr_convertible<T2>::value, sfinae_type* >::type = 0) const
    {  return base()(*traits_->to_value_ptr(t1), *traits_->to_value_ptr(t2));  }
+
+   //pred(pnode, pnode), non-const version to support predicates with non-const operator()
+   template<class T1, class T2>
+   inline bool operator()
+      (const T1 &t1, const T2 &t2, typename enable_if_c< is_same_or_nodeptr_convertible<T1>::value && is_same_or_nodeptr_convertible<T2>::value, sfinae_type* >::type = 0)
+   {  return base().get()(key_of_value()(*traits_->to_value_ptr(t1)), key_of_value()(*traits_->to_value_ptr(t2)));  }
 
    //pred(pnode, key)
    template<class T1, class T2>

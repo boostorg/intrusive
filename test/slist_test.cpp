@@ -176,10 +176,12 @@ void test_slist< ListType, ValueContainer >
       l.clear();
    }
 
-   //The merge performs at most size() + x.size() - 1 comparisons
+   //The merge performs at most size() + x.size() - 1 comparisons,
+   //also with a predicate with a non-const operator() (nc == 1)
    {
       static const int first [4][4] = { {0, 2, 4, -1}, {1, 3, -1, -1}, {0, 1, -1, -1}, {2, 3, 4, -1} };
       static const int second[4][4] = { {1, 3, -1, -1}, {0, 2, 4, -1}, {2, 3, 4, -1}, {0, 1, -1, -1} };
+      for(int nc = 0; nc != 2; ++nc)
       for(int c = 0; c != 4; ++c){
          list_type l1, l2;
          for(int i = 0; first[c][i] >= 0; ++i)
@@ -189,7 +191,10 @@ void test_slist< ListType, ValueContainer >
          const std::size_t bound = l1.size() + l2.size() - 1u;
          std::size_t count = 0;
          test::counting_less less = { &count };
-         l1.merge(l2, less);
+         if(nc)
+            l1.merge(l2, test::make_nonconst_pred(less));
+         else
+            l1.merge(l2, less);
          BOOST_TEST(count <= bound);
          BOOST_TEST(l2.empty());
          int merged_values [] = { 1, 2, 3, 4, 5 };
@@ -216,7 +221,7 @@ void test_slist< ListType, ValueContainer >
    {
       list_type list(values.begin(), values.end());
       const std::size_t old_size = list.size();
-      const std::size_t removed  = list.remove_if(is_odd());
+      const std::size_t removed  = list.remove_if(test::make_nonconst_pred(is_odd()));
       const std::size_t new_size = list.size();
       BOOST_TEST(removed == (old_size - new_size));
       int init_values [] = { 2, 4 };
@@ -234,7 +239,7 @@ void test_slist< ListType, ValueContainer >
    {
       list_type list(values.begin(), values.end());
       const std::size_t old_size = list.size();
-      const std::size_t removed  = list.remove_and_dispose_if(is_odd(), test::empty_noexcept_disposer());
+      const std::size_t removed  = list.remove_and_dispose_if(test::make_nonconst_pred(is_odd()), test::empty_noexcept_disposer());
       const std::size_t new_size = list.size();
       BOOST_TEST(removed == (old_size - new_size));
       int init_values [] = { 2, 4 };
@@ -249,6 +254,20 @@ void test_slist< ListType, ValueContainer >
       TEST_INTRUSIVE_SEQUENCE( init_values, list.begin() );
       const std::size_t old_size = list.size();
       const std::size_t removed  = list.unique();
+      const std::size_t new_size = list.size();
+      BOOST_TEST(removed == (old_size - new_size));
+      int init_values2 [] = { 1, 2, 3, 4, 5 };
+      TEST_INTRUSIVE_SEQUENCE( init_values2, list.begin() );
+   }
+   {
+      ValueContainer values2(values);
+      list_type list(values.begin(), values.end());
+      list.insert_after(list.before_begin(), values2.begin(), values2.end());
+      list.sort();
+      int init_values [] = { 1, 1, 2, 2, 3, 3, 4, 4, 5, 5 };
+      TEST_INTRUSIVE_SEQUENCE( init_values, list.begin() );
+      const std::size_t old_size = list.size();
+      const std::size_t removed  = list.unique(test::make_nonconst_pred(test::any_equal()));
       const std::size_t new_size = list.size();
       BOOST_TEST(removed == (old_size - new_size));
       int init_values2 [] = { 1, 2, 3, 4, 5 };
@@ -308,6 +327,11 @@ void test_slist< ListType, ValueContainer >
       {  int init_values [] = { 1, 2, 3, 4 };
          TEST_INTRUSIVE_SEQUENCE( init_values, fourlist.begin() );  }
       fourlist.sort(even_odd());
+      {  int init_values [] = { 2, 4, 1, 3 };
+         TEST_INTRUSIVE_SEQUENCE( init_values, fourlist.begin() );  }
+      //Predicate with a non-const operator()
+      fourlist.sort();
+      fourlist.sort(test::make_nonconst_pred(even_odd()));
       {  int init_values [] = { 2, 4, 1, 3 };
          TEST_INTRUSIVE_SEQUENCE( init_values, fourlist.begin() );  }
       BOOST_TEST(fourlist.size() == 4u);

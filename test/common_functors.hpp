@@ -106,6 +106,36 @@ struct counting_less
    {  ++*count_; return t < u;  }
 };
 
+struct any_equal
+{
+   template<class T, class U>
+   bool operator()(const T &t, const U &u) const
+   {  return t == u;  }
+};
+
+//Wraps a predicate and only offers a non-const operator()
+//to test that containers support such predicates
+template<class Pred>
+struct nonconst_pred
+{
+   Pred pred_;
+
+   template<class T>
+   bool operator()(const T &t)
+   {  return pred_(t);  }
+
+   template<class T, class U>
+   bool operator()(const T &t, const U &u)
+   {  return pred_(t, u);  }
+};
+
+template<class Pred>
+nonconst_pred<Pred> make_nonconst_pred(const Pred &p)
+{
+   nonconst_pred<Pred> r = { p };
+   return r;
+}
+
 struct any_greater
 {
    template<class T, class U>
