@@ -24,6 +24,7 @@
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/detail/workaround.hpp>
+#include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/pointer_rebind.hpp>
 
 namespace boost {
@@ -45,14 +46,16 @@ struct slist_node_traits
    typedef slist_node<VoidPointer>  node;
    typedef typename node::node_ptr  node_ptr;
    typedef typename pointer_rebind<VoidPointer, const node>::type    const_node_ptr;
+   typedef typename detail::ptr_cparam<node_ptr>::type        node_ptr_cparam;
+   typedef typename detail::ptr_cparam<const_node_ptr>::type  const_node_ptr_cparam;
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_next(const_node_ptr n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_next(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
    {  return n->next_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_next(node_ptr n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_next(BOOST_INTRUSIVE_CPARAM(node_ptr) n)
    {  return n->next_;  }
 
-   BOOST_INTRUSIVE_NVCOMPILER_WORKAROUND_NOINLINE static void set_next(node_ptr n, node_ptr next)
+   BOOST_INTRUSIVE_NVCOMPILER_WORKAROUND_NOINLINE static void set_next(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr next)
    {  n->next_ = next;  }
 };
 

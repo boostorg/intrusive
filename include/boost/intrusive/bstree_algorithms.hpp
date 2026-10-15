@@ -1501,7 +1501,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Note</b>: The method might not have effect when asserts are turned off (e.g., with NDEBUG).
    //!   Experimental function, interface might change in future versions.
    template<class Checker>
-   static void check(const_node_ptr header, Checker checker, typename Checker::return_type& checker_return)
+   static void check(BOOST_INTRUSIVE_CPARAM(const_node_ptr) header, Checker checker, typename Checker::return_type& checker_return)
    {
       const_node_ptr root_node_ptr = NodeTraits::get_parent(header);
       if (!root_node_ptr){
@@ -2128,7 +2128,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
 
    private:
    template<class Checker>
-   static void check_subtree(const_node_ptr n, Checker checker, typename Checker::return_type& check_return)
+   static void check_subtree(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n, Checker checker, typename Checker::return_type& check_return)
    {
       const_node_ptr left = NodeTraits::get_left(n);
       const_node_ptr right = NodeTraits::get_right(n);

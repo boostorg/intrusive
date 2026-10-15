@@ -23,6 +23,7 @@
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/detail/workaround.hpp>
+#include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/pointer_rebind.hpp>
 
 namespace boost {
@@ -43,32 +44,34 @@ struct tree_node_traits
 
    typedef typename node::node_ptr   node_ptr;
    typedef typename pointer_rebind<VoidPointer, const node>::type const_node_ptr;
+   typedef typename detail::ptr_cparam<node_ptr>::type        node_ptr_cparam;
+   typedef typename detail::ptr_cparam<const_node_ptr>::type  const_node_ptr_cparam;
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_parent(const_node_ptr n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_parent(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
    {  return n->parent_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_parent(node_ptr n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_parent(BOOST_INTRUSIVE_CPARAM(node_ptr) n)
    {  return n->parent_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_parent(node_ptr n, node_ptr p)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_parent(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr p)
    {  n->parent_ = p;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_left(const_node_ptr n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_left(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
    {  return n->left_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_left(node_ptr n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_left(BOOST_INTRUSIVE_CPARAM(node_ptr) n)
    {  return n->left_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_left(node_ptr n, node_ptr l)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_left(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr l)
    {  n->left_ = l;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_right(const_node_ptr n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_right(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
    {  return n->right_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_right(node_ptr n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_right(BOOST_INTRUSIVE_CPARAM(node_ptr) n)
    {  return n->right_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_right(node_ptr n, node_ptr r)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_right(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr r)
    {  n->right_ = r;  }
 };
 

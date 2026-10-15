@@ -17,6 +17,7 @@
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/detail/workaround.hpp>
+#include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/algo_type.hpp>
 #include <boost/intrusive/detail/node_chain_sort.hpp>
 #include <cstddef>
@@ -60,6 +61,8 @@ class circular_list_algorithms
    typedef typename NodeTraits::node            node;
    typedef typename NodeTraits::node_ptr        node_ptr;
    typedef typename NodeTraits::const_node_ptr  const_node_ptr;
+   typedef typename detail::ptr_cparam<node_ptr>::type        node_ptr_cparam;
+   typedef typename detail::ptr_cparam<const_node_ptr>::type  const_node_ptr_cparam;
    typedef NodeTraits                           node_traits;
 
    //! <b>Effects</b>: Constructs an non-used list element, so that
@@ -81,7 +84,7 @@ class circular_list_algorithms
    //! <b>Complexity</b>: Constant
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static bool inited(const_node_ptr this_node) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bool inited(BOOST_INTRUSIVE_CPARAM(const_node_ptr) this_node) BOOST_NOEXCEPT
    {  return !NodeTraits::get_next(this_node); }
 
    //! <b>Effects</b>: Constructs an empty list, making this_node the only
@@ -103,7 +106,7 @@ class circular_list_algorithms
    //! <b>Complexity</b>: Constant
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static bool is_empty(const_node_ptr this_node) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bool is_empty(BOOST_INTRUSIVE_CPARAM(const_node_ptr) this_node) BOOST_NOEXCEPT
    {
       return NodeTraits::get_next(this_node) == this_node;
    }
@@ -116,7 +119,7 @@ class circular_list_algorithms
    //! <b>Complexity</b>: Constant
    //!
    //! <b>Throws</b>: Nothing.
-   static bool unique(const_node_ptr this_node) BOOST_NOEXCEPT
+   static bool unique(BOOST_INTRUSIVE_CPARAM(const_node_ptr) this_node) BOOST_NOEXCEPT
    {
       node_ptr next = NodeTraits::get_next(this_node);
       return !next || next == this_node;
@@ -130,7 +133,7 @@ class circular_list_algorithms
    //! <b>Complexity</b>: Linear
    //!
    //! <b>Throws</b>: Nothing.
-   static std::size_t count(const_node_ptr this_node) BOOST_NOEXCEPT
+   static std::size_t count(BOOST_INTRUSIVE_CPARAM(const_node_ptr) this_node) BOOST_NOEXCEPT
    {
       std::size_t result = 0;
       const_node_ptr p = this_node;
@@ -442,7 +445,7 @@ class circular_list_algorithms
    //! <b>Complexity</b>: Linear
    //!
    //! <b>Throws</b>: Nothing.
-   static std::size_t distance(const_node_ptr f, const_node_ptr l) BOOST_NOEXCEPT
+   static std::size_t distance(const_node_ptr f, BOOST_INTRUSIVE_CPARAM(const_node_ptr) l) BOOST_NOEXCEPT
    {
       std::size_t result = 0;
       while(f != l){

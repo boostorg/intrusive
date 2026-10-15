@@ -23,6 +23,7 @@
 
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/detail/workaround.hpp>
+#include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/intrusive/detail/algo_type.hpp>
 #include <cstddef>
@@ -38,9 +39,11 @@ class common_slist_algorithms
    typedef typename NodeTraits::node            node;
    typedef typename NodeTraits::node_ptr        node_ptr;
    typedef typename NodeTraits::const_node_ptr  const_node_ptr;
+   typedef typename detail::ptr_cparam<node_ptr>::type        node_ptr_cparam;
+   typedef typename detail::ptr_cparam<const_node_ptr>::type  const_node_ptr_cparam;
    typedef NodeTraits                           node_traits;
 
-   static node_ptr get_previous_node(node_ptr p, node_ptr this_node)
+   static node_ptr get_previous_node(node_ptr p, BOOST_INTRUSIVE_CPARAM(node_ptr) this_node)
    {
       for( node_ptr p_next
          ; this_node != (p_next = NodeTraits::get_next(p))
@@ -55,13 +58,13 @@ class common_slist_algorithms
    BOOST_INTRUSIVE_FORCEINLINE static void init(node_ptr this_node) BOOST_NOEXCEPT
    {  NodeTraits::set_next(this_node, node_ptr());  }
 
-   static bool unique(const_node_ptr this_node) BOOST_NOEXCEPT
+   static bool unique(BOOST_INTRUSIVE_CPARAM(const_node_ptr) this_node) BOOST_NOEXCEPT
    {
       node_ptr next = NodeTraits::get_next(this_node);
       return !next || next == this_node;
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE static bool inited(const_node_ptr this_node) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bool inited(BOOST_INTRUSIVE_CPARAM(const_node_ptr) this_node) BOOST_NOEXCEPT
    {  return !NodeTraits::get_next(this_node); }
 
    inline static void unlink_after(node_ptr prev_node) BOOST_NOEXCEPT
@@ -167,7 +170,7 @@ class common_slist_algorithms
    //! <b>Complexity</b>: Linear
    //!
    //! <b>Throws</b>: Nothing.
-   static std::size_t distance(const_node_ptr f, const_node_ptr l) BOOST_NOEXCEPT
+   static std::size_t distance(BOOST_INTRUSIVE_CPARAM(const_node_ptr) f, BOOST_INTRUSIVE_CPARAM(const_node_ptr) l) BOOST_NOEXCEPT
    {
       const_node_ptr i(f);
       std::size_t result = 0;

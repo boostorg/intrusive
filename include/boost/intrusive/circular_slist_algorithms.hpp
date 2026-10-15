@@ -63,6 +63,8 @@ class circular_slist_algorithms
    typedef typename NodeTraits::node            node;
    typedef typename NodeTraits::node_ptr        node_ptr;
    typedef typename NodeTraits::const_node_ptr  const_node_ptr;
+   typedef typename detail::ptr_cparam<node_ptr>::type        node_ptr_cparam;
+   typedef typename detail::ptr_cparam<const_node_ptr>::type  const_node_ptr_cparam;
    typedef NodeTraits                           node_traits;
 
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
@@ -157,7 +159,7 @@ class circular_slist_algorithms
    //! <b>Complexity</b>: Constant time.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr end_node(const_node_ptr p) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr end_node(BOOST_INTRUSIVE_CPARAM(const_node_ptr) p) BOOST_NOEXCEPT
    {  return detail::uncast(p);   }
 
    //! <b>Effects</b>: Returns true if this_node_points to an empty list.
@@ -165,7 +167,7 @@ class circular_slist_algorithms
    //! <b>Complexity</b>: Constant
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static bool is_empty(const_node_ptr this_node) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bool is_empty(BOOST_INTRUSIVE_CPARAM(const_node_ptr) this_node) BOOST_NOEXCEPT
    {  return NodeTraits::get_next(this_node) == this_node;  }
 
    //! <b>Effects</b>: Returns true if this_node points to a sentinel node.
@@ -173,7 +175,7 @@ class circular_slist_algorithms
    //! <b>Complexity</b>: Constant
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static bool is_sentinel(const_node_ptr this_node) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static bool is_sentinel(BOOST_INTRUSIVE_CPARAM(const_node_ptr) this_node) BOOST_NOEXCEPT
    {  return NodeTraits::get_next(this_node) == node_ptr();  }
 
    //! <b>Effects</b>: Marks this node as a "sentinel" node, a special state that is different from "empty",
@@ -194,7 +196,7 @@ class circular_slist_algorithms
    //! <b>Complexity</b>: Linear to the number of elements between prev_init_node and this_node.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_previous_node(node_ptr prev_init_node, node_ptr this_node) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_previous_node(node_ptr prev_init_node, BOOST_INTRUSIVE_CPARAM(node_ptr) this_node) BOOST_NOEXCEPT
    {  return base_t::get_previous_node(prev_init_node, this_node);   }
 
    //! <b>Requires</b>: this_node must be in a circular list or be an empty circular list.
@@ -204,7 +206,7 @@ class circular_slist_algorithms
    //! <b>Complexity</b>: Linear to the number of elements in the circular list.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_previous_node(node_ptr this_node) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_previous_node(BOOST_INTRUSIVE_CPARAM(node_ptr) this_node) BOOST_NOEXCEPT
    {  return base_t::get_previous_node(this_node, this_node); }
 
    //! <b>Requires</b>: this_node must be in a circular list or be an empty circular list.
@@ -214,7 +216,7 @@ class circular_slist_algorithms
    //! <b>Complexity</b>: Linear to the number of elements in the circular list.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_previous_previous_node(node_ptr this_node) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_previous_previous_node(BOOST_INTRUSIVE_CPARAM(node_ptr) this_node) BOOST_NOEXCEPT
    {  return get_previous_previous_node(this_node, this_node); }
 
    //! <b>Requires</b>: this_node and p must be in the same circular list.
@@ -226,7 +228,7 @@ class circular_slist_algorithms
    //! <b>Complexity</b>: Linear to the number of elements in the circular list.
    //!
    //! <b>Throws</b>: Nothing.
-   static node_ptr get_previous_previous_node(node_ptr p, node_ptr this_node) BOOST_NOEXCEPT
+   static node_ptr get_previous_previous_node(node_ptr p, BOOST_INTRUSIVE_CPARAM(node_ptr) this_node) BOOST_NOEXCEPT
    {
       node_ptr p_next = NodeTraits::get_next(p);
       node_ptr p_next_next = NodeTraits::get_next(p_next);
@@ -246,7 +248,7 @@ class circular_slist_algorithms
    //! <b>Complexity</b>: Linear
    //!
    //! <b>Throws</b>: Nothing.
-   static std::size_t count(const_node_ptr this_node) BOOST_NOEXCEPT
+   static std::size_t count(BOOST_INTRUSIVE_CPARAM(const_node_ptr) this_node) BOOST_NOEXCEPT
    {
       std::size_t result = 0;
       const_node_ptr p = this_node;
