@@ -113,15 +113,13 @@ class treap_set_impl
       : tree_type(true, b, e, cmp, pcmp, v_traits)
    {}
 
-   //! <b>Effects</b>: to-do
-   //!
+   //! @copydoc ::boost::intrusive::treap::treap(treap &&)
    BOOST_INTRUSIVE_FORCEINLINE treap_set_impl(BOOST_RV_REF(treap_set_impl) x)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<tree_type>::value)
       :  tree_type(BOOST_MOVE_BASE(tree_type, x))
    {}
 
-   //! <b>Effects</b>: to-do
-   //!
+   //! @copydoc ::boost::intrusive::treap::operator=(treap &&)
    BOOST_INTRUSIVE_FORCEINLINE treap_set_impl& operator=(BOOST_RV_REF(treap_set_impl) x)
    #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<key_compare>::value &&
@@ -704,15 +702,13 @@ class treap_multiset_impl
       : tree_type(false, b, e, cmp, pcmp, v_traits)
    {}
 
-   //! <b>Effects</b>: to-do
-   //!
+   //! @copydoc ::boost::intrusive::treap::treap(treap &&)
    BOOST_INTRUSIVE_FORCEINLINE treap_multiset_impl(BOOST_RV_REF(treap_multiset_impl) x)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<tree_type>::value)
       :  tree_type(BOOST_MOVE_BASE(tree_type, x))
    {}
 
-   //! <b>Effects</b>: to-do
-   //!
+   //! @copydoc ::boost::intrusive::treap::operator=(treap &&)
    BOOST_INTRUSIVE_FORCEINLINE treap_multiset_impl& operator=(BOOST_RV_REF(treap_multiset_impl) x)
    #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<key_compare>::value &&

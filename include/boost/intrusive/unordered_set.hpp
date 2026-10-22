@@ -666,8 +666,7 @@ class unordered_multiset_impl
       :  table_type(BOOST_MOVE_BASE(table_type, x))
    {}
 
-   //! <b>Effects</b>: to-do
-   //!
+   //! @copydoc ::boost::intrusive::hashtable::operator=(hashtable&&)
    BOOST_INTRUSIVE_FORCEINLINE unordered_multiset_impl& operator=(BOOST_RV_REF(unordered_multiset_impl) x)
    #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<hasher>::value &&
