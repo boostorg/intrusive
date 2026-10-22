@@ -209,11 +209,11 @@ Intrusive containers have also downsides:
    iterator invalid] without touching the intrusive container directly, because the object
    can be disposed before is erased from the container.
 
-*  [*Boost.Intrusive] containers are [*non-copyable and non-assignable]. Since intrusive
+*  [*Boost.Intrusive] containers are [*non-copyable and non-copy-assignable]. Since intrusive
    containers don't have allocation capabilities, these operations make no sense. However,
-   swapping can be used to implement move capabilities. To ease the implementation of
-   copy constructors and assignment operators of classes storing [*Boost.Intrusive]
-   containers, [*Boost.Intrusive] offers special cloning functions. See
+   they can be moved (see [link intrusive.moving Moving Boost.Intrusive containers]).
+   To ease the implementation of copy constructors and assignment operators of classes
+   storing [*Boost.Intrusive] containers, [*Boost.Intrusive] offers special cloning functions. See
    [link intrusive.clone_from Cloning Boost.Intrusive containers] section for more information.
 
 *  [*Boost.Intrusive] containers [*don't support incomplete types]. Some std containers and most Boost.Container
@@ -2309,6 +2309,84 @@ Here is an example of `clone_from`:
 
 [endsect]
 
+[section:moving Moving Boost.Intrusive containers]
+
+[section:moving_no_copy No copy constructor]
+
+[*Boost.Intrusive] containers have no copy constructor and no copy assignment. A value can be
+linked to only one container through each hook, and a container can not create new values,
+so a copy of a container can not contain the same values as the source. To copy a container,
+use `clone_from` (see [link intrusive.clone_from Cloning Boost.Intrusive containers]).
+
+[endsect]
+
+[section:moving_move_constructor Move constructor]
+
+The move constructor links the nodes of the source container to the new container:
+
+*  The new container gets all the values of the source container, in the same order. No value is
+   copied, moved or destroyed: only the links change.
+*  The predicates of the source container (comparison, priority, hash and equality function objects)
+   are copied, not moved or swapped. The source container keeps valid predicates.
+*  The source container is left empty and it can be used again.
+*  Unordered containers: the new container takes the bucket array of the source container. The source
+   container is left without a bucket array, so call `rehash` with a new bucket array before you insert
+   values in it.
+*  The move constructor is `noexcept` if the copies of the predicates (and the copies or moves of the value
+   and bucket traits) are `noexcept`.
+
+[endsect]
+
+[section:moving_move_assignment Move assignment]
+
+From Boost 1.93, the move assignment `a = boost::move(b)` does these steps:
+
+*  The values of `a` are unlinked, as with `a.clear()`. The values are not destroyed: the user still owns them.
+*  The predicates of `b` are copied to `a`. `b` keeps its predicates.
+*  The nodes of `b` are linked to `a`, in the same order.
+*  `b` is left empty and it can be used again.
+*  Unordered containers: `a` takes the bucket array of `b` and no longer uses its own bucket array.
+   `b` is left without a bucket array, as after a move construction.
+*  If `a` and `b` are the same object, there are no effects.
+*  The move assignment is `noexcept` if the copies of the predicates (and the copies or moves of the value
+   and bucket traits) are `noexcept`.
+
+This is the behavior of standard containers, where the previous elements of the target are destroyed
+and the source container does not receive them. An intrusive container does not own its values,
+so it unlinks them instead of destroying them. Other intrusive container libraries do the same:
+for example, the move assignment of LLVM's `simple_ilist` unlinks the values of the target
+and then splices the values of the source.
+
+[important Before Boost 1.93, the move assignment was equivalent to `a.swap(b)`: `b` received the values
+and the predicates of `a`. Code that uses the values of `b` after the move assignment
+must use `swap` explicitly.]
+
+[section:moving_move_assignment_swaps Old behavior: BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS]
+
+For backwards compatibility, define the macro `BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS` to get the behavior
+before Boost 1.93. Then the move assignment of all [*Boost.Intrusive] containers is equivalent to `swap`
+and it is not `noexcept`. Define the macro before you include any [*Boost.Intrusive] header, with the same value
+in all the translation units of the program (for example, in the build system), or the program violates
+the One Definition Rule. The macro does not change the containers of [*Boost.Container], which
+use [*Boost.Intrusive] internally.
+
+[warning `BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS` is only a transition aid. It will be removed in a future
+release, after a transition period. Update the code that needs the old behavior to call `swap` explicitly.]
+
+[c++]
+
+   #define BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS
+   #include <boost/intrusive/list.hpp>
+
+   //...
+   a = boost::move(b);  //Same as a.swap(b): b now contains the values of a
+
+[endsect]
+
+[endsect]
+
+[endsect]
+
 [section:function_hooks Using function hooks]
 
 A programmer might find that base or member hooks are not flexible enough in some situations.
@@ -4022,6 +4100,13 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
   swapping them, as standard containers do ([@https://cplusplus.github.io/LWG/issue2227 LWG 2227]), so the
   moved-from container keeps valid predicates. They are `noexcept` when those copies (and the copies or moves of the
   value and bucket traits) are `noexcept`.
+* [*Potentially breaking change]: move assignments no longer swap the containers. As in standard
+  containers, the elements of the target are unlinked (as `clear()`), the predicates of the source are
+  copied, its nodes are linked to the target and the source is left empty. In unordered containers the
+  target takes the bucket array of the source, which is left without one, and no longer uses its own.
+  The move assignments are `noexcept` when the copies of the predicates (and the copies or moves of the
+  value and bucket traits) are `noexcept`. Define `BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS` to get the
+  old behavior during a transition period: the macro will be removed in a future release. See [link intrusive.moving Moving Boost.Intrusive containers] for more information.
 * [*Potentially breaking change]: treap containers no longer accept `auto_unlink` hooks (a static assertion
   is raised), as unlinking a node through the hook broke the heap order of the priorities, so it was a bug.
 * [*Potentially breaking change]: `suggested_lower_bucket_count(n)` now returns the biggest supported bucket count that is smaller

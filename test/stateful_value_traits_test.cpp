@@ -148,8 +148,8 @@ bool holds_values(const Container &c, const MyClass *vals)
    return count == SwapElements;
 }
 
-//Swap and move assignment must swap also the value traits
-//and move construction must take the value traits of the source
+//Swap must swap also the value traits. Move assignment and move construction
+//must take the value traits of the source, whose elements they take
 template<class Container, class Node>
 bool test_swap(Container &a, Container &b, swap_data<Node> &d)
 {
@@ -160,8 +160,9 @@ bool test_swap(Container &a, Container &b, swap_data<Node> &d)
    a.swap(b);
    if(!holds_values(a, d.values2) || !holds_values(b, d.values1))
       return false;
+   //The elements of a are unlinked, a takes the elements of b and b is left empty
    a = boost::move(b);
-   if(!holds_values(a, d.values1) || !holds_values(b, d.values2))
+   if(!holds_values(a, d.values1) || !b.empty())
       return false;
    Container c(boost::move(a));
    if(!holds_values(c, d.values1) || !a.empty())

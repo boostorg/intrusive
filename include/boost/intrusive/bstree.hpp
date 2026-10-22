@@ -937,10 +937,50 @@ class bstree_impl
       this->sz_traits().swap(x.sz_traits());
    }
 
-   //! <b>Effects</b>: Equivalent to swap
+   //! <b>Effects</b>: Unlinks the elements of *this (as clear()), copy assigns the
+   //!   comparison object and the value traits of x and links the nodes of x to *this.
+   //!   x is left empty and keeps its comparison object and value traits.
+   //!   If &x == this, there are no effects.
    //!
+   //! <b>Complexity</b>: Linear to the elements of *this if it's a safe-mode or an
+   //!   auto-unlink value, constant otherwise.
+   //!
+   //! <b>Throws</b>: If the copy assignment of the comparison object or of the value
+   //!   traits throws. Then *this is empty and x is unchanged.
+   //!
+   //! <b>Note</b>: If BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS is defined, it is equivalent to swap(x)
+   //!   and it is not noexcept (the behavior before Boost 1.93).
    BOOST_INTRUSIVE_FORCEINLINE bstree_impl& operator=(BOOST_RV_REF(bstree_impl) x)
-   {  this->swap(x); return *this;  }
+   #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_assignable<value_traits>::value)
+   #endif
+   {
+      #if defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      this->swap(x);
+      #else
+      this->move_assign_unlink(x);
+      #endif
+      return *this;
+   }
+
+   /// @cond
+   //The move assignment when BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS is not defined.
+   //Boost.Container calls it, so that the macro does not change its containers.
+   BOOST_INTRUSIVE_FORCEINLINE void move_assign_unlink(bstree_impl &x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_assignable<value_traits>::value)
+   {
+      if(BOOST_LIKELY(this != &x)){
+         this->clear();
+         this->get_comp() = x.get_comp();
+         this->get_value_traits() = x.get_value_traits();
+         //*this is empty: x is left empty
+         node_algorithms::swap_tree(this->header_ptr(), node_ptr(x.header_ptr()));
+         this->sz_traits().swap(x.sz_traits());
+      }
+   }
+   /// @endcond
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! <b>Effects</b>: Detaches all elements from this. The objects in the set
@@ -2504,6 +2544,9 @@ class bstree
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE bstree& operator=(BOOST_RV_REF(bstree) x)
+   #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
+   #endif
    {  return static_cast<bstree &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    template <class Cloner, class Disposer>

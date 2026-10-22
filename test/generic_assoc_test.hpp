@@ -664,7 +664,19 @@ void test_generic_assoc<ContainerDefiner>::test_move_constructor_predicates(valu
    BOOST_TEST(src.empty());
    BOOST_TEST(dst.size() == size);
    dst.check();
-   dst.clear();
+   //Move assignment: the destination gets the comparison object and the nodes,
+   //the source keeps its comparison object and is left empty
+   assoc_type assigned((less_type(3)));
+   predicate_counters::reset();
+   assigned = boost::move(dst);
+   BOOST_TEST(predicate_counters::moves == 0);
+   BOOST_TEST(predicate_counters::swaps == 0);
+   BOOST_TEST(assigned.key_comp().tag_ == 7);
+   BOOST_TEST(dst.key_comp().tag_ == 7);
+   BOOST_TEST(dst.empty());
+   BOOST_TEST(assigned.size() == size);
+   assigned.check();
+   assigned.clear();
    src.insert(values.begin(), values.end());
    BOOST_TEST(src.size() == size);
    src.check();
@@ -674,6 +686,8 @@ void test_generic_assoc<ContainerDefiner>::test_move_constructor_predicates(valu
    using boost::move_detail::declval;
    BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(assoc_type(declval<assoc_type>())) ));
    BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(default_type(declval<default_type>())) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(declval<assoc_type&>() = declval<assoc_type>()) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(declval<default_type&>() = declval<default_type>()) ));
    #endif
 }
 

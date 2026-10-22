@@ -58,7 +58,18 @@ struct test_treap
       BOOST_TEST(src.empty());
       BOOST_TEST(dst.size() == size);
       dst.check();
-      dst.clear();
+      //Move assignment: the priority comparison is copied too
+      treap_type assigned(key_compare(), tracking_priority(3));
+      predicate_counters::reset();
+      assigned = boost::move(dst);
+      BOOST_TEST(predicate_counters::moves == 0);
+      BOOST_TEST(predicate_counters::swaps == 0);
+      BOOST_TEST(assigned.priority_comp().tag_ == 8);
+      BOOST_TEST(dst.priority_comp().tag_ == 8);
+      BOOST_TEST(dst.empty());
+      BOOST_TEST(assigned.size() == size);
+      assigned.check();
+      assigned.clear();
       src.insert(values.begin(), values.end());
       BOOST_TEST(src.size() == size);
       src.check();
@@ -67,6 +78,7 @@ struct test_treap
       #if !defined(BOOST_NO_CXX11_NOEXCEPT)
       using boost::move_detail::declval;
       BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(treap_type(declval<treap_type>())) ));
+      BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(declval<treap_type&>() = declval<treap_type>()) ));
       #endif
    }
 };

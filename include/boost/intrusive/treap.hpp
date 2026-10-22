@@ -241,8 +241,37 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    {}
 
    //! @copydoc ::boost::intrusive::bstree::operator=(bstree &&)
+   //! Additional notes: the priority comparison object is also copy assigned. If
+   //! that copy throws, there are no effects.
    treap_impl& operator=(BOOST_RV_REF(treap_impl) x)
-   {  this->swap(x); return *this;  }
+   #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_assignable<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_assignable<priority_compare>::value)
+   #endif
+   {
+      #if defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      this->swap(x);
+      #else
+      this->move_assign_unlink(x);
+      #endif
+      return *this;
+   }
+
+   /// @cond
+   //The move assignment when BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS is not defined
+   void move_assign_unlink(treap_impl &x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_assignable<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_assignable<priority_compare>::value)
+   {
+      if(BOOST_LIKELY(this != &x)){
+         //Before taking the nodes of x, which are ordered by this priority
+         this->priv_pcomp() = x.priv_pcomp();
+         tree_type::move_assign_unlink(x);
+      }
+   }
+   /// @endcond
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::bstree::~bstree()
@@ -1403,6 +1432,9 @@ class treap
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE treap& operator=(BOOST_RV_REF(treap) x)
+   #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
+   #endif
    {  return static_cast<treap&>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    template <class Cloner, class Disposer>

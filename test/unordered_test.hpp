@@ -1339,9 +1339,9 @@ void test_unordered<ContainerDefiner>::test_clone_functors(value_cont_type& valu
    }
 }
 
-//The move constructor copies the hasher and the equality, so that the
-//moved-from container keeps valid ones. They are not moved
-//or swapped, and the move constructor is noexcept only if the copies are.
+//The move constructor and the move assignment copy the hasher and the equality,
+//so that the moved-from container keeps valid ones. They are not moved or
+//swapped, and the operations are noexcept only if the copies are.
 template<class ContainerDefiner>
 void test_unordered<ContainerDefiner>::test_move_constructor_predicates(value_cont_type& values)
 {
@@ -1372,7 +1372,27 @@ void test_unordered<ContainerDefiner>::test_move_constructor_predicates(value_co
    for(typename value_cont_type::iterator it = values.begin(), itend = values.end(); it != itend; ++it){
       BOOST_TEST(dst.find(key_of_value()(*it)) != dst.end());
    }
-   dst.clear();
+   //Move assignment: the destination gets the predicates, the bucket array and
+   //the nodes, the source keeps its predicates and is left without a bucket array
+   typename unordered_type::bucket_type buckets2[sizes::Normal + ExtraBuckets];
+   unordered_type assigned (bucket_traits(
+      pointer_traits<bucket_ptr>::pointer_to(buckets2[0]), sizes::Normal + ExtraBuckets)
+      , tracking_hash(2), tracking_equal(3));
+   predicate_counters::reset();
+   assigned = boost::move(dst);
+   BOOST_TEST(predicate_counters::moves == 0);
+   BOOST_TEST(predicate_counters::swaps == 0);
+   BOOST_TEST(assigned.hash_function().tag_ == 5);
+   BOOST_TEST(assigned.key_eq().tag_ == 6);
+   BOOST_TEST(dst.hash_function().tag_ == 5);
+   BOOST_TEST(dst.key_eq().tag_ == 6);
+   BOOST_TEST(dst.empty());
+   BOOST_TEST(dst.bucket_count() == 0u);
+   BOOST_TEST(assigned.size() == size);
+   for(typename value_cont_type::iterator it = values.begin(), itend = values.end(); it != itend; ++it){
+      BOOST_TEST(assigned.find(key_of_value()(*it)) != assigned.end());
+   }
+   assigned.clear();
 
    #if !defined(BOOST_NO_CXX11_NOEXCEPT)
    typedef typename ContainerDefiner::template container
@@ -1380,6 +1400,8 @@ void test_unordered<ContainerDefiner>::test_move_constructor_predicates(value_co
    using boost::move_detail::declval;
    BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(unordered_type(declval<unordered_type>())) ));
    BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(default_type(declval<default_type>())) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(declval<unordered_type&>() = declval<unordered_type>()) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(declval<default_type&>() = declval<default_type>()) ));
    #endif
 }
 

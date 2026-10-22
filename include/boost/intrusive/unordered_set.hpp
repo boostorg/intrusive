@@ -146,6 +146,12 @@ class unordered_set_impl
 
    //! @copydoc ::boost::intrusive::hashtable::operator=(hashtable&&)
    BOOST_INTRUSIVE_FORCEINLINE unordered_set_impl& operator=(BOOST_RV_REF(unordered_set_impl) x)
+   #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<hasher>::value &&
+                        ::boost::move_detail::is_nothrow_copy_assignable<key_equal>::value &&
+                        ::boost::move_detail::is_nothrow_move_assignable<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_move_assignable<bucket_traits>::value)
+   #endif
    {  return static_cast<unordered_set_impl&>(table_type::operator=(BOOST_MOVE_BASE(table_type, x))); }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -536,6 +542,9 @@ class unordered_set
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE unordered_set& operator=(BOOST_RV_REF(unordered_set) x)
+   #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
+   #endif
    {  return static_cast<unordered_set&>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    template <class Cloner, class Disposer>
@@ -660,6 +669,12 @@ class unordered_multiset_impl
    //! <b>Effects</b>: to-do
    //!
    BOOST_INTRUSIVE_FORCEINLINE unordered_multiset_impl& operator=(BOOST_RV_REF(unordered_multiset_impl) x)
+   #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<hasher>::value &&
+                        ::boost::move_detail::is_nothrow_copy_assignable<key_equal>::value &&
+                        ::boost::move_detail::is_nothrow_move_assignable<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_move_assignable<bucket_traits>::value)
+   #endif
    {  return static_cast<unordered_multiset_impl&>(table_type::operator=(BOOST_MOVE_BASE(table_type, x)));  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -993,6 +1008,9 @@ class unordered_multiset
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE unordered_multiset& operator=(BOOST_RV_REF(unordered_multiset) x)
+   #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
+   #endif
    {  return static_cast<unordered_multiset&>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    template <class Cloner, class Disposer>

@@ -18,6 +18,7 @@
 #include<boost/static_assert.hpp>
 #include<boost/move/detail/to_raw_pointer.hpp>
 #include<boost/move/utility_core.hpp>
+#include<boost/move/core.hpp>
 #include<boost/intrusive/priority_compare.hpp>
 #include <cstddef>
 
@@ -196,30 +197,20 @@ typedef predicate_counters_t<> predicate_counters;
 
 //The state of a predicate that counts its copies, moves and swaps. A moved-from
 //predicate has tag -1, so a container that kept a moved-from predicate is
-//detected. The copy constructor is not noexcept (it does not throw), so the
-//containers that copy it are not noexcept either.
+//detected.
 template<class Derived>
 class tracking_predicate
 {
-   BOOST_COPYABLE_AND_MOVABLE(tracking_predicate)
+   protected:
+   explicit tracking_predicate(int tag) : tag_(tag) {}
 
-   public:
-   explicit tracking_predicate(int tag = 0) : tag_(tag) {}
-
-   tracking_predicate(const tracking_predicate &o) BOOST_NOEXCEPT_IF(false)
-      : tag_(o.tag_)
+   static void copied()
    {  ++predicate_counters::copies;  }
 
-   tracking_predicate(BOOST_RV_REF(tracking_predicate) o) BOOST_NOEXCEPT_OR_NOTHROW
-      : tag_(o.tag_)
-   {  o.tag_ = -1; ++predicate_counters::moves;  }
+   static void moved(tracking_predicate &from)
+   {  from.tag_ = -1; ++predicate_counters::moves;  }
 
-   tracking_predicate &operator=(BOOST_COPY_ASSIGN_REF(tracking_predicate) o)
-   {  tag_ = o.tag_; return *this;  }
-
-   tracking_predicate &operator=(BOOST_RV_REF(tracking_predicate) o) BOOST_NOEXCEPT_OR_NOTHROW
-   {  tag_ = o.tag_; o.tag_ = -1; ++predicate_counters::moves; return *this;  }
-
+   public:
    friend void swap(Derived &a, Derived &b) BOOST_NOEXCEPT_OR_NOTHROW
    {
       const int tmp = a.tag_; a.tag_ = b.tag_; b.tag_ = tmp;
@@ -229,37 +220,61 @@ class tracking_predicate
    int tag_;
 };
 
+//The copy and move operations of a tracking predicate. Each predicate declares
+//them, not tracking_predicate: with the Boost.Move emulation, a base class with
+//move operations gives the derived class a copy assignment that can't take a
+//const argument. The copy constructor is not noexcept (it does not throw), so
+//the containers that copy it are not noexcept either.
+#define BOOST_INTRUSIVE_TEST_TRACKING_PREDICATE(TYPE)\
+   BOOST_COPYABLE_AND_MOVABLE(TYPE)\
+   typedef tracking_predicate<TYPE> base_t;\
+   public:\
+   explicit TYPE(int tag = 0) : base_t(tag) {}\
+   TYPE(const TYPE &o) BOOST_NOEXCEPT_IF(false) : base_t(o.tag_)\
+   {  this->copied();  }\
+   TYPE(BOOST_RV_REF(TYPE) o) BOOST_NOEXCEPT_OR_NOTHROW : base_t(o.tag_)\
+   {  this->moved(o);  }\
+   TYPE &operator=(BOOST_COPY_ASSIGN_REF(TYPE) o)\
+   {  this->tag_ = o.tag_; return *this;  }\
+   TYPE &operator=(BOOST_RV_REF(TYPE) o) BOOST_NOEXCEPT_OR_NOTHROW\
+   {  this->tag_ = o.tag_; this->moved(o); return *this;  }\
+//
+
 template<class Key>
-struct tracking_less
-   : tracking_predicate< tracking_less<Key> >
+class tracking_less
+   : public tracking_predicate< tracking_less<Key> >
 {
-   explicit tracking_less(int tag = 0) : tracking_predicate< tracking_less<Key> >(tag) {}
+   BOOST_INTRUSIVE_TEST_TRACKING_PREDICATE(tracking_less)
+
    bool operator()(const Key &a, const Key &b) const
    {  return a < b;  }
 };
 
-struct tracking_priority
-   : tracking_predicate<tracking_priority>
+class tracking_priority
+   : public tracking_predicate<tracking_priority>
 {
-   explicit tracking_priority(int tag = 0) : tracking_predicate<tracking_priority>(tag) {}
+   BOOST_INTRUSIVE_TEST_TRACKING_PREDICATE(tracking_priority)
+
    template<class T, class U>
    bool operator()(const T &t, const U &u) const
    {  return priority_compare<>()(t, u);  }
 };
 
-struct tracking_hash
-   : tracking_predicate<tracking_hash>
+class tracking_hash
+   : public tracking_predicate<tracking_hash>
 {
-   explicit tracking_hash(int tag = 0) : tracking_predicate<tracking_hash>(tag) {}
+   BOOST_INTRUSIVE_TEST_TRACKING_PREDICATE(tracking_hash)
+
    template<class T>
    std::size_t operator()(const T &t) const
    {  return hash_value(t);  }
 };
 
-struct tracking_equal
-   : tracking_predicate<tracking_equal>
+class tracking_equal
+   : public tracking_predicate<tracking_equal>
 {
-   explicit tracking_equal(int tag = 0) : tracking_predicate<tracking_equal>(tag) {}
+   BOOST_INTRUSIVE_TEST_TRACKING_PREDICATE(tracking_equal)
+
    template<class T, class U>
    bool operator()(const T &t, const U &u) const
    {  return t == u;  }

@@ -149,6 +149,10 @@ class avltree_impl
 
    //! @copydoc ::boost::intrusive::bstree::operator=(bstree &&)
    BOOST_INTRUSIVE_FORCEINLINE avltree_impl& operator=(BOOST_RV_REF(avltree_impl) x)
+   #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_assignable<value_traits>::value)
+   #endif
    {  return static_cast<avltree_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x))); }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -559,6 +563,9 @@ class avltree
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE avltree& operator=(BOOST_RV_REF(avltree) x)
+   #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
+   #endif
    {  return static_cast<avltree &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    template <class Cloner, class Disposer>

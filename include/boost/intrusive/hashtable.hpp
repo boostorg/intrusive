@@ -2615,10 +2615,48 @@ class hashtable_impl
       x.split_count(size_type(0));
    }
 
-   //! <b>Effects</b>: Equivalent to swap.
+   //! <b>Effects</b>: Unlinks the elements of *this (as clear()), copy assigns the
+   //!   hasher and the equality of x, move assigns the value traits and the bucket
+   //!   traits of x and links the nodes of x to *this. x is left empty and without a
+   //!   bucket array (see the move constructor), and keeps its hasher and equality.
+   //!   The bucket array of *this is no longer used by *this. If &x == this, there
+   //!   are no effects.
    //!
+   //! <b>Complexity</b>: Linear to the elements and the buckets of *this if it's a
+   //!   safe-mode or an auto-unlink value, constant otherwise.
+   //!
+   //! <b>Throws</b>: If the copy assignment of the hasher or the equality, or the move
+   //!   assignment of the value traits or the bucket traits throws.
+   //!
+   //! <b>Note</b>: If BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS is defined, it is equivalent to swap(x)
+   //!   and it is not noexcept (the behavior before Boost 1.93).
    hashtable_impl& operator=(BOOST_RV_REF(hashtable_impl) x)
-   {  this->swap(x); return *this;  }
+   #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<hasher>::value &&
+                        ::boost::move_detail::is_nothrow_copy_assignable<key_equal>::value &&
+                        ::boost::move_detail::is_nothrow_move_assignable<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_move_assignable<bucket_traits>::value)
+   #endif
+   {
+      #if defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      this->swap(x);
+      #else
+      if(BOOST_LIKELY(this != &x)){
+         this->clear();
+         this->priv_hasher() = x.priv_hasher();
+         this->priv_equal()  = x.priv_equal();
+         this->priv_value_traits()  = ::boost::move(x.priv_value_traits());
+         this->priv_bucket_traits() = ::boost::move(x.priv_bucket_traits());
+         this->priv_swap_cache(x);
+         x.priv_init_cache();
+         this->priv_size_traits().set_size(x.priv_size_traits().get_size());
+         x.priv_size_traits().set_size(size_type(0));
+         this->split_count(x.split_count());
+         x.split_count(size_type(0));
+      }
+      #endif
+      return *this;
+   }
 
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
    //! <b>Effects</b>: Detaches all elements from this. The objects in the unordered_set
@@ -4508,6 +4546,9 @@ class hashtable
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE hashtable& operator=(BOOST_RV_REF(hashtable) x)
+   #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
+   #endif
    {  return static_cast<hashtable&>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    template <class Cloner, class Disposer>

@@ -459,10 +459,27 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
       this->swap(x);
    }
 
-   //! <b>Effects</b>: Equivalent to swap
+   //! <b>Effects</b>: Unlinks the elements of *this (as clear()) and links the nodes
+   //!   of x to *this. *this gets the value traits of x and x, left empty, the value
+   //!   traits of *this. If &x == this, there are no effects.
    //!
+   //! <b>Complexity</b>: Linear to the elements of *this if it's a safe-mode or an
+   //!   auto-unlink value, constant otherwise.
+   //!
+   //! <b>Note</b>: If BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS is defined, it is equivalent to swap(x)
+   //!   (the behavior before Boost 1.93).
    list_impl& operator=(BOOST_RV_REF(list_impl) x)
-   {  this->swap(x); return *this;  }
+   {
+      #if defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      this->swap(x);
+      #else
+      if(BOOST_LIKELY(this != &x)){
+         this->clear();
+         this->swap(x);
+      }
+      #endif
+      return *this;
+   }
 
    //! <b>Effects</b>: If it's not a safe-mode or an auto-unlink value_type
    //!   the destructor does nothing

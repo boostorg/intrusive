@@ -318,10 +318,25 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
 
    //! @copydoc ::boost::intrusive::bstree::operator=(bstree &&)
    sgtree_impl& operator=(BOOST_RV_REF(sgtree_impl) x)
+   #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_assignable<value_traits>::value)
+   #endif
    {
       this->get_alpha_traits() = x.get_alpha_traits();
       return static_cast<sgtree_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x)));
    }
+
+   /// @cond
+   //The move assignment when BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS is not defined
+   BOOST_INTRUSIVE_FORCEINLINE void move_assign_unlink(sgtree_impl &x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_assignable<value_traits>::value)
+   {
+      this->get_alpha_traits() = x.get_alpha_traits();
+      tree_type::move_assign_unlink(x);
+   }
+   /// @endcond
 
    /// @cond
    private:
@@ -1012,6 +1027,9 @@ class sgtree
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE sgtree& operator=(BOOST_RV_REF(sgtree) x)
+   #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
+   #endif
    {  return static_cast<sgtree &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    template <class Cloner, class Disposer>
