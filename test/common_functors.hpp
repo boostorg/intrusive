@@ -17,6 +17,8 @@
 #include<boost/intrusive/detail/mpl.hpp>
 #include<boost/static_assert.hpp>
 #include<boost/move/detail/to_raw_pointer.hpp>
+#include<boost/move/utility_core.hpp>
+#include<boost/intrusive/priority_compare.hpp>
 #include <cstddef>
 
 namespace boost      {
@@ -169,6 +171,95 @@ struct tagged_equal
    int tag_;
    explicit tagged_equal(int tag = 0) : tag_(tag) {}
 
+   template<class T, class U>
+   bool operator()(const T &t, const U &u) const
+   {  return t == u;  }
+};
+
+//Counts the copies, moves and swaps of the tracking_xxx predicates below
+template<class Dummy = void>
+struct predicate_counters_t
+{
+   static int copies;
+   static int moves;
+   static int swaps;
+
+   static void reset()
+   {  copies = moves = swaps = 0;  }
+};
+
+template<class Dummy> int predicate_counters_t<Dummy>::copies = 0;
+template<class Dummy> int predicate_counters_t<Dummy>::moves  = 0;
+template<class Dummy> int predicate_counters_t<Dummy>::swaps  = 0;
+
+typedef predicate_counters_t<> predicate_counters;
+
+//The state of a predicate that counts its copies, moves and swaps. A moved-from
+//predicate has tag -1, so a container that kept a moved-from predicate is
+//detected. The copy constructor is not noexcept (it does not throw), so the
+//containers that copy it are not noexcept either.
+template<class Derived>
+class tracking_predicate
+{
+   BOOST_COPYABLE_AND_MOVABLE(tracking_predicate)
+
+   public:
+   explicit tracking_predicate(int tag = 0) : tag_(tag) {}
+
+   tracking_predicate(const tracking_predicate &o) BOOST_NOEXCEPT_IF(false)
+      : tag_(o.tag_)
+   {  ++predicate_counters::copies;  }
+
+   tracking_predicate(BOOST_RV_REF(tracking_predicate) o) BOOST_NOEXCEPT_OR_NOTHROW
+      : tag_(o.tag_)
+   {  o.tag_ = -1; ++predicate_counters::moves;  }
+
+   tracking_predicate &operator=(BOOST_COPY_ASSIGN_REF(tracking_predicate) o)
+   {  tag_ = o.tag_; return *this;  }
+
+   tracking_predicate &operator=(BOOST_RV_REF(tracking_predicate) o) BOOST_NOEXCEPT_OR_NOTHROW
+   {  tag_ = o.tag_; o.tag_ = -1; ++predicate_counters::moves; return *this;  }
+
+   friend void swap(Derived &a, Derived &b) BOOST_NOEXCEPT_OR_NOTHROW
+   {
+      const int tmp = a.tag_; a.tag_ = b.tag_; b.tag_ = tmp;
+      ++predicate_counters::swaps;
+   }
+
+   int tag_;
+};
+
+template<class Key>
+struct tracking_less
+   : tracking_predicate< tracking_less<Key> >
+{
+   explicit tracking_less(int tag = 0) : tracking_predicate< tracking_less<Key> >(tag) {}
+   bool operator()(const Key &a, const Key &b) const
+   {  return a < b;  }
+};
+
+struct tracking_priority
+   : tracking_predicate<tracking_priority>
+{
+   explicit tracking_priority(int tag = 0) : tracking_predicate<tracking_priority>(tag) {}
+   template<class T, class U>
+   bool operator()(const T &t, const U &u) const
+   {  return priority_compare<>()(t, u);  }
+};
+
+struct tracking_hash
+   : tracking_predicate<tracking_hash>
+{
+   explicit tracking_hash(int tag = 0) : tracking_predicate<tracking_hash>(tag) {}
+   template<class T>
+   std::size_t operator()(const T &t) const
+   {  return hash_value(t);  }
+};
+
+struct tracking_equal
+   : tracking_predicate<tracking_equal>
+{
+   explicit tracking_equal(int tag = 0) : tracking_predicate<tracking_equal>(tag) {}
    template<class T, class U>
    bool operator()(const T &t, const U &u) const
    {  return t == u;  }

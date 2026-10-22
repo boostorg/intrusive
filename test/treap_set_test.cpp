@@ -14,6 +14,7 @@
 #include "smart_ptr.hpp"
 #include "bs_test_common.hpp"
 #include "generic_set_test.hpp"
+#include "treap_test.hpp"
 #include <boost/intrusive/treap_set.hpp>
 
 using namespace boost::intrusive;
@@ -66,6 +67,9 @@ class test_main_template<VoidPointer, ConstantTimeSize, DefaultHolder, Map, Base
       test::test_generic_set
          < rebinder<base_hook_t, ConstantTimeSize, DefaultHolder, Map>
          >::test_all();
+      test::test_treap
+         < rebinder<base_hook_t, ConstantTimeSize, DefaultHolder, Map>
+         >::test_all();
    }
 };
 
@@ -82,6 +86,9 @@ class test_main_template<VoidPointer, ConstantTimeSize, DefaultHolder, Map, Memb
       test::test_generic_set
          < rebinder<member_hook_t, ConstantTimeSize, DefaultHolder, Map>
          >::test_all();
+      test::test_treap
+         < rebinder<member_hook_t, ConstantTimeSize, DefaultHolder, Map>
+         >::test_all();
    }
 };
 
@@ -94,6 +101,9 @@ class test_main_template<VoidPointer, ConstantTimeSize, DefaultHolder, Map, NonM
       typedef testvalue_traits< bs_hooks<VoidPointer> > testval_traits_t;
       //nonmember
       test::test_generic_set
+         < rebinder<typename testval_traits_t::nonhook_value_traits, ConstantTimeSize, DefaultHolder, Map>
+         >::test_all();
+      test::test_treap
          < rebinder<typename testval_traits_t::nonhook_value_traits, ConstantTimeSize, DefaultHolder, Map>
          >::test_all();
    }
@@ -109,6 +119,9 @@ struct test_main_template_bptr
 
       bounded_allocator_scope<allocator_type> bounded_scope; (void)bounded_scope;
       test::test_generic_set
+         < rebinder< value_traits, ConstantTimeSize, true, Map>
+         >::test_all();
+      test::test_treap
          < rebinder< value_traits, ConstantTimeSize, true, Map>
          >::test_all();
    }

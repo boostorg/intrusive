@@ -143,6 +143,7 @@ class avltree_impl
 
    //! @copydoc ::boost::intrusive::bstree::bstree(bstree &&)
    BOOST_INTRUSIVE_FORCEINLINE avltree_impl(BOOST_RV_REF(avltree_impl) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<tree_type>::value)
       :  tree_type(BOOST_MOVE_BASE(tree_type, x))
    {}
 
@@ -553,6 +554,7 @@ class avltree
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE avltree(BOOST_RV_REF(avltree) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<Base>::value)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 

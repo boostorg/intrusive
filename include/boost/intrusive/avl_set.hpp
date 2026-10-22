@@ -110,6 +110,7 @@ class avl_set_impl
 
    //! @copydoc ::boost::intrusive::avltree::avltree(avltree &&)
    BOOST_INTRUSIVE_FORCEINLINE avl_set_impl(BOOST_RV_REF(avl_set_impl) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<tree_type>::value)
       :  tree_type(BOOST_MOVE_BASE(tree_type, x))
    {}
 
@@ -560,6 +561,7 @@ class avl_set
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE avl_set(BOOST_RV_REF(avl_set) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<Base>::value)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
@@ -672,6 +674,7 @@ class avl_multiset_impl
 
    //! @copydoc ::boost::intrusive::avltree::avltree(avltree &&)
    BOOST_INTRUSIVE_FORCEINLINE avl_multiset_impl(BOOST_RV_REF(avl_multiset_impl) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<tree_type>::value)
       :  tree_type(BOOST_MOVE_BASE(tree_type, x))
    {}
 
@@ -1063,6 +1066,7 @@ class avl_multiset
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE avl_multiset(BOOST_RV_REF(avl_multiset) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<Base>::value)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 

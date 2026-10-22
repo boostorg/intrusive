@@ -45,6 +45,7 @@
 #include <boost/intrusive/parent_from_member.hpp>
 #include <boost/move/utility_core.hpp>
 #include <boost/move/adl_move_swap.hpp>
+#include <boost/move/detail/type_traits.hpp>   //is_nothrow_copy_constructible, ...
 
 #include <boost/intrusive/detail/minimal_pair_header.hpp>
 #include <cstddef>   //size_t...
@@ -506,7 +507,7 @@ struct BOOST_INTRUSIVE_EMPTY_BASES bstbase2
    typedef typename treeheader_t::const_node_ptr                     const_node_ptr;
 
    BOOST_INTRUSIVE_FORCEINLINE bstbase2(const key_compare &comp, const ValueTraits &vtraits)
-      : detail::ebo_functor_holder<value_compare>(value_compare(comp)), treeheader_t(vtraits)
+      : detail::ebo_functor_holder<value_compare>(comp), treeheader_t(vtraits)
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE const value_compare &get_comp() const
@@ -917,18 +918,23 @@ class bstree_impl
    }
 
    //! <b>Effects</b>: Constructs a container moving resources from another container.
-   //!   Internal comparison object and value traits are move constructed and
-   //!   nodes belonging to x (except the node representing the "end") are linked to *this.
+   //!   The comparison object and the value traits are copy constructed, so that x keeps
+   //!   valid ones, and nodes belonging to x (except the node representing the "end")
+   //!   are linked to *this. x is left empty.
    //!
    //! <b>Complexity</b>: Constant.
    //!
-   //! <b>Throws</b>: If value_traits::node_traits::node's
-   //!   move constructor throws (this does not happen with predefined Boost.Intrusive hooks)
-   //!   or the move constructor of the comparison objet throws.
+   //! <b>Throws</b>: If the copy constructor of the comparison object or of the value
+   //!   traits throws.
    BOOST_INTRUSIVE_FORCEINLINE bstree_impl(BOOST_RV_REF(bstree_impl) x)
-      : data_type(x.get_comp().key_comp(), ::boost::move(x.get_value_traits()))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value)
+      : data_type(x.get_comp().key_comp(), x.get_value_traits())
    {
-      this->swap(x);
+      //Only the nodes and the size are exchanged: the comparison object and
+      //the value traits are copies
+      node_algorithms::swap_tree(this->header_ptr(), node_ptr(x.header_ptr()));
+      this->sz_traits().swap(x.sz_traits());
    }
 
    //! <b>Effects</b>: Equivalent to swap
@@ -2493,6 +2499,7 @@ class bstree
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE bstree(BOOST_RV_REF(bstree) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<Base>::value)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 

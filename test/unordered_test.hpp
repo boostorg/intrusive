@@ -16,6 +16,7 @@
 #include <algorithm> //std::sort
 #include <set>
 #include <boost/core/lightweight_test.hpp>
+#include <boost/move/detail/meta_utils.hpp>   //declval
 
 #include "test_macros.hpp"
 #include "test_container.hpp"
@@ -101,6 +102,7 @@ struct test_unordered
    static void test_clone(value_cont_type& values);
    static void test_clone_functors(value_cont_type& values);
    static void test_moved_from(value_cont_type& values);
+   static void test_move_constructor_predicates(value_cont_type& values);
 };
 
 template<class ContainerDefiner>
@@ -155,6 +157,7 @@ void test_unordered<ContainerDefiner>::test_all (value_cont_type& values)
    test_clone(values);
    //Only one option can be added to the container in C++03 compilers
    test_clone_functors(values);
+   test_move_constructor_predicates(values);
    test_moved_from(values);
 }
 
@@ -1334,6 +1337,50 @@ void test_unordered<ContainerDefiner>::test_clone_functors(value_cont_type& valu
       dst.clear_and_dispose(test::delete_disposer<value_type>());
       BOOST_TEST(dst.empty());
    }
+}
+
+//The move constructor copies the hasher and the equality, so that the
+//moved-from container keeps valid ones. They are not moved
+//or swapped, and the move constructor is noexcept only if the copies are.
+template<class ContainerDefiner>
+void test_unordered<ContainerDefiner>::test_move_constructor_predicates(value_cont_type& values)
+{
+   typedef typename ContainerDefiner::template container
+      < hash<tracking_hash>, equal<tracking_equal> >::type unordered_type;
+   const std::size_t ExtraBuckets = unordered_type::bucket_overhead;
+   typedef bucket_sizes<unordered_type> sizes;
+   typedef typename unordered_type::key_of_value  key_of_value;
+   typedef typename unordered_type::bucket_traits bucket_traits;
+   typedef typename unordered_type::bucket_ptr    bucket_ptr;
+
+   typename unordered_type::bucket_type buckets[sizes::Normal + ExtraBuckets];
+   unordered_type src (values.begin(), values.end(), bucket_traits(
+      pointer_traits<bucket_ptr>::pointer_to(buckets[0]), sizes::Normal + ExtraBuckets)
+      , tracking_hash(5), tracking_equal(6));
+   const std::size_t size = src.size();
+   predicate_counters::reset();
+   unordered_type dst(boost::move(src));
+   BOOST_TEST(predicate_counters::moves == 0);
+   BOOST_TEST(predicate_counters::swaps == 0);
+   BOOST_TEST(src.hash_function().tag_ == 5);
+   BOOST_TEST(src.key_eq().tag_ == 6);
+   BOOST_TEST(dst.hash_function().tag_ == 5);
+   BOOST_TEST(dst.key_eq().tag_ == 6);
+   //The nodes moved and are found with the copied predicates
+   BOOST_TEST(src.empty());
+   BOOST_TEST(dst.size() == size);
+   for(typename value_cont_type::iterator it = values.begin(), itend = values.end(); it != itend; ++it){
+      BOOST_TEST(dst.find(key_of_value()(*it)) != dst.end());
+   }
+   dst.clear();
+
+   #if !defined(BOOST_NO_CXX11_NOEXCEPT)
+   typedef typename ContainerDefiner::template container
+      <>::type default_type;
+   using boost::move_detail::declval;
+   BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(unordered_type(declval<unordered_type>())) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(default_type(declval<default_type>())) ));
+   #endif
 }
 
 //test: a moved-from container has no bucket array. It can be destroyed, cleared, iterated,

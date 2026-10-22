@@ -64,6 +64,7 @@
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/move/utility_core.hpp>
 #include <boost/move/adl_move_swap.hpp>
+#include <boost/move/detail/type_traits.hpp>   //is_nothrow_copy_constructible, ...
 
 //std C++
 #include <boost/intrusive/detail/minimal_pair_header.hpp>   //std::pair
@@ -254,19 +255,19 @@ public:
       : buckets_(x.buckets_), buckets_len_(x.buckets_len_)
    {}
 
-   inline bucket_traits_impl& operator=(BOOST_COPY_ASSIGN_REF(bucket_traits_impl) x)
+   BOOST_INTRUSIVE_FORCEINLINE bucket_traits_impl& operator=(BOOST_COPY_ASSIGN_REF(bucket_traits_impl) x)
    {
       buckets_ = x.buckets_;  buckets_len_ = x.buckets_len_; return *this;
    }
    #endif
 
-   inline bucket_traits_impl(BOOST_RV_REF(bucket_traits_impl) x)
+   BOOST_INTRUSIVE_FORCEINLINE bucket_traits_impl(BOOST_RV_REF(bucket_traits_impl) x) BOOST_NOEXCEPT_OR_NOTHROW
       : buckets_(x.buckets_), buckets_len_(x.buckets_len_)
    {
       x.buckets_ = bucket_ptr();   x.buckets_len_ = 0u;
    }
 
-   inline bucket_traits_impl& operator=(BOOST_RV_REF(bucket_traits_impl) x)
+   BOOST_INTRUSIVE_FORCEINLINE bucket_traits_impl& operator=(BOOST_RV_REF(bucket_traits_impl) x) BOOST_NOEXCEPT_OR_NOTHROW
    {
       buckets_ = x.buckets_; buckets_len_ = x.buckets_len_;
       x.buckets_ = bucket_ptr();   x.buckets_len_ = 0u; return *this;
@@ -1631,9 +1632,9 @@ struct BOOST_INTRUSIVE_EMPTY_BASES bucket_hash_equal_t
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE bucket_hash_equal_t(BOOST_RV_REF(bucket_hash_equal_t) other)
-      : hasher_holder_t(BOOST_MOVE_BASE(hasher_holder_t, other))
+      : hasher_holder_t(static_cast<const hasher_holder_t&>(other))
       , bucket_plus_vtraits_t(BOOST_MOVE_BASE(bucket_plus_vtraits_t, other))
-      , equal_holder_t(BOOST_MOVE_BASE(equal_holder_t, other))
+      , equal_holder_t(static_cast<const equal_holder_t&>(other))
    {}
 
    template<class K>
@@ -2581,14 +2582,14 @@ class hashtable_impl
    }
 
    //! <b>Effects</b>: Constructs a container moving resources from another container.
-   //!   Internal value traits, bucket traits, hasher and comparison are move constructed and
-   //!   nodes belonging to x are linked to *this.
+   //!   The hasher and the equality are copy constructed, so that x keeps valid ones.
+   //!   Internal value traits and bucket traits are move constructed and nodes belonging
+   //!   to x are linked to *this.
    //!
    //! <b>Complexity</b>: Constant.
    //!
-   //! <b>Throws</b>: If value_traits::node_traits::node's
-   //!   move constructor throws (this does not happen with predefined Boost.Intrusive hooks)
-   //!   or the move constructor of value traits, bucket traits, hasher or comparison throws.
+   //! <b>Throws</b>: If the copy constructor of the hasher or the equality, or the move
+   //!   constructor of the value traits or the bucket traits throws.
    //!
    //! <b>Note</b>: The bucket array is not copied: after the move, *this uses the bucket array
    //!   of x, which holds the nodes. The move constructor of the bucket traits must therefore leave
@@ -2600,6 +2601,10 @@ class hashtable_impl
    //!   bucket traits gives it a new bucket array. Functions that need a bucket (insertions,
    //!   lookups and erasures by key, bucket functions, etc.) can't be used until then.
    hashtable_impl(BOOST_RV_REF(hashtable_impl) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<hasher>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<key_equal>::value &&
+                        ::boost::move_detail::is_nothrow_move_constructible<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_move_constructible<bucket_traits>::value)
       : internal_type(BOOST_MOVE_BASE(internal_type, x))
    {
       this->priv_swap_cache(x);
@@ -4498,6 +4503,7 @@ class hashtable
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE hashtable(BOOST_RV_REF(hashtable) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<Base>::value)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 

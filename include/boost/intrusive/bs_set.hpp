@@ -104,6 +104,7 @@ class bs_set_impl
 
    //! @copydoc ::boost::intrusive::bstree::bstree(bstree &&)
    BOOST_INTRUSIVE_FORCEINLINE bs_set_impl(BOOST_RV_REF(bs_set_impl) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<tree_type>::value)
       :  tree_type(BOOST_MOVE_BASE(tree_type, x))
    {}
 
@@ -553,6 +554,7 @@ class bs_set
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE bs_set(BOOST_RV_REF(bs_set) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<Base>::value)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
@@ -660,6 +662,7 @@ class bs_multiset_impl
 
    //! @copydoc ::boost::intrusive::bstree::bstree(bstree &&)
    BOOST_INTRUSIVE_FORCEINLINE bs_multiset_impl(BOOST_RV_REF(bs_multiset_impl) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<tree_type>::value)
       :  tree_type(BOOST_MOVE_BASE(tree_type, x))
    {}
 
@@ -1051,6 +1054,7 @@ class bs_multiset
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE bs_multiset(BOOST_RV_REF(bs_multiset) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<Base>::value)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 

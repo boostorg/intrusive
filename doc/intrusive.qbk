@@ -4018,6 +4018,10 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
   copyable when their members are. This way, compilers can pass and return them in registers instead of
   by hidden reference.
 * Fixed functions calling predicates and/or hashes that were incorrectly marked as `noexcept`.
+* Move constructors now copy the predicates (comparison, priority, hash and equality) instead of moving or
+  swapping them, as standard containers do ([@https://cplusplus.github.io/LWG/issue2227 LWG 2227]), so the
+  moved-from container keeps valid predicates. They are `noexcept` when those copies (and the copies or moves of the
+  value and bucket traits) are `noexcept`.
 * [*Potentially breaking change]: treap containers no longer accept `auto_unlink` hooks (a static assertion
   is raised), as unlinking a node through the hook broke the heap order of the priorities, so it was a bug.
 * [*Potentially breaking change]: `suggested_lower_bucket_count(n)` now returns the biggest supported bucket count that is smaller

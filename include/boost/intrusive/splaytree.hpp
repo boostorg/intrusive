@@ -134,6 +134,7 @@ class splaytree_impl
 
    //! @copydoc ::boost::intrusive::bstree::bstree(bstree &&)
    BOOST_INTRUSIVE_FORCEINLINE splaytree_impl(BOOST_RV_REF(splaytree_impl) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<tree_type>::value)
       :  tree_type(BOOST_MOVE_BASE(tree_type, x))
    {}
 
@@ -735,6 +736,7 @@ class splaytree
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE splaytree(BOOST_RV_REF(splaytree) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<Base>::value)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 

@@ -20,6 +20,7 @@
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/iterator.hpp>
 #include <boost/core/lightweight_test.hpp>
+#include <boost/move/detail/meta_utils.hpp>   //declval
 #include "test_macros.hpp"
 #include "test_container.hpp"
 
@@ -59,6 +60,7 @@ struct test_generic_assoc
    static void test_root(value_cont_type&);
    static void test_clone(value_cont_type&);
    static void test_moved_from(value_cont_type&);
+   static void test_move_constructor_predicates(value_cont_type&);
    static void test_insert_erase_burst();
    static void test_swap_nodes();
    template <class Assoc>
@@ -381,6 +383,7 @@ void test_generic_assoc<ContainerDefiner>::test_all(value_cont_type& values)
    test_root(values);
    test_clone(values);
    test_moved_from(values);
+   test_move_constructor_predicates(values);
    test_container_from_end(values, detail::bool_< assoc_type::has_container_from_iterator >());
    test_splay_up(values, detail::bool_< has_splay_up< assoc_type >::value >());
    test_splay_down(values, detail::bool_< has_splay_down< assoc_type >::value >());
@@ -636,6 +639,42 @@ void test_generic_assoc<ContainerDefiner>::test_moved_from(value_cont_type& valu
    BOOST_TEST (moved.empty());
    src.check();
    src.clear();
+}
+
+template<class ContainerDefiner>
+void test_generic_assoc<ContainerDefiner>::test_move_constructor_predicates(value_cont_type& values)
+{
+   typedef typename ContainerDefiner::template container
+      <>::type default_type;
+   typedef typename default_type::key_type key_type;
+   typedef tracking_less<key_type> less_type;
+   typedef typename ContainerDefiner::template container
+      < compare<less_type> >::type assoc_type;
+   typedef typename assoc_type::size_type size_type;
+
+   assoc_type src(values.begin(), values.end(), less_type(7));
+   const size_type size = src.size();
+   predicate_counters::reset();
+   assoc_type dst(boost::move(src));
+   BOOST_TEST(predicate_counters::moves == 0);
+   BOOST_TEST(predicate_counters::swaps == 0);
+   BOOST_TEST(src.key_comp().tag_ == 7);
+   BOOST_TEST(dst.key_comp().tag_ == 7);
+   //The nodes moved, the moved-from container can still be used
+   BOOST_TEST(src.empty());
+   BOOST_TEST(dst.size() == size);
+   dst.check();
+   dst.clear();
+   src.insert(values.begin(), values.end());
+   BOOST_TEST(src.size() == size);
+   src.check();
+   src.clear();
+
+   #if !defined(BOOST_NO_CXX11_NOEXCEPT)
+   using boost::move_detail::declval;
+   BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(assoc_type(declval<assoc_type>())) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(default_type(declval<default_type>())) ));
+   #endif
 }
 
 template<class ContainerDefiner>

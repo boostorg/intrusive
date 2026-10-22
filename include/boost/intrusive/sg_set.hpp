@@ -105,6 +105,7 @@ class sg_set_impl
 
    //! @copydoc ::boost::intrusive::sgtree::sgtree(sgtree &&)
    BOOST_INTRUSIVE_FORCEINLINE sg_set_impl(BOOST_RV_REF(sg_set_impl) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<tree_type>::value)
       :  tree_type(BOOST_MOVE_BASE(tree_type, x))
    {}
 
@@ -565,6 +566,7 @@ class sg_set
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE sg_set(BOOST_RV_REF(sg_set) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<Base>::value)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
@@ -673,6 +675,7 @@ class sg_multiset_impl
 
    //! @copydoc ::boost::intrusive::sgtree::sgtree(sgtree &&)
    BOOST_INTRUSIVE_FORCEINLINE sg_multiset_impl(BOOST_RV_REF(sg_multiset_impl) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<tree_type>::value)
       :  tree_type(BOOST_MOVE_BASE(tree_type, x))
    {}
 
@@ -1076,6 +1079,7 @@ class sg_multiset
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE sg_multiset(BOOST_RV_REF(sg_multiset) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<Base>::value)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 
