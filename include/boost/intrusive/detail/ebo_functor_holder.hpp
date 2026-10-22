@@ -23,6 +23,7 @@
 #endif
 
 #include <boost/intrusive/detail/workaround.hpp>
+#include <boost/intrusive/detail/mpl.hpp>   //enable_if_c, is_convertible
 #include <boost/move/utility_core.hpp>
 
 namespace boost {
@@ -50,6 +51,13 @@ class ebo_functor_holder
       : T(::boost::move(t))
    {}
 
+   template<class Arg>
+   BOOST_INTRUSIVE_FORCEINLINE explicit ebo_functor_holder
+      ( BOOST_FWD_REF(Arg) arg
+      , typename enable_if_c<!is_convertible<Arg, const T&>::value>::type* = 0)
+      : T(::boost::forward<Arg>(arg))
+   {}
+
    template<class Arg1, class Arg2>
    BOOST_INTRUSIVE_FORCEINLINE ebo_functor_holder(BOOST_FWD_REF(Arg1) arg1, BOOST_FWD_REF(Arg2) arg2)
       : T(::boost::forward<Arg1>(arg1), ::boost::forward<Arg2>(arg2))
@@ -67,7 +75,7 @@ class ebo_functor_holder
    inline ebo_functor_holder& operator=(BOOST_COPY_ASSIGN_REF(ebo_functor_holder) x)
    {
       const ebo_functor_holder&r = x;
-      this->get() = r;
+      static_cast<T&>(*this) = static_cast<const T&>(r);
       return *this;
    }
    #endif
@@ -82,20 +90,20 @@ class ebo_functor_holder
 
    inline ebo_functor_holder& operator=(BOOST_RV_REF(ebo_functor_holder) x)
    {
-      this->get() = ::boost::move(x.get());
+      static_cast<T&>(*this) = ::boost::move(static_cast<T&>(x));
       return *this;
    }
    #endif
 
    inline ebo_functor_holder& operator=(const T &t)
    {
-      this->get() = t;
+      static_cast<T&>(*this) = t;
       return *this;
    }
 
    inline ebo_functor_holder& operator=(BOOST_RV_REF(T) t)
    {
-      this->get() = ::boost::move(t);
+      static_cast<T&>(*this) = ::boost::move(t);
       return *this;
    }
 
