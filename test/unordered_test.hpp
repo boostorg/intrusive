@@ -99,7 +99,6 @@ struct test_unordered
    static void test_equal();
    static void test_impl();
    static void test_clone(value_cont_type& values);
-   template<class Option>
    static void test_clone_functors(value_cont_type& values);
    static void test_moved_from(value_cont_type& values);
 };
@@ -155,8 +154,7 @@ void test_unordered<ContainerDefiner>::test_all (value_cont_type& values)
    test_impl();
    test_clone(values);
    //Only one option can be added to the container in C++03 compilers
-   test_clone_functors<hash<instance_seed_hash> >(values);
-   test_clone_functors<equal<tagged_equal> >(values);
+   test_clone_functors(values);
    test_moved_from(values);
 }
 
@@ -1290,38 +1288,13 @@ void test_unordered<ContainerDefiner>::test_clone(value_cont_type& values)
 }
 
 //Builds a functor with the state "state" if the functor has a state, else a default functor
-inline instance_seed_hash make_tagged_functor(instance_seed_hash*, unsigned state)
-{  return instance_seed_hash(state);  }
-
-inline tagged_equal make_tagged_functor(tagged_equal*, unsigned state)
-{  return tagged_equal(int(state));  }
-
-template<class Functor>
-Functor make_tagged_functor(Functor*, unsigned)
-{  return Functor();  }
-
-//Checks the state of a functor, if the functor has a state
-inline bool functor_tag_is(const instance_seed_hash &f, unsigned state)
-{  return f.seed_ == state;  }
-
-inline bool functor_tag_is(const tagged_equal &f, unsigned state)
-{  return f.tag_ == int(state);  }
-
-template<class Functor>
-bool functor_tag_is(const Functor &, unsigned)
-{  return true;  }
-
 //test: clone_from copies the hash function and the equality predicate of the source, also if
 //the source is empty or the bucket array of the source can not be cloned structurally.
-//"Option" is hash<instance_seed_hash> or equal<tagged_equal>
 template<class ContainerDefiner>
-template<class Option>
 void test_unordered<ContainerDefiner>::test_clone_functors(value_cont_type& values)
 {
    typedef typename ContainerDefiner::template container
-      <Option>::type unordered_type;
-   typedef typename unordered_type::hasher        hasher;
-   typedef typename unordered_type::key_equal     key_equal;
+      < hash<instance_seed_hash>, equal<tagged_equal> >::type unordered_type;
    const std::size_t ExtraBuckets = unordered_type::bucket_overhead;
    typedef bucket_sizes<unordered_type> sizes;
    typedef typename unordered_type::value_type    value_type;
@@ -1344,14 +1317,14 @@ void test_unordered<ContainerDefiner>::test_clone_functors(value_cont_type& valu
 
       unordered_type src (values.begin(), src_end, bucket_traits(
          pointer_traits<bucket_ptr>::pointer_to(buckets1[0]), src_buckets + ExtraBuckets)
-         , make_tagged_functor((hasher*)0, 5u), make_tagged_functor((key_equal*)0, 7u));
+         , instance_seed_hash(5u), tagged_equal(7));
       unordered_type dst (bucket_traits(
          pointer_traits<bucket_ptr>::pointer_to(buckets2[0]), dst_buckets + ExtraBuckets)
-         , make_tagged_functor((hasher*)0, 2u), make_tagged_functor((key_equal*)0, 3u));
+         , instance_seed_hash(2u), tagged_equal(3));
 
       dst.clone_from(src, test::new_cloner<value_type>(), test::delete_disposer<value_type>());
-      BOOST_TEST(functor_tag_is(dst.hash_function(), 5u));
-      BOOST_TEST(functor_tag_is(dst.key_eq(), 7u));
+      BOOST_TEST(dst.hash_function().seed_ == 5u);
+      BOOST_TEST(dst.key_eq().tag_ == 7);
       BOOST_TEST(dst.size() == src.size());
       //The cloned elements are found using the copied hash function
       for(iterator it = src.begin(), itend = src.end(); it != itend; ++it){

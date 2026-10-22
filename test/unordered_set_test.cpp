@@ -22,6 +22,7 @@
 #include "test_container.hpp"
 #include "unordered_test_common.hpp"
 #include "unordered_test.hpp"
+#include <boost/intrusive/hashtable.hpp>
 
 using namespace boost::intrusive;
 
@@ -32,7 +33,9 @@ struct rebinder
    typedef unordered_rebinder_common<ValueTraits, DefaultHolder, Map> common_t;
    typedef typename ValueContainer< typename ValueTraits::value_type >::type value_cont_type;
 
-   template < class Option1 =void >
+   template < class Option1 =void
+            , class Option2 =void
+            >
    struct container
    {
       typedef unordered_set
@@ -48,6 +51,7 @@ struct rebinder
          , typename common_t::key_of_value_opt
          , size_type<unsigned short>
          , Option1
+         , Option2
          > type;
       BOOST_INTRUSIVE_STATIC_ASSERT((key_type_tester<typename common_t::key_of_value_opt, type>::value));
       BOOST_INTRUSIVE_STATIC_ASSERT((!boost::intrusive::test::is_multikey_true<type>::value));
@@ -145,8 +149,74 @@ class test_main_template<VoidPointer, ConstantTimeSize, DefaultHolder, Map, NonM
    }
 };
 
+//All the options of the unordered containers can be used at the same time
+//(without variadic templates, they accept a limited number of options)
+struct all_options_value
+   : public unordered_set_base_hook< store_hash<true> >
+{
+   explicit all_options_value(int v) : v_(v) {}
+   int v_;
+};
+
+struct all_options_key_of_value
+{
+   typedef int type;
+   int operator()(const all_options_value &v) const {  return v.v_;  }
+};
+
+struct all_options_hash
+{
+   std::size_t operator()(int i) const {  return std::size_t(i);  }
+};
+
+struct all_options_equal
+{
+   bool operator()(int a, int b) const {  return a == b;  }
+};
+
+template<class Container>
+void test_all_options_container()
+{
+   typedef typename Container::bucket_type   bucket_type;
+   typedef typename Container::bucket_traits bucket_traits;
+   bucket_type buckets[8];
+   Container c(bucket_traits(buckets, 8u));
+   all_options_value v1(1), v2(2);
+   c.insert_equal(v1);
+   c.insert_equal(v2);
+   BOOST_TEST(c.size() == 2u);
+   BOOST_TEST(c.find(2) != c.end());
+   c.clear();
+}
+
+void test_all_options()
+{
+   typedef unordered_set_base_hook< store_hash<true> > hook_t;
+   typedef unordered_default_bucket_traits< base_hook<hook_t> >::type bucket_traits_t;
+   //13 options: value traits (hook), size_type, key_of_value, hash, equal, bucket traits
+   //and the 7 flags
+   #define BOOST_INTRUSIVE_TEST_ALL_UNORDERED_OPTIONS \
+        base_hook<hook_t>, size_type<std::size_t>, key_of_value<all_options_key_of_value> \
+      , hash<all_options_hash>, equal<all_options_equal>, bucket_traits<bucket_traits_t> \
+      , constant_time_size<true>, power_2_buckets<true>, cache_begin<true>, compare_hash<true> \
+      , incremental<true>, linear_buckets<false>, fastmod_buckets<false>
+   test_all_options_container< hashtable<all_options_value, BOOST_INTRUSIVE_TEST_ALL_UNORDERED_OPTIONS> >();
+   test_all_options_container< unordered_multiset<all_options_value, BOOST_INTRUSIVE_TEST_ALL_UNORDERED_OPTIONS> >();
+   {
+      typedef unordered_set<all_options_value, BOOST_INTRUSIVE_TEST_ALL_UNORDERED_OPTIONS> uset_t;
+      uset_t::bucket_type buckets[8];
+      uset_t c(uset_t::bucket_traits(buckets, 8u));
+      all_options_value v1(1);
+      BOOST_TEST(c.insert(v1).second);
+      BOOST_TEST(c.find(1) != c.end());
+      c.clear();
+   }
+   #undef BOOST_INTRUSIVE_TEST_ALL_UNORDERED_OPTIONS
+}
+
 int main()
 {
+   test_all_options();
    //Combinations: VoidPointer x ConstantTimeSize x DefaultHolder x Map x HookType x LinearBuckets
    //Minimize them selecting different combinations for raw and smart pointers
    //Base and Member hooks use auto_unlink if !ConstantTimeSize, and auto_unlink

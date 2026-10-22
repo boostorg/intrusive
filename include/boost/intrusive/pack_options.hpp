@@ -55,6 +55,8 @@ template
    , class O9         = void
    , class O10        = void
    , class O11        = void
+   , class O12        = void
+   , class O13        = void
    >
 struct pack_options
 {
@@ -71,28 +73,34 @@ struct pack_options
                            <  typename do_pack
                               <  typename do_pack
                                  <  typename do_pack
-                                    < DefaultOptions
-                                    , O1
+                                    <  typename do_pack
+                                       <  typename do_pack
+                                          < DefaultOptions
+                                          , O1
+                                          >::type
+                                       , O2
+                                       >::type
+                                    , O3
                                     >::type
-                                 , O2
+                                 , O4
                                  >::type
-                              , O3
+                              , O5
                               >::type
-                           , O4
+                           , O6
                            >::type
-                        , O5
+                        , O7
                         >::type
-                     , O6
+                     , O8
                      >::type
-                  , O7
+                  , O9
                   >::type
-               , O8
+               , O10
                >::type
-            , O9
+            , O11
             >::type
-         , O10
+         , O12
          >::type
-      , O11
+      , O13
       >::type
    type;
 };

@@ -429,7 +429,8 @@ template<class T, class O1 = void, class O2 = void
                 , class O5 = void, class O6 = void
                 , class O7 = void, class O8 = void
                 , class O9 = void, class O10= void
-                , class O11 = void
+                , class O11 = void, class O12 = void
+                , class O13 = void
                 >
 #endif
 struct make_unordered_set
@@ -438,7 +439,7 @@ struct make_unordered_set
    typedef typename pack_options
       < hashtable_defaults,
          #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-         O1, O2, O3, O4, O5, O6, O7, O8, O9, O10, O11
+         O1, O2, O3, O4, O5, O6, O7, O8, O9, O10, O11, O12, O13
          #else
          Options...
          #endif
@@ -474,14 +475,14 @@ struct make_unordered_set
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
 #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-template<class T, class O1, class O2, class O3, class O4, class O5, class O6, class O7, class O8, class O9, class O10, class O11>
+template<class T, class O1, class O2, class O3, class O4, class O5, class O6, class O7, class O8, class O9, class O10, class O11, class O12, class O13>
 #else
 template<class T, class ...Options>
 #endif
 class unordered_set
    :  public make_unordered_set<T,
          #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-         O1, O2, O3, O4, O5, O6, O7, O8, O9, O10, O11
+         O1, O2, O3, O4, O5, O6, O7, O8, O9, O10, O11, O12, O13
          #else
          Options...
          #endif
@@ -489,7 +490,7 @@ class unordered_set
 {
    typedef typename make_unordered_set<T,
          #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-         O1, O2, O3, O4, O5, O6, O7, O8, O9, O10, O11
+         O1, O2, O3, O4, O5, O6, O7, O8, O9, O10, O11, O12, O13
          #else
          Options...
          #endif
@@ -883,7 +884,8 @@ template<class T, class O1 = void, class O2 = void
                 , class O5 = void, class O6 = void
                 , class O7 = void, class O8 = void
                 , class O9 = void, class O10= void
-                , class O11 = void
+                , class O11 = void, class O12 = void
+                , class O13 = void
                 >
 #endif
 struct make_unordered_multiset
@@ -892,7 +894,7 @@ struct make_unordered_multiset
    typedef typename pack_options
       < hashtable_defaults,
          #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-         O1, O2, O3, O4, O5, O6, O7, O8, O9, O10, O11
+         O1, O2, O3, O4, O5, O6, O7, O8, O9, O10, O11, O12, O13
          #else
          Options...
          #endif
@@ -928,14 +930,14 @@ struct make_unordered_multiset
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
 #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-template<class T, class O1, class O2, class O3, class O4, class O5, class O6, class O7, class O8, class O9, class O10, class O11>
+template<class T, class O1, class O2, class O3, class O4, class O5, class O6, class O7, class O8, class O9, class O10, class O11, class O12, class O13>
 #else
 template<class T, class ...Options>
 #endif
 class unordered_multiset
    :  public make_unordered_multiset<T,
          #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-         O1, O2, O3, O4, O5, O6, O7, O8, O9, O10, O11
+         O1, O2, O3, O4, O5, O6, O7, O8, O9, O10, O11, O12, O13
          #else
          Options...
          #endif
@@ -944,7 +946,7 @@ class unordered_multiset
    typedef typename make_unordered_multiset
       <T,
          #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-         O1, O2, O3, O4, O5, O6, O7, O8, O9, O10, O11
+         O1, O2, O3, O4, O5, O6, O7, O8, O9, O10, O11, O12, O13
          #else
          Options...
          #endif

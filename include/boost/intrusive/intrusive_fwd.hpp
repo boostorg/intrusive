@@ -551,6 +551,9 @@ template
    , class O8  = void
    , class O9  = void
    , class O10 = void
+   , class O11 = void
+   , class O12 = void
+   , class O13 = void
    >
 #else
 template<class T, class ...Options>
@@ -571,6 +574,8 @@ template
    , class O9  = void
    , class O10 = void
    , class O11 = void
+   , class O12 = void
+   , class O13 = void
    >
 #else
 template<class T, class ...Options>
@@ -591,6 +596,8 @@ template
    , class O9  = void
    , class O10 = void
    , class O11 = void
+   , class O12 = void
+   , class O13 = void
    >
 #else
 template<class T, class ...Options>
