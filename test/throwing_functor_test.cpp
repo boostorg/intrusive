@@ -657,6 +657,62 @@ void test_treap(value (&values)[N])
    c.clear();
 }
 
+//Priority with state: inverse_ inverts the order. The copy assignment can throw.
+struct stateful_priority
+{
+   explicit stateful_priority(bool inverse = false) : inverse_(inverse) {}
+
+   stateful_priority(const stateful_priority &o) : inverse_(o.inverse_) {}
+
+   stateful_priority &operator=(const stateful_priority &o)
+   {  maybe_throw(g_pred_throw_active); inverse_ = o.inverse_; return *this;  }
+
+   bool operator()(const value &a, const value &b) const
+   {
+      const int da = throwing_priority::distance(a), db = throwing_priority::distance(b);
+      return inverse_ ? db < da : da < db;
+   }
+
+   bool inverse_;
+};
+
+typedef bi::treap_multiset
+   < value, bi::compare<throwing_less>, bi::priority<stateful_priority> > sp_treap_t;
+
+//clone_from copies the priority before cloning the nodes: if the copy throws,
+//the destination does not get nodes ordered by another priority
+void treap_clone(sp_treap_t &dst, sp_treap_t &src, bool move_src)
+{
+   if(move_src)
+      dst.clone_from(boost::move(src), new_cloner(), delete_disposer());
+   else
+      dst.clone_from(static_cast<const sp_treap_t&>(src), new_cloner(), delete_disposer());
+}
+
+void test_treap_clone_from(value (&values)[N], bool move_src)
+{
+   sp_treap_t src(&values[0], &values[0] + N);
+   sp_treap_t dst(throwing_less(), stateful_priority(true));
+   g_pred_throw_active = true;
+   try{
+      treap_clone(dst, src, move_src);
+      BOOST_TEST(false);
+   }
+   catch(test_exception &){
+   }
+   g_pred_throw_active = false;
+   BOOST_TEST(dst.empty());
+   BOOST_TEST(dst.priority_comp().inverse_);
+   //Without exceptions, the destination gets the priority of the source
+   treap_clone(dst, src, move_src);
+   BOOST_TEST(!dst.priority_comp().inverse_);
+   BOOST_TEST(dst.size() == N);
+   BOOST_TEST(dst.top()->v_ == 4);
+   dst.check();
+   dst.clear_and_dispose(delete_disposer());
+   src.clear();
+}
+
 //////////////////////////////////////////
 //list/slist: remove, unique, sort and merge call operator==, operator<
 //or the passed predicate.
@@ -1075,6 +1131,8 @@ void test_trees(value (&values)[N], value (&values2)[N2])
    test_tree< bi::treap_set<value, cmp, bi::priority<throwing_priority> >, true, true >(values, values2);
    test_tree< treap_t, false, true >(values, values2);
    test_treap(values);
+   test_treap_clone_from(values, false);
+   test_treap_clone_from(values, true);
 }
 
 void test_sequences(value (&values)[N], value (&values2)[N2])

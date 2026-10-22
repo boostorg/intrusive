@@ -408,11 +408,12 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //! <b>Complexity</b>: Linear to erased plus inserted elements.
    //!
    //! <b>Throws</b>: If cloner throws or predicate copy assignment throws. Basic guarantee.
+   //!   If the copy assignment of the priority comparison throws, there are no effects.
    template <class Cloner, class Disposer>
    void clone_from(const treap_impl &src, Cloner cloner, Disposer disposer)
    {
-      tree_type::clone_from(src, cloner, disposer);
       this->priv_pcomp() = src.priv_pcomp();
+      tree_type::clone_from(src, cloner, disposer);
    }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
@@ -429,11 +430,12 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //! <b>Complexity</b>: Linear to erased plus inserted elements.
    //!
    //! <b>Throws</b>: If cloner throws or predicate copy assignment throws. Basic guarantee.
+   //!   If the copy assignment of the priority comparison throws, there are no effects.
    template <class Cloner, class Disposer>
    void clone_from(BOOST_RV_REF(treap_impl) src, Cloner cloner, Disposer disposer)
    {
+      this->priv_pcomp() = src.priv_pcomp();
       tree_type::clone_from(BOOST_MOVE_BASE(tree_type, src), cloner, disposer);
-      this->priv_pcomp() = ::boost::move(src.priv_pcomp());
    }
 
    //! <b>Requires</b>: value must be an lvalue
