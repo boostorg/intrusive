@@ -246,7 +246,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    treap_impl& operator=(BOOST_RV_REF(treap_impl) x)
    #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_copy_assignable<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_move_assignable<value_traits>::value &&
                         ::boost::move_detail::is_nothrow_copy_assignable<priority_compare>::value)
    #endif
    {
@@ -262,7 +262,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //The move assignment when BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS is not defined
    void move_assign_unlink(treap_impl &x)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_copy_assignable<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_move_assignable<value_traits>::value &&
                         ::boost::move_detail::is_nothrow_copy_assignable<priority_compare>::value)
    {
       if(BOOST_LIKELY(this != &x)){

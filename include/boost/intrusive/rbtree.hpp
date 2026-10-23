@@ -152,7 +152,7 @@ class rbtree_impl
    BOOST_INTRUSIVE_FORCEINLINE rbtree_impl& operator=(BOOST_RV_REF(rbtree_impl) x)
    #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_copy_assignable<value_traits>::value)
+                        ::boost::move_detail::is_nothrow_move_assignable<value_traits>::value)
    #endif
    {  return static_cast<rbtree_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x))); }
 

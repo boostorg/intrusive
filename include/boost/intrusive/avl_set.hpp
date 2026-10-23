@@ -118,7 +118,7 @@ class avl_set_impl
    BOOST_INTRUSIVE_FORCEINLINE avl_set_impl& operator=(BOOST_RV_REF(avl_set_impl) x)
    #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_copy_assignable<value_traits>::value)
+                        ::boost::move_detail::is_nothrow_move_assignable<value_traits>::value)
    #endif
    {  return static_cast<avl_set_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x))); }
 
@@ -689,7 +689,7 @@ class avl_multiset_impl
    BOOST_INTRUSIVE_FORCEINLINE avl_multiset_impl& operator=(BOOST_RV_REF(avl_multiset_impl) x)
    #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_copy_assignable<value_traits>::value)
+                        ::boost::move_detail::is_nothrow_move_assignable<value_traits>::value)
    #endif
    {  return static_cast<avl_multiset_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x))); }
 

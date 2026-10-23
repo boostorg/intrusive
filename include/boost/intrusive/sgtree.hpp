@@ -320,7 +320,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
    sgtree_impl& operator=(BOOST_RV_REF(sgtree_impl) x)
    #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_copy_assignable<value_traits>::value)
+                        ::boost::move_detail::is_nothrow_move_assignable<value_traits>::value)
    #endif
    {
       this->get_alpha_traits() = x.get_alpha_traits();
@@ -331,7 +331,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
    //The move assignment when BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS is not defined
    BOOST_INTRUSIVE_FORCEINLINE void move_assign_unlink(sgtree_impl &x)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_copy_assignable<value_traits>::value)
+                        ::boost::move_detail::is_nothrow_move_assignable<value_traits>::value)
    {
       this->get_alpha_traits() = x.get_alpha_traits();
       tree_type::move_assign_unlink(x);

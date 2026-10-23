@@ -302,6 +302,10 @@ struct bstbase3
       BOOST_INTRUSIVE_FORCEINLINE explicit holder_t(const ValueTraits &vtraits)
          : ValueTraits(vtraits), node_base_t()
       {}
+
+      BOOST_INTRUSIVE_FORCEINLINE explicit holder_t(BOOST_RV_REF(ValueTraits) vtraits)
+         : ValueTraits(::boost::move(vtraits)), node_base_t()
+      {}
    } holder;
 
    static bstbase3 &get_tree_base_from_end_iterator(const const_iterator &end_iterator)
@@ -313,6 +317,10 @@ struct bstbase3
 
    BOOST_INTRUSIVE_FORCEINLINE bstbase3(const ValueTraits &vtraits)
       : holder(vtraits)
+   {}
+
+   BOOST_INTRUSIVE_FORCEINLINE bstbase3(BOOST_RV_REF(ValueTraits) vtraits)
+      : holder(::boost::move(vtraits))
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE const value_traits &get_value_traits() const
@@ -508,6 +516,10 @@ struct BOOST_INTRUSIVE_EMPTY_BASES bstbase2
 
    BOOST_INTRUSIVE_FORCEINLINE bstbase2(const key_compare &comp, const ValueTraits &vtraits)
       : detail::ebo_functor_holder<value_compare>(comp), treeheader_t(vtraits)
+   {}
+
+   BOOST_INTRUSIVE_FORCEINLINE bstbase2(const key_compare &comp, BOOST_RV_REF(ValueTraits) vtraits)
+      : detail::ebo_functor_holder<value_compare>(comp), treeheader_t(::boost::move(vtraits))
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE const value_compare &get_comp() const
@@ -918,42 +930,42 @@ class bstree_impl
    }
 
    //! <b>Effects</b>: Constructs a container moving resources from another container.
-   //!   The comparison object and the value traits are copy constructed, so that x keeps
-   //!   valid ones, and nodes belonging to x (except the node representing the "end")
+   //!   The comparison object is copy constructed, so that x keeps a valid one, the
+   //!   value traits are move constructed (x keeps valid value traits, see the requirements
+   //!   of the value traits) and nodes belonging to x (except the node representing the "end")
    //!   are linked to *this. x is left empty.
    //!
    //! <b>Complexity</b>: Constant.
    //!
-   //! <b>Throws</b>: If the copy constructor of the comparison object or of the value
-   //!   traits throws.
+   //! <b>Throws</b>: If the copy constructor of the comparison object or the move
+   //!   constructor of the value traits throws.
    BOOST_INTRUSIVE_FORCEINLINE bstree_impl(BOOST_RV_REF(bstree_impl) x)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value)
-      : data_type(x.get_comp().key_comp(), x.get_value_traits())
+                        ::boost::move_detail::is_nothrow_move_constructible<value_traits>::value)
+      : data_type(x.get_comp().key_comp(), ::boost::move(x.get_value_traits()))
    {
-      //Only the nodes and the size are exchanged: the comparison object and
-      //the value traits are copies
+      //Only the nodes and the size are exchanged
       node_algorithms::swap_tree(this->header_ptr(), node_ptr(x.header_ptr()));
       this->sz_traits().swap(x.sz_traits());
    }
 
    //! <b>Effects</b>: Unlinks the elements of *this (as clear()), copy assigns the
-   //!   comparison object and the value traits of x and links the nodes of x to *this.
-   //!   x is left empty and keeps its comparison object and value traits.
-   //!   If &x == this, there are no effects.
+   //!   comparison object of x, move assigns the value traits of x and links the nodes
+   //!   of x to *this. x is left empty and keeps its comparison object and valid value
+   //!   traits (see the requirements of the value traits). If &x == this, there are no effects.
    //!
    //! <b>Complexity</b>: Linear to the elements of *this if it's a safe-mode or an
    //!   auto-unlink value, constant otherwise.
    //!
-   //! <b>Throws</b>: If the copy assignment of the comparison object or of the value
-   //!   traits throws. Then *this is empty and x is unchanged.
+   //! <b>Throws</b>: If the copy assignment of the comparison object or the move
+   //!   assignment of the value traits throws. Then *this is empty and x keeps its elements.
    //!
    //! <b>Note</b>: If BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS is defined, it is equivalent to swap(x)
    //!   and it is not noexcept (the behavior before Boost 1.93).
    BOOST_INTRUSIVE_FORCEINLINE bstree_impl& operator=(BOOST_RV_REF(bstree_impl) x)
    #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_copy_assignable<value_traits>::value)
+                        ::boost::move_detail::is_nothrow_move_assignable<value_traits>::value)
    #endif
    {
       #if defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
@@ -969,12 +981,12 @@ class bstree_impl
    //Boost.Container calls it, so that the macro does not change its containers.
    BOOST_INTRUSIVE_FORCEINLINE void move_assign_unlink(bstree_impl &x)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_copy_assignable<value_traits>::value)
+                        ::boost::move_detail::is_nothrow_move_assignable<value_traits>::value)
    {
       if(BOOST_LIKELY(this != &x)){
          this->clear();
          this->get_comp() = x.get_comp();
-         this->get_value_traits() = x.get_value_traits();
+         this->get_value_traits() = ::boost::move(x.get_value_traits());
          //*this is empty: x is left empty
          node_algorithms::swap_tree(this->header_ptr(), node_ptr(x.header_ptr()));
          this->sz_traits().swap(x.sz_traits());

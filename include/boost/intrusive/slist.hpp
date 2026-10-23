@@ -843,27 +843,38 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
       :  vtraits_holder_t(::boost::move(x.priv_value_traits())), base_t()
    {
       this->set_default_constructed_state();
-      //nothrow, no need to rollback to release elements on exception
-      this->swap(x);
+      //Only the nodes and the size: swap() would also exchange the value traits
+      node_ops::swap(this->get_root_node(), this->priv_last_ptr(), x.get_root_node(), x.priv_last_ptr());
+      this->priv_size_traits().swap(x.priv_size_traits());
    }
 
-   //! <b>Effects</b>: Unlinks the elements of *this (as clear()) and links the nodes
-   //!   of x to *this. *this gets the value traits of x and x, left empty, the value
-   //!   traits of *this. If &x == this, there are no effects.
+   //! <b>Effects</b>: Unlinks the elements of *this (as clear()), move assigns the value
+   //!   traits of x and links the nodes of x to *this. x is left empty and keeps valid
+   //!   value traits (see the requirements of the value traits). If &x == this, there
+   //!   are no effects.
    //!
    //! <b>Complexity</b>: Linear to the elements of *this if it's a safe-mode or an
    //!   auto-unlink value, constant otherwise.
    //!
+   //! <b>Throws</b>: If the move assignment of the value traits throws. Then *this is
+   //!   empty and x keeps its elements.
+   //!
    //! <b>Note</b>: If BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS is defined, it is equivalent to swap(x)
    //!   (the behavior before Boost 1.93).
    slist_impl& operator=(BOOST_RV_REF(slist_impl) x)
+   #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<value_traits>::value)
+   #endif
    {
       #if defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
       this->swap(x);
       #else
       if(BOOST_LIKELY(this != &x)){
          this->clear();
-         this->swap(x);
+         this->priv_value_traits() = ::boost::move(x.priv_value_traits());
+         //*this is empty: x is left empty
+         node_ops::swap(this->get_root_node(), this->priv_last_ptr(), x.get_root_node(), x.priv_last_ptr());
+         this->priv_size_traits().swap(x.priv_size_traits());
       }
       #endif
       return *this;
@@ -2518,6 +2529,9 @@ class slist
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE slist& operator=(BOOST_RV_REF(slist) x)
+   #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
+   #endif
    {  return static_cast<slist &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    template <class Cloner, class Disposer>

@@ -22,6 +22,7 @@
 #endif
 
 #include <boost/intrusive/detail/workaround.hpp>
+#include <boost/move/utility_core.hpp>
 
 namespace boost {
 namespace intrusive {
@@ -35,6 +36,10 @@ struct value_traits_holder
 {
    BOOST_INTRUSIVE_FORCEINLINE explicit value_traits_holder(const ValueTraits &val_traits)
       :  ValueTraits(val_traits)
+   {}
+
+   BOOST_INTRUSIVE_FORCEINLINE explicit value_traits_holder(BOOST_RV_REF(ValueTraits) val_traits)
+      :  ValueTraits(::boost::move(val_traits))
    {}
 };
 

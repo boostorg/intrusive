@@ -15,6 +15,7 @@
 #include <boost/intrusive/unordered_set.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/move/utility_core.hpp>
+#include <boost/move/core.hpp>
 #include <vector>
 #include <functional>
 #include <cstddef>
@@ -40,9 +41,16 @@ class MyClass
    {  return std::size_t(v.int_); }
 };
 
+//Copies and moves of the value traits
+int vtraits_copies = 0;
+int vtraits_moves  = 0;
+
 template<class T, class NodeTraits>
 struct stateful_value_traits
 {
+   BOOST_COPYABLE_AND_MOVABLE(stateful_value_traits)
+
+   public:
    typedef NodeTraits                                          node_traits;
    typedef typename node_traits::node                          node;
    typedef typename node_traits::node_ptr                      node_ptr;
@@ -58,6 +66,21 @@ struct stateful_value_traits
    stateful_value_traits(pointer vals, node_ptr node_array)
       :  values_(vals),  node_array_(node_array)
    {}
+
+   //A move leaves the source equal to the result, as the value traits must do
+   stateful_value_traits(const stateful_value_traits &o)
+      :  values_(o.values_),  node_array_(o.node_array_)
+   {  ++vtraits_copies;  }
+
+   stateful_value_traits(BOOST_RV_REF(stateful_value_traits) o)
+      :  values_(o.values_),  node_array_(o.node_array_)
+   {  ++vtraits_moves;  }
+
+   stateful_value_traits &operator=(BOOST_COPY_ASSIGN_REF(stateful_value_traits) o)
+   {  values_ = o.values_;  node_array_ = o.node_array_;  ++vtraits_copies;  return *this;  }
+
+   stateful_value_traits &operator=(BOOST_RV_REF(stateful_value_traits) o)
+   {  values_ = o.values_;  node_array_ = o.node_array_;  ++vtraits_moves;  return *this;  }
 
    node_ptr to_node_ptr (value_type &value) const
    {  return node_array_ + (&value - values_); }
@@ -148,8 +171,25 @@ bool holds_values(const Container &c, const MyClass *vals)
    return count == SwapElements;
 }
 
+//Fills the container with "vals", checks it and clears it
+template<class Container>
+bool refill(Container &c, MyClass *vals)
+{
+   for(std::size_t i = 0; i < SwapElements; ++i)
+      insert_value(c, vals[i]);
+   const bool ok = holds_values(c, vals);
+   c.clear();
+   return ok;
+}
+
+//A moved-from unordered container has no bucket array: it can't be filled again
+bool refill(Uset &, MyClass *)
+{  return true;  }
+
 //Swap must swap also the value traits. Move assignment and move construction
-//must take the value traits of the source, whose elements they take
+//must move the value traits of the source, whose elements they take: the
+//moved-from container keeps value traits equal to the ones of the destination,
+//so it can hold the same elements
 template<class Container, class Node>
 bool test_swap(Container &a, Container &b, swap_data<Node> &d)
 {
@@ -161,13 +201,26 @@ bool test_swap(Container &a, Container &b, swap_data<Node> &d)
    if(!holds_values(a, d.values2) || !holds_values(b, d.values1))
       return false;
    //The elements of a are unlinked, a takes the elements of b and b is left empty
+   vtraits_copies = vtraits_moves = 0;
    a = boost::move(b);
+   if(vtraits_copies != 0 || vtraits_moves != 1)
+      return false;
    if(!holds_values(a, d.values1) || !b.empty())
       return false;
+   a.clear();
+   if(!refill(b, d.values1))
+      return false;
+   for(std::size_t i = 0; i < SwapElements; ++i)
+      insert_value(a, d.values1[i]);
+   vtraits_copies = vtraits_moves = 0;
    Container c(boost::move(a));
+   if(vtraits_copies != 0 || vtraits_moves != 1)
+      return false;
    if(!holds_values(c, d.values1) || !a.empty())
       return false;
    c.clear();
+   if(!refill(a, d.values1))
+      return false;
    b.clear();
    return true;
 }
