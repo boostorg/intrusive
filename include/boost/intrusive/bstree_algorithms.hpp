@@ -178,8 +178,10 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    typedef NodeTraits                           node_traits;
    typedef typename NodeTraits::node_ptr        node_ptr;
    typedef typename NodeTraits::const_node_ptr  const_node_ptr;
+   /// @cond
    typedef typename detail::ptr_cparam<node_ptr>::type        node_ptr_cparam;
    typedef typename detail::ptr_cparam<const_node_ptr>::type  const_node_ptr_cparam;
+   /// @endcond
    typedef BOOST_INTRUSIVE_IMPDEF(insert_commit_data_t<node_ptr>) insert_commit_data;
    typedef data_for_rebalance_t<node_ptr>       data_for_rebalance;
 

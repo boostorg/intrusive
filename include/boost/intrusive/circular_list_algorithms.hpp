@@ -61,8 +61,10 @@ class circular_list_algorithms
    typedef typename NodeTraits::node            node;
    typedef typename NodeTraits::node_ptr        node_ptr;
    typedef typename NodeTraits::const_node_ptr  const_node_ptr;
+   /// @cond
    typedef typename detail::ptr_cparam<node_ptr>::type        node_ptr_cparam;
    typedef typename detail::ptr_cparam<const_node_ptr>::type  const_node_ptr_cparam;
+   /// @endcond
    typedef NodeTraits                           node_traits;
 
    //! <b>Effects</b>: Constructs an non-used list element, so that
