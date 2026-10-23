@@ -1227,7 +1227,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //!
    //! <b>Note</b>: Does not affect the validity of iterators and references.
    //!   If value traits are stateful, iterators are invalidated.
-   void swap(slist_impl& other)
+   void swap(slist_impl& other) BOOST_NOEXCEPT
    {
       node_ops::swap(this->get_root_node(), this->priv_last_ptr(), other.get_root_node(), other.priv_last_ptr());
       ::boost::adl_move_swap(this->priv_value_traits(), other.priv_value_traits());
@@ -2420,7 +2420,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    BOOST_INTRUSIVE_FORCEINLINE friend bool operator>=(const slist_impl &x, const slist_impl &y)
    {  return !(x < y);  }
 
-   BOOST_INTRUSIVE_FORCEINLINE friend void swap(slist_impl &x, slist_impl &y)
+   BOOST_INTRUSIVE_FORCEINLINE friend void swap(slist_impl &x, slist_impl &y) BOOST_NOEXCEPT
    {  x.swap(y);  }
 
    private:

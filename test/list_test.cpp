@@ -418,6 +418,10 @@ void test_list< ListType, ValueContainer >
       list_type testlist2;
       testlist2.insert (testlist2.end(), values.begin() + 2, values.begin() + 5);
       testlist1.swap (testlist2);
+      #if !defined(BOOST_NO_CXX11_NOEXCEPT)
+      BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(testlist1.swap(testlist2)) ));
+      BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(swap(testlist1, testlist2)) ));
+      #endif
 
       {  int init_values [] = { 3, 4, 5 };
          TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
