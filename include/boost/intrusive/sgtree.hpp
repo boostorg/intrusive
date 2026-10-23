@@ -1045,6 +1045,13 @@ class sgtree
    #endif
    {  return static_cast<sgtree &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
+   /// @cond
+   //Exact match: preferred to std::swap, so the member swap is used
+   BOOST_INTRUSIVE_FORCEINLINE friend void swap(sgtree &x, sgtree &y)
+      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<Base&>().swap(::boost::move_detail::declval<Base&>())))
+   {  x.swap(y);  }
+   /// @endcond
+
    template <class Cloner, class Disposer>
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(const sgtree &src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(src, cloner, disposer);  }

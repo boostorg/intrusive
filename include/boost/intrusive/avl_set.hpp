@@ -123,6 +123,13 @@ class avl_set_impl
    #endif
    {  return static_cast<avl_set_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x))); }
 
+   /// @cond
+   //Exact match: preferred to std::swap, so the member swap is used
+   BOOST_INTRUSIVE_FORCEINLINE friend void swap(avl_set_impl &x, avl_set_impl &y)
+      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<tree_type&>().swap(::boost::move_detail::declval<tree_type&>())))
+   {  x.swap(y);  }
+   /// @endcond
+
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::avltree::~avltree()
@@ -576,6 +583,13 @@ class avl_set
    #endif
    {  return static_cast<avl_set &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
+   /// @cond
+   //Exact match: preferred to std::swap, so the member swap is used
+   BOOST_INTRUSIVE_FORCEINLINE friend void swap(avl_set &x, avl_set &y)
+      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<Base&>().swap(::boost::move_detail::declval<Base&>())))
+   {  x.swap(y);  }
+   /// @endcond
+
    template <class Cloner, class Disposer>
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(const avl_set &src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(src, cloner, disposer);  }
@@ -694,6 +708,13 @@ class avl_multiset_impl
                         ::boost::move_detail::is_nothrow_move_assignable<value_traits>::value)
    #endif
    {  return static_cast<avl_multiset_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x))); }
+
+   /// @cond
+   //Exact match: preferred to std::swap, so the member swap is used
+   BOOST_INTRUSIVE_FORCEINLINE friend void swap(avl_multiset_impl &x, avl_multiset_impl &y)
+      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<tree_type&>().swap(::boost::move_detail::declval<tree_type&>())))
+   {  x.swap(y);  }
+   /// @endcond
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::avltree::~avltree()
@@ -1088,6 +1109,13 @@ class avl_multiset
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
    #endif
    {  return static_cast<avl_multiset &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
+
+   /// @cond
+   //Exact match: preferred to std::swap, so the member swap is used
+   BOOST_INTRUSIVE_FORCEINLINE friend void swap(avl_multiset &x, avl_multiset &y)
+      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<Base&>().swap(::boost::move_detail::declval<Base&>())))
+   {  x.swap(y);  }
+   /// @endcond
 
    template <class Cloner, class Disposer>
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(const avl_multiset &src, Cloner cloner, Disposer disposer)

@@ -2536,6 +2536,13 @@ class slist
    #endif
    {  return static_cast<slist &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
+   /// @cond
+   //Exact match: preferred to std::swap, so the member swap is used
+   BOOST_INTRUSIVE_FORCEINLINE friend void swap(slist &x, slist &y)
+      BOOST_NOEXCEPT
+   {  x.swap(y);  }
+   /// @endcond
+
    template <class Cloner, class Disposer>
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(const slist &src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(src, cloner, disposer);  }

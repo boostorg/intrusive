@@ -46,6 +46,7 @@
 #include <boost/move/utility_core.hpp>
 #include <boost/move/adl_move_swap.hpp>
 #include <boost/move/detail/type_traits.hpp>   //is_nothrow_copy_constructible, ...
+#include <boost/move/detail/meta_utils.hpp>     //declval
 
 #include <boost/intrusive/detail/minimal_pair_header.hpp>
 #include <cstddef>   //size_t...
@@ -2564,6 +2565,13 @@ class bstree
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
    #endif
    {  return static_cast<bstree &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
+
+   /// @cond
+   //Exact match: preferred to std::swap, so the member swap is used
+   BOOST_INTRUSIVE_FORCEINLINE friend void swap(bstree &x, bstree &y)
+      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<Base&>().swap(::boost::move_detail::declval<Base&>())))
+   {  x.swap(y);  }
+   /// @endcond
 
    template <class Cloner, class Disposer>
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(const bstree &src, Cloner cloner, Disposer disposer)

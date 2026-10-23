@@ -681,6 +681,22 @@ void test_generic_assoc<ContainerDefiner>::test_move_constructor_predicates(valu
    BOOST_TEST(src.size() == size);
    src.check();
    src.clear();
+   {
+      //With std::swap visible, swap(a, b) still calls the member swap, which
+      //swaps the comparison objects: std::swap would copy them
+      assoc_type a(values.begin(), values.end(), less_type(1));
+      assoc_type b((less_type(2)));
+      predicate_counters::reset();
+      using std::swap;
+      swap(a, b);
+      BOOST_TEST(predicate_counters::copies == 0);
+      BOOST_TEST(a.empty());
+      BOOST_TEST(b.size() == size);
+      BOOST_TEST(a.key_comp().tag_ == 2);
+      BOOST_TEST(b.key_comp().tag_ == 1);
+      b.check();
+      b.clear();
+   }
 
    #if !defined(BOOST_NO_CXX11_NOEXCEPT)
    using boost::move_detail::declval;

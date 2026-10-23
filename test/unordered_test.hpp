@@ -1375,6 +1375,8 @@ void test_unordered<ContainerDefiner>::test_move_constructor_predicates(value_co
    //Move assignment: the destination gets the predicates, the bucket array and
    //the nodes, the source keeps its predicates and is left without a bucket array
    typename unordered_type::bucket_type buckets2[sizes::Normal + ExtraBuckets];
+   //Declared before "assigned", which takes it in the swap below
+   typename unordered_type::bucket_type buckets3[sizes::Normal + ExtraBuckets];
    unordered_type assigned (bucket_traits(
       pointer_traits<bucket_ptr>::pointer_to(buckets2[0]), sizes::Normal + ExtraBuckets)
       , tracking_hash(2), tracking_equal(3));
@@ -1391,6 +1393,26 @@ void test_unordered<ContainerDefiner>::test_move_constructor_predicates(value_co
    BOOST_TEST(assigned.size() == size);
    for(typename value_cont_type::iterator it = values.begin(), itend = values.end(); it != itend; ++it){
       BOOST_TEST(assigned.find(key_of_value()(*it)) != assigned.end());
+   }
+   {
+      //With std::swap visible, swap(a, b) still calls the member swap, which swaps
+      //the hasher, the equality and the bucket arrays: std::swap would copy the predicates
+      unordered_type empty_one (bucket_traits(
+         pointer_traits<bucket_ptr>::pointer_to(buckets3[0]), sizes::Normal + ExtraBuckets)
+         , tracking_hash(8), tracking_equal(9));
+      predicate_counters::reset();
+      using std::swap;
+      swap(assigned, empty_one);
+      BOOST_TEST(predicate_counters::copies == 0);
+      BOOST_TEST(assigned.empty());
+      BOOST_TEST(empty_one.size() == size);
+      BOOST_TEST(assigned.hash_function().tag_ == 8);
+      BOOST_TEST(empty_one.hash_function().tag_ == 5);
+      BOOST_TEST(empty_one.key_eq().tag_ == 6);
+      for(typename value_cont_type::iterator it = values.begin(), itend = values.end(); it != itend; ++it){
+         BOOST_TEST(empty_one.find(key_of_value()(*it)) != empty_one.end());
+      }
+      empty_one.clear();
    }
    assigned.clear();
 

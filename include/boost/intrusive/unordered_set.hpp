@@ -157,6 +157,13 @@ class unordered_set_impl
    #endif
    {  return static_cast<unordered_set_impl&>(table_type::operator=(BOOST_MOVE_BASE(table_type, x))); }
 
+   /// @cond
+   //Exact match: preferred to std::swap, so the member swap is used
+   BOOST_INTRUSIVE_FORCEINLINE friend void swap(unordered_set_impl &x, unordered_set_impl &y)
+      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<table_type&>().swap(::boost::move_detail::declval<table_type&>())))
+   {  x.swap(y);  }
+   /// @endcond
+
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::hashtable::~hashtable()
    ~unordered_set_impl();
@@ -550,6 +557,13 @@ class unordered_set
    #endif
    {  return static_cast<unordered_set&>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
+   /// @cond
+   //Exact match: preferred to std::swap, so the member swap is used
+   BOOST_INTRUSIVE_FORCEINLINE friend void swap(unordered_set &x, unordered_set &y)
+      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<Base&>().swap(::boost::move_detail::declval<Base&>())))
+   {  x.swap(y);  }
+   /// @endcond
+
    template <class Cloner, class Disposer>
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(const unordered_set &src, Cloner cloner, Disposer disposer)
    {  this->Base::clone_from(src, cloner, disposer);  }
@@ -681,6 +695,13 @@ class unordered_multiset_impl
                         ::boost::move_detail::is_nothrow_move_assignable<bucket_traits>::value)
    #endif
    {  return static_cast<unordered_multiset_impl&>(table_type::operator=(BOOST_MOVE_BASE(table_type, x)));  }
+
+   /// @cond
+   //Exact match: preferred to std::swap, so the member swap is used
+   BOOST_INTRUSIVE_FORCEINLINE friend void swap(unordered_multiset_impl &x, unordered_multiset_impl &y)
+      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<table_type&>().swap(::boost::move_detail::declval<table_type&>())))
+   {  x.swap(y);  }
+   /// @endcond
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
@@ -1017,6 +1038,13 @@ class unordered_multiset
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
    #endif
    {  return static_cast<unordered_multiset&>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
+
+   /// @cond
+   //Exact match: preferred to std::swap, so the member swap is used
+   BOOST_INTRUSIVE_FORCEINLINE friend void swap(unordered_multiset &x, unordered_multiset &y)
+      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<Base&>().swap(::boost::move_detail::declval<Base&>())))
+   {  x.swap(y);  }
+   /// @endcond
 
    template <class Cloner, class Disposer>
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(const unordered_multiset &src, Cloner cloner, Disposer disposer)
