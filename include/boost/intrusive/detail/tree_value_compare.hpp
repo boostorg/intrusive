@@ -47,9 +47,7 @@ struct disable_if_smartref_to
 
 //This function object takes a KeyCompare function object
 //and compares values that contains keys using KeyOfValue
-template< class ValuePtr, class KeyCompare, class KeyOfValue, class Ret = bool
-        , bool = boost::intrusive::detail::is_same
-   <typename boost::movelib::pointer_element<ValuePtr>::type, typename KeyOfValue::type>::value >
+template< class ValuePtr, class KeyCompare, class KeyOfValue, class Ret = bool>
 struct tree_value_compare
    :  public boost::intrusive::detail::ebo_functor_holder<KeyCompare>
 {
@@ -61,6 +59,15 @@ struct tree_value_compare
 
    typedef boost::intrusive::detail::ebo_functor_holder<KeyCompare> base_t;
 
+   private:
+   //If the value is the key, the value overloads would repeat the key overloads:
+   //they take this type instead, which no argument converts to
+   struct nat {};
+   typedef typename detail::if_c
+      < detail::is_same<value_type, key_type>::value
+      , nat, value_type>::type               value_arg_t;
+
+   public:
    BOOST_INTRUSIVE_FORCEINLINE tree_value_compare()
       :  base_t()
    {}
@@ -85,101 +92,44 @@ struct tree_value_compare
    BOOST_INTRUSIVE_FORCEINLINE Ret operator()(const key_type &key) const
    {  return this->key_comp()(key);   }
 
-   BOOST_INTRUSIVE_FORCEINLINE Ret operator()(const value_type &value) const
+   BOOST_INTRUSIVE_FORCEINLINE Ret operator()(const value_arg_t &value) const
    {  return this->key_comp()(KeyOfValue()(value));  }
 
    template<class U>
-   inline Ret operator()( const U &nonkey
-                                             , typename disable_if_smartref_to<U, ValuePtr>::type* = 0) const
+   inline Ret operator()( const U &nonkey, typename disable_if_smartref_to<U, ValuePtr>::type* = 0) const
    {  return this->key_comp()(nonkey);  }
 
    BOOST_INTRUSIVE_FORCEINLINE Ret operator()(const key_type &key1, const key_type &key2) const
    {  return this->key_comp()(key1, key2);  }
 
-   BOOST_INTRUSIVE_FORCEINLINE Ret operator()(const value_type &value1, const value_type &value2) const
+   BOOST_INTRUSIVE_FORCEINLINE Ret operator()(const value_arg_t &value1, const value_arg_t &value2) const
    {  return this->key_comp()(KeyOfValue()(value1), KeyOfValue()(value2));  }
 
-   BOOST_INTRUSIVE_FORCEINLINE Ret operator()(const key_type &key1, const value_type &value2) const
+   BOOST_INTRUSIVE_FORCEINLINE Ret operator()(const key_type &key1, const value_arg_t &value2) const
    {  return this->key_comp()(key1, KeyOfValue()(value2));  }
 
-   BOOST_INTRUSIVE_FORCEINLINE Ret operator()(const value_type &value1, const key_type &key2) const
+   BOOST_INTRUSIVE_FORCEINLINE Ret operator()(const value_arg_t &value1, const key_type &key2) const
    {  return this->key_comp()(KeyOfValue()(value1), key2);  }
 
    template<class U>
    inline Ret operator()( const key_type &key1, const U &nonkey2
-                                              , typename disable_if_smartref_to<U, ValuePtr>::type* = 0) const
+                        , typename disable_if_smartref_to<U, ValuePtr>::type* = 0) const
    {  return this->key_comp()(key1, nonkey2);  }
 
    template<class U>
    inline Ret operator()( const U &nonkey1, const key_type &key2
-                                              , typename disable_if_smartref_to<U, ValuePtr>::type* = 0) const
+                        , typename disable_if_smartref_to<U, ValuePtr>::type* = 0) const
    {  return this->key_comp()(nonkey1, key2);  }
 
    template<class U>
-   inline Ret operator()( const value_type &value1, const U &nonvalue2
-                                              , typename disable_if_smartref_to<U, ValuePtr>::type* = 0) const
+   inline Ret operator()( const value_arg_t &value1, const U &nonvalue2
+                        , typename disable_if_smartref_to<U, ValuePtr>::type* = 0) const
    {  return this->key_comp()(KeyOfValue()(value1), nonvalue2);  }
 
    template<class U>
-   inline Ret operator()( const U &nonvalue1, const value_type &value2
-                                              , typename disable_if_smartref_to<U, ValuePtr>::type* = 0) const
+   inline Ret operator()( const U &nonvalue1, const value_arg_t &value2
+                        , typename disable_if_smartref_to<U, ValuePtr>::type* = 0) const
    {  return this->key_comp()(nonvalue1, KeyOfValue()(value2));  }
-};
-
-template<class ValuePtr, class KeyCompare, class KeyOfValue, class Ret>
-struct tree_value_compare<ValuePtr, KeyCompare, KeyOfValue, Ret, true>
-   :  public boost::intrusive::detail::ebo_functor_holder<KeyCompare>
-{
-   typedef typename
-      boost::movelib::pointer_element<ValuePtr>::type value_type;
-   typedef KeyCompare                                 key_compare;
-   typedef KeyOfValue                                 key_of_value;
-   typedef typename KeyOfValue::type                  key_type;
-
-   typedef boost::intrusive::detail::ebo_functor_holder<KeyCompare> base_t;
-
-
-   BOOST_INTRUSIVE_FORCEINLINE tree_value_compare()
-      :  base_t()
-   {}
-
-   BOOST_INTRUSIVE_FORCEINLINE explicit tree_value_compare(const key_compare &kcomp)
-      :  base_t(kcomp)
-   {}
-
-   //Implicit copy operations: keeps the comparator trivially copyable (passed in registers)
-
-   BOOST_INTRUSIVE_FORCEINLINE tree_value_compare &operator=(const key_compare &x)
-   {  this->base_t::get() = x;   return *this;  }
-
-   //Swaps the key comparison objects with their own swap function, if any
-   BOOST_INTRUSIVE_FORCEINLINE friend void swap(tree_value_compare &a, tree_value_compare &b)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value)
-   {  ::boost::adl_move_swap(a.base_t::get(), b.base_t::get());  }
-
-   BOOST_INTRUSIVE_FORCEINLINE const key_compare &key_comp() const
-   {  return this->base_t::get();  }
-
-   BOOST_INTRUSIVE_FORCEINLINE Ret operator()(const key_type &key) const
-   {  return this->key_comp()(key);   }
-
-   template<class U>
-   inline Ret operator()( const U &nonkey
-                                             , typename disable_if_smartref_to<U, ValuePtr>::type* = 0) const
-   {  return this->key_comp()(nonkey);  }
-
-   BOOST_INTRUSIVE_FORCEINLINE Ret operator()(const key_type &key1, const key_type &key2) const
-   {  return this->key_comp()(key1, key2);  }
-
-   template<class U>
-   inline Ret operator()( const key_type &key1, const U &nonkey2
-                                              , typename disable_if_smartref_to<U, ValuePtr>::type* = 0) const
-   {  return this->key_comp()(key1, nonkey2);  }
-
-   template<class U>
-   inline Ret operator()(const U &nonkey1, const key_type &key2
-                                              , typename disable_if_smartref_to<U, ValuePtr>::type* = 0) const
-   {  return this->key_comp()(nonkey1, key2);  }
 };
 
 }  //namespace intrusive{
