@@ -156,12 +156,11 @@ class avltree_impl
    #endif
    {  return static_cast<avltree_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x))); }
 
-   /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
+   //! @copydoc ::boost::intrusive::bstree::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(avltree_impl &x, avltree_impl &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<tree_type&>().swap(::boost::move_detail::declval<tree_type&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {  x.swap(y);  }
-   /// @endcond
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
@@ -471,7 +470,6 @@ class avltree_impl
 
    friend bool operator>=(const avltree_impl &x, const avltree_impl &y);
 
-   friend void swap(avltree_impl &x, avltree_impl &y);
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 };
 
@@ -577,9 +575,9 @@ class avltree
    {  return static_cast<avltree &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(avltree &x, avltree &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<Base&>().swap(::boost::move_detail::declval<Base&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
    {  x.swap(y);  }
    /// @endcond
 

@@ -419,7 +419,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //! <b>Throws</b>: If the comparison functor's swap call throws.
    void swap(treap_impl& other)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<priority_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<value_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
                         ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {
       //This can throw
@@ -427,14 +427,12 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
       tree_type::swap(other);
    }
 
-   /// @cond
-   //The friend swap of bstree_impl would not swap the priority comparison objects
+   //! @copydoc ::boost::intrusive::treap::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(treap_impl &x, treap_impl &y)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<priority_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<value_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
                         ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {  x.swap(y);  }
-   /// @endcond
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!   Cloner should yield to nodes equivalent to the original nodes.
@@ -1320,7 +1318,6 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
 
    friend bool operator>=(const treap_impl &x, const treap_impl &y);
 
-   friend void swap(treap_impl &x, treap_impl &y);
 
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
@@ -1451,9 +1448,10 @@ class treap
    {  return static_cast<treap&>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(treap &x, treap &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<Base&>().swap(::boost::move_detail::declval<Base&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::priority_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
    {  x.swap(y);  }
    /// @endcond
 

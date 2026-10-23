@@ -157,12 +157,13 @@ class unordered_set_impl
    #endif
    {  return static_cast<unordered_set_impl&>(table_type::operator=(BOOST_MOVE_BASE(table_type, x))); }
 
-   /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
+   //! @copydoc ::boost::intrusive::hashtable::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(unordered_set_impl &x, unordered_set_impl &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<table_type&>().swap(::boost::move_detail::declval<table_type&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_equal>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<hasher>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<bucket_traits>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {  x.swap(y);  }
-   /// @endcond
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::hashtable::~hashtable()
@@ -198,7 +199,7 @@ class unordered_set_impl
    //! @copydoc ::boost::intrusive::hashtable::size()const
    size_type size() const BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::hashtable::hashtable
+   //! @copydoc ::boost::intrusive::hashtable::swap
    void swap(unordered_set_impl& other);
 
    //! @copydoc ::boost::intrusive::hashtable::clone_from(const hashtable&,Cloner,Disposer)
@@ -558,9 +559,11 @@ class unordered_set
    {  return static_cast<unordered_set&>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(unordered_set &x, unordered_set &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<Base&>().swap(::boost::move_detail::declval<Base&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_equal>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::hasher>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::bucket_traits>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
    {  x.swap(y);  }
    /// @endcond
 
@@ -696,12 +699,13 @@ class unordered_multiset_impl
    #endif
    {  return static_cast<unordered_multiset_impl&>(table_type::operator=(BOOST_MOVE_BASE(table_type, x)));  }
 
-   /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
+   //! @copydoc ::boost::intrusive::hashtable::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(unordered_multiset_impl &x, unordered_multiset_impl &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<table_type&>().swap(::boost::move_detail::declval<table_type&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_equal>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<hasher>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<bucket_traits>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {  x.swap(y);  }
-   /// @endcond
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
@@ -738,7 +742,7 @@ class unordered_multiset_impl
    //! @copydoc ::boost::intrusive::hashtable::size()const
    size_type size() const BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::hashtable::hashtable
+   //! @copydoc ::boost::intrusive::hashtable::swap
    void swap(unordered_multiset_impl& other);
 
    //! @copydoc ::boost::intrusive::hashtable::clone_from(const hashtable&,Cloner,Disposer)
@@ -1040,9 +1044,11 @@ class unordered_multiset
    {  return static_cast<unordered_multiset&>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(unordered_multiset &x, unordered_multiset &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<Base&>().swap(::boost::move_detail::declval<Base&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_equal>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::hasher>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::bucket_traits>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
    {  x.swap(y);  }
    /// @endcond
 

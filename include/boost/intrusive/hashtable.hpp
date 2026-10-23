@@ -2800,14 +2800,13 @@ class hashtable_impl
       this->priv_split_traits().swap(other.priv_split_traits());
    }
 
-   /// @cond
+   //! @copydoc ::boost::intrusive::hashtable::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(hashtable_impl &x, hashtable_impl &y)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_equal>::value &&
                         ::boost::move_detail::is_nothrow_swappable<hasher>::value &&
                         ::boost::move_detail::is_nothrow_swappable<bucket_traits>::value &&
                         ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {  x.swap(y);  }
-   /// @endcond
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw
    //!   Cloner should yield to nodes that compare equal and produce the same
@@ -4566,9 +4565,11 @@ class hashtable
    {  return static_cast<hashtable&>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(hashtable &x, hashtable &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<Base&>().swap(::boost::move_detail::declval<Base&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_equal>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::hasher>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::bucket_traits>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
    {  x.swap(y);  }
    /// @endcond
 

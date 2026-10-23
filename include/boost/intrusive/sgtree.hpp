@@ -435,23 +435,19 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
 
    //! @copydoc ::boost::intrusive::bstree::swap
    void swap(sgtree_impl& other)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<value_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<alpha_traits>::value)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {
       //This can throw
       this->tree_type::swap(static_cast<tree_type&>(other));
       ::boost::adl_move_swap(this->get_alpha_traits(), other.get_alpha_traits());
    }
 
-   /// @cond
-   //The friend swap of bstree_impl would not swap the alpha factors
+   //! @copydoc ::boost::intrusive::sgtree::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(sgtree_impl &x, sgtree_impl &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<value_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<alpha_traits>::value)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {  x.swap(y);  }
-   /// @endcond
 
    //! @copydoc ::boost::intrusive::bstree::clone_from(const bstree&,Cloner,Disposer)
    //! Additional notes: it also copies the alpha factor from the source container.
@@ -889,7 +885,6 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
 
    friend bool operator>=(const sgtree_impl &x, const sgtree_impl &y);
 
-   friend void swap(sgtree_impl &x, sgtree_impl &y);
 
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
@@ -1046,9 +1041,9 @@ class sgtree
    {  return static_cast<sgtree &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(sgtree &x, sgtree &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<Base&>().swap(::boost::move_detail::declval<Base&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
    {  x.swap(y);  }
    /// @endcond
 

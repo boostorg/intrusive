@@ -1224,7 +1224,7 @@ class bstree_impl
    //! <b>Note</b>: Does not affect the validity of iterators and references.
    //!   If value traits are stateful, iterators are invalidated.
    void swap(bstree_impl& other)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<value_compare>::value &&
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
                         ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {
       //This can throw
@@ -2334,8 +2334,9 @@ class bstree_impl
    BOOST_INTRUSIVE_FORCEINLINE friend bool operator>=(const bstree_impl &x, const bstree_impl &y)
    {  return !(x < y);  }
 
+   //! @copydoc ::boost::intrusive::bstree::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(bstree_impl &x, bstree_impl &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<value_compare>::value &&
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
                         ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {  x.swap(y);  }
 
@@ -2567,9 +2568,9 @@ class bstree
    {  return static_cast<bstree &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(bstree &x, bstree &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<Base&>().swap(::boost::move_detail::declval<Base&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
    {  x.swap(y);  }
    /// @endcond
 

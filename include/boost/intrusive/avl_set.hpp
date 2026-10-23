@@ -123,12 +123,11 @@ class avl_set_impl
    #endif
    {  return static_cast<avl_set_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x))); }
 
-   /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
+   //! @copydoc ::boost::intrusive::avltree::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(avl_set_impl &x, avl_set_impl &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<tree_type&>().swap(::boost::move_detail::declval<tree_type&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {  x.swap(y);  }
-   /// @endcond
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
@@ -482,8 +481,6 @@ bool operator<=(const avl_set_impl<T, Options...> &x, const avl_set_impl<T, Opti
 template<class T, class ...Options>
 bool operator>=(const avl_set_impl<T, Options...> &x, const avl_set_impl<T, Options...> &y);
 
-template<class T, class ...Options>
-void swap(avl_set_impl<T, Options...> &x, avl_set_impl<T, Options...> &y);
 
 #endif   //#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
@@ -584,9 +581,9 @@ class avl_set
    {  return static_cast<avl_set &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(avl_set &x, avl_set &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<Base&>().swap(::boost::move_detail::declval<Base&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
    {  x.swap(y);  }
    /// @endcond
 
@@ -709,12 +706,11 @@ class avl_multiset_impl
    #endif
    {  return static_cast<avl_multiset_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x))); }
 
-   /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
+   //! @copydoc ::boost::intrusive::avltree::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(avl_multiset_impl &x, avl_multiset_impl &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<tree_type&>().swap(::boost::move_detail::declval<tree_type&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {  x.swap(y);  }
-   /// @endcond
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::avltree::~avltree()
@@ -1008,8 +1004,6 @@ bool operator<=(const avl_multiset_impl<T, Options...> &x, const avl_multiset_im
 template<class T, class ...Options>
 bool operator>=(const avl_multiset_impl<T, Options...> &x, const avl_multiset_impl<T, Options...> &y);
 
-template<class T, class ...Options>
-void swap(avl_multiset_impl<T, Options...> &x, avl_multiset_impl<T, Options...> &y);
 
 #endif   //#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
@@ -1111,9 +1105,9 @@ class avl_multiset
    {  return static_cast<avl_multiset &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(avl_multiset &x, avl_multiset &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<Base&>().swap(::boost::move_detail::declval<Base&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
    {  x.swap(y);  }
    /// @endcond
 

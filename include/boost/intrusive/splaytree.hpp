@@ -147,12 +147,11 @@ class splaytree_impl
    #endif
    {  return static_cast<splaytree_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x))); }
 
-   /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
+   //! @copydoc ::boost::intrusive::bstree::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(splaytree_impl &x, splaytree_impl &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<tree_type&>().swap(::boost::move_detail::declval<tree_type&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {  x.swap(y);  }
-   /// @endcond
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::bstree::~bstree()
@@ -653,7 +652,6 @@ class splaytree_impl
 
    friend bool operator>=(const splaytree_impl &x, const splaytree_impl &y);
 
-   friend void swap(splaytree_impl &x, splaytree_impl &y);
 
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 };
@@ -759,9 +757,9 @@ class splaytree
    {  return static_cast<splaytree &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(splaytree &x, splaytree &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<Base&>().swap(::boost::move_detail::declval<Base&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
    {  x.swap(y);  }
    /// @endcond
 

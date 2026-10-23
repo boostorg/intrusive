@@ -2537,7 +2537,6 @@ class slist
    {  return static_cast<slist &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(slist &x, slist &y)
       BOOST_NOEXCEPT
    {  x.swap(y);  }

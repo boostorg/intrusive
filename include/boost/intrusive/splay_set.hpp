@@ -118,12 +118,11 @@ class splay_set_impl
    #endif
    {  return static_cast<splay_set_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x))); }
 
-   /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
+   //! @copydoc ::boost::intrusive::splaytree::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(splay_set_impl &x, splay_set_impl &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<tree_type&>().swap(::boost::move_detail::declval<tree_type&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {  x.swap(y);  }
-   /// @endcond
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::splaytree::~splaytree()
@@ -562,8 +561,6 @@ bool operator<=(const splay_set_impl<T, Options...> &x, const splay_set_impl<T, 
 template<class T, class ...Options>
 bool operator>=(const splay_set_impl<T, Options...> &x, const splay_set_impl<T, Options...> &y);
 
-template<class T, class ...Options>
-void swap(splay_set_impl<T, Options...> &x, splay_set_impl<T, Options...> &y);
 
 #endif   //#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
@@ -664,9 +661,9 @@ class splay_set
    {  return static_cast<splay_set &>(this->Base::operator=(::boost::move(static_cast<Base&>(x))));  }
 
    /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(splay_set &x, splay_set &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<Base&>().swap(::boost::move_detail::declval<Base&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
    {  x.swap(y);  }
    /// @endcond
 
@@ -785,12 +782,11 @@ class splay_multiset_impl
    #endif
    {  return static_cast<splay_multiset_impl&>(tree_type::operator=(::boost::move(static_cast<tree_type&>(x)))); }
 
-   /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
+   //! @copydoc ::boost::intrusive::splaytree::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(splay_multiset_impl &x, splay_multiset_impl &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<tree_type&>().swap(::boost::move_detail::declval<tree_type&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {  x.swap(y);  }
-   /// @endcond
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::splaytree::~splaytree()
@@ -1100,8 +1096,6 @@ bool operator<=(const splay_multiset_impl<T, Options...> &x, const splay_multise
 template<class T, class ...Options>
 bool operator>=(const splay_multiset_impl<T, Options...> &x, const splay_multiset_impl<T, Options...> &y);
 
-template<class T, class ...Options>
-void swap(splay_multiset_impl<T, Options...> &x, splay_multiset_impl<T, Options...> &y);
 
 #endif   //#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
@@ -1203,9 +1197,9 @@ class splay_multiset
    {  return static_cast<splay_multiset &>(this->Base::operator=(::boost::move(static_cast<Base&>(x))));  }
 
    /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(splay_multiset &x, splay_multiset &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<Base&>().swap(::boost::move_detail::declval<Base&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
    {  x.swap(y);  }
    /// @endcond
 

@@ -118,12 +118,11 @@ class sg_set_impl
    #endif
    {  return static_cast<sg_set_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x))); }
 
-   /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
+   //! @copydoc ::boost::intrusive::sgtree::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(sg_set_impl &x, sg_set_impl &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<tree_type&>().swap(::boost::move_detail::declval<tree_type&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {  x.swap(y);  }
-   /// @endcond
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::sgtree::~sgtree()
@@ -487,8 +486,6 @@ bool operator<=(const sg_set_impl<T, Options...> &x, const sg_set_impl<T, Option
 template<class T, class ...Options>
 bool operator>=(const sg_set_impl<T, Options...> &x, const sg_set_impl<T, Options...> &y);
 
-template<class T, class ...Options>
-void swap(sg_set_impl<T, Options...> &x, sg_set_impl<T, Options...> &y);
 
 #endif   //#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
@@ -589,9 +586,9 @@ class sg_set
    {  return static_cast<sg_set &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(sg_set &x, sg_set &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<Base&>().swap(::boost::move_detail::declval<Base&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
    {  x.swap(y);  }
    /// @endcond
 
@@ -710,12 +707,11 @@ class sg_multiset_impl
    #endif
    {  return static_cast<sg_multiset_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x))); }
 
-   /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
+   //! @copydoc ::boost::intrusive::sgtree::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(sg_multiset_impl &x, sg_multiset_impl &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<tree_type&>().swap(::boost::move_detail::declval<tree_type&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {  x.swap(y);  }
-   /// @endcond
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::sgtree::~sgtree()
@@ -1021,8 +1017,6 @@ bool operator<=(const sg_multiset_impl<T, Options...> &x, const sg_multiset_impl
 template<class T, class ...Options>
 bool operator>=(const sg_multiset_impl<T, Options...> &x, const sg_multiset_impl<T, Options...> &y);
 
-template<class T, class ...Options>
-void swap(sg_multiset_impl<T, Options...> &x, sg_multiset_impl<T, Options...> &y);
 
 #endif   //#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
@@ -1124,9 +1118,9 @@ class sg_multiset
    {  return static_cast<sg_multiset &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
 
    /// @cond
-   //Exact match: preferred to std::swap, so the member swap is used
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(sg_multiset &x, sg_multiset &y)
-      BOOST_NOEXCEPT_IF(noexcept(::boost::move_detail::declval<Base&>().swap(::boost::move_detail::declval<Base&>())))
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
    {  x.swap(y);  }
    /// @endcond
 
