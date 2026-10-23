@@ -140,7 +140,10 @@ class unordered_set_impl
 
    //! @copydoc ::boost::intrusive::hashtable::hashtable(hashtable&&)
    BOOST_INTRUSIVE_FORCEINLINE unordered_set_impl(BOOST_RV_REF(unordered_set_impl) x)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<table_type>::value)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<hasher>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<key_equal>::value &&
+                        ::boost::move_detail::is_nothrow_move_constructible<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_move_constructible<bucket_traits>::value)
       :  table_type(BOOST_MOVE_BASE(table_type, x))
    {}
 
@@ -662,7 +665,10 @@ class unordered_multiset_impl
 
    //! @copydoc ::boost::intrusive::hashtable::hashtable(hashtable&&)
    BOOST_INTRUSIVE_FORCEINLINE unordered_multiset_impl(BOOST_RV_REF(unordered_multiset_impl) x)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<table_type>::value)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<hasher>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<key_equal>::value &&
+                        ::boost::move_detail::is_nothrow_move_constructible<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_move_constructible<bucket_traits>::value)
       :  table_type(BOOST_MOVE_BASE(table_type, x))
    {}
 

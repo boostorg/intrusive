@@ -105,7 +105,8 @@ class splay_set_impl
 
    //! @copydoc ::boost::intrusive::splaytree::splaytree(splaytree &&)
    BOOST_INTRUSIVE_FORCEINLINE splay_set_impl(BOOST_RV_REF(splay_set_impl) x)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<tree_type>::value)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_move_constructible<value_traits>::value)
       :  tree_type(BOOST_MOVE_BASE(tree_type, x))
    {}
 
@@ -757,7 +758,8 @@ class splay_multiset_impl
 
    //! @copydoc ::boost::intrusive::splaytree::splaytree(splaytree &&)
    BOOST_INTRUSIVE_FORCEINLINE splay_multiset_impl(BOOST_RV_REF(splay_multiset_impl) x)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<tree_type>::value)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_move_constructible<value_traits>::value)
       :  tree_type(::boost::move(static_cast<tree_type&>(x)))
    {}
 

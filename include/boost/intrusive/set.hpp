@@ -111,7 +111,8 @@ class set_impl
 
    //! @copydoc ::boost::intrusive::rbtree::rbtree(rbtree &&)
    BOOST_INTRUSIVE_FORCEINLINE set_impl(BOOST_RV_REF(set_impl) x)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<tree_type>::value)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_move_constructible<value_traits>::value)
       :  tree_type(BOOST_MOVE_BASE(tree_type, x))
    {}
 
@@ -681,7 +682,8 @@ class multiset_impl
 
    //! @copydoc ::boost::intrusive::rbtree::rbtree(rbtree &&)
    BOOST_INTRUSIVE_FORCEINLINE multiset_impl(BOOST_RV_REF(multiset_impl) x)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<tree_type>::value)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_move_constructible<value_traits>::value)
       :  tree_type(BOOST_MOVE_BASE(tree_type, x))
    {}
 
