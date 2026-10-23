@@ -434,11 +434,23 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
 
    //! @copydoc ::boost::intrusive::bstree::swap
    void swap(sgtree_impl& other)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<value_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<alpha_traits>::value)
    {
       //This can throw
       this->tree_type::swap(static_cast<tree_type&>(other));
       ::boost::adl_move_swap(this->get_alpha_traits(), other.get_alpha_traits());
    }
+
+   /// @cond
+   //The friend swap of bstree_impl would not swap the alpha factors
+   BOOST_INTRUSIVE_FORCEINLINE friend void swap(sgtree_impl &x, sgtree_impl &y)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<value_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<alpha_traits>::value)
+   {  x.swap(y);  }
+   /// @endcond
 
    //! @copydoc ::boost::intrusive::bstree::clone_from(const bstree&,Cloner,Disposer)
    //! Additional notes: it also copies the alpha factor from the source container.

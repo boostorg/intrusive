@@ -1223,6 +1223,8 @@ class bstree_impl
    //! <b>Note</b>: Does not affect the validity of iterators and references.
    //!   If value traits are stateful, iterators are invalidated.
    void swap(bstree_impl& other)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<value_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {
       //This can throw
       ::boost::adl_move_swap(this->get_comp(), other.get_comp());
@@ -2332,6 +2334,8 @@ class bstree_impl
    {  return !(x < y);  }
 
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(bstree_impl &x, bstree_impl &y)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<value_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {  x.swap(y);  }
 
    /// @cond

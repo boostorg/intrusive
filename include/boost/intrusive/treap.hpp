@@ -417,11 +417,23 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //!
    //! <b>Throws</b>: If the comparison functor's swap call throws.
    void swap(treap_impl& other)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<priority_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {
       //This can throw
       ::boost::adl_move_swap(this->priv_pcomp(), other.priv_pcomp());
       tree_type::swap(other);
    }
+
+   /// @cond
+   //The friend swap of bstree_impl would not swap the priority comparison objects
+   BOOST_INTRUSIVE_FORCEINLINE friend void swap(treap_impl &x, treap_impl &y)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<priority_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_compare>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
+   {  x.swap(y);  }
+   /// @endcond
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!   Cloner should yield to nodes equivalent to the original nodes.

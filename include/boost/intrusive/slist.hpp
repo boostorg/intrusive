@@ -840,6 +840,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //!   move constructor throws (this does not happen with predefined Boost.Intrusive hooks)
    //!   or the move constructor of value traits throws.
    slist_impl(BOOST_RV_REF(slist_impl) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<value_traits>::value)
       :  vtraits_holder_t(::boost::move(x.priv_value_traits())), base_t()
    {
       this->set_default_constructed_state();
@@ -2525,6 +2526,7 @@ class slist
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE slist(BOOST_RV_REF(slist) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<Base>::value)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 

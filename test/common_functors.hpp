@@ -280,6 +280,48 @@ class tracking_equal
    {  return t == u;  }
 };
 
+//Predicates whose swap is not noexcept (it does not throw): the swap of the
+//containers that use them is not noexcept either
+template<class Key>
+struct swap_not_noexcept_less
+{
+   bool operator()(const Key &a, const Key &b) const
+   {  return a < b;  }
+
+   friend void swap(swap_not_noexcept_less &, swap_not_noexcept_less &)
+   {}
+};
+
+struct swap_not_noexcept_priority
+{
+   template<class T, class U>
+   bool operator()(const T &t, const U &u) const
+   {  return priority_compare<>()(t, u);  }
+
+   friend void swap(swap_not_noexcept_priority &, swap_not_noexcept_priority &)
+   {}
+};
+
+struct swap_not_noexcept_hash
+{
+   template<class T>
+   std::size_t operator()(const T &t) const
+   {  return hash_value(t);  }
+
+   friend void swap(swap_not_noexcept_hash &, swap_not_noexcept_hash &)
+   {}
+};
+
+struct swap_not_noexcept_equal
+{
+   template<class T, class U>
+   bool operator()(const T &t, const U &u) const
+   {  return t == u;  }
+
+   friend void swap(swap_not_noexcept_equal &, swap_not_noexcept_equal &)
+   {}
+};
+
 //Compares the integer values divided by 2: a comparison coarser than less.
 //Several elements with unique keys can be equivalent to a key
 struct coarse_less

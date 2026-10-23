@@ -1402,6 +1402,19 @@ void test_unordered<ContainerDefiner>::test_move_constructor_predicates(value_co
    BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(default_type(declval<default_type>())) ));
    BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(declval<unordered_type&>() = declval<unordered_type>()) ));
    BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(declval<default_type&>() = declval<default_type>()) ));
+   //swap is noexcept if the swaps of the hasher and the equality are (the member and
+   //the swap found by argument dependent lookup)
+   typedef typename ContainerDefiner::template container
+      < hash<swap_not_noexcept_hash> >::type   hash_swap_type;
+   typedef typename ContainerDefiner::template container
+      < equal<swap_not_noexcept_equal> >::type equal_swap_type;
+   using boost::move_detail::is_nothrow_swappable;
+   BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(declval<default_type&>().swap(declval<default_type&>())) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT((  is_nothrow_swappable<default_type>::value ));
+   BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(declval<hash_swap_type&>().swap(declval<hash_swap_type&>())) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT(( !is_nothrow_swappable<hash_swap_type>::value ));
+   BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(declval<equal_swap_type&>().swap(declval<equal_swap_type&>())) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT(( !is_nothrow_swappable<equal_swap_type>::value ));
    #endif
 }
 

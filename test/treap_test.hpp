@@ -21,6 +21,15 @@
 #include "test_macros.hpp"
 #include <cstddef>
 
+//Calls swap(a, b) without std::swap: only argument dependent lookup finds a swap
+namespace treap_test_adl {
+
+template<class T>
+void unqualified_swap(T &a, T &b)
+{  swap(a, b);  }
+
+}  //namespace treap_test_adl {
+
 namespace boost{
 namespace intrusive{
 namespace test{
@@ -79,7 +88,40 @@ struct test_treap
       using boost::move_detail::declval;
       BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(treap_type(declval<treap_type>())) ));
       BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(declval<treap_type&>() = declval<treap_type>()) ));
+      //swap is also noexcept only if the swap of the priority comparison is
+      typedef typename ContainerDefiner::template container
+         <>::type default_type;
+      //A key comparison outside namespace std: std::swap is not found by
+      //argument dependent lookup and the friend swap of the treap is used
+      typedef typename ContainerDefiner::template container
+         < compare< tracking_less<typename treap_type::key_type> >
+         , priority<swap_not_noexcept_priority> >::type swap_type;
+      using boost::move_detail::is_nothrow_swappable;
+      BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(default_type(declval<default_type>())) ));
+      BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(declval<default_type&>() = declval<default_type>()) ));
+      BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(declval<default_type&>().swap(declval<default_type&>())) ));
+      BOOST_INTRUSIVE_STATIC_ASSERT((  is_nothrow_swappable<default_type>::value ));
+      BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(declval<swap_type&>().swap(declval<swap_type&>())) ));
+      BOOST_INTRUSIVE_STATIC_ASSERT(( !is_nothrow_swappable<swap_type>::value ));
       #endif
+
+      //The swap found by argument dependent lookup (without std::swap) also swaps
+      //the priority comparison
+      {
+         typedef typename ContainerDefiner::template container
+            < compare< tracking_less<typename treap_type::key_type> >
+            , priority<tracking_priority> >::type adl_type;
+         typedef typename adl_type::key_compare adl_key_compare;
+         adl_type a(values.begin(), values.end(), adl_key_compare(1), tracking_priority(1));
+         adl_type b(adl_key_compare(2), tracking_priority(2));
+         treap_test_adl::unqualified_swap(a, b);
+         BOOST_TEST(a.empty());
+         BOOST_TEST(b.size() == size);
+         BOOST_TEST(a.priority_comp().tag_ == 2);
+         BOOST_TEST(b.priority_comp().tag_ == 1);
+         b.check();
+         b.clear();
+      }
    }
 };
 

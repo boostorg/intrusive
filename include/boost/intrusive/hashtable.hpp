@@ -2783,6 +2783,10 @@ class hashtable_impl
    //! <b>Note</b>: Does not affect the validity of iterators and references.
    //!   If value traits are stateful, iterators are invalidated.
    void swap(hashtable_impl& other)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_equal>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<hasher>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<bucket_traits>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
    {
       //These can throw
       ::boost::adl_move_swap(this->priv_equal(),  other.priv_equal());
@@ -2794,6 +2798,15 @@ class hashtable_impl
       this->priv_size_traits().swap(other.priv_size_traits());
       this->priv_split_traits().swap(other.priv_split_traits());
    }
+
+   /// @cond
+   BOOST_INTRUSIVE_FORCEINLINE friend void swap(hashtable_impl &x, hashtable_impl &y)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_equal>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<hasher>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<bucket_traits>::value &&
+                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
+   {  x.swap(y);  }
+   /// @endcond
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw
    //!   Cloner should yield to nodes that compare equal and produce the same

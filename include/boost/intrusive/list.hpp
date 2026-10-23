@@ -453,6 +453,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    //!   move constructor throws (this does not happen with predefined Boost.Intrusive hooks)
    //!   or the move constructor of value traits throws.
    BOOST_INTRUSIVE_FORCEINLINE list_impl(BOOST_RV_REF(list_impl) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<value_traits>::value)
       :  vtraits_holder_t(::boost::move(x.priv_value_traits())), base_t()
    {
       //Only the nodes and the size: swap() would also exchange the value traits
@@ -1677,6 +1678,7 @@ class list
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE list(BOOST_RV_REF(list) x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<Base>::value)
       :  Base(BOOST_MOVE_BASE(Base, x))
    {}
 

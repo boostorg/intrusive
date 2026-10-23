@@ -688,6 +688,15 @@ void test_generic_assoc<ContainerDefiner>::test_move_constructor_predicates(valu
    BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(default_type(declval<default_type>())) ));
    BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(declval<assoc_type&>() = declval<assoc_type>()) ));
    BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(declval<default_type&>() = declval<default_type>()) ));
+   //swap is noexcept if the swap of the comparison object is (the member and the
+   //swap found by argument dependent lookup)
+   typedef typename ContainerDefiner::template container
+      < compare< swap_not_noexcept_less<key_type> > >::type swap_type;
+   using boost::move_detail::is_nothrow_swappable;
+   BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(declval<default_type&>().swap(declval<default_type&>())) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT((  is_nothrow_swappable<default_type>::value ));
+   BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(declval<swap_type&>().swap(declval<swap_type&>())) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT(( !is_nothrow_swappable<swap_type>::value ));
    #endif
 }
 

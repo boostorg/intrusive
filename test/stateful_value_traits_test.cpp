@@ -214,6 +214,11 @@ bool test_swap(Container &a, Container &b, swap_data<Node> &d)
       insert_value(a, d.values1[i]);
    vtraits_copies = vtraits_moves = 0;
    Container c(boost::move(a));
+   //The moves of the value traits are not noexcept
+   #if !defined(BOOST_NO_CXX11_NOEXCEPT)
+   BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(Container(boost::move(a))) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(a = boost::move(b)) ));
+   #endif
    if(vtraits_copies != 0 || vtraits_moves != 1)
       return false;
    if(!holds_values(c, d.values1) || !a.empty())
