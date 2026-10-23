@@ -22,6 +22,8 @@
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/ebo_functor_holder.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
+#include <boost/move/adl_move_swap.hpp>
+#include <boost/move/detail/type_traits.hpp>   //is_nothrow_swappable
 
 namespace boost{
 namespace intrusive{
@@ -71,6 +73,11 @@ struct tree_value_compare
 
    BOOST_INTRUSIVE_FORCEINLINE tree_value_compare &operator=(const key_compare &x)
    {  this->base_t::get() = x;   return *this;  }
+
+   //Swaps the key comparison objects with their own swap function, if any
+   BOOST_INTRUSIVE_FORCEINLINE friend void swap(tree_value_compare &a, tree_value_compare &b)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value)
+   {  ::boost::adl_move_swap(a.base_t::get(), b.base_t::get());  }
 
    BOOST_INTRUSIVE_FORCEINLINE const key_compare &key_comp() const
    {  return this->base_t::get();  }
@@ -144,6 +151,11 @@ struct tree_value_compare<ValuePtr, KeyCompare, KeyOfValue, Ret, true>
 
    BOOST_INTRUSIVE_FORCEINLINE tree_value_compare &operator=(const key_compare &x)
    {  this->base_t::get() = x;   return *this;  }
+
+   //Swaps the key comparison objects with their own swap function, if any
+   BOOST_INTRUSIVE_FORCEINLINE friend void swap(tree_value_compare &a, tree_value_compare &b)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value)
+   {  ::boost::adl_move_swap(a.base_t::get(), b.base_t::get());  }
 
    BOOST_INTRUSIVE_FORCEINLINE const key_compare &key_comp() const
    {  return this->base_t::get();  }
