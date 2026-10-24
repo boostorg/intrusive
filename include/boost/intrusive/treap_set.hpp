@@ -132,9 +132,7 @@ class treap_set_impl
 
    //! @copydoc ::boost::intrusive::treap::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(treap_set_impl &x, treap_set_impl &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<priority_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -603,9 +601,7 @@ class treap_set
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(treap_set &x, treap_set &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::priority_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
    /// @endcond
 
@@ -738,9 +734,7 @@ class treap_multiset_impl
 
    //! @copydoc ::boost::intrusive::treap::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(treap_multiset_impl &x, treap_multiset_impl &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<priority_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -1149,9 +1143,7 @@ class treap_multiset
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(treap_multiset &x, treap_multiset &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::priority_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
    /// @endcond
 

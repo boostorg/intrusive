@@ -125,8 +125,7 @@ class avl_set_impl
 
    //! @copydoc ::boost::intrusive::avltree::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(avl_set_impl &x, avl_set_impl &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -582,8 +581,7 @@ class avl_set
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(avl_set &x, avl_set &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
    /// @endcond
 
@@ -708,8 +706,7 @@ class avl_multiset_impl
 
    //! @copydoc ::boost::intrusive::avltree::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(avl_multiset_impl &x, avl_multiset_impl &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -1106,8 +1103,7 @@ class avl_multiset
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(avl_multiset &x, avl_multiset &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
    /// @endcond
 

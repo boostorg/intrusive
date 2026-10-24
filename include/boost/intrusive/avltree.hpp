@@ -158,8 +158,7 @@ class avltree_impl
 
    //! @copydoc ::boost::intrusive::bstree::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(avltree_impl &x, avltree_impl &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -576,8 +575,7 @@ class avltree
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(avltree &x, avltree &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
    /// @endcond
 

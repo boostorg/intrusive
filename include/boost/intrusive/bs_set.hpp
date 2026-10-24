@@ -119,8 +119,7 @@ class bs_set_impl
 
    //! @copydoc ::boost::intrusive::bstree::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(bs_set_impl &x, bs_set_impl &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -575,8 +574,7 @@ class bs_set
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(bs_set &x, bs_set &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
    /// @endcond
 
@@ -696,8 +694,7 @@ class bs_multiset_impl
 
    //! @copydoc ::boost::intrusive::bstree::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(bs_multiset_impl &x, bs_multiset_impl &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -1094,8 +1091,7 @@ class bs_multiset
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(bs_multiset &x, bs_multiset &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
    /// @endcond
 

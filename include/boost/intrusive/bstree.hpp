@@ -46,7 +46,6 @@
 #include <boost/move/utility_core.hpp>
 #include <boost/move/adl_move_swap.hpp>
 #include <boost/move/detail/type_traits.hpp>   //is_nothrow_copy_constructible, ...
-#include <boost/move/detail/meta_utils.hpp>     //declval
 
 #include <boost/intrusive/detail/minimal_pair_header.hpp>
 #include <cstddef>   //size_t...
@@ -2336,8 +2335,7 @@ class bstree_impl
 
    //! @copydoc ::boost::intrusive::bstree::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(bstree_impl &x, bstree_impl &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
 
    /// @cond
@@ -2569,8 +2567,7 @@ class bstree
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(bstree &x, bstree &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
    /// @endcond
 

@@ -149,8 +149,7 @@ class splaytree_impl
 
    //! @copydoc ::boost::intrusive::bstree::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(splaytree_impl &x, splaytree_impl &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -758,8 +757,7 @@ class splaytree
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(splaytree &x, splaytree &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
    /// @endcond
 

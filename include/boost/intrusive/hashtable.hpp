@@ -65,7 +65,6 @@
 #include <boost/move/utility_core.hpp>
 #include <boost/move/adl_move_swap.hpp>
 #include <boost/move/detail/type_traits.hpp>   //is_nothrow_copy_constructible, ...
-#include <boost/move/detail/meta_utils.hpp>     //declval
 
 //std C++
 #include <boost/intrusive/detail/minimal_pair_header.hpp>   //std::pair
@@ -2802,10 +2801,7 @@ class hashtable_impl
 
    //! @copydoc ::boost::intrusive::hashtable::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(hashtable_impl &x, hashtable_impl &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_equal>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<hasher>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<bucket_traits>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw
@@ -4566,10 +4562,7 @@ class hashtable
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(hashtable &x, hashtable &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_equal>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::hasher>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::bucket_traits>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
    /// @endcond
 

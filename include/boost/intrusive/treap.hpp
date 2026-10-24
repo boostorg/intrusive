@@ -429,9 +429,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
 
    //! @copydoc ::boost::intrusive::treap::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(treap_impl &x, treap_impl &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<priority_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
@@ -1449,9 +1447,7 @@ class treap
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(treap &x, treap &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::priority_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
    /// @endcond
 

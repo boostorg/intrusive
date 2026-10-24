@@ -159,8 +159,7 @@ class rbtree_impl
 
    //! @copydoc ::boost::intrusive::bstree::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(rbtree_impl &x, rbtree_impl &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -576,8 +575,7 @@ class rbtree
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(rbtree &x, rbtree &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_compare>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
    /// @endcond
 

@@ -159,10 +159,7 @@ class unordered_set_impl
 
    //! @copydoc ::boost::intrusive::hashtable::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(unordered_set_impl &x, unordered_set_impl &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_equal>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<hasher>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<bucket_traits>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -560,10 +557,7 @@ class unordered_set
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(unordered_set &x, unordered_set &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_equal>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::hasher>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::bucket_traits>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
    /// @endcond
 
@@ -701,10 +695,7 @@ class unordered_multiset_impl
 
    //! @copydoc ::boost::intrusive::hashtable::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(unordered_multiset_impl &x, unordered_multiset_impl &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_equal>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<hasher>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<bucket_traits>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -1045,10 +1036,7 @@ class unordered_multiset
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(unordered_multiset &x, unordered_multiset &y)
-      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<typename Base::key_equal>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::hasher>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::bucket_traits>::value &&
-                        ::boost::move_detail::is_nothrow_swappable<typename Base::value_traits>::value)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
    /// @endcond
 
