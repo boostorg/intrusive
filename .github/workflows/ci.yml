@@ -504,7 +504,11 @@ jobs:
 
     timeout-minutes: 240
     runs-on: ${{matrix.os}}
-    container: ${{matrix.container}}
+    container:
+      image: ${{matrix.container}}
+      #TSan runs the test again without ASLR (personality), which the default
+      #seccomp profile of Docker does not allow
+      options: ${{matrix.container_options}}
 
     steps:
       - name: Setup environment
