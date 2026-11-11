@@ -177,6 +177,7 @@ jobs:
             cxxstd: "03,11,14,17,20,23,26"
             cxxflags: -pipe
             tsan: 1
+            container_options: --security-opt seccomp=unconfined
             os: ubuntu-latest
             container: ubuntu:26.04
             install: g++-16
@@ -457,6 +458,7 @@ jobs:
             cxxflags: -pipe -stdlib=libc++
             linkflags: -stdlib=libc++
             tsan: 1
+            container_options: --security-opt seccomp=unconfined
             os: ubuntu-latest
             container: ubuntu:26.04
             install:
@@ -480,9 +482,6 @@ jobs:
           #------------------
           # MacOS, clang
           #------------------
-          - toolset: clang
-            cxxstd: "11,14,17,20,2b"
-            os: macos-14
           - toolset: clang
             cxxstd: "11,14,17,20,2b"
             os: macos-15
