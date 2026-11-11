@@ -42,7 +42,7 @@ namespace detail {
 
    //Use _BitScanReverseXX intrinsics
 
-   #if defined(_M_X64) || defined(_M_AMD64) || defined(_M_IA64)   //64 bit target
+   #if defined(_M_X64) || defined(_M_AMD64) || defined(_M_IA64) || defined(_M_ARM64) || defined(_M_ARM64EC)   //64 bit target
       #define BOOST_INTRUSIVE_BSR_INTRINSIC_64_BIT
    #endif
 
