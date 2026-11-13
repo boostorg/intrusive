@@ -4184,6 +4184,23 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
    * `clear_and_dispose` for tree containers, as nodes are no longer initialized twice in safe and auto-unlink modes.
    * `merge_unique` and `merge_equal` for tree containers when both containers use the same comparison type
      and this type is an empty class.
+* A systematic, AI-assisted review of the library found and fixed many bugs that users did
+  not report. The main types of bugs are:
+   * Exception safety: `clone_from` rollback when the cloner throws, a `linear_buckets` hash table left without
+     its sentinel when a rehash throws, and `noexcept` specifications and documented exception guarantees of
+     functions that call user predicates, hashers or comparators.
+   * Stateful value traits and predicates: swap and move assignment did not swap or propagate the value traits,
+     and cloning did not transfer the predicates, comparators and hashers correctly.
+   * Container invariants: `slist::splice_after` with `cache_last`, `slist::incorporate_after` with
+     `constant_time_size`, `slist::dispose_and_assign`, linear `slist::sort`, `swap_nodes` of circular slist
+     algorithms, leftmost and rightmost nodes in `clone_subtree`, cloning from empty trees, self merge, and
+     `rebalance()` of red-black, AVL and treap trees (removed, as it broke the invariants).
+   * Unordered containers: the cached begin after a rehash, `erase(first, last)` and full rehash with
+     `optimize_multikey`, `clone_from` with `fastmod_buckets`, `operator==`, moved-from containers that were
+     not usable, and `floor_log2` on MSVC ARM64.
+   * Lookups: `count(key, comp)` in unique key containers with a coarser comparison, `splay_down` that ignored
+     the comparator, and extra comparisons in `list::merge` and `slist::merge`.
+   * Compilation errors with function pointer predicates, smart pointers, `last()` and `clone_from` with rvalues.
 
 [endsect]
 
