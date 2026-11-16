@@ -150,7 +150,7 @@ class treap_algorithms
       bool remove_it_;
    };
 
-   static void rotate_up_n(const node_ptr header, const node_ptr p, std::size_t n)
+   static void rotate_up_n(const node_ptr header, const node_ptr p, std::size_t n) BOOST_NOEXCEPT
    {
       node_ptr p_parent(NodeTraits::get_parent(p));
       node_ptr p_grandparent(NodeTraits::get_parent(p_parent));

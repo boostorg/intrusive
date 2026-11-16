@@ -108,7 +108,7 @@ class bstree_algorithms_base
    //! <b>Complexity</b>: Logarithmic to the size of the subtree.
    //!
    //! <b>Throws</b>: Nothing.
-   static node_ptr minimum(BOOST_INTRUSIVE_CPARAM(node_ptr) n)
+   static node_ptr minimum(BOOST_INTRUSIVE_CPARAM(node_ptr) n) BOOST_NOEXCEPT
    {
       node_ptr p_left(NodeTraits::get_left(n));
       if(!p_left)
@@ -128,7 +128,7 @@ class bstree_algorithms_base
    //! <b>Complexity</b>: Logarithmic to the size of the subtree.
    //!
    //! <b>Throws</b>: Nothing.
-   static node_ptr maximum(BOOST_INTRUSIVE_CPARAM(node_ptr) n)
+   static node_ptr maximum(BOOST_INTRUSIVE_CPARAM(node_ptr) n) BOOST_NOEXCEPT
    {
       node_ptr p_right(NodeTraits::get_right(n));
       if(!p_right)
@@ -169,7 +169,7 @@ class bstree_algorithms_base
    //! <b>Complexity</b>: Logarithmic.
    //!
    //! <b>Throws</b>: Nothing.
-   static node_ptr get_header(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   static node_ptr get_header(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {
       node_ptr nn(detail::uncast(n));
       node_ptr p(NodeTraits::get_parent(n));

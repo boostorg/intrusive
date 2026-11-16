@@ -264,7 +264,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Logarithmic.
    //!
    //! <b>Throws</b>: Nothing.
-   static node_ptr get_header(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n);
+   static node_ptr get_header(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT;
    #endif
 
    //! <b>Requires</b>: node1 and node2 can't be header nodes
@@ -549,7 +549,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Logarithmic to the size of the subtree.
    //!
    //! <b>Throws</b>: Nothing.
-   static node_ptr minimum(BOOST_INTRUSIVE_CPARAM(node_ptr) n);
+   static node_ptr minimum(BOOST_INTRUSIVE_CPARAM(node_ptr) n) BOOST_NOEXCEPT;
 
    //! <b>Requires</b>: 'n' is a node of a tree but not the header.
    //!
@@ -558,7 +558,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Logarithmic to the size of the subtree.
    //!
    //! <b>Throws</b>: Nothing.
-   static node_ptr maximum(BOOST_INTRUSIVE_CPARAM(node_ptr) n);
+   static node_ptr maximum(BOOST_INTRUSIVE_CPARAM(node_ptr) n) BOOST_NOEXCEPT;
    #endif
 
    //! <b>Requires</b>: 'n' must not be part of any tree.
@@ -582,7 +582,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static bool inited(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static bool inited(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {
       return !NodeTraits::get_parent(n) &&
              !NodeTraits::get_left(n)   &&
@@ -1576,7 +1576,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       insert_commit(header1, z, commit_data);
    }
 
-   static void erase(BOOST_INTRUSIVE_CPARAM(node_ptr) header, BOOST_INTRUSIVE_CPARAM(node_ptr) z, data_for_rebalance &info)
+   static void erase(BOOST_INTRUSIVE_CPARAM(node_ptr) header, BOOST_INTRUSIVE_CPARAM(node_ptr) z, data_for_rebalance &info) BOOST_NOEXCEPT
    {
       node_ptr y(z);
       node_ptr x;
@@ -1727,7 +1727,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
          #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
          , std::size_t *pdepth = 0
          #endif
-      )
+      ) BOOST_NOEXCEPT
    {
       node_ptr prev(pos);
       if(pos != NodeTraits::get_left(header))
