@@ -315,7 +315,10 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
                         ::boost::move_detail::is_nothrow_move_constructible<value_traits>::value)
       :  tree_type(BOOST_MOVE_BASE(tree_type, x)), alpha_traits(x.get_alpha_traits())
-   {}
+   {
+      //x is empty: reset its maximum tree size as in a default constructed tree
+      x.max_tree_size_ = 0;
+   }
 
    //! @copydoc ::boost::intrusive::bstree::operator=(bstree &&)
    sgtree_impl& operator=(BOOST_RV_REF(sgtree_impl) x)
@@ -324,8 +327,12 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
                         ::boost::move_detail::is_nothrow_move_assignable<value_traits>::value)
    #endif
    {
-      this->get_alpha_traits() = x.get_alpha_traits();
-      return static_cast<sgtree_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x)));
+      #if defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
+      this->swap(x);
+      #else
+      this->move_assign_unlink(x);
+      #endif
+      return *this;
    }
 
    /// @cond
@@ -334,8 +341,12 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<key_compare>::value &&
                         ::boost::move_detail::is_nothrow_move_assignable<value_traits>::value)
    {
-      this->get_alpha_traits() = x.get_alpha_traits();
-      tree_type::move_assign_unlink(x);
+      if(BOOST_LIKELY(this != &x)){
+         this->get_alpha_traits() = x.get_alpha_traits();
+         tree_type::move_assign_unlink(x);
+         //x is empty: reset its maximum tree size as in a default constructed tree
+         x.max_tree_size_ = 0;
+      }
    }
    /// @endcond
 
