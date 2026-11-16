@@ -600,6 +600,8 @@ class splaytree_impl
    //! <b>Complexity</b>: Amortized logarithmic.
    //!
    //! <b>Throws</b>: Nothing.
+   //!
+   //! <b>Note</b>: Does not affect the validity of iterators and references.
    BOOST_INTRUSIVE_FORCEINLINE void splay_up(iterator i) BOOST_NOEXCEPT
    {  return node_algorithms::splay_up(i.pointed_node(), tree_type::header_ptr());   }
 
@@ -613,6 +615,8 @@ class splaytree_impl
    //! <b>Returns</b>: An iterator to the new root of the tree, end() if the tree is empty.
    //!
    //! <b>Throws</b>: If the comparison functor throws.
+   //!
+   //! <b>Note</b>: Does not affect the validity of iterators and references.
    template<class KeyType, class KeyTypeKeyCompare>
    iterator splay_down(const KeyType &key, KeyTypeKeyCompare comp)
    {
@@ -629,6 +633,8 @@ class splaytree_impl
    //! <b>Returns</b>: An iterator to the new root of the tree, end() if the tree is empty.
    //!
    //! <b>Throws</b>: If the predicate throws.
+   //!
+   //! <b>Note</b>: Does not affect the validity of iterators and references.
    BOOST_INTRUSIVE_FORCEINLINE iterator splay_down(const key_type &key)
    {  return this->splay_down(key, this->key_comp());   }
 

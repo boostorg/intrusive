@@ -1688,6 +1688,9 @@ replacements of [classref boost::intrusive::set set]/
 [classref boost::intrusive::multiset multiset], specially for const search functions,
 might not result in desired performance improvements.
 
+Splaying only relinks nodes, so it does not invalidate iterators, pointers or
+references to elements.
+
 If element searches are randomized, the tree will be continuously srebalanced
 without taking advantage of the cache effect, so splay trees can offer worse
 performance than other balanced trees for several search patterns.

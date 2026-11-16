@@ -417,6 +417,9 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: If the comparison functor's swap call throws.
+   //!
+   //! <b>Note</b>: Does not affect the validity of iterators and references.
+   //!   If value traits are stateful, iterators are invalidated.
    void swap(treap_impl& other)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<priority_compare>::value &&
                         ::boost::move_detail::is_nothrow_swappable<key_compare>::value &&
@@ -447,6 +450,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //!
    //! <b>Throws</b>: If cloner throws or predicate copy assignment throws. Basic guarantee.
    //!   If the copy assignment of the priority comparison throws, there are no effects.
+   //!
+   //! <b>Note</b>: Invalidates the iterators to the erased elements of *this.
    template <class Cloner, class Disposer>
    void clone_from(const treap_impl &src, Cloner cloner, Disposer disposer)
    {
@@ -469,6 +474,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //!
    //! <b>Throws</b>: If cloner throws or predicate copy assignment throws. Basic guarantee.
    //!   If the copy assignment of the priority comparison throws, there are no effects.
+   //!
+   //! <b>Note</b>: Invalidates the iterators to the erased elements of *this.
    template <class Cloner, class Disposer>
    void clone_from(BOOST_RV_REF(treap_impl) src, Cloner cloner, Disposer disposer)
    {
@@ -812,6 +819,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //! <b>Notes</b>: This function has only sense if a "insert_check" has been
    //!   previously executed to fill "commit_data". No value should be inserted or
    //!   erased between the "insert_check" and "insert_commit" calls.
+   //!
+   //!   Does not affect the validity of iterators and references.
    iterator insert_unique_commit(reference value, const insert_commit_data &commit_data) BOOST_NOEXCEPT
    {
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
@@ -835,6 +844,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //! the successor of "value" container ordering invariant will be broken.
    //! This is a low-level function to be used only for performance reasons
    //! by advanced users.
+   //!
+   //! Does not affect the validity of iterators and references.
    iterator insert_before(const_iterator pos, reference value)
    {
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
@@ -865,6 +876,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //!   This function is slightly more efficient than using "insert_before".
    //!   This is a low-level function to be used only for performance reasons
    //!   by advanced users.
+   //!
+   //!   Does not affect the validity of iterators and references.
    void push_back(reference value)
    {
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
@@ -888,6 +901,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //!   This function is slightly more efficient than using "insert_before".
    //!   This is a low-level function to be used only for performance reasons
    //!   by advanced users.
+   //!
+   //!   Does not affect the validity of iterators and references.
    void push_front(reference value)
    {
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
@@ -1302,6 +1317,9 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //!   with_this is not equivalent to *replace_this according to the
    //!   ordering and priority rules. This function is faster than erasing and inserting
    //!   the node, since no rebalancing or comparison is needed.
+   //!
+   //!   Invalidates the iterators (but not the references) to the replaced element.
+   //!   Other iterators and references are not affected.
    void replace_node(iterator replace_this, reference with_this) BOOST_NOEXCEPT;
 
    friend bool operator< (const treap_impl &x, const treap_impl &y);

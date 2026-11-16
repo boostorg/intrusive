@@ -903,6 +903,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
    //! <b>Throws</b>: Nothing.
    //!
    //! <b>Complexity</b>: Linear to the elements in the subtree.
+   //!
+   //! <b>Note</b>: Does not affect the validity of iterators and references.
    void balance_factor(float new_alpha) BOOST_NOEXCEPT
    {
       //The alpha factor CAN't be changed if the fixed, floating operation-less

@@ -939,6 +939,10 @@ class bstree_impl
    //!
    //! <b>Throws</b>: If the copy constructor of the comparison object or the move
    //!   constructor of the value traits throws.
+   //!
+   //! <b>Note</b>: Iterators, pointers and references to the elements of x are not
+   //!   invalidated and refer to the same elements as members of *this.
+   //!   If value traits are stateful, iterators are invalidated.
    BOOST_INTRUSIVE_FORCEINLINE bstree_impl(BOOST_RV_REF(bstree_impl) x)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
                         ::boost::move_detail::is_nothrow_move_constructible<value_traits>::value)
@@ -960,7 +964,11 @@ class bstree_impl
    //! <b>Throws</b>: If the copy assignment of the comparison object or the move
    //!   assignment of the value traits throws. Then *this is empty and x keeps its elements.
    //!
-   //! <b>Note</b>: If BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS is defined, it is equivalent to swap(x)
+   //! <b>Note</b>: Invalidates the iterators (but not the references) to the elements
+   //!   of *this, as clear() does. Iterators, pointers and references to the elements
+   //!   of x behave as in the move constructor.
+   //!
+   //!   If BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS is defined, it is equivalent to swap(x)
    //!   and it is not noexcept (the behavior before Boost 1.93).
    BOOST_INTRUSIVE_FORCEINLINE bstree_impl& operator=(BOOST_RV_REF(bstree_impl) x)
    #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
@@ -1249,6 +1257,8 @@ class bstree_impl
    //! <b>Complexity</b>: Linear to erased plus inserted elements.
    //!
    //! <b>Throws</b>: If cloner throws or predicate copy assignment throws. Basic guarantee.
+   //!
+   //! <b>Note</b>: Invalidates the iterators to the erased elements of *this.
    template <class Cloner, class Disposer>
    void clone_from(const bstree_impl &src, Cloner cloner, Disposer disposer)
    {
@@ -1287,6 +1297,8 @@ class bstree_impl
    //!
    //! <b>Note</b>: This version can modify the source container, useful to implement
    //!    move semantics.
+   //!
+   //!   Invalidates the iterators to the erased elements of *this.
    template <class Cloner, class Disposer>
    void clone_from(BOOST_RV_REF(bstree_impl) src, Cloner cloner, Disposer disposer)
    {
@@ -1571,6 +1583,8 @@ class bstree_impl
    //! <b>Notes</b>: This function has only sense if a "insert_check" has been
    //!   previously executed to fill "commit_data". No value should be inserted or
    //!   erased between the "insert_check" and "insert_commit" calls.
+   //!
+   //!   Does not affect the validity of iterators and references.
    iterator insert_unique_commit(reference value, const insert_commit_data &commit_data) BOOST_NOEXCEPT
    {
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
@@ -1612,6 +1626,8 @@ class bstree_impl
    //! the successor of "value" container ordering invariant will be broken.
    //! This is a low-level function to be used only for performance reasons
    //! by advanced users.
+   //!
+   //! Does not affect the validity of iterators and references.
    iterator insert_before(const_iterator pos, reference value) BOOST_NOEXCEPT
    {
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
@@ -1635,6 +1651,8 @@ class bstree_impl
    //!   This function is slightly more efficient than using "insert_before".
    //!   This is a low-level function to be used only for performance reasons
    //!   by advanced users.
+   //!
+   //!   Does not affect the validity of iterators and references.
    void push_back(reference value) BOOST_NOEXCEPT
    {
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
@@ -1657,6 +1675,8 @@ class bstree_impl
    //!   This function is slightly more efficient than using "insert_before".
    //!   This is a low-level function to be used only for performance reasons
    //!   by advanced users.
+   //!
+   //!   Does not affect the validity of iterators and references.
    void push_front(reference value) BOOST_NOEXCEPT
    {
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
@@ -2145,6 +2165,9 @@ class bstree_impl
    //!   only be used for more unlink_leftmost_without_rebalance calls.
    //!   This function is normally used to achieve a step by step
    //!   controlled destruction of the container.
+   //!
+   //!   After the first call, iterators into the container must not be used.
+   //!   Pointers and references to the elements are not invalidated.
    pointer unlink_leftmost_without_rebalance() BOOST_NOEXCEPT
    {
       node_ptr to_be_disposed(node_algorithms::unlink_leftmost_without_rebalance
@@ -2173,6 +2196,9 @@ class bstree_impl
    //!   with_this is not equivalent to *replace_this according to the
    //!   ordering rules. This function is faster than erasing and inserting
    //!   the node, since no rebalancing or comparison is needed.
+   //!
+   //!   Invalidates the iterators (but not the references) to the replaced element.
+   //!   Other iterators and references are not affected.
    void replace_node(iterator replace_this, reference with_this) BOOST_NOEXCEPT;
 
    //! <b>Effects</b>: Rebalances the tree.
@@ -2180,6 +2206,8 @@ class bstree_impl
    //! <b>Throws</b>: Nothing.
    //!
    //! <b>Complexity</b>: Linear.
+   //!
+   //! <b>Note</b>: Does not affect the validity of iterators and references.
    void rebalance() BOOST_NOEXCEPT;
 
    //! <b>Requires</b>: old_root is a node of a tree.
@@ -2191,6 +2219,8 @@ class bstree_impl
    //! <b>Throws</b>: Nothing.
    //!
    //! <b>Complexity</b>: Linear to the elements in the subtree.
+   //!
+   //! <b>Note</b>: Does not affect the validity of iterators and references.
    iterator rebalance_subtree(iterator r) BOOST_NOEXCEPT;
 
    #endif   //#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
@@ -2207,6 +2237,8 @@ class bstree_impl
    //! If the user calls
    //! this function with a constant time size container or stateful comparison
    //! functor a compilation error will be issued.
+   //!
+   //! Invalidates the iterators (but not the references) to the removed element.
    static void remove_node(reference value) BOOST_NOEXCEPT
    {
       BOOST_INTRUSIVE_STATIC_ASSERT((!constant_time_size));
