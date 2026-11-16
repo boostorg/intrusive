@@ -375,16 +375,16 @@ struct slist_node_ops
    }
 
    private:
-   BOOST_INTRUSIVE_FORCEINLINE static void priv_reverse(node_ptr header, detail::bool_<false>)
+   BOOST_INTRUSIVE_FORCEINLINE static void priv_reverse(node_ptr header, detail::bool_<false>) BOOST_NOEXCEPT
    {  node_algorithms::reverse(header);   }
 
-   static void priv_reverse(node_ptr header, detail::bool_<true>)
+   static void priv_reverse(node_ptr header, detail::bool_<true>) BOOST_NOEXCEPT
    {
       node_ptr new_first = node_algorithms::reverse(NodeTraits::get_next(header));
       NodeTraits::set_next(header, new_first);
    }
 
-   static void priv_shift_backwards(node_ptr header, node_ptr *plast, std::size_t n, detail::bool_<false>)
+   static void priv_shift_backwards(node_ptr header, node_ptr *plast, std::size_t n, detail::bool_<false>) BOOST_NOEXCEPT
    {
       (void)plast;
       node_ptr l = node_algorithms::move_forward(header, n);
@@ -396,7 +396,7 @@ struct slist_node_ops
       }
    }
 
-   static void priv_shift_backwards(node_ptr header, node_ptr *plast, std::size_t n, detail::bool_<true>)
+   static void priv_shift_backwards(node_ptr header, node_ptr *plast, std::size_t n, detail::bool_<true>) BOOST_NOEXCEPT
    {
       (void)plast;
       typename node_algorithms::node_pair ret(
@@ -409,7 +409,7 @@ struct slist_node_ops
       }
    }
 
-   static void priv_shift_forward(node_ptr header, node_ptr *plast, std::size_t n, detail::bool_<false>)
+   static void priv_shift_forward(node_ptr header, node_ptr *plast, std::size_t n, detail::bool_<false>) BOOST_NOEXCEPT
    {
       (void)plast;
       node_ptr l = node_algorithms::move_backwards(header, n);
@@ -421,7 +421,7 @@ struct slist_node_ops
       }
    }
 
-   static void priv_shift_forward(node_ptr header, node_ptr *plast, std::size_t n, detail::bool_<true>)
+   static void priv_shift_forward(node_ptr header, node_ptr *plast, std::size_t n, detail::bool_<true>) BOOST_NOEXCEPT
    {
       (void)plast;
       typename node_algorithms::node_pair ret(
@@ -434,7 +434,7 @@ struct slist_node_ops
       }
    }
 
-   static void priv_swap_cache_last(node_ptr this_bfirst, node_ptr *this_plast, node_ptr other_bfirst, node_ptr *other_plast)
+   static void priv_swap_cache_last(node_ptr this_bfirst, node_ptr *this_plast, node_ptr other_bfirst, node_ptr *other_plast) BOOST_NOEXCEPT
    {
       bool other_was_empty = false;
       if(node_algorithms::is_empty(this_bfirst)){
@@ -472,10 +472,10 @@ struct slist_node_ops
       }
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void priv_swap_lists(node_ptr this_node, node_ptr other_node, detail::bool_<false>)
+   BOOST_INTRUSIVE_FORCEINLINE static void priv_swap_lists(node_ptr this_node, node_ptr other_node, detail::bool_<false>) BOOST_NOEXCEPT
    {  node_algorithms::swap_nodes(this_node, other_node); }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void priv_swap_lists(node_ptr this_node, node_ptr other_node, detail::bool_<true>)
+   BOOST_INTRUSIVE_FORCEINLINE static void priv_swap_lists(node_ptr this_node, node_ptr other_node, detail::bool_<true>) BOOST_NOEXCEPT
    {  node_algorithms::swap_trailing_nodes(this_node, other_node); }
 };
 
@@ -762,16 +762,16 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //A list with cached last node is incompatible with auto-unlink hooks!
    BOOST_INTRUSIVE_STATIC_ASSERT(!(cache_last && ((int)value_traits::link_mode == (int)auto_unlink)));
 
-   BOOST_INTRUSIVE_FORCEINLINE const value_traits &priv_value_traits() const
+   BOOST_INTRUSIVE_FORCEINLINE const value_traits &priv_value_traits() const BOOST_NOEXCEPT
    {  return *this;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE value_traits &priv_value_traits()
+   BOOST_INTRUSIVE_FORCEINLINE value_traits &priv_value_traits() BOOST_NOEXCEPT
    {  return *this;  }
 
    typedef typename boost::intrusive::value_traits_pointers
       <ValueTraits>::const_value_traits_ptr const_value_traits_ptr;
 
-   BOOST_INTRUSIVE_FORCEINLINE const_value_traits_ptr priv_value_traits_ptr() const
+   BOOST_INTRUSIVE_FORCEINLINE const_value_traits_ptr priv_value_traits_ptr() const BOOST_NOEXCEPT
    {  return pointer_traits<const_value_traits_ptr>::pointer_to(this->priv_value_traits());  }
 
    /// @endcond
@@ -2461,7 +2461,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
 
    private:
    BOOST_INTRUSIVE_NO_DANGLING
-   static slist_impl &priv_container_from_end_iterator(const const_iterator &end_iterator)
+   static slist_impl &priv_container_from_end_iterator(const const_iterator &end_iterator) BOOST_NOEXCEPT
    {
       //Obtaining the container from the end iterator is not possible with linear
       //singly linked lists (because "end" is represented by the null pointer)

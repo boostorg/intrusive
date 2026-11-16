@@ -43,7 +43,7 @@ class common_slist_algorithms
    typedef typename detail::ptr_cparam<const_node_ptr>::type  const_node_ptr_cparam;
    typedef NodeTraits                           node_traits;
 
-   static node_ptr get_previous_node(node_ptr p, BOOST_INTRUSIVE_CPARAM(node_ptr) this_node)
+   static node_ptr get_previous_node(node_ptr p, BOOST_INTRUSIVE_CPARAM(node_ptr) this_node) BOOST_NOEXCEPT
    {
       for( node_ptr p_next
          ; this_node != (p_next = NodeTraits::get_next(p))
