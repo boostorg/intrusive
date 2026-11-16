@@ -460,9 +460,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<value_traits>::value)
       :  vtraits_holder_t(::boost::move(x.priv_value_traits())), base_t()
    {
-      //Only the nodes and the size: swap() would also exchange the value traits
-      node_algorithms::swap_nodes(this->get_root_node(), x.get_root_node());
-      this->priv_size_traits().swap(x.priv_size_traits());
+      //Only the nodes and the size are transferred
+      node_ops::splice_all(this->get_root_node(), this->priv_size_traits(), x.get_root_node(), x.priv_size_traits());
    }
 
    //! <b>Effects</b>: Unlinks the elements of *this (as clear()), move assigns the value
@@ -494,8 +493,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
          this->clear();
          this->priv_value_traits() = ::boost::move(x.priv_value_traits());
          //*this is empty: x is left empty
-         node_algorithms::swap_nodes(this->get_root_node(), x.get_root_node());
-         this->priv_size_traits().swap(x.priv_size_traits());
+         node_ops::splice_all(this->get_root_node(), this->priv_size_traits(), x.get_root_node(), x.priv_size_traits());
       }
       #endif
       return *this;

@@ -309,6 +309,27 @@ struct slist_node_ops
       }
    }
 
+   //Transfers all the nodes of the list x to the empty list and leaves x empty.
+   //Constant time, except in circular lists without a cached last node.
+   static void move_all
+      ( node_ptr header, node_ptr *plast, SizeTraits &sz
+      , node_ptr xheader, node_ptr *xplast, SizeTraits &xsz) BOOST_NOEXCEPT
+   {
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(node_algorithms::is_empty(header));
+      if(!node_algorithms::is_empty(xheader)){
+         BOOST_IF_CONSTEXPR(Linear && !CacheLast){
+            //The last node is not needed: it already points to the end (null)
+            NodeTraits::set_next(header, NodeTraits::get_next(xheader));
+            node_algorithms::init_header(xheader);
+            sz.increase(xsz.get_size());
+            xsz.set_size(size_type(0));
+         }
+         else{
+            slist_node_ops::splice_after_all(header, header, plast, sz, xheader, xplast, xsz);
+         }
+      }
+   }
+
    static void update_last_node(node_ptr header, node_ptr *plast) BOOST_NOEXCEPT
    {
       const node_ptr end_node = node_algorithms::end_node(header);
@@ -834,7 +855,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //!   Internal value traits are move constructed and
    //!   nodes belonging to x (except the node representing the "end") are linked to *this.
    //!
-   //! <b>Complexity</b>: Constant.
+   //! <b>Complexity</b>: Constant if linear<> and/or cache_last<> options are used.
+   //!   Linear to the elements of x otherwise.
    //!
    //! <b>Throws</b>: If value_traits::node_traits::node's
    //!   move constructor throws (this does not happen with predefined Boost.Intrusive hooks)
@@ -848,9 +870,9 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
       :  vtraits_holder_t(::boost::move(x.priv_value_traits())), base_t()
    {
       this->set_default_constructed_state();
-      //Only the nodes and the size: swap() would also exchange the value traits
-      node_ops::swap(this->get_root_node(), this->priv_last_ptr(), x.get_root_node(), x.priv_last_ptr());
-      this->priv_size_traits().swap(x.priv_size_traits());
+      //Only the nodes and the size are transferred
+      node_ops::move_all( this->get_root_node(), this->priv_last_ptr(), this->priv_size_traits()
+                        , x.get_root_node(), x.priv_last_ptr(), x.priv_size_traits());
    }
 
    //! <b>Effects</b>: Unlinks the elements of *this (as clear()), move assigns the value
@@ -859,7 +881,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //!   are no effects.
    //!
    //! <b>Complexity</b>: Linear to the elements of *this if it's a safe-mode or an
-   //!   auto-unlink value, constant otherwise.
+   //!   auto-unlink value, constant otherwise. Plus linear to the elements of x if
+   //!   linear<> and cache_last<> options are not used.
    //!
    //! <b>Throws</b>: If the move assignment of the value traits throws. Then *this is
    //!   empty and x keeps its elements.
@@ -882,8 +905,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
          this->clear();
          this->priv_value_traits() = ::boost::move(x.priv_value_traits());
          //*this is empty: x is left empty
-         node_ops::swap(this->get_root_node(), this->priv_last_ptr(), x.get_root_node(), x.priv_last_ptr());
-         this->priv_size_traits().swap(x.priv_size_traits());
+         node_ops::move_all( this->get_root_node(), this->priv_last_ptr(), this->priv_size_traits()
+                           , x.get_root_node(), x.priv_last_ptr(), x.priv_size_traits());
       }
       #endif
       return *this;
