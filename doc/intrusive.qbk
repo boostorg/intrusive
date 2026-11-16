@@ -245,6 +245,35 @@ For a performance comparison between Intrusive and Non-intrusive containers see
 
 [endsect]
 
+[section:iterator_invalidation Iterator, pointer and reference invalidation]
+
+[*Boost.Intrusive] containers do not copy, move or destroy values: they only link and unlink
+the nodes of the values. These are the general rules:
+
+*  A container operation never invalidates pointers and references to a value. They are
+   invalidated only when the user destroys the value (for example, in a disposer function).
+*  Insertions do not invalidate iterators.
+*  Erasures (`erase`, `remove`, `unique`, `clear`, `pop_front`, etc.) invalidate only the
+   iterators to the erased values.
+*  Operations that relink the nodes of a container (`sort`, `reverse`, `rebalance`, splaying, etc.)
+   do not invalidate iterators.
+*  Operations that transfer values from one container to another (`splice`, `merge`, swap, the
+   move constructor and the move assignment) do not invalidate iterators: they refer to the same values, now in the other
+   container.
+
+There are some exceptions:
+
+*  Unordered containers: rehashing invalidates all iterators. Swap, the move constructor and the
+   move assignment also invalidate the iterators of the containers.
+*  Stateful value traits: iterators store a pointer to the value traits of their container, so
+   swap, the move constructor, the move assignment and the transfer of values to another container
+   invalidate them (see [link intrusive.value_traits.stateful_value_traits Stateful value traits]).
+*  After a call to `unlink_leftmost_without_rebalance`, iterators into the container must not be used.
+
+The documentation of each member function gives the rules for that function.
+
+[endsect]
+
 [endsect]
 
 [section:usage How to use Boost.Intrusive]
@@ -2345,6 +2374,9 @@ The move constructor links the nodes of the source container to the new containe
 *  Unordered containers: the new container takes the bucket array of the source container. The source
    container is left without a bucket array, so call `rehash` with a new bucket array before you insert
    values in it.
+*  Pointers and references to the values stay valid and refer to the same values, now in the new
+   container. Iterators to the values also stay valid, except in unordered containers and with stateful
+   value traits, where they are invalidated.
 *  The move constructor is `noexcept` if the copies of the predicates and the moves of the value
    and bucket traits are `noexcept`.
 
@@ -2363,6 +2395,9 @@ From Boost 1.93, the move assignment `a = boost::move(b)` does these steps:
 *  Unordered containers: `a` takes the bucket array of `b` and no longer uses its own bucket array.
    `b` is left without a bucket array, as after a move construction.
 *  If `a` and `b` are the same object, there are no effects.
+*  Iterators to the previous values of `a` are invalidated, as with `a.clear()`. Pointers and references
+   to them stay valid. Iterators, pointers and references to the values of `b` follow the rules of the
+   move constructor.
 *  The move assignment is `noexcept` if the copies of the predicates and the moves of the value
    and bucket traits are `noexcept`.
 
@@ -2433,6 +2468,7 @@ Iterators and references:
    traits are stateful. Stateful value traits are exchanged too, and the iterators store a pointer to
    them, so the iterators are invalidated (see
    [link intrusive.value_traits.stateful_value_traits Stateful value traits]).
+*  Unordered containers: the swap invalidates all iterators.
 
 Swap and move assignment are different operations from Boost 1.93: after `a.swap(b)`, `b` contains the
 previous values of `a`. After `a = boost::move(b)`, the previous values of `a` are unlinked and `b` is empty
