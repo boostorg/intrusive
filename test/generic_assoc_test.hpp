@@ -704,6 +704,11 @@ void test_generic_assoc<ContainerDefiner>::test_move_constructor_predicates(valu
    BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(default_type(declval<default_type>())) ));
    BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(declval<assoc_type&>() = declval<assoc_type>()) ));
    BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(declval<default_type&>() = declval<default_type>()) ));
+   //key_comp() and value_comp() return copies
+   BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(declval<const assoc_type&>().key_comp()) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(declval<const assoc_type&>().value_comp()) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(declval<const default_type&>().key_comp()) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(declval<const default_type&>().value_comp()) ));
    //swap is noexcept if the swap of the comparison object is (the member and the
    //swap found by argument dependent lookup)
    typedef typename ContainerDefiner::template container

@@ -2288,9 +2288,11 @@ struct hashdata_internal
    }
 
    BOOST_INTRUSIVE_FORCEINLINE hasher hash_function() const
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<hasher>::value)
    {  return this->priv_hasher();  }
 
    BOOST_INTRUSIVE_FORCEINLINE key_equal key_eq() const
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_equal>::value)
    {  return this->priv_equal();   }
 };
 
@@ -2737,14 +2739,16 @@ class hashtable_impl
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: If hasher copy-constructor throws.
-   hasher hash_function() const;
+   hasher hash_function() const
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<hasher>::value);
 
    //! <b>Effects</b>: Returns the key_equal object used by the unordered_set.
    //!
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: If key_equal copy-constructor throws.
-   key_equal key_eq() const;
+   key_equal key_eq() const
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_equal>::value);
 
    #endif
 

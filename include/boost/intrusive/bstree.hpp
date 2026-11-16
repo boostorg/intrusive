@@ -536,9 +536,11 @@ struct BOOST_INTRUSIVE_EMPTY_BASES bstbase2
    typedef BOOST_INTRUSIVE_IMPDEF(typename node_algorithms::insert_commit_data)   insert_commit_data;
 
    BOOST_INTRUSIVE_FORCEINLINE value_compare value_comp() const
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<value_compare>::value)
    {  return this->get_comp();   }
 
    BOOST_INTRUSIVE_FORCEINLINE key_compare key_comp() const
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value)
    {  return this->get_comp().key_comp();   }
 
    //Overloads taking key_type call node algorithms directly instead of the
@@ -1189,14 +1191,16 @@ class bstree_impl
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: If key_compare copy-constructor throws.
-   key_compare key_comp() const;
+   key_compare key_comp() const
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value);
 
    //! <b>Effects</b>: Returns the value_compare object used by the container.
    //!
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: If value_compare copy-constructor throws.
-   value_compare value_comp() const;
+   value_compare value_comp() const
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<value_compare>::value);
 
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 

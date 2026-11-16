@@ -99,6 +99,9 @@ struct test_treap
       using boost::move_detail::is_nothrow_swappable;
       BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(default_type(declval<default_type>())) ));
       BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(declval<default_type&>() = declval<default_type>()) ));
+      //priority_comp() returns a copy
+      BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(declval<const treap_type&>().priority_comp()) ));
+      BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(declval<const default_type&>().priority_comp()) ));
       BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(declval<default_type&>().swap(declval<default_type&>())) ));
       BOOST_INTRUSIVE_STATIC_ASSERT((  is_nothrow_swappable<default_type>::value ));
       BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(declval<swap_type&>().swap(declval<swap_type&>())) ));

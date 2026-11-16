@@ -410,6 +410,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //!
    //! <b>Throws</b>: If priority_compare copy-constructor throws.
    BOOST_INTRUSIVE_FORCEINLINE priority_compare priority_comp() const
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<priority_compare>::value)
    {  return this->priv_pcomp();   }
 
    //! <b>Effects</b>: Swaps the contents of two treaps.
