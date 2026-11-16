@@ -308,7 +308,7 @@ struct bstbase3
       {}
    } holder;
 
-   static bstbase3 &get_tree_base_from_end_iterator(const const_iterator &end_iterator)
+   static bstbase3 &get_tree_base_from_end_iterator(const const_iterator &end_iterator) BOOST_NOEXCEPT
    {
       BOOST_INTRUSIVE_STATIC_ASSERT(has_container_from_iterator);
       holder_t *h = static_cast<holder_t*>(&node_base_t::priv_base_from_end_node(end_iterator.pointed_node()));
@@ -323,10 +323,10 @@ struct bstbase3
       : holder(::boost::move(vtraits))
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE const value_traits &get_value_traits() const
+   BOOST_INTRUSIVE_FORCEINLINE const value_traits &get_value_traits() const BOOST_NOEXCEPT
    {  return this->holder;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE value_traits &get_value_traits()
+   BOOST_INTRUSIVE_FORCEINLINE value_traits &get_value_traits() BOOST_NOEXCEPT
    {  return this->holder;  }
 
    BOOST_INTRUSIVE_FORCEINLINE node_ptr header_ptr() BOOST_NOEXCEPT
@@ -356,13 +356,13 @@ struct bstbase3
    typedef typename boost::intrusive::value_traits_pointers
       <ValueTraits>::const_value_traits_ptr const_value_traits_ptr;
 
-   BOOST_INTRUSIVE_FORCEINLINE const_value_traits_ptr priv_value_traits_ptr() const
+   BOOST_INTRUSIVE_FORCEINLINE const_value_traits_ptr priv_value_traits_ptr() const BOOST_NOEXCEPT
    {  return pointer_traits<const_value_traits_ptr>::pointer_to(this->get_value_traits());  }
 
-   BOOST_INTRUSIVE_FORCEINLINE iterator priv_to_it(node_ptr n)
+   BOOST_INTRUSIVE_FORCEINLINE iterator priv_to_it(node_ptr n) BOOST_NOEXCEPT
    {  return iterator(n, this->priv_value_traits_ptr());  }
 
-   BOOST_INTRUSIVE_FORCEINLINE const_iterator priv_to_cit(node_ptr n) const
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator priv_to_cit(node_ptr n) const BOOST_NOEXCEPT
    {  return const_iterator(n, this->priv_value_traits_ptr());  }
 
    BOOST_INTRUSIVE_FORCEINLINE iterator begin() BOOST_NOEXCEPT
@@ -383,34 +383,34 @@ struct bstbase3
    BOOST_INTRUSIVE_FORCEINLINE const_iterator cend() const BOOST_NOEXCEPT
    {  return this->priv_to_cit(node_algorithms::end_node(this->header_ptr()));   }
 
-   BOOST_INTRUSIVE_FORCEINLINE iterator root()
+   BOOST_INTRUSIVE_FORCEINLINE iterator root() BOOST_NOEXCEPT
    {  return this->priv_to_it(node_algorithms::root_node(this->header_ptr()));   }
 
-   BOOST_INTRUSIVE_FORCEINLINE const_iterator root() const
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator root() const BOOST_NOEXCEPT
    {  return croot();   }
 
-   BOOST_INTRUSIVE_FORCEINLINE const_iterator croot() const
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator croot() const BOOST_NOEXCEPT
    {  return this->priv_to_cit(node_algorithms::root_node(this->header_ptr()));   }
 
-   BOOST_INTRUSIVE_FORCEINLINE reverse_iterator rbegin()
+   BOOST_INTRUSIVE_FORCEINLINE reverse_iterator rbegin() BOOST_NOEXCEPT
    {  return reverse_iterator(end());  }
 
-   BOOST_INTRUSIVE_FORCEINLINE const_reverse_iterator rbegin() const
+   BOOST_INTRUSIVE_FORCEINLINE const_reverse_iterator rbegin() const BOOST_NOEXCEPT
    {  return const_reverse_iterator(end());  }
 
-   BOOST_INTRUSIVE_FORCEINLINE const_reverse_iterator crbegin() const
+   BOOST_INTRUSIVE_FORCEINLINE const_reverse_iterator crbegin() const BOOST_NOEXCEPT
    {  return const_reverse_iterator(end());  }
 
-   BOOST_INTRUSIVE_FORCEINLINE reverse_iterator rend()
+   BOOST_INTRUSIVE_FORCEINLINE reverse_iterator rend() BOOST_NOEXCEPT
    {  return reverse_iterator(begin());   }
 
-   BOOST_INTRUSIVE_FORCEINLINE const_reverse_iterator rend() const
+   BOOST_INTRUSIVE_FORCEINLINE const_reverse_iterator rend() const BOOST_NOEXCEPT
    {  return const_reverse_iterator(begin());   }
 
-   BOOST_INTRUSIVE_FORCEINLINE const_reverse_iterator crend() const
+   BOOST_INTRUSIVE_FORCEINLINE const_reverse_iterator crend() const BOOST_NOEXCEPT
    {  return const_reverse_iterator(begin());   }
 
-   void replace_node(iterator replace_this, reference with_this)
+   void replace_node(iterator replace_this, reference with_this) BOOST_NOEXCEPT
    {
       node_algorithms::replace_node( get_value_traits().to_node_ptr(*replace_this)
                                    , this->header_ptr()
@@ -440,7 +440,7 @@ struct bstbase3
    BOOST_INTRUSIVE_FORCEINLINE const_iterator iterator_to(const_reference value) const BOOST_NOEXCEPT
    {  return this->priv_to_cit(this->get_value_traits().to_node_ptr(*pointer_traits<pointer>::const_cast_from(pointer_traits<const_pointer>::pointer_to(value)))); }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void init_node(reference value)
+   BOOST_INTRUSIVE_FORCEINLINE static void init_node(reference value) BOOST_NOEXCEPT
    { node_algorithms::init(value_traits::to_node_ptr(value)); }
 
 };
@@ -522,10 +522,10 @@ struct BOOST_INTRUSIVE_EMPTY_BASES bstbase2
       : detail::ebo_functor_holder<value_compare>(comp), treeheader_t(::boost::move(vtraits))
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE const value_compare &get_comp() const
+   BOOST_INTRUSIVE_FORCEINLINE const value_compare &get_comp() const BOOST_NOEXCEPT
    {  return this->get();  }
 
-   BOOST_INTRUSIVE_FORCEINLINE value_compare &get_comp()
+   BOOST_INTRUSIVE_FORCEINLINE value_compare &get_comp() BOOST_NOEXCEPT
    {  return this->get();  }
 
    typedef BOOST_INTRUSIVE_IMPDEF(typename value_traits::pointer)                               pointer;
