@@ -3755,12 +3755,13 @@ class hashtable_impl
    //!
    //! <b>Complexity</b>: Average case linear in this->size(), worst case quadratic.
    //!
-   //! <b>Throws</b>: If the hasher functor throws. Basic guarantee: all the elements
-   //!   are unlinked (no destructors are called) and the container is left empty.
+   //! <b>Throws</b>: If store_hash<true> is not set, if the hasher functor throws.
+   //!   Basic guarantee: all the elements are unlinked (no destructors are called)
+   //!   and the container is left empty. Otherwise, nothing.
    //!
    //! <b>Note</b>: Invalidates all iterators. Pointers and references to the elements
    //!   are not invalidated.
-   BOOST_INTRUSIVE_FORCEINLINE void rehash(const bucket_traits &new_bucket_traits)
+   BOOST_INTRUSIVE_FORCEINLINE void rehash(const bucket_traits &new_bucket_traits) BOOST_NOEXCEPT_IF(store_hash)
    {  this->priv_rehash_impl(new_bucket_traits, false, detail::bool_<store_hash>()); }
 
    //! <b>Note</b>: This function is used when keys from inserted elements are changed 
@@ -3815,7 +3816,7 @@ class hashtable_impl
    //!
    //!   If true is returned, all iterators are invalidated. Pointers and references
    //!   to the elements are not invalidated.
-   bool incremental_rehash(bool grow = true)
+   bool incremental_rehash(bool grow = true) BOOST_NOEXCEPT_IF(store_hash)
    {
       //This function is only available for containers with incremental hashing
       BOOST_INTRUSIVE_STATIC_ASSERT(( incremental && power_2_buckets ));

@@ -568,6 +568,10 @@ void test_unordered<ContainerDefiner>::test_rehash(value_cont_type& values, deta
    unordered_type testset1(&values[0], &values[0] + values.size(),
       bucket_traits(pointer_traits<bucket_ptr>::
          pointer_to(buckets1[0]), sizeof(buckets1)/sizeof(*buckets1)));
+   #if !defined(BOOST_NO_CXX11_NOEXCEPT)
+   //incremental_rehash(bool) only calls the hasher without a stored hash
+   BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(testset1.incremental_rehash()) == unordered_type::store_hash ));
+   #endif
    //Test current state
    BOOST_TEST(testset1.split_count() == BucketSize/2);
    {  int init_values [] = { 4, 5, 1, 2, 2, 3 };
@@ -1434,6 +1438,9 @@ void test_unordered<ContainerDefiner>::test_move_constructor_predicates(value_co
                                    == (!unordered_type::linear_buckets || unordered_type::store_hash) ));
    BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(declval<const unordered_type&>().iterator_to(declval<typename unordered_type::const_reference>()))
                                    == (!unordered_type::linear_buckets || unordered_type::store_hash) ));
+   //rehash only calls the hasher without a stored hash
+   BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(declval<unordered_type&>().rehash(declval<const typename unordered_type::bucket_traits&>()))
+                                   == unordered_type::store_hash ));
    //swap is noexcept if the swaps of the hasher and the equality are (the member and
    //the swap found by argument dependent lookup)
    typedef typename ContainerDefiner::template container
