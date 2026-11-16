@@ -735,6 +735,27 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       }
    }
 
+   /// @cond
+   //Links the nodes of the tree of src_header to dst_header, which must represent an
+   //empty tree, and leaves src_header as an empty tree. dst_header != src_header.
+   //Used by the move constructor and the move assignment of the containers.
+   static void move_tree(node_ptr dst_header, node_ptr src_header) BOOST_NOEXCEPT
+   {
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(dst_header != src_header);
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(!NodeTraits::get_parent(dst_header));
+      const node_ptr root(NodeTraits::get_parent(src_header));
+      if(root){
+         NodeTraits::set_parent(dst_header, root);
+         NodeTraits::set_left(dst_header, NodeTraits::get_left(src_header));
+         NodeTraits::set_right(dst_header, NodeTraits::get_right(src_header));
+         NodeTraits::set_parent(root, dst_header);
+         NodeTraits::set_parent(src_header, node_ptr());
+         NodeTraits::set_left(src_header, src_header);
+         NodeTraits::set_right(src_header, src_header);
+      }
+   }
+   /// @endcond
+
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
    //! <b>Requires</b>: p is a node of a tree.
    //!

@@ -948,9 +948,10 @@ class bstree_impl
                         ::boost::move_detail::is_nothrow_move_constructible<value_traits>::value)
       : data_type(x.get_comp().key_comp(), ::boost::move(x.get_value_traits()))
    {
-      //Only the nodes and the size are exchanged
-      node_algorithms::swap_tree(this->header_ptr(), node_ptr(x.header_ptr()));
-      this->sz_traits().swap(x.sz_traits());
+      //Only the nodes and the size are transferred
+      node_algorithms::move_tree(this->header_ptr(), node_ptr(x.header_ptr()));
+      this->sz_traits().set_size(x.sz_traits().get_size());
+      x.sz_traits().set_size(size_type(0));
    }
 
    //! <b>Effects</b>: Unlinks the elements of *this (as clear()), copy assigns the
@@ -996,8 +997,9 @@ class bstree_impl
          this->get_comp() = x.get_comp();
          this->get_value_traits() = ::boost::move(x.get_value_traits());
          //*this is empty: x is left empty
-         node_algorithms::swap_tree(this->header_ptr(), node_ptr(x.header_ptr()));
-         this->sz_traits().swap(x.sz_traits());
+         node_algorithms::move_tree(this->header_ptr(), node_ptr(x.header_ptr()));
+         this->sz_traits().set_size(x.sz_traits().get_size());
+         x.sz_traits().set_size(size_type(0));
       }
    }
    /// @endcond
