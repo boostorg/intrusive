@@ -120,7 +120,7 @@ class bucket_array_base
    BOOST_INTRUSIVE_FORCEINLINE float max_load_factor() const BOOST_NOEXCEPT
    {  return m_max_load_factor;  }
 
-   void max_load_factor(float mlf)
+   void max_load_factor(float mlf) BOOST_NOEXCEPT
    {
       BOOST_ASSERT(mlf > 0.0f);
       if(mlf > 0.0f){
@@ -136,7 +136,7 @@ class bucket_array_base
    //element_capacity elements without exceeding the maximum load factor.
    //This is the hot path of the manager, called before every insertion,
    //so the common case is a single integer comparison.
-   bool grow_count(size_type element_capacity, size_type &new_count) const
+   bool grow_count(size_type element_capacity, size_type &new_count) const BOOST_NOEXCEPT
    {
       if(element_capacity <= m_max_elements)
          return false;
@@ -149,7 +149,7 @@ class bucket_array_base
 
    //Returns the bucket count for element_count elements and a minimum of
    //bucket_count_hint buckets.
-   size_type rehash_count(size_type element_count, size_type bucket_count_hint) const
+   size_type rehash_count(size_type element_count, size_type bucket_count_hint) const BOOST_NOEXCEPT
    {
       size_type target = this->priv_buckets_for(element_count);
       if(bucket_count_hint > target)
@@ -159,7 +159,7 @@ class bucket_array_base
 
    //Rounds `n` up to a bucket count the container accepts, limited
    //to max_count().
-   BOOST_INTRUSIVE_FORCEINLINE static size_type suggested_count(size_type n)
+   BOOST_INTRUSIVE_FORCEINLINE static size_type suggested_count(size_type n) BOOST_NOEXCEPT
    {
       return priv_suggested_count(n ? n : size_type(1u), bool_<Power2Buckets>());
    }
@@ -196,7 +196,7 @@ class bucket_array_base
    }
    #endif
 
-   void swap(bucket_array_base &x)
+   void swap(bucket_array_base &x) BOOST_NOEXCEPT
    {
       ::boost::adl_move_swap(m_buckets,         x.m_buckets);
       ::boost::adl_move_swap(m_bucket_count,    x.m_bucket_count);
@@ -204,7 +204,7 @@ class bucket_array_base
       ::boost::adl_move_swap(m_max_elements,    x.m_max_elements);
    }
 
-   void set_buckets(bucket_ptr p, size_type n)
+   void set_buckets(bucket_ptr p, size_type n) BOOST_NOEXCEPT
    {
       m_buckets      = p;
       m_bucket_count = n;
@@ -215,14 +215,14 @@ class bucket_array_base
    //Maximum number of usable buckets: the array, including the overhead
    //buckets, must be representable by size_type and its size in bytes
    //can't exceed the maximum object size (PTRDIFF_MAX).
-   static size_type priv_max_count()
+   static size_type priv_max_count() BOOST_NOEXCEPT
    {
       const std::size_t max_alloc = (std::size_t(-1) >> 1u) / sizeof(bucket_type);
       const std::size_t max_size  = std::size_t(size_type(-1));
       return size_type((max_alloc < max_size ? max_alloc : max_size) - BucketOverhead);
    }
 
-   static size_type priv_suggested_count(size_type n, bool_<true>)
+   static size_type priv_suggested_count(size_type n, bool_<true>) BOOST_NOEXCEPT
    {
       const size_type max_count = priv_max_count();
       size_type p = 1u;
@@ -232,7 +232,7 @@ class bucket_array_base
       return p;
    }
 
-   static size_type priv_suggested_count(size_type n, bool_<false>)
+   static size_type priv_suggested_count(size_type n, bool_<false>) BOOST_NOEXCEPT
    {
       const size_type max_count = priv_max_count();
       const size_type r = prime_list_holder<>::suggested_upper_bucket_count(n);
@@ -242,7 +242,7 @@ class bucket_array_base
    //Smallest bucket count `b` such that element_count <= max_load_factor*b.
    //The result is limited to priv_max_count(). Calculations use double,
    //as float can't represent all integers greater than 2^24.
-   size_type priv_buckets_for(size_type element_count) const
+   size_type priv_buckets_for(size_type element_count) const BOOST_NOEXCEPT
    {
       const size_type max_count = priv_max_count();
       const double d = double(element_count) / double(m_max_load_factor);
@@ -256,7 +256,7 @@ class bucket_array_base
 
    //Maximum number of elements that `n` buckets hold without exceeding
    //the maximum load factor, limited to size_type's maximum value.
-   size_type priv_max_elements(size_type n) const
+   size_type priv_max_elements(size_type n) const BOOST_NOEXCEPT
    {
       const double d = double(n) * double(m_max_load_factor);
       return d >= double(size_type(-1)) ? size_type(-1) : size_type(d);
@@ -321,13 +321,13 @@ class BOOST_INTRUSIVE_EMPTY_BASES bucket_array_manager
    BOOST_INTRUSIVE_FORCEINLINE ~bucket_array_manager()
    {  this->destroy_buckets(this->buckets(), this->bucket_count());  }
 
-   void swap(bucket_array_manager &x)
+   void swap(bucket_array_manager &x) BOOST_NOEXCEPT
    {
       ::boost::adl_move_swap(this->priv_alloc(), x.priv_alloc());
       base_t::swap(x);
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE allocator_type get_allocator() const
+   BOOST_INTRUSIVE_FORCEINLINE allocator_type get_allocator() const BOOST_NOEXCEPT
    {  return allocator_type(this->priv_alloc());  }
 
    //Allocates and default-constructs `n` usable buckets plus the overhead buckets.
@@ -344,7 +344,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES bucket_array_manager
    }
 
    //Destroys a bucket array obtained from create_buckets. Buckets must be empty.
-   void destroy_buckets(bucket_ptr p, size_type n)
+   void destroy_buckets(bucket_ptr p, size_type n) BOOST_NOEXCEPT
    {
       if(p){
          const size_type len = size_type(n + BucketOverhead);
@@ -357,7 +357,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES bucket_array_manager
    }
 
    //Destroys the owned (now empty) array and takes ownership of `p`
-   void replace_buckets(bucket_ptr p, size_type n)
+   void replace_buckets(bucket_ptr p, size_type n) BOOST_NOEXCEPT
    {
       this->destroy_buckets(this->buckets(), this->bucket_count());
       this->set_buckets(p, n);
@@ -545,7 +545,7 @@ class unordered_bucket_manager
    //!   manager become associated with the other one.
    //!
    //! <b>Throws</b>: Nothing (assuming the allocator's swap doesn't throw).
-   BOOST_INTRUSIVE_FORCEINLINE void swap(unordered_bucket_manager &x)
+   BOOST_INTRUSIVE_FORCEINLINE void swap(unordered_bucket_manager &x) BOOST_NOEXCEPT
    {  base_t::swap(x);  }
 
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(unordered_bucket_manager &l, unordered_bucket_manager &r) BOOST_NOEXCEPT
@@ -582,7 +582,7 @@ class unordered_bucket_manager
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
    //! <b>Effects</b>: Returns a copy of the stored allocator, converted back
    //!   to the original \c Allocator type.
-   allocator_type get_allocator() const;
+   allocator_type get_allocator() const BOOST_NOEXCEPT;
 
    //! <b>Effects</b>: Returns the current maximum load factor.
    float max_load_factor() const BOOST_NOEXCEPT;
@@ -593,7 +593,7 @@ class unordered_bucket_manager
    //!   bucket array is not resized immediately, and the new factor is
    //!   applied by the next operation that changes the bucket count
    //!   (reserve(), reserve_additional(), rehash(), shrink_to_fit()).
-   void max_load_factor(float mlf);
+   void max_load_factor(float mlf) BOOST_NOEXCEPT;
    #else
    using base_t::get_allocator;
    using base_t::max_load_factor;
