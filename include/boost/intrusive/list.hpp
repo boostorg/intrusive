@@ -452,6 +452,10 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    //! <b>Throws</b>: If value_traits::node_traits::node's
    //!   move constructor throws (this does not happen with predefined Boost.Intrusive hooks)
    //!   or the move constructor of value traits throws.
+   //!
+   //! <b>Note</b>: Iterators, pointers and references to the elements of x are not
+   //!   invalidated and refer to the same elements as members of *this.
+   //!   If value traits are stateful, iterators are invalidated.
    BOOST_INTRUSIVE_FORCEINLINE list_impl(BOOST_RV_REF(list_impl) x)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<value_traits>::value)
       :  vtraits_holder_t(::boost::move(x.priv_value_traits())), base_t()
@@ -472,7 +476,11 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    //! <b>Throws</b>: If the move assignment of the value traits throws. Then *this is
    //!   empty and x keeps its elements.
    //!
-   //! <b>Note</b>: If BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS is defined, it is equivalent to swap(x)
+   //! <b>Note</b>: Invalidates the iterators (but not the references) to the elements
+   //!   of *this, as clear() does. Iterators, pointers and references to the elements
+   //!   of x behave as in the move constructor.
+   //!
+   //!   If BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS is defined, it is equivalent to swap(x)
    //!   (the behavior before Boost 1.93).
    list_impl& operator=(BOOST_RV_REF(list_impl) x)
    #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
@@ -1021,6 +1029,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    //! <b>Complexity</b>: Linear to erased plus inserted elements.
    //!
    //! <b>Throws</b>: If cloner throws. Basic guarantee.
+   //!
+   //! <b>Note</b>: Invalidates the iterators to the erased elements of *this.
    template <class Cloner, class Disposer>
    void clone_from(const list_impl &src, Cloner cloner, Disposer disposer)
    {
@@ -1050,6 +1060,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    //! <b>Complexity</b>: Linear to erased plus inserted elements.
    //!
    //! <b>Throws</b>: If cloner throws. Basic guarantee.
+   //!
+   //! <b>Note</b>: Invalidates the iterators to the erased elements of *this.
    template <class Cloner, class Disposer>
    void clone_from(BOOST_RV_REF(list_impl) src, Cloner cloner, Disposer disposer)
    {
