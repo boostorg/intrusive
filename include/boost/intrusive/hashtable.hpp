@@ -242,7 +242,7 @@ public:
    typedef BucketPtr bucket_ptr;
    typedef SizeType  size_type;
 
-   BOOST_INTRUSIVE_FORCEINLINE bucket_traits_impl(bucket_ptr buckets, size_type len)
+   BOOST_INTRUSIVE_FORCEINLINE bucket_traits_impl(bucket_ptr buckets, size_type len) BOOST_NOEXCEPT
       : buckets_(buckets), buckets_len_(len)
    {}
 
@@ -251,11 +251,11 @@ public:
    bucket_traits_impl(const bucket_traits_impl&) = default;
    bucket_traits_impl& operator=(const bucket_traits_impl&) = default;
    #else
-   BOOST_INTRUSIVE_FORCEINLINE bucket_traits_impl(const bucket_traits_impl& x)
+   BOOST_INTRUSIVE_FORCEINLINE bucket_traits_impl(const bucket_traits_impl& x) BOOST_NOEXCEPT
       : buckets_(x.buckets_), buckets_len_(x.buckets_len_)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE bucket_traits_impl& operator=(BOOST_COPY_ASSIGN_REF(bucket_traits_impl) x)
+   BOOST_INTRUSIVE_FORCEINLINE bucket_traits_impl& operator=(BOOST_COPY_ASSIGN_REF(bucket_traits_impl) x) BOOST_NOEXCEPT
    {
       buckets_ = x.buckets_;  buckets_len_ = x.buckets_len_; return *this;
    }
@@ -273,7 +273,7 @@ public:
       x.buckets_ = bucket_ptr();   x.buckets_len_ = 0u; return *this;
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE bucket_ptr bucket_begin() const
+   BOOST_INTRUSIVE_FORCEINLINE bucket_ptr bucket_begin() const BOOST_NOEXCEPT
    {
       return buckets_;
    }
