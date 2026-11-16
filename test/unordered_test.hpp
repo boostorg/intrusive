@@ -1429,6 +1429,11 @@ void test_unordered<ContainerDefiner>::test_move_constructor_predicates(value_co
    BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(declval<const unordered_type&>().key_eq()) ));
    BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(declval<const default_type&>().hash_function()) ));
    BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(declval<const default_type&>().key_eq()) ));
+   //iterator_to only calls the hasher with linear buckets and without a stored hash
+   BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(declval<unordered_type&>().iterator_to(declval<typename unordered_type::reference>()))
+                                   == (!unordered_type::linear_buckets || unordered_type::store_hash) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(declval<const unordered_type&>().iterator_to(declval<typename unordered_type::const_reference>()))
+                                   == (!unordered_type::linear_buckets || unordered_type::store_hash) ));
    //swap is noexcept if the swaps of the hasher and the equality are (the member and
    //the swap found by argument dependent lookup)
    typedef typename ContainerDefiner::template container

@@ -2133,20 +2133,20 @@ struct hashdata_internal
    BOOST_INTRUSIVE_FORCEINLINE static SizeType rehash_split_from_bucket_count(SizeType bc) BOOST_NOEXCEPT
    {  return index_ops_t::rehash_split_from_bucket_count(bc);  }
 
-   BOOST_INTRUSIVE_FORCEINLINE iterator iterator_to(reference value) BOOST_NOEXCEPT_IF(!linear_buckets)
+   BOOST_INTRUSIVE_FORCEINLINE iterator iterator_to(reference value) BOOST_NOEXCEPT_IF(!linear_buckets || store_hash)
    {  return iterator_to(value, linear_buckets_t());  }
 
-   BOOST_INTRUSIVE_FORCEINLINE const_iterator iterator_to(const_reference value) const BOOST_NOEXCEPT_IF(!linear_buckets)
+   BOOST_INTRUSIVE_FORCEINLINE const_iterator iterator_to(const_reference value) const BOOST_NOEXCEPT_IF(!linear_buckets || store_hash)
    {  return iterator_to(value, linear_buckets_t());  }
 
-   iterator iterator_to(reference value, detail::true_)  //linear_buckets
+   iterator iterator_to(reference value, detail::true_) BOOST_NOEXCEPT_IF(store_hash)  //linear_buckets
    {
       const std::size_t h = this->priv_stored_or_compute_hash(value, store_hash_t());
       siterator sit(this->priv_value_to_node_ptr(value));
       return this->build_iterator(sit, this->priv_hash_to_bucket_ptr(h));
    }
 
-   const_iterator iterator_to(const_reference value, detail::true_) const //linear_buckets
+   const_iterator iterator_to(const_reference value, detail::true_) const BOOST_NOEXCEPT_IF(store_hash) //linear_buckets
    {
       const std::size_t h = this->priv_stored_or_compute_hash(value, store_hash_t());
       siterator const sit = siterator
@@ -3532,7 +3532,7 @@ class hashtable_impl
    //!
    //! <b>Throws</b>: If linear_buckets<true> is set and store_hash<true> is not set,
    //!   if the internal hasher throws. Otherwise, nothing.
-   iterator iterator_to(reference value);
+   iterator iterator_to(reference value) BOOST_NOEXCEPT_IF(!linear_buckets || store_hash);
 
    //! <b>Requires</b>: value must be an lvalue and shall be in a unordered_set of
    //!   appropriate type. Otherwise the behavior is undefined.
@@ -3544,7 +3544,7 @@ class hashtable_impl
    //!
    //! <b>Throws</b>: If linear_buckets<true> is set and store_hash<true> is not set,
    //!   if the internal hasher throws. Otherwise, nothing.
-   const_iterator iterator_to(const_reference value) const;
+   const_iterator iterator_to(const_reference value) const BOOST_NOEXCEPT_IF(!linear_buckets || store_hash);
 
    //! <b>Requires</b>: value must be an lvalue and shall be in a unordered_set of
    //!   appropriate type. Otherwise the behavior is undefined.
