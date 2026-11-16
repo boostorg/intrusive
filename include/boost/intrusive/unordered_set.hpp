@@ -58,8 +58,11 @@ namespace intrusive {
 //! offers functions related to a load factor. Rehashing can be explicitly requested
 //! and the user must provide a new bucket array that will be used from that moment.
 //!
-//! Since no automatic rehashing is done, iterators are never invalidated when
-//! inserting or erasing elements. Iterators are only invalidated when rehasing.
+//! Since no automatic rehashing is done, inserting elements never invalidates
+//! iterators and erasing elements only invalidates iterators to the erased elements.
+//! Rehashing invalidates all iterators. Swapping or moving the container can also
+//! invalidate iterators (see swap()). These operations never invalidate pointers
+//! or references to the elements.
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
@@ -606,8 +609,11 @@ class unordered_set
 //! offers functions related to a load factor. Rehashing can be explicitly requested
 //! and the user must provide a new bucket array that will be used from that moment.
 //!
-//! Since no automatic rehashing is done, iterators are never invalidated when
-//! inserting or erasing elements. Iterators are only invalidated when rehasing.
+//! Since no automatic rehashing is done, inserting elements never invalidates
+//! iterators and erasing elements only invalidates iterators to the erased elements.
+//! Rehashing invalidates all iterators. Swapping or moving the container can also
+//! invalidate iterators (see swap()). These operations never invalidate pointers
+//! or references to the elements.
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else

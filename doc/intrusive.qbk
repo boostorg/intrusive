@@ -1158,6 +1158,10 @@ As with TR1 unordered associative containers, rehashing invalidates iterators,
 changes ordering between elements and changes which buckets elements appear in,
 but does not invalidate pointers or references to elements.
 
+Swapping two containers invalidates their iterators, and moving a container
+(move construction or move assignment) invalidates the iterators of the source
+container. Pointers and references to elements are not invalidated.
+
 Apart from expected hash and equality function objects, [*Boost.Intrusive] unordered
 associative containers' constructors take an argument specifying an auxiliary
 bucket vector to be used by the container.
@@ -1425,7 +1429,7 @@ Every other operation is performed on the container itself: insertions
 
 Two rules must be respected: the manager shall be declared [*before] the
 container, so that it is destroyed after it, and the buckets shall be empty
-(e.g. after `clear_and_dispose`, of after the constainer is destroyed)
+(e.g. after `clear_and_dispose`, or after the container is destroyed)
 when the manager is destroyed. Note also that
 a rehash invalidates all iterators into the container, but never pointers or
 references to the elements, since nodes are relinked and not moved.

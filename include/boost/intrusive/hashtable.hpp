@@ -2376,8 +2376,11 @@ struct unordered_default_bucket_traits
 //! offers functions related to a load factor. Rehashing can be explicitly requested
 //! and the user must provide a new bucket array that will be used from that moment.
 //!
-//! Since no automatic rehashing is done, iterators are never invalidated when
-//! inserting or erasing elements. Iterators are only invalidated when rehashing.
+//! Since no automatic rehashing is done, inserting elements never invalidates
+//! iterators and erasing elements only invalidates iterators to the erased elements.
+//! Rehashing invalidates all iterators. Swapping or moving the container can also
+//! invalidate iterators (see swap()). These operations never invalidate pointers
+//! or references to the elements.
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
@@ -2609,6 +2612,9 @@ class hashtable_impl
    //!   the source is empty) and rehashed (full_rehash does nothing). Calling rehash with new
    //!   bucket traits gives it a new bucket array. Functions that need a bucket (insertions,
    //!   lookups and erasures by key, bucket functions, etc.) can't be used until then.
+   //!
+   //!   Pointers and references to the elements of x are not invalidated and refer to
+   //!   the same elements as members of *this. Iterators into x are invalidated.
    hashtable_impl(BOOST_RV_REF(hashtable_impl) x)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<hasher>::value &&
                         ::boost::move_detail::is_nothrow_copy_constructible<key_equal>::value &&
@@ -2636,7 +2642,11 @@ class hashtable_impl
    //! <b>Throws</b>: If the copy assignment of the hasher or the equality, or the move
    //!   assignment of the value traits or the bucket traits throws.
    //!
-   //! <b>Note</b>: If BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS is defined, it is equivalent to swap(x)
+   //! <b>Note</b>: Invalidates the iterators (but not the references) to the elements
+   //!   of *this, as clear() does. Iterators, pointers and references to the elements
+   //!   of x behave as in the move constructor.
+   //!
+   //!   If BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS is defined, it is equivalent to swap(x)
    //!   and it is not noexcept (the behavior before Boost 1.93).
    hashtable_impl& operator=(BOOST_RV_REF(hashtable_impl) x)
    #if !defined(BOOST_INTRUSIVE_MOVE_ASSIGNMENT_SWAPS)
@@ -2787,8 +2797,7 @@ class hashtable_impl
    //! <b>Throws</b>: If the swap() call for the comparison or hash functors
    //!   found using ADL throw. Basic guarantee.
    //!
-   //! <b>Note</b>: Does not affect the validity of iterators and references.
-   //!   If value traits are stateful, iterators are invalidated.
+   //! <b>Note</b>: Invalidates all iterators. Pointers and references are not invalidated.
    void swap(hashtable_impl& other)
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_equal>::value &&
                         ::boost::move_detail::is_nothrow_swappable<hasher>::value &&
@@ -2830,6 +2839,8 @@ class hashtable_impl
    //!
    //! <b>Throws</b>: If cloner or hasher throw or hash or equality predicate copying
    //!   throws. Basic guarantee.
+   //!
+   //! <b>Note</b>: Invalidates the iterators to the erased elements of *this.
    template <class Cloner, class Disposer>
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(const hashtable_impl &src, Cloner cloner, Disposer disposer)
    {  this->priv_clone_from(src, cloner, disposer);   }
@@ -2853,6 +2864,8 @@ class hashtable_impl
    //!
    //! <b>Throws</b>: If cloner or hasher throw or hash or equality predicate copying
    //!   throws. Basic guarantee.
+   //!
+   //! <b>Note</b>: Invalidates the iterators to the erased elements of *this.
    template <class Cloner, class Disposer>
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(hashtable_impl) src, Cloner cloner, Disposer disposer)
    {  this->priv_clone_from(static_cast<hashtable_impl&>(src), cloner, disposer);   }
@@ -3047,6 +3060,8 @@ class hashtable_impl
    //!   erased between the "insert_check" and "insert_commit" calls.
    //!
    //!   After a successful rehashing insert_commit_data remains valid.
+   //!
+   //!   Does not affect the validity of iterators and references.
    iterator insert_unique_commit(reference value, const insert_commit_data& commit_data) BOOST_NOEXCEPT
    {
       size_type bucket_num = this->priv_hash_to_nbucket(commit_data.get_hash());
@@ -3081,6 +3096,8 @@ class hashtable_impl
    //!
    //!   Since this commit operation does not support rehashing between the check
    //!   and the commit, it's faster than `insert_commit`.
+   //!
+   //!   Does not affect the validity of iterators and references.
    iterator insert_unique_fast_commit(reference value, const insert_commit_data &commit_data) BOOST_NOEXCEPT
    {
       this->priv_size_traits().increment();
@@ -3736,6 +3753,9 @@ class hashtable_impl
    //!
    //! <b>Throws</b>: If the hasher functor throws. Basic guarantee: all the elements
    //!   are unlinked (no destructors are called) and the container is left empty.
+   //!
+   //! <b>Note</b>: Invalidates all iterators. Pointers and references to the elements
+   //!   are not invalidated.
    BOOST_INTRUSIVE_FORCEINLINE void rehash(const bucket_traits &new_bucket_traits)
    {  this->priv_rehash_impl(new_bucket_traits, false, detail::bool_<store_hash>()); }
 
@@ -3760,6 +3780,9 @@ class hashtable_impl
    //!
    //! <b>Throws</b>: If the hasher functor throws. Basic guarantee: all the elements
    //!   are unlinked (no destructors are called) and the container is left empty.
+   //!
+   //! <b>Note</b>: Invalidates all iterators. Pointers and references to the elements
+   //!   are not invalidated.
    inline void full_rehash()
    {
       //A moved-from container has no bucket array and nothing to rehash
@@ -3785,6 +3808,9 @@ class hashtable_impl
    //!   hasher throws. Strong guarantee.
    //!
    //! <b>Note</b>: this method is only available if incremental<true> option is activated.
+   //!
+   //!   If true is returned, all iterators are invalidated. Pointers and references
+   //!   to the elements are not invalidated.
    bool incremental_rehash(bool grow = true)
    {
       //This function is only available for containers with incremental hashing
@@ -3845,6 +3871,9 @@ class hashtable_impl
    //! <b>Throws</b>: Nothing
    //!
    //! <b>Note</b>: this method is only available if incremental<true> option is activated.
+   //!
+   //!   If true is returned, all iterators are invalidated. Pointers and references
+   //!   to the elements are not invalidated.
    bool incremental_rehash(const bucket_traits &new_bucket_traits) BOOST_NOEXCEPT
    {
       //This function is only available for containers with incremental hashing
