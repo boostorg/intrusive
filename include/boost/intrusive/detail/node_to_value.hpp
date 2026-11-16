@@ -37,12 +37,12 @@ struct dummy_constptr
    typedef typename boost::intrusive::pointer_traits<VoidPointer>::
       template rebind_pointer<const void>::type ConstVoidPtr;
 
-   BOOST_INTRUSIVE_FORCEINLINE explicit dummy_constptr(ConstVoidPtr)
+   BOOST_INTRUSIVE_FORCEINLINE explicit dummy_constptr(ConstVoidPtr) BOOST_NOEXCEPT
    {}
 
    BOOST_DEFAULTED_FUNCTION(BOOST_INTRUSIVE_FORCEINLINE dummy_constptr(), {})
 
-   BOOST_INTRUSIVE_FORCEINLINE ConstVoidPtr get_ptr() const
+   BOOST_INTRUSIVE_FORCEINLINE ConstVoidPtr get_ptr() const BOOST_NOEXCEPT
    {  return ConstVoidPtr();  }
 };
 
@@ -54,11 +54,11 @@ struct constptr
 
    BOOST_DEFAULTED_FUNCTION(BOOST_INTRUSIVE_FORCEINLINE constptr(), {})
 
-   BOOST_INTRUSIVE_FORCEINLINE explicit constptr(const ConstVoidPtr &ptr)
+   BOOST_INTRUSIVE_FORCEINLINE explicit constptr(const ConstVoidPtr &ptr) BOOST_NOEXCEPT
       :  const_void_ptr_(ptr)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE const void *get_ptr() const
+   BOOST_INTRUSIVE_FORCEINLINE const void *get_ptr() const BOOST_NOEXCEPT
    {  return boost::movelib::to_raw_pointer(const_void_ptr_);  }
 
    ConstVoidPtr const_void_ptr_;
@@ -103,23 +103,23 @@ struct node_to_value
    typedef typename pointer_traits<npointer>::
       template rebind_pointer<const ValueTraits>::type const_value_traits_ptr;
 
-   BOOST_INTRUSIVE_FORCEINLINE node_to_value(const_value_traits_ptr ptr)
+   BOOST_INTRUSIVE_FORCEINLINE node_to_value(const_value_traits_ptr ptr) BOOST_NOEXCEPT
       :  Base(ptr)
    {}
 
    typedef vtype &                                 result_type;
    typedef ntype &                                 first_argument_type;
 
-   BOOST_INTRUSIVE_FORCEINLINE const_value_traits_ptr get_value_traits() const
+   BOOST_INTRUSIVE_FORCEINLINE const_value_traits_ptr get_value_traits() const BOOST_NOEXCEPT
    {  return pointer_traits<const_value_traits_ptr>::static_cast_from(Base::get_ptr());  }
 
-   BOOST_INTRUSIVE_FORCEINLINE result_type to_value(first_argument_type arg, false_) const
+   BOOST_INTRUSIVE_FORCEINLINE result_type to_value(first_argument_type arg, false_) const BOOST_NOEXCEPT
    {  return *(value_traits::to_value_ptr(pointer_traits<npointer>::pointer_to(arg)));  }
 
-   BOOST_INTRUSIVE_FORCEINLINE result_type to_value(first_argument_type arg, true_) const
+   BOOST_INTRUSIVE_FORCEINLINE result_type to_value(first_argument_type arg, true_) const BOOST_NOEXCEPT
    {  return *(this->get_value_traits()->to_value_ptr(pointer_traits<npointer>::pointer_to(arg))); }
 
-   BOOST_INTRUSIVE_FORCEINLINE result_type operator()(first_argument_type arg) const
+   BOOST_INTRUSIVE_FORCEINLINE result_type operator()(first_argument_type arg) const BOOST_NOEXCEPT
    {  return this->to_value(arg, bool_<stateful_value_traits>()); }
 };
 

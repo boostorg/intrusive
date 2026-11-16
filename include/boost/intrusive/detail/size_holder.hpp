@@ -33,25 +33,25 @@ struct size_holder
    static const bool constant_time_size = ConstantSize;
    typedef SizeType  size_type;
 
-   BOOST_INTRUSIVE_FORCEINLINE SizeType get_size() const
+   BOOST_INTRUSIVE_FORCEINLINE SizeType get_size() const BOOST_NOEXCEPT
    {  return size_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE void set_size(SizeType size)
+   BOOST_INTRUSIVE_FORCEINLINE void set_size(SizeType size) BOOST_NOEXCEPT
    {  size_ = size; }
 
-   BOOST_INTRUSIVE_FORCEINLINE void decrement()
+   BOOST_INTRUSIVE_FORCEINLINE void decrement() BOOST_NOEXCEPT
    {  --size_; }
 
-   BOOST_INTRUSIVE_FORCEINLINE void increment()
+   BOOST_INTRUSIVE_FORCEINLINE void increment() BOOST_NOEXCEPT
    {  ++size_; }
 
-   BOOST_INTRUSIVE_FORCEINLINE void increase(SizeType n)
+   BOOST_INTRUSIVE_FORCEINLINE void increase(SizeType n) BOOST_NOEXCEPT
    {  size_ += n; }
 
-   BOOST_INTRUSIVE_FORCEINLINE void decrease(SizeType n)
+   BOOST_INTRUSIVE_FORCEINLINE void decrease(SizeType n) BOOST_NOEXCEPT
    {  size_ -= n; }
 
-   BOOST_INTRUSIVE_FORCEINLINE void swap(size_holder &other)
+   BOOST_INTRUSIVE_FORCEINLINE void swap(size_holder &other) BOOST_NOEXCEPT
    {  SizeType tmp(size_); size_ = other.size_; other.size_ = tmp; }
 
    SizeType size_;
@@ -63,25 +63,25 @@ struct size_holder<false, SizeType, Tag>
    static const bool constant_time_size = false;
    typedef SizeType  size_type;
 
-   BOOST_INTRUSIVE_FORCEINLINE size_type get_size() const
+   BOOST_INTRUSIVE_FORCEINLINE size_type get_size() const BOOST_NOEXCEPT
    {  return 0;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE void set_size(size_type)
+   BOOST_INTRUSIVE_FORCEINLINE void set_size(size_type) BOOST_NOEXCEPT
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE void decrement()
+   BOOST_INTRUSIVE_FORCEINLINE void decrement() BOOST_NOEXCEPT
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE void increment()
+   BOOST_INTRUSIVE_FORCEINLINE void increment() BOOST_NOEXCEPT
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE void increase(SizeType)
+   BOOST_INTRUSIVE_FORCEINLINE void increase(SizeType) BOOST_NOEXCEPT
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE void decrease(SizeType)
+   BOOST_INTRUSIVE_FORCEINLINE void decrease(SizeType) BOOST_NOEXCEPT
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE void swap(size_holder){}
+   BOOST_INTRUSIVE_FORCEINLINE void swap(size_holder) BOOST_NOEXCEPT {}
 };
 
 }  //namespace detail{
