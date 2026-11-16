@@ -2041,6 +2041,15 @@ struct hashdata_internal
       }
    }
 
+   void priv_move_cache(hashdata_internal &other)
+   {
+      (void)other;
+      BOOST_IF_CONSTEXPR(cache_begin){
+         this->priv_set_cache(other.priv_get_cache());
+         other.priv_init_cache();
+      }
+   }
+
    siterator priv_begin(bucket_ptr &pbucketptr) const
    {
       BOOST_IF_CONSTEXPR(cache_begin){
@@ -2607,8 +2616,7 @@ class hashtable_impl
                         ::boost::move_detail::is_nothrow_move_constructible<bucket_traits>::value)
       : internal_type(BOOST_MOVE_BASE(internal_type, x))
    {
-      this->priv_swap_cache(x);
-      x.priv_init_cache();
+      this->priv_move_cache(x);
       this->priv_size_traits().set_size(x.priv_size_traits().get_size());
       x.priv_size_traits().set_size(size_type(0));
       this->split_count(x.split_count());
@@ -2647,8 +2655,7 @@ class hashtable_impl
          this->priv_equal()  = x.priv_equal();
          this->priv_value_traits()  = ::boost::move(x.priv_value_traits());
          this->priv_bucket_traits() = ::boost::move(x.priv_bucket_traits());
-         this->priv_swap_cache(x);
-         x.priv_init_cache();
+         this->priv_move_cache(x);
          this->priv_size_traits().set_size(x.priv_size_traits().get_size());
          x.priv_size_traits().set_size(size_type(0));
          this->split_count(x.split_count());
