@@ -1277,7 +1277,8 @@ class bstree_impl
       this->sz_traits().swap(other.sz_traits());
    }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!   Cloner should yield to nodes equivalent to the original nodes.
    //!
    //! <b>Effects</b>: Erases all the elements from *this
@@ -1314,7 +1315,8 @@ class bstree_impl
       }
    }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!   Cloner should yield to nodes equivalent to the original nodes.
    //!
    //! <b>Effects</b>: Erases all the elements from *this
@@ -1792,7 +1794,8 @@ class bstree_impl
       return n;
    }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Erases the element pointed to by i.
    //!   Disposer::operator()(pointer) is called for the removed element.
@@ -1812,7 +1815,8 @@ class bstree_impl
       return ret;
    }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Erases all the elements with the given value.
    //!   Disposer::operator()(pointer) is called for the removed elements.
@@ -1834,7 +1838,8 @@ class bstree_impl
       return n;
    }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Erases the range pointed to by b end e.
    //!   Disposer::operator()(pointer) is called for the removed elements.
@@ -1854,7 +1859,8 @@ class bstree_impl
    //!   comp(nk, key) and !comp(key, nk), with comp(nk, key) implying !comp(key, nk)
    //!   and nk the key_type of a value_type inserted into `*this`.
    //!
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Erases all the elements with the given key.
    //!   according to the comparison functor "comp".

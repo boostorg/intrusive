@@ -547,7 +547,8 @@ class circular_slist_algorithms
    }
 
    //! <b>Requires</b>: "disposer" must be an object function
-   //!   taking a node_ptr parameter and shouldn't throw.
+   //!   taking a node_ptr parameter. Its call operator and its copy
+   //!   and move constructors shouldn't throw.
    //!
    //! <b>Effects</b>: Unlinks all nodes reachable from p (but not p) and calls
    //!   <tt>void disposer::operator()(node_ptr)</tt> for every node of the list

@@ -607,7 +607,8 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    }
 
    //! <b>Requires</b>: "disposer" must be an object function
-   //!   taking a node_ptr parameter and shouldn't throw.
+   //!   taking a node_ptr parameter. Its call operator and its copy
+   //!   and move constructors shouldn't throw.
    //!
    //! <b>Effects</b>: Empties the target tree calling
    //!   <tt>void disposer::operator()(node_ptr)</tt> for every node of the tree
@@ -1353,7 +1354,8 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
 
    //! <b>Requires</b>: "cloner" must be a function
    //!   object taking a node_ptr and returning a new cloned node of it. "disposer" must
-   //!   take a node_ptr and shouldn't throw.
+   //!   take a node_ptr. Its call operator and its copy and move
+   //!   constructors shouldn't throw.
    //!
    //! <b>Effects</b>: First empties target tree calling
    //!   <tt>void disposer::operator()(node_ptr)</tt> for every node of the tree

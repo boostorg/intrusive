@@ -182,7 +182,8 @@ class common_slist_algorithms
    }
 
    //! <b>Requires</b>: "disposer" must be an object function
-   //!   taking a node_ptr parameter and shouldn't throw.
+   //!   taking a node_ptr parameter. Its call operator and its copy
+   //!   and move constructors shouldn't throw.
    //!
    //! <b>Effects</b>: Calls
    //!   <tt>void disposer::operator()(node_ptr)</tt> for every node of the list
@@ -209,7 +210,8 @@ class common_slist_algorithms
    }
 
    //! <b>Requires</b>: "disposer" must be an object function
-   //!   taking a node_ptr parameter and shouldn't throw.
+   //!   taking a node_ptr parameter. Its call operator and its copy
+   //!   and move constructors shouldn't throw.
    //!
    //! <b>Effects</b>: Calls
    //!   <tt>void disposer::operator()(node_ptr)</tt> for every node of the list

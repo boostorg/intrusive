@@ -568,7 +568,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    BOOST_INTRUSIVE_FORCEINLINE void pop_back() BOOST_NOEXCEPT
    {  node_ops::erase(node_traits::get_previous(this->get_root_node()), this->priv_size_traits());   }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Erases the last element of the list.
    //!   No destructors are called.
@@ -601,7 +602,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    BOOST_INTRUSIVE_FORCEINLINE void pop_front() BOOST_NOEXCEPT
    {  node_ops::erase(node_traits::get_next(this->get_root_node()), this->priv_size_traits());   }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Erases the first element of the list.
    //!   No destructors are called.
@@ -916,7 +918,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
       return e.unconst();
    }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Erases the element pointed by i of the list.
    //!   No destructors are called.
@@ -949,7 +952,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    {  return this->erase_and_dispose(const_iterator(i), disposer);   }
    #endif
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Erases the element range pointed by b and e
    //!   No destructors are called.
@@ -994,7 +998,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    using base_t::clear;
    #endif
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Erases all the elements of the container.
    //!   No destructors are called.
@@ -1020,7 +1025,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
       this->priv_size_traits().set_size(0);
    }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!   Cloner should yield to nodes equivalent to the original nodes.
    //!
    //! <b>Effects</b>: Erases all the elements from *this
@@ -1051,7 +1057,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
       rollback.release();
    }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!   Cloner should yield to nodes equivalent to the original nodes.
    //!
    //! <b>Effects</b>: Erases all the elements from *this
@@ -1146,7 +1153,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
       this->insert(this->cend(), b, e);
    }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Requires</b>: Dereferencing iterator must yield
    //!   an lvalue of type value_type.
@@ -1342,7 +1350,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    BOOST_INTRUSIVE_FORCEINLINE size_type remove(const_reference value)
    {  return this->remove_if(detail::equal_to_value<const_reference>(value));  }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Removes all the elements that compare equal to value.
    //!   Disposer::operator()(pointer) is called for every removed element.
@@ -1383,7 +1392,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
       return info.num_1st_partition;
    }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Removes all the elements for which a specified
    //!   predicate is satisfied.
@@ -1442,7 +1452,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    BOOST_INTRUSIVE_FORCEINLINE size_type unique(BinaryPredicate pred)
    {  return this->unique_and_dispose(pred, detail::null_disposer());  }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Removes adjacent duplicate elements or adjacent
    //!   elements that are equal from the list.
@@ -1460,7 +1471,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    BOOST_INTRUSIVE_FORCEINLINE size_type unique_and_dispose(Disposer disposer)
    {  return this->unique_and_dispose(value_equal<value_type>(), disposer);  }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Removes adjacent duplicate elements or adjacent
    //!   elements that satisfy some binary predicate from the list.

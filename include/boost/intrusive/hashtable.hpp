@@ -2861,7 +2861,8 @@ class hashtable_impl
       BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!   Cloner should yield to nodes that compare equal and produce the same
    //!   hash than the original node.
    //!
@@ -2886,7 +2887,8 @@ class hashtable_impl
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(const hashtable_impl &src, Cloner cloner, Disposer disposer)
    {  this->priv_clone_from(src, cloner, disposer);   }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!   Cloner should yield to nodes that compare equal and produce the same
    //!   hash than the original node.
    //!
@@ -3215,7 +3217,8 @@ class hashtable_impl
    BOOST_INTRUSIVE_FORCEINLINE size_type erase(const KeyType& key, KeyHasher hash_func, KeyEqual equal_func)
    {  return this->erase_and_dispose(key, hash_func, equal_func, detail::null_disposer()); }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Erases the element pointed to by i.
    //!   Disposer::operator()(pointer) is called for the removed element.
@@ -3238,7 +3241,8 @@ class hashtable_impl
       this->priv_erasure_update_cache(bp);
    }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Erases the range pointed to by b end e.
    //!   Disposer::operator()(pointer) is called for the removed elements.
@@ -3268,7 +3272,8 @@ class hashtable_impl
       }
    }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Erases all the elements with the given value.
    //!   Disposer::operator()(pointer) is called for the removed elements.
@@ -3290,7 +3295,8 @@ class hashtable_impl
          (key, this->priv_hasher(), this->priv_equal(), disposer, unique_keys_t());
    }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Erases all the elements with the given key.
    //!   according to the comparison functor "equal_func".
@@ -3325,7 +3331,8 @@ class hashtable_impl
       this->priv_size_traits().set_size(size_type(0));
    }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Erases all of the elements.
    //!

@@ -442,7 +442,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
       BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!   Cloner should yield to nodes equivalent to the original nodes.
    //!
    //! <b>Effects</b>: Erases all the elements from *this
@@ -466,7 +467,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
       tree_type::clone_from(src, cloner, disposer);
    }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!   Cloner should yield to nodes equivalent to the original nodes.
    //!
    //! <b>Effects</b>: Erases all the elements from *this
@@ -989,7 +991,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
       return n;
    }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Erases the element pointed to by i.
    //!   Disposer::operator()(pointer) is called for the removed element.
@@ -1015,7 +1018,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    {  return this->erase_and_dispose(const_iterator(i), disposer);   }
    #endif
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Erases the range pointed to by b end e.
    //!   Disposer::operator()(pointer) is called for the removed elements.
@@ -1031,7 +1035,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    BOOST_INTRUSIVE_FORCEINLINE iterator erase_and_dispose(const_iterator b, const_iterator e, Disposer disposer)
    {  size_type n;   return private_erase(b, e, n, disposer);   }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Erases all the elements with the given value.
    //!   Disposer::operator()(pointer) is called for the removed elements.
@@ -1054,7 +1059,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
       return n;
    }
 
-   //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
+   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   constructors of Disposer shouldn't throw.
    //!
    //! <b>Effects</b>: Erases all the elements with the given key.
    //!   according to the comparison functor "comp".
