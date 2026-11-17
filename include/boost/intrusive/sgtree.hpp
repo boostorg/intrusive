@@ -62,7 +62,7 @@ namespace detail{
 //! Undefined if N is 0.
 //!
 //! This function does not use float point operations.
-inline std::size_t calculate_h_sqrt2 (std::size_t n)
+inline std::size_t calculate_h_sqrt2 (std::size_t n) BOOST_NOEXCEPT
 {
    std::size_t f_log2 = detail::floor_log2(n);
    return (2*f_log2) + static_cast<std::size_t>(n >= detail::sqrt2_pow_2xplus1(f_log2));
@@ -70,16 +70,16 @@ inline std::size_t calculate_h_sqrt2 (std::size_t n)
 
 struct h_alpha_sqrt2_t
 {
-   BOOST_INTRUSIVE_FORCEINLINE h_alpha_sqrt2_t(void){}
-   BOOST_INTRUSIVE_FORCEINLINE std::size_t operator()(std::size_t n) const
+   BOOST_INTRUSIVE_FORCEINLINE h_alpha_sqrt2_t(void) BOOST_NOEXCEPT {}
+   BOOST_INTRUSIVE_FORCEINLINE std::size_t operator()(std::size_t n) const BOOST_NOEXCEPT
    {  return calculate_h_sqrt2(n);  }
 };
 
 struct alpha_0_75_by_max_size_t
 {
-   BOOST_INTRUSIVE_FORCEINLINE alpha_0_75_by_max_size_t(void){}
+   BOOST_INTRUSIVE_FORCEINLINE alpha_0_75_by_max_size_t(void) BOOST_NOEXCEPT {}
 
-   std::size_t operator()(std::size_t max_tree_size) const
+   std::size_t operator()(std::size_t max_tree_size) const BOOST_NOEXCEPT
    {
       const std::size_t max_tree_size_limit = ((~std::size_t(0))/std::size_t(3));
       return max_tree_size > max_tree_size_limit ? max_tree_size/4*3 : max_tree_size*3/4;
@@ -94,11 +94,11 @@ struct alpha_0_75_by_max_size_t
 
 struct h_alpha_t
 {
-   BOOST_INTRUSIVE_FORCEINLINE explicit h_alpha_t(float inv_minus_logalpha)
+   BOOST_INTRUSIVE_FORCEINLINE explicit h_alpha_t(float inv_minus_logalpha) BOOST_NOEXCEPT
       :  inv_minus_logalpha_(inv_minus_logalpha)
    {}
 
-   std::size_t operator()(std::size_t n) const
+   std::size_t operator()(std::size_t n) const BOOST_NOEXCEPT
    {
       ////////////////////////////////////////////////////////////
       // This function must return "floor(log2(1/alpha(n)))" ->
@@ -119,11 +119,11 @@ struct h_alpha_t
 
 struct alpha_by_max_size_t
 {
-   BOOST_INTRUSIVE_FORCEINLINE explicit alpha_by_max_size_t(float alpha)
+   BOOST_INTRUSIVE_FORCEINLINE explicit alpha_by_max_size_t(float alpha) BOOST_NOEXCEPT
       :  alpha_(alpha)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE float operator()(std::size_t max_tree_size) const
+   BOOST_INTRUSIVE_FORCEINLINE float operator()(std::size_t max_tree_size) const BOOST_NOEXCEPT
    {  return float(max_tree_size)*alpha_;   }
 
    private:
