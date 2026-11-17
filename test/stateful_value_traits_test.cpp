@@ -105,6 +105,7 @@ typedef list<MyClass, value_traits<list_traits> > List;
 //Define a slist that will store MyClass using the external hook
 typedef stateful_value_traits< MyClass, slist_node_traits<void*> > slist_traits;
 typedef slist<MyClass, value_traits<slist_traits> > Slist;
+typedef slist<MyClass, value_traits<slist_traits>, linear<true> > LinearSlist;
 
 //The copy constructor of the value traits is not noexcept
 #if !defined(BOOST_NO_CXX11_NOEXCEPT)
@@ -313,6 +314,25 @@ int main()
       Uset u2( Uset::bucket_traits(buckets2, SwapElements), Uset::hasher(), Uset::key_equal()
              , slist_traits(ud.values2, ud.hooks2));
       if(!test_swap(u1, u2, ud))  return 1;
+   }
+
+   //splice_after to an empty linear slist only transfers the nodes
+   {
+      swap_data<slist_node_t> &sld = slist_swap_data;
+      LinearSlist sl1(slist_traits(sld.values1, sld.hooks1));
+      LinearSlist sl2(slist_traits(sld.values1, sld.hooks1));
+      for(std::size_t i = 0; i < SwapElements; ++i)
+         sl2.push_front(sld.values1[i]);
+      vtraits_copies = vtraits_moves = 0;
+      LinearSlist::const_iterator last;
+      sl1.splice_after(sl1.cbefore_begin(), sl2, &last);
+      if(vtraits_copies != 0 || vtraits_moves != 0)
+         return 1;
+      if(!holds_values(sl1, sld.values1) || !sl2.empty())
+         return 1;
+      if(&*last != &sld.values1[0])
+         return 1;
+      sl1.clear();
    }
 
    return 0;

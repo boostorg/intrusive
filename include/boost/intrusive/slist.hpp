@@ -1809,7 +1809,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
          if(l) *l = prev;
       }
       else if(linear && this->empty()){
-         this->swap(x);
+         node_ops::move_all( this->get_root_node(), this->priv_last_ptr(), this->priv_size_traits()
+                           , x.get_root_node(), x.priv_last_ptr(), x.priv_size_traits());
          if(l) *l = this->previous(this->cend());
       }
       else{
