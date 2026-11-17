@@ -733,6 +733,11 @@ with the name of the file to include:
    #define BOOST_INTRUSIVE_SAFE_HOOK_DESTRUCTOR_ASSERT          MYASSERT
    #define BOOST_INTRUSIVE_SAFE_HOOK_DESTRUCTOR_ASSERT_INCLUDE <myassert.h>
 
+[important The assertion handlers must not throw. The assertions are used in functions that are `noexcept`
+(for example, the insertion functions of the containers and the destructors of the hooks), so an exception
+that an assertion handler throws calls `std::terminate`. This is also true for a `BOOST_ASSERT` handler
+(`boost::assertion_failed`) if these macros use `BOOST_ASSERT`.]
+
 [endsect]
 
 [endsect]
@@ -4203,6 +4208,8 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 * Documented that the copy and move constructors of disposers must not throw, as their function call
   operator must not, because `noexcept` functions copy the disposer (the same rule as for the deleter
   of `std::unique_ptr`).
+* Documented that safe-mode assertion handlers must not throw, because the assertions are used in `noexcept`
+  functions.
 * Move constructors now copy the predicates (comparison, priority, hash and equality) instead of moving or
   swapping them, as standard containers do ([@https://cplusplus.github.io/LWG/issue2227 LWG 2227]), so the
   moved-from container keeps valid predicates. They are `noexcept` when those copies (and the copies or moves of the
