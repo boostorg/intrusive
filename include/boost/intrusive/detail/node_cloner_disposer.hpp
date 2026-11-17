@@ -88,11 +88,13 @@ struct node_disposer
    static const bool safemode_or_autounlink =
       is_safe_autounlink<value_traits::link_mode>::value;
 
-   BOOST_INTRUSIVE_FORCEINLINE node_disposer(F f, const ValueTraits *cont)
+   //This is noexcept because the user disposer must not throw and node algorithms are noexcept
+   BOOST_INTRUSIVE_FORCEINLINE node_disposer(F f, const ValueTraits *cont) BOOST_NOEXCEPT
       :  base_t(f), traits_(cont)
    {}
 
-   inline void operator()(node_ptr p)
+   //This is noexcept because disposer's operator() must not throw
+   inline void operator()(node_ptr p) BOOST_NOEXCEPT
    {
       BOOST_IF_CONSTEXPR(safemode_or_autounlink)
          node_algorithms::init(p);
@@ -108,10 +110,10 @@ struct node_null_disposer
 {
    typedef typename NodeAlgorithms::node_ptr    node_ptr;
 
-   BOOST_INTRUSIVE_FORCEINLINE node_null_disposer(null_disposer, const void *)
+   BOOST_INTRUSIVE_FORCEINLINE node_null_disposer(null_disposer, const void *) BOOST_NOEXCEPT
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE void operator()(node_ptr p)
+   BOOST_INTRUSIVE_FORCEINLINE void operator()(node_ptr p) BOOST_NOEXCEPT
    {  NodeAlgorithms::init(p);   }
 };
 
@@ -125,11 +127,11 @@ struct get_node_disposer
 //is normal_link. No dependencies
 struct node_noop_disposer
 {
-   BOOST_INTRUSIVE_FORCEINLINE node_noop_disposer(null_disposer, const void *)
+   BOOST_INTRUSIVE_FORCEINLINE node_noop_disposer(null_disposer, const void *) BOOST_NOEXCEPT
    {}
 
    template<class NodePtr>
-   BOOST_INTRUSIVE_FORCEINLINE void operator()(const NodePtr &)
+   BOOST_INTRUSIVE_FORCEINLINE void operator()(const NodePtr &) BOOST_NOEXCEPT
    {}
 };
 

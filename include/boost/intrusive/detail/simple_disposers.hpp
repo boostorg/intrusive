@@ -31,7 +31,7 @@ class null_disposer
 {
    public:
    template <class Pointer>
-   BOOST_INTRUSIVE_FORCEINLINE void operator()(Pointer)
+   BOOST_INTRUSIVE_FORCEINLINE void operator()(Pointer) BOOST_NOEXCEPT
    {}
 };
 
@@ -41,7 +41,7 @@ class init_disposer
    typedef typename NodeAlgorithms::node_ptr node_ptr;
 
    public:
-   BOOST_INTRUSIVE_FORCEINLINE void operator()(node_ptr p)
+   BOOST_INTRUSIVE_FORCEINLINE void operator()(node_ptr p) BOOST_NOEXCEPT
    {  NodeAlgorithms::init(p);   }
 };
 
