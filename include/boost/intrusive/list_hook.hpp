@@ -148,7 +148,7 @@ class list_base_hook
    //!   will return a valid iterator.
    //!
    //! <b>Complexity</b>: Constant
-   bool is_linked() const;
+   bool is_linked() const noexcept;
 
    //! <b>Effects</b>: Removes the node if it's inserted in a container.
    //!   This function is only allowed if link_mode is \c auto_unlink.
@@ -271,7 +271,7 @@ class list_member_hook
    //!   will return a valid iterator.
    //!
    //! <b>Complexity</b>: Constant
-   bool is_linked() const;
+   bool is_linked() const noexcept;
 
    //! <b>Effects</b>: Removes the node if it's inserted in a container.
    //!   This function is only allowed if link_mode is \c auto_unlink.

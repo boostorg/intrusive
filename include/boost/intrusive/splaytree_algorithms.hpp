@@ -185,7 +185,7 @@ class splaytree_algorithms
    static node_ptr end_node(const_node_ptr header) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::swap_tree
-   static void swap_tree(node_ptr header1, node_ptr header2);
+   static void swap_tree(node_ptr header1, node_ptr header2) noexcept;
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::swap_nodes(node_ptr,node_ptr)
    static void swap_nodes(node_ptr node1, node_ptr node2) BOOST_NOEXCEPT;

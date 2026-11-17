@@ -97,7 +97,7 @@ class avl_set_base_hook
    //!   initializes the node to an unlinked state.
    //!
    //! <b>Throws</b>: Nothing.
-   avl_set_base_hook();
+   avl_set_base_hook() noexcept;
 
    //! <b>Effects</b>: If link_mode is \c auto_unlink or \c safe_link
    //!   initializes the node to an unlinked state. The argument is ignored.
@@ -108,7 +108,7 @@ class avl_set_base_hook
    //!   makes classes using the hook STL-compliant without forcing the
    //!   user to do some additional work. \c swap can be used to emulate
    //!   move-semantics.
-   avl_set_base_hook(const avl_set_base_hook& );
+   avl_set_base_hook(const avl_set_base_hook& ) noexcept;
 
    //! <b>Effects</b>: Empty function. The argument is ignored.
    //!
@@ -118,7 +118,7 @@ class avl_set_base_hook
    //!   makes classes using the hook STL-compliant without forcing the
    //!   user to do some additional work. \c swap can be used to emulate
    //!   move-semantics.
-   avl_set_base_hook& operator=(const avl_set_base_hook& );
+   avl_set_base_hook& operator=(const avl_set_base_hook& ) noexcept;
 
    //! <b>Effects</b>: If link_mode is \c normal_link, the destructor does
    //!   nothing (ie. no code is generated). If link_mode is \c safe_link and the
@@ -140,7 +140,7 @@ class avl_set_base_hook
    //! <b>Complexity</b>: Constant
    //!
    //! <b>Throws</b>: Nothing.
-   void swap_nodes(avl_set_base_hook &other);
+   void swap_nodes(avl_set_base_hook &other) noexcept;
 
    //! <b>Precondition</b>: link_mode must be \c safe_link or \c auto_unlink.
    //!
@@ -149,13 +149,13 @@ class avl_set_base_hook
    //!   will return a valid iterator.
    //!
    //! <b>Complexity</b>: Constant
-   bool is_linked() const;
+   bool is_linked() const noexcept;
 
    //! <b>Effects</b>: Removes the node if it's inserted in a container.
    //!   This function is only allowed if link_mode is \c auto_unlink.
    //!
    //! <b>Throws</b>: Nothing.
-   void unlink();
+   void unlink() noexcept;
    #endif
 };
 
@@ -223,7 +223,7 @@ class avl_set_member_hook
    //!   initializes the node to an unlinked state.
    //!
    //! <b>Throws</b>: Nothing.
-   avl_set_member_hook();
+   avl_set_member_hook() noexcept;
 
    //! <b>Effects</b>: If link_mode is \c auto_unlink or \c safe_link
    //!   initializes the node to an unlinked state. The argument is ignored.
@@ -234,7 +234,7 @@ class avl_set_member_hook
    //!   makes classes using the hook STL-compliant without forcing the
    //!   user to do some additional work. \c swap can be used to emulate
    //!   move-semantics.
-   avl_set_member_hook(const avl_set_member_hook& );
+   avl_set_member_hook(const avl_set_member_hook& ) noexcept;
 
    //! <b>Effects</b>: Empty function. The argument is ignored.
    //!
@@ -244,7 +244,7 @@ class avl_set_member_hook
    //!   makes classes using the hook STL-compliant without forcing the
    //!   user to do some additional work. \c swap can be used to emulate
    //!   move-semantics.
-   avl_set_member_hook& operator=(const avl_set_member_hook& );
+   avl_set_member_hook& operator=(const avl_set_member_hook& ) noexcept;
 
    //! <b>Effects</b>: If link_mode is \c normal_link, the destructor does
    //!   nothing (ie. no code is generated). If link_mode is \c safe_link and the
@@ -266,7 +266,7 @@ class avl_set_member_hook
    //! <b>Complexity</b>: Constant
    //!
    //! <b>Throws</b>: Nothing.
-   void swap_nodes(avl_set_member_hook &other);
+   void swap_nodes(avl_set_member_hook &other) noexcept;
 
    //! <b>Precondition</b>: link_mode must be \c safe_link or \c auto_unlink.
    //!
@@ -275,13 +275,13 @@ class avl_set_member_hook
    //!   will return a valid iterator.
    //!
    //! <b>Complexity</b>: Constant
-   bool is_linked() const;
+   bool is_linked() const noexcept;
 
    //! <b>Effects</b>: Removes the node if it's inserted in a container.
    //!   This function is only allowed if link_mode is \c auto_unlink.
    //!
    //! <b>Throws</b>: Nothing.
-   void unlink();
+   void unlink() noexcept;
    #endif
 };
 

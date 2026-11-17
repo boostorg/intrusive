@@ -251,7 +251,7 @@ class unordered_set_impl
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::hashtable::erase(const_iterator)
-   void erase(const_iterator i);
+   void erase(const_iterator i) noexcept;
 
    //! @copydoc ::boost::intrusive::hashtable::erase(const_iterator,const_iterator)
    void erase(const_iterator b, const_iterator e) BOOST_NOEXCEPT;
@@ -393,7 +393,7 @@ class unordered_set_impl
    bool incremental_rehash(bool grow = true);
 
    //! @copydoc ::boost::intrusive::hashtable::incremental_rehash(const bucket_traits &)
-   bool incremental_rehash(const bucket_traits &new_bucket_traits);
+   bool incremental_rehash(const bucket_traits &new_bucket_traits) noexcept;
 
    //! @copydoc ::boost::intrusive::hashtable::split_count
    size_type split_count() const BOOST_NOEXCEPT;
@@ -788,7 +788,7 @@ class unordered_multiset_impl
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::hashtable::erase(const_iterator)
-   void erase(const_iterator i);
+   void erase(const_iterator i) noexcept;
 
    //! @copydoc ::boost::intrusive::hashtable::erase(const_iterator,const_iterator)
    void erase(const_iterator b, const_iterator e) BOOST_NOEXCEPT;
@@ -924,7 +924,7 @@ class unordered_multiset_impl
    bool incremental_rehash(bool grow = true);
 
    //! @copydoc ::boost::intrusive::hashtable::incremental_rehash(const bucket_traits &)
-   bool incremental_rehash(const bucket_traits &new_bucket_traits);
+   bool incremental_rehash(const bucket_traits &new_bucket_traits) noexcept;
 
    //! @copydoc ::boost::intrusive::hashtable::split_count
    size_type split_count() const BOOST_NOEXCEPT;

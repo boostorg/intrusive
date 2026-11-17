@@ -252,7 +252,7 @@ class treap_set_impl
    //! @copydoc ::boost::intrusive::treap::crtop()const
    inline const_reverse_iterator crtop() const BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::treap::crtop() const
+   //! @copydoc ::boost::intrusive::treap::priority_comp()const
    priority_compare priority_comp() const;
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
@@ -872,7 +872,7 @@ class treap_multiset_impl
    //! @copydoc ::boost::intrusive::treap::crtop()const
    inline const_reverse_iterator crtop() const BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::treap::crtop() const
+   //! @copydoc ::boost::intrusive::treap::priority_comp()const
    priority_compare priority_comp() const;
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
