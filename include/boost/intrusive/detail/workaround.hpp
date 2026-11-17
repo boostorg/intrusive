@@ -32,6 +32,15 @@
    #define BOOST_INTRUSIVE_PERFECT_FORWARDING
 #endif
 
+//Inheriting constructors with the C++17 rules (P0136, the inherited constructor keeps
+//the noexcept of the base constructor) plus defaulted move operations. The final
+//container classes then do not repeat the constructors and noexcept conditions of their base.
+#if    defined(__cpp_inheriting_constructors) && (__cpp_inheriting_constructors >= 201511L) \
+    && !defined(BOOST_NO_CXX11_RVALUE_REFERENCES) && !defined(BOOST_NO_CXX11_DEFAULTED_FUNCTIONS) \
+    && !defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
+   #define BOOST_INTRUSIVE_HAS_INHERITING_CONSTRUCTORS
+#endif
+
 //Macros for documentation purposes. For code, expands to the argument
 #define BOOST_INTRUSIVE_IMPDEF(TYPE) TYPE
 #define BOOST_INTRUSIVE_SEEDOC(TYPE) TYPE

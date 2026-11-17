@@ -125,11 +125,15 @@ class avltree_impl
 
    //! @copydoc ::boost::intrusive::bstree::bstree()
    BOOST_INTRUSIVE_FORCEINLINE avltree_impl()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_default_constructible<value_traits>::value)
       :  tree_type()
    {}
 
    //! @copydoc ::boost::intrusive::bstree::bstree(const key_compare &,const value_traits &)
    BOOST_INTRUSIVE_FORCEINLINE explicit avltree_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value)
       :  tree_type(cmp, v_traits)
    {}
 
@@ -547,11 +551,21 @@ class avltree
    //Assert if passed value traits are compatible with the type
    BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
+   #if defined(BOOST_INTRUSIVE_HAS_INHERITING_CONSTRUCTORS)
+   //The inherited constructors and the defaulted operations get the noexcept of Base
+   using Base::Base;
+   avltree() = default;
+   avltree(avltree &&) = default;
+   avltree& operator=(avltree &&) = default;
+   #else
    BOOST_INTRUSIVE_FORCEINLINE avltree()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<Base>::value)
       :  Base()
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE explicit avltree( const key_compare &cmp, const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value)
       :  Base(cmp, v_traits)
    {}
 
@@ -572,6 +586,7 @@ class avltree
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
    #endif
    {  return static_cast<avltree &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
+   #endif
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(avltree &x, avltree &y)

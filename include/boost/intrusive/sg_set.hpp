@@ -87,11 +87,15 @@ class sg_set_impl
    public:
    //! @copydoc ::boost::intrusive::sgtree::sgtree()
    BOOST_INTRUSIVE_FORCEINLINE sg_set_impl()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_default_constructible<value_traits>::value)
       :  tree_type()
    {}
 
    //! @copydoc ::boost::intrusive::sgtree::sgtree(const key_compare &,const value_traits &)
    BOOST_INTRUSIVE_FORCEINLINE explicit sg_set_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value)
       :  tree_type(cmp, v_traits)
    {}
 
@@ -558,11 +562,21 @@ class sg_set
    //Assert if passed value traits are compatible with the type
    BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
+   #if defined(BOOST_INTRUSIVE_HAS_INHERITING_CONSTRUCTORS)
+   //The inherited constructors and the defaulted operations get the noexcept of Base
+   using Base::Base;
+   sg_set() = default;
+   sg_set(sg_set &&) = default;
+   sg_set& operator=(sg_set &&) = default;
+   #else
    BOOST_INTRUSIVE_FORCEINLINE sg_set()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<Base>::value)
       :  Base()
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE explicit sg_set( const key_compare &cmp, const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value)
       :  Base(cmp, v_traits)
    {}
 
@@ -583,6 +597,7 @@ class sg_set
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
    #endif
    {  return static_cast<sg_set &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
+   #endif
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(sg_set &x, sg_set &y)
@@ -674,11 +689,15 @@ class sg_multiset_impl
    public:
    //! @copydoc ::boost::intrusive::sgtree::sgtree()
    BOOST_INTRUSIVE_FORCEINLINE sg_multiset_impl()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_default_constructible<value_traits>::value)
       :  tree_type()
    {}
 
    //! @copydoc ::boost::intrusive::sgtree::sgtree(const key_compare &,const value_traits &)
    BOOST_INTRUSIVE_FORCEINLINE explicit sg_multiset_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value)
       :  tree_type(cmp, v_traits)
    {}
 
@@ -1088,11 +1107,21 @@ class sg_multiset
    //Assert if passed value traits are compatible with the type
    BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
+   #if defined(BOOST_INTRUSIVE_HAS_INHERITING_CONSTRUCTORS)
+   //The inherited constructors and the defaulted operations get the noexcept of Base
+   using Base::Base;
+   sg_multiset() = default;
+   sg_multiset(sg_multiset &&) = default;
+   sg_multiset& operator=(sg_multiset &&) = default;
+   #else
    BOOST_INTRUSIVE_FORCEINLINE sg_multiset()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<Base>::value)
       :  Base()
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE explicit sg_multiset( const key_compare &cmp, const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value)
       :  Base(cmp, v_traits)
    {}
 
@@ -1113,6 +1142,7 @@ class sg_multiset
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
    #endif
    {  return static_cast<sg_multiset &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
+   #endif
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(sg_multiset &x, sg_multiset &y)

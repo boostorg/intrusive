@@ -94,6 +94,9 @@ class treap_set_impl
    public:
    //! @copydoc ::boost::intrusive::treap::treap()
    BOOST_INTRUSIVE_FORCEINLINE treap_set_impl()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_default_constructible<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_default_constructible<priority_compare>::value)
       :  tree_type()
    {}
 
@@ -101,6 +104,9 @@ class treap_set_impl
    explicit treap_set_impl( const key_compare &cmp
                           , const priority_compare &pcmp  = priority_compare()
                           , const value_traits &v_traits  = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<priority_compare>::value)
       :  tree_type(cmp, pcmp, v_traits)
    {}
 
@@ -570,13 +576,24 @@ class treap_set
    //Assert if passed value traits are compatible with the type
    BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
+   #if defined(BOOST_INTRUSIVE_HAS_INHERITING_CONSTRUCTORS)
+   //The inherited constructors and the defaulted operations get the noexcept of Base
+   using Base::Base;
+   treap_set() = default;
+   treap_set(treap_set &&) = default;
+   treap_set& operator=(treap_set &&) = default;
+   #else
    BOOST_INTRUSIVE_FORCEINLINE treap_set()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<Base>::value)
       :  Base()
    {}
 
    inline explicit treap_set( const key_compare &cmp
                      , const priority_compare &pcmp = priority_compare()
                      , const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<priority_compare>::value)
       :  Base(cmp, pcmp, v_traits)
    {}
 
@@ -598,6 +615,7 @@ class treap_set
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
    #endif
    {  return static_cast<treap_set &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
+   #endif
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(treap_set &x, treap_set &y)
@@ -696,6 +714,9 @@ class treap_multiset_impl
 
    //! @copydoc ::boost::intrusive::treap::treap()
    BOOST_INTRUSIVE_FORCEINLINE treap_multiset_impl()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_default_constructible<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_default_constructible<priority_compare>::value)
       :  tree_type()
    {}
 
@@ -703,6 +724,9 @@ class treap_multiset_impl
    explicit treap_multiset_impl( const key_compare &cmp
                           , const priority_compare &pcmp  = priority_compare()
                           , const value_traits &v_traits  = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<priority_compare>::value)
       :  tree_type(cmp, pcmp, v_traits)
    {}
 
@@ -1112,13 +1136,24 @@ class treap_multiset
    //Assert if passed value traits are compatible with the type
    BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
+   #if defined(BOOST_INTRUSIVE_HAS_INHERITING_CONSTRUCTORS)
+   //The inherited constructors and the defaulted operations get the noexcept of Base
+   using Base::Base;
+   treap_multiset() = default;
+   treap_multiset(treap_multiset &&) = default;
+   treap_multiset& operator=(treap_multiset &&) = default;
+   #else
    BOOST_INTRUSIVE_FORCEINLINE treap_multiset()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<Base>::value)
       :  Base()
    {}
 
    inline explicit treap_multiset( const key_compare &cmp
                           , const priority_compare &pcmp = priority_compare()
                           , const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<priority_compare>::value)
       :  Base(cmp, pcmp, v_traits)
    {}
 
@@ -1140,6 +1175,7 @@ class treap_multiset
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
    #endif
    {  return static_cast<treap_multiset &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
+   #endif
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(treap_multiset &x, treap_multiset &y)

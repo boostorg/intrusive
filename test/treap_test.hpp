@@ -97,6 +97,18 @@ struct test_treap
          < compare< tracking_less<typename treap_type::key_type> >
          , priority<swap_not_noexcept_priority> >::type swap_type;
       using boost::move_detail::is_nothrow_swappable;
+      //The default constructor and the constructor from the comparison objects are
+      //noexcept only if the ones of the priority comparison are
+      typedef typename treap_type::key_compare        t_key_compare;
+      typedef typename treap_type::priority_compare   t_priority_compare;
+      typedef typename default_type::key_compare      d_key_compare;
+      typedef typename default_type::priority_compare d_priority_compare;
+      BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(treap_type()) ));
+      BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(treap_type( declval<const t_key_compare&>()
+                                                          , declval<const t_priority_compare&>())) ));
+      BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(default_type()) ));
+      BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(default_type( declval<const d_key_compare&>()
+                                                            , declval<const d_priority_compare&>())) ));
       BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(default_type(declval<default_type>())) ));
       BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(declval<default_type&>() = declval<default_type>()) ));
       //priority_comp() returns a copy

@@ -92,11 +92,15 @@ class avl_set_impl
 
    //! @copydoc ::boost::intrusive::avltree::avltree()
    BOOST_INTRUSIVE_FORCEINLINE avl_set_impl()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_default_constructible<value_traits>::value)
       :  tree_type()
    {}
 
    //! @copydoc ::boost::intrusive::avltree::avltree(const key_compare &,const value_traits &)
    BOOST_INTRUSIVE_FORCEINLINE explicit avl_set_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value)
       :  tree_type(cmp, v_traits)
    {}
 
@@ -553,11 +557,21 @@ class avl_set
    //Assert if passed value traits are compatible with the type
    BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
+   #if defined(BOOST_INTRUSIVE_HAS_INHERITING_CONSTRUCTORS)
+   //The inherited constructors and the defaulted operations get the noexcept of Base
+   using Base::Base;
+   avl_set() = default;
+   avl_set(avl_set &&) = default;
+   avl_set& operator=(avl_set &&) = default;
+   #else
    BOOST_INTRUSIVE_FORCEINLINE avl_set()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<Base>::value)
       :  Base()
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE explicit avl_set( const key_compare &cmp, const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value)
       :  Base(cmp, v_traits)
    {}
 
@@ -578,6 +592,7 @@ class avl_set
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
    #endif
    {  return static_cast<avl_set &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
+   #endif
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(avl_set &x, avl_set &y)
@@ -673,11 +688,15 @@ class avl_multiset_impl
    public:
    //! @copydoc ::boost::intrusive::avltree::avltree()
    BOOST_INTRUSIVE_FORCEINLINE avl_multiset_impl()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_default_constructible<value_traits>::value)
       :  tree_type()
    {}
 
    //! @copydoc ::boost::intrusive::avltree::avltree(const key_compare &,const value_traits &)
    BOOST_INTRUSIVE_FORCEINLINE explicit avl_multiset_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value)
       :  tree_type(cmp, v_traits)
    {}
 
@@ -1075,11 +1094,21 @@ class avl_multiset
    //Assert if passed value traits are compatible with the type
    BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
+   #if defined(BOOST_INTRUSIVE_HAS_INHERITING_CONSTRUCTORS)
+   //The inherited constructors and the defaulted operations get the noexcept of Base
+   using Base::Base;
+   avl_multiset() = default;
+   avl_multiset(avl_multiset &&) = default;
+   avl_multiset& operator=(avl_multiset &&) = default;
+   #else
    BOOST_INTRUSIVE_FORCEINLINE avl_multiset()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<Base>::value)
       :  Base()
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE explicit avl_multiset( const key_compare &cmp, const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value)
       :  Base(cmp, v_traits)
    {}
 
@@ -1100,6 +1129,7 @@ class avl_multiset
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
    #endif
    {  return static_cast<avl_multiset &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
+   #endif
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(avl_multiset &x, avl_multiset &y)

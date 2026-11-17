@@ -700,6 +700,12 @@ void test_generic_assoc<ContainerDefiner>::test_move_constructor_predicates(valu
 
    #if !defined(BOOST_NO_CXX11_NOEXCEPT)
    using boost::move_detail::declval;
+   //The default constructor and the constructor from the comparison object are
+   //noexcept if the default and copy constructors of the comparison object are
+   BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(assoc_type()) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(default_type()) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(assoc_type(declval<const typename assoc_type::key_compare&>())) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(default_type(declval<const typename default_type::key_compare&>())) ));
    BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(assoc_type(declval<assoc_type>())) ));
    BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(default_type(declval<default_type>())) ));
    BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(declval<assoc_type&>() = declval<assoc_type>()) ));

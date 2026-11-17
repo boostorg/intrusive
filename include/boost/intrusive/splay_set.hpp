@@ -87,11 +87,15 @@ class splay_set_impl
    public:
    //! @copydoc ::boost::intrusive::splaytree::splaytree()
    BOOST_INTRUSIVE_FORCEINLINE splay_set_impl()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_default_constructible<value_traits>::value)
       :  tree_type()
    {}
 
    //! @copydoc ::boost::intrusive::splaytree::splaytree(const key_compare &,const value_traits &)
    BOOST_INTRUSIVE_FORCEINLINE explicit splay_set_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value)
       :  tree_type(cmp, v_traits)
    {}
 
@@ -633,11 +637,21 @@ class splay_set
    //Assert if passed value traits are compatible with the type
    BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
+   #if defined(BOOST_INTRUSIVE_HAS_INHERITING_CONSTRUCTORS)
+   //The inherited constructors and the defaulted operations get the noexcept of Base
+   using Base::Base;
+   splay_set() = default;
+   splay_set(splay_set &&) = default;
+   splay_set& operator=(splay_set &&) = default;
+   #else
    BOOST_INTRUSIVE_FORCEINLINE splay_set()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<Base>::value)
       :  Base()
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE explicit splay_set( const key_compare &cmp, const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value)
       :  Base(cmp, v_traits)
    {}
 
@@ -658,6 +672,7 @@ class splay_set
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
    #endif
    {  return static_cast<splay_set &>(this->Base::operator=(::boost::move(static_cast<Base&>(x))));  }
+   #endif
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(splay_set &x, splay_set &y)
@@ -749,11 +764,15 @@ class splay_multiset_impl
    public:
    //! @copydoc ::boost::intrusive::splaytree::splaytree()
    BOOST_INTRUSIVE_FORCEINLINE splay_multiset_impl()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_default_constructible<value_traits>::value)
       :  tree_type()
    {}
 
    //! @copydoc ::boost::intrusive::splaytree::splaytree(const key_compare &,const value_traits &)
    BOOST_INTRUSIVE_FORCEINLINE explicit splay_multiset_impl(const key_compare &cmp, const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value)
       :  tree_type(cmp, v_traits)
    {}
 
@@ -1167,11 +1186,21 @@ class splay_multiset
    //Assert if passed value traits are compatible with the type
    BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
+   #if defined(BOOST_INTRUSIVE_HAS_INHERITING_CONSTRUCTORS)
+   //The inherited constructors and the defaulted operations get the noexcept of Base
+   using Base::Base;
+   splay_multiset() = default;
+   splay_multiset(splay_multiset &&) = default;
+   splay_multiset& operator=(splay_multiset &&) = default;
+   #else
    BOOST_INTRUSIVE_FORCEINLINE splay_multiset()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<Base>::value)
       :  Base()
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE explicit splay_multiset( const key_compare &cmp, const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value)
       :  Base(cmp, v_traits)
    {}
 
@@ -1192,6 +1221,7 @@ class splay_multiset
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
    #endif
    {  return static_cast<splay_multiset &>(this->Base::operator=(::boost::move(static_cast<Base&>(x))));  }
+   #endif
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(splay_multiset &x, splay_multiset &y)
