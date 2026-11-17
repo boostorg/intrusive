@@ -414,7 +414,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks).
    BOOST_INTRUSIVE_FORCEINLINE list_impl()
-      :  vtraits_holder_t(value_traits()), base_t()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<value_traits>::value)
+      :  vtraits_holder_t(), base_t()
    {}
 
    //! <b>Effects</b>: constructs an empty list.
@@ -424,6 +425,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks).
    BOOST_INTRUSIVE_FORCEINLINE explicit list_impl(const value_traits &v_traits)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value)
       :  vtraits_holder_t(v_traits), base_t()
    {}
 
@@ -1675,10 +1677,12 @@ class list
    typedef typename Base::const_iterator        const_iterator;
 
    BOOST_INTRUSIVE_FORCEINLINE list()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<Base>::value)
       :  Base()
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE explicit list(const value_traits &v_traits)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value)
       :  Base(v_traits)
    {}
 

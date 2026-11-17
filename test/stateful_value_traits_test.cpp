@@ -106,6 +106,12 @@ typedef list<MyClass, value_traits<list_traits> > List;
 typedef stateful_value_traits< MyClass, slist_node_traits<void*> > slist_traits;
 typedef slist<MyClass, value_traits<slist_traits> > Slist;
 
+//The copy constructor of the value traits is not noexcept
+#if !defined(BOOST_NO_CXX11_NOEXCEPT)
+BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(List(boost::move_detail::declval<const list_traits&>())) ));
+BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(Slist(boost::move_detail::declval<const slist_traits&>())) ));
+#endif
+
 //Define a set that will store MyClass using the external hook
 typedef stateful_value_traits< MyClass, rbtree_node_traits<void*> > rbtree_traits;
 typedef set<MyClass, value_traits<rbtree_traits> > Set;

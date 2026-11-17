@@ -486,6 +486,8 @@ void test_slist< ListType, ValueContainer >
       BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(swap(testlist1, testlist2)) ));
       BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(list_type(boost::move(testlist1))) ));
       BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(testlist1 = boost::move(testlist2)) ));
+      BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(list_type()) ));
+      BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(list_type(boost::move_detail::declval<const typename list_type::value_traits&>())) ));
       #endif
       {  int init_values [] = { 3, 4, 5 };
          TEST_INTRUSIVE_SEQUENCE( init_values, testlist1.begin() );  }
