@@ -29,6 +29,7 @@
 #include <boost/intrusive/detail/reverse_iterator.hpp>
 #include <boost/intrusive/detail/uncast.hpp>
 #include <boost/intrusive/detail/list_iterator.hpp>
+#include <boost/intrusive/detail/iterator.hpp>
 #include <boost/intrusive/detail/exception_disposer.hpp>
 #include <boost/intrusive/detail/equal_to_value.hpp>
 #include <boost/intrusive/detail/key_nodeptr_comp.hpp>
@@ -436,12 +437,16 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    //! <b>Complexity</b>: Linear in distance(b, e). No copy constructors are called.
    //!
    //! <b>Throws</b>: If value_traits::node_traits::node
-   //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks).
+   //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks),
+   //!   or if the copy constructor of value_traits or the operations of Iterator throw.
    template<class Iterator>
    BOOST_INTRUSIVE_FORCEINLINE list_impl(Iterator b, Iterator e, const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value &&
+                        (detail::is_nothrow_range_iterator<Iterator, reference>::value))
       :  vtraits_holder_t(v_traits), base_t()
    {
-      //nothrow, no need to rollback to release elements on exception
+      //If the iterator throws, the destructor of base_t unlinks the
+      //inserted elements (safe-mode and auto-unlink hooks)
       this->insert(this->cend(), b, e);
    }
 
@@ -1103,13 +1108,15 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    //! <b>Effects</b>: Inserts the range pointed by b and e before the position p.
    //!   No copy constructors are called.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If the operations of Iterator throw. Basic guarantee: the elements
+   //!   inserted before the exception stay in the list.
    //!
    //! <b>Complexity</b>: Linear to the number of elements inserted.
    //!
    //! <b>Note</b>: Does not affect the validity of iterators and references.
    template<class Iterator>
-   void insert(const_iterator p, Iterator b, Iterator e) BOOST_NOEXCEPT
+   void insert(const_iterator p, Iterator b, Iterator e)
+      BOOST_NOEXCEPT_IF((detail::is_nothrow_range_iterator<Iterator, reference>::value))
    {
       for (; b != e; ++b)
          this->insert(p, *b);
@@ -1121,7 +1128,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    //! <b>Effects</b>: Clears the list and inserts the range pointed by b and e.
    //!   No destructors or copy constructors are called.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If the operations of Iterator throw. Basic guarantee: the list
+   //!   holds the elements inserted before the exception.
    //!
    //! <b>Complexity</b>: Linear to the number of elements inserted plus
    //!   linear to the elements contained in the list if it's a safe-mode
@@ -1131,7 +1139,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    //! <b>Note</b>: Invalidates the iterators (but not the references)
    //!   to the erased elements.
    template<class Iterator>
-   void assign(Iterator b, Iterator e) BOOST_NOEXCEPT
+   void assign(Iterator b, Iterator e)
+      BOOST_NOEXCEPT_IF((detail::is_nothrow_range_iterator<Iterator, reference>::value))
    {
       this->clear();
       this->insert(this->cend(), b, e);
@@ -1695,6 +1704,8 @@ class list
 
    template<class Iterator>
    BOOST_INTRUSIVE_FORCEINLINE list(Iterator b, Iterator e, const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value &&
+                        (detail::is_nothrow_range_iterator<Iterator, typename Base::reference>::value))
       :  Base(b, e, v_traits)
    {}
 

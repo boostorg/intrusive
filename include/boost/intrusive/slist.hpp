@@ -843,13 +843,17 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //! <b>Complexity</b>: Linear in distance(b, e). No copy constructors are called.
    //!
    //! <b>Throws</b>: If value_traits::node_traits::node
-   //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks).
+   //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks),
+   //!   or if the copy constructor of value_traits or the operations of Iterator throw.
    template<class Iterator>
    slist_impl(Iterator b, Iterator e, const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value &&
+                        (detail::is_nothrow_range_iterator<Iterator, reference>::value))
       :  vtraits_holder_t(v_traits), base_t()
    {
       this->set_default_constructed_state();
-      //nothrow, no need to rollback to release elements on exception
+      //If the iterator throws, the destructor of base_t unlinks the
+      //inserted elements (safe-mode and auto-unlink hooks)
       this->insert_after(this->cbefore_begin(), b, e);
    }
 
@@ -1397,30 +1401,27 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //! <b>Effects</b>: Inserts the [f, l)
    //!   after the position prev_p.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If the operations of Iterator throw. Basic guarantee: the elements
+   //!   inserted before the exception stay in the list.
    //!
    //! <b>Complexity</b>: Linear to the number of elements inserted.
    //!
    //! <b>Note</b>: Does not affect the validity of iterators and references.
    template<class Iterator>
-   void insert_after(const_iterator prev_p, Iterator f, Iterator l) BOOST_NOEXCEPT
+   void insert_after(const_iterator prev_p, Iterator f, Iterator l)
+      BOOST_NOEXCEPT_IF((detail::is_nothrow_range_iterator<Iterator, reference>::value))
    {
-      //Insert first nodes avoiding cache and size checks
+      //Insert first nodes avoiding cache and size checks. The fixer updates
+      //them at the end, also if the iterator throws.
       size_type count = 0;
       node_ptr prev_n(prev_p.pointed_node());
-      for (; f != l; ++f, ++count){
+      const range_insertion_fixer fixer(*this, prev_n, prev_n, count);
+      for (; f != l; ++f){
          const node_ptr n = priv_value_traits().to_node_ptr(*f);
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::inited(n));
          node_algorithms::link_after(prev_n, n);
          prev_n = n;
-      }
-      //Now fix special cases if needed
-      BOOST_IF_CONSTEXPR(cache_last)
-      if(this->get_last_node() == prev_p.pointed_node()){
-         this->set_last_node(prev_n);
-      }
-      BOOST_IF_CONSTEXPR(constant_time_size){
-         this->priv_size_traits().increase(count);
+         ++count;
       }
    }
 
@@ -1446,7 +1447,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //! <b>Effects</b>: Inserts the pointed by b and e
    //!   before the position p. No copy constructors are called.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If the operations of Iterator throw. Basic guarantee: the elements
+   //!   inserted before the exception stay in the list.
    //!
    //! <b>Complexity</b>: Linear to the number of elements inserted plus linear
    //!   to the elements before b.
@@ -1454,7 +1456,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //!
    //! <b>Note</b>: Does not affect the validity of iterators and references.
    template<class Iterator>
-   BOOST_INTRUSIVE_FORCEINLINE void insert(const_iterator p, Iterator b, Iterator e) BOOST_NOEXCEPT
+   BOOST_INTRUSIVE_FORCEINLINE void insert(const_iterator p, Iterator b, Iterator e)
+      BOOST_NOEXCEPT_IF((detail::is_nothrow_range_iterator<Iterator, reference>::value))
    {  return this->insert_after(this->previous(p), b, e);  }
 
    //! <b>Effects</b>: Erases the element after the element pointed by prev of
@@ -1738,7 +1741,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //! <b>Effects</b>: Clears the list and inserts the range pointed by b and e.
    //!   No destructors or copy constructors are called.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If the operations of Iterator throw. Basic guarantee: the list
+   //!   holds the elements inserted before the exception.
    //!
    //! <b>Complexity</b>: Linear to the number of elements inserted plus
    //!   linear to the elements contained in the list if it's a safe-mode
@@ -1749,6 +1753,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //!   to the erased elements.
    template<class Iterator>
    void assign(Iterator b, Iterator e)
+      BOOST_NOEXCEPT_IF((detail::is_nothrow_range_iterator<Iterator, reference>::value))
    {
       this->clear();
       this->insert_after(this->cbefore_begin(), b, e);
@@ -2471,6 +2476,33 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
       BOOST_INTRUSIVE_STATIC_ASSERT((has_container_from_iterator));
       return static_cast<slist_impl&>(base_t::priv_base_from_end_node(end_iterator.pointed_node()));
    }
+
+   //Used by insert_after(const_iterator, Iterator, Iterator) to implement rollback
+   class range_insertion_fixer
+   {
+      public:
+      range_insertion_fixer
+         (slist_impl &c, node_ptr prev_n, const node_ptr &last_n, const size_type &count) BOOST_NOEXCEPT
+         : c_(c), prev_n_(prev_n), last_n_(last_n), count_(count)
+      {}
+
+      ~range_insertion_fixer()
+      {
+         BOOST_IF_CONSTEXPR(cache_last)
+         if(c_.get_last_node() == prev_n_){
+            c_.set_last_node(last_n_);
+         }
+         BOOST_IF_CONSTEXPR(constant_time_size){
+            c_.priv_size_traits().increase(count_);
+         }
+      }
+
+      private:
+      slist_impl &c_;
+      const node_ptr prev_n_;
+      const node_ptr &last_n_;
+      const size_type &count_;
+   };
 };
 
 //! Helper metafunction to define a \c slist that yields to the same type when the
@@ -2568,6 +2600,8 @@ class slist
 
    template<class Iterator>
    BOOST_INTRUSIVE_FORCEINLINE slist(Iterator b, Iterator e, const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value &&
+                        (detail::is_nothrow_range_iterator<Iterator, typename Base::reference>::value))
       :  Base(b, e, v_traits)
    {}
 

@@ -26,6 +26,7 @@
 #include <boost/intrusive/detail/workaround.hpp>
 #include <boost/move/detail/iterator_traits.hpp>
 #include <boost/move/detail/meta_utils_core.hpp>
+#include <boost/move/detail/type_traits.hpp>   //declval, is_nothrow_copy_constructible
 
 namespace boost{
 namespace iterators{
@@ -301,6 +302,31 @@ BOOST_INTRUSIVE_FORCEINLINE typename iterator_traits<I>::pointer iterator_arrow_
 template<class T>
 BOOST_INTRUSIVE_FORCEINLINE T * iterator_arrow_result(T *p)
 {  return p;   }
+
+namespace detail {
+
+////////////////////////////////////////
+// is_nothrow_range_iterator
+////////////////////////////////////////
+
+//Declared only: a call converts the argument to T as a function parameter does
+template<class T>
+T nothrow_range_implicit_conversion(T) BOOST_NOEXCEPT;
+
+//True if all the operations that a function taking the range [b, e) uses on the
+//iterator are noexcept.
+template<class It, class Ref>
+struct is_nothrow_range_iterator
+{
+   static const bool value =
+      ::boost::move_detail::is_nothrow_copy_constructible<It>::value &&
+      BOOST_NOEXCEPT_EXPR(::boost::move_detail::declval<It&>().~It()) &&
+      BOOST_NOEXCEPT_EXPR(static_cast<bool>(::boost::move_detail::declval<It&>() != ::boost::move_detail::declval<It&>())) &&
+      BOOST_NOEXCEPT_EXPR(++::boost::move_detail::declval<It&>()) &&
+      BOOST_NOEXCEPT_EXPR(nothrow_range_implicit_conversion<Ref>(*::boost::move_detail::declval<It&>()));
+};
+
+}  //namespace detail {
 
 } //namespace intrusive
 } //namespace boost

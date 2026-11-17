@@ -795,9 +795,218 @@ struct list_merge_pred
    {  c.merge(c2, throwing_less());  }
 };
 
+//Throws test_exception. The call is not a throw expression, so a noexcept
+//function that calls it does not cause a warning.
+void throw_test_exception()
+{  throw test_exception();  }
+
+//The operation of minimal_iterator that is not noexcept
+enum minimal_iterator_op
+{  op_none, op_compare, op_compare_nonconst, op_compare_to_bool
+,  op_increment, op_deref, op_deref_to_ref };
+
+//Iterator over an array of values with only the operations that the range functions
+//can use: copy construction, destruction, "!=", prefix "++" and "*".
+//The operation Op is not noexcept. If Op is op_compare, op_increment or op_deref, the
+//operation also throws when the iterator points to throw_at (the left operand of "!=").
+//These are the three positions in the loop of the range functions where an exception
+//can occur. The other operations throw at the same positions, so they are only used
+//in the noexcept checks.
+template<minimal_iterator_op Op>
+class minimal_iterator
+{
+   public:
+   struct bool_proxy
+   {
+      operator bool() const BOOST_NOEXCEPT_IF(Op != op_compare_to_bool)
+      {  return b_;  }
+      bool b_;
+   };
+
+   struct ref_proxy
+   {
+      operator value &() const BOOST_NOEXCEPT_IF(Op != op_deref_to_ref)
+      {  return *p_;  }
+      value *p_;
+   };
+
+   explicit minimal_iterator(value *p, const value *throw_at = 0) BOOST_NOEXCEPT
+      : p_(p), throw_at_(throw_at)
+   {}
+
+   minimal_iterator(const minimal_iterator &other) BOOST_NOEXCEPT
+      : p_(other.p_), throw_at_(other.throw_at_)
+   {}
+
+   ref_proxy operator*() const BOOST_NOEXCEPT_IF(Op != op_deref)
+   {
+      if(Op == op_deref && p_ == throw_at_)
+         throw_test_exception();
+      ref_proxy r = { p_ };
+      return r;
+   }
+
+   minimal_iterator &operator++() BOOST_NOEXCEPT_IF(Op != op_increment)
+   {
+      if(Op == op_increment && p_ == throw_at_)
+         throw_test_exception();
+      ++p_;
+      return *this;
+   }
+
+   //The range functions compare non-const lvalues, so this overload is selected
+   friend bool_proxy operator!=(minimal_iterator &a, minimal_iterator &b)
+      BOOST_NOEXCEPT_IF(Op != op_compare && Op != op_compare_nonconst)
+   {
+      if(Op == op_compare && a.p_ == a.throw_at_)
+         throw_test_exception();
+      bool_proxy r = { a.p_ != b.p_ };
+      return r;
+   }
+
+   friend bool_proxy operator!=(const minimal_iterator &a, const minimal_iterator &b)
+      BOOST_NOEXCEPT_IF(Op != op_compare)
+   {
+      if(Op == op_compare && a.p_ == a.throw_at_)
+         throw_test_exception();
+      bool_proxy r = { a.p_ != b.p_ };
+      return r;
+   }
+
+   private:
+   //Range functions do not assign iterators
+   minimal_iterator &operator=(const minimal_iterator &);
+
+   value *p_;
+   const value *throw_at_;
+};
+
+#if !defined(BOOST_NO_CXX11_NOEXCEPT)
+
+//Compile-time check of the noexcept specification of the range functions
+template<class Cont, minimal_iterator_op Op>
+void test_sequence_range_noexcept_op()
+{
+   using boost::move_detail::declval;
+   typedef typename Cont::const_iterator const_iterator;
+   typedef minimal_iterator<Op> it_t;
+   const bool nothrow = Op == op_none;
+   BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(declval<Cont&>().insert(declval<const_iterator>(), declval<const it_t&>(), declval<const it_t&>())) == nothrow ));
+   BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(declval<Cont&>().assign(declval<const it_t&>(), declval<const it_t&>())) == nothrow ));
+   BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(Cont(declval<const it_t&>(), declval<const it_t&>())) == nothrow ));
+}
+
+#endif   //#if !defined(BOOST_NO_CXX11_NOEXCEPT)
+
+
+template<class Cont>
+void test_sequence_range_noexcept()
+{
+   #if !defined(BOOST_NO_CXX11_NOEXCEPT)
+   //The range functions are noexcept only if the operations of the iterator are
+   test_sequence_range_noexcept_op<Cont, op_none>();
+   test_sequence_range_noexcept_op<Cont, op_compare>();
+   test_sequence_range_noexcept_op<Cont, op_compare_nonconst>();
+   test_sequence_range_noexcept_op<Cont, op_compare_to_bool>();
+   test_sequence_range_noexcept_op<Cont, op_increment>();
+   test_sequence_range_noexcept_op<Cont, op_deref>();
+   test_sequence_range_noexcept_op<Cont, op_deref_to_ref>();
+
+   //Check that the range functions are noexcept for raw pointers
+   using boost::move_detail::declval;
+   typedef typename Cont::const_iterator const_iterator;
+   BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(declval<Cont&>().insert(declval<const_iterator>(), declval<value*>(), declval<value*>())) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(declval<Cont&>().assign(declval<value*>(), declval<value*>())) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(Cont(declval<value*>(), declval<value*>())) ));
+   #endif
+}
+
+//The operation Op of the iterator throws at values2[1]. Basic guarantee: the elements
+//linked before the exception stay in the container.
+template<class Cont, minimal_iterator_op Op>
+void test_sequence_range_throw(value (&values)[N], value (&values2)[N2])
+{
+   typedef minimal_iterator<Op> throwing_iterator;
+   const throwing_iterator b(&values2[0], &values2[1]), e(&values2[0] + N2, &values2[1]);
+   //When an exception happens, values2[0] remains and, if "++"
+   //throws, also values2[1], because "++" is called after the link.
+   const std::size_t linked = Op == op_increment ? 2u : 1u;
+   //Insertion at the beginning and at the end (the cached last node of slist changes)
+   for(std::size_t i = 0; i != 2; ++i){
+      Cont c(&values[0], &values[0] + N);
+      bool thrown = false;
+      try{
+         c.insert(i ? c.cend() : c.cbegin(), b, e);
+      }
+      catch(test_exception &){
+         thrown = true;
+      }
+      BOOST_TEST(thrown);
+      BOOST_TEST(c.size() == N + linked);
+      BOOST_TEST(iterated_size(c) == N + linked);
+      BOOST_TEST(contains(c, values2[0]));
+      BOOST_TEST(contains(c, values2[1]) == (linked == 2u));
+      BOOST_TEST(!contains(c, values2[2]));
+      c.check();
+      c.clear();
+   }
+   {
+      Cont c(&values[0], &values[0] + N);
+      bool thrown = false;
+      try{
+         c.assign(b, e);
+      }
+      catch(test_exception &){
+         thrown = true;
+      }
+      BOOST_TEST(thrown);
+      BOOST_TEST(c.size() == linked);
+      BOOST_TEST(iterated_size(c) == linked);
+      BOOST_TEST(contains(c, values2[0]));
+      BOOST_TEST(contains(c, values2[1]) == (linked == 2u));
+      c.check();
+      c.clear();
+   }
+   {
+      //The destructor of the base class unlinks the elements inserted by the constructor
+      bool thrown = false;
+      try{
+         Cont c(b, e);
+      }
+      catch(test_exception &){
+         thrown = true;
+      }
+      BOOST_TEST(thrown);
+      BOOST_TEST(Cont::node_algorithms::inited(Cont::value_traits::to_node_ptr(values2[0])));
+      BOOST_TEST(Cont::node_algorithms::inited(Cont::value_traits::to_node_ptr(values2[1])));
+   }
+}
+
+template<class Cont>
+void test_sequence_range(value (&values)[N], value (&values2)[N2])
+{
+   test_sequence_range_noexcept<Cont>();
+   //The range functions compile with an iterator that has only the needed operations
+   {
+      const minimal_iterator<op_none> b(&values[0]), e(&values[0] + N);
+      Cont c(b, e);
+      BOOST_TEST(c.size() == N);
+      c.assign(b, e);
+      BOOST_TEST(c.size() == N);
+      c.clear();
+      c.insert(c.cend(), b, e);
+      BOOST_TEST(c.size() == N);
+      c.clear();
+   }
+   test_sequence_range_throw<Cont, op_compare>(values, values2);
+   test_sequence_range_throw<Cont, op_deref>(values, values2);
+   test_sequence_range_throw<Cont, op_increment>(values, values2);
+}
+
 template<class Cont>
 void test_sequence(value (&values)[N], value (&values2)[N2])
 {
+   test_sequence_range<Cont>(values, values2);
    Cont c(&values[0], &values[0] + N);
    test_throws(c, list_remove(), g_pred_throw_active);
    test_throws(c, list_remove_and_dispose(), g_pred_throw_active);
