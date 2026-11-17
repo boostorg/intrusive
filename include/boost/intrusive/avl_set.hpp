@@ -155,11 +155,11 @@ class avl_set_impl
    //! @copydoc ::boost::intrusive::avltree::cend()const
    const_iterator cend() const BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::avltree::begin()
-   reverse_iterator avlegin();
+   //! @copydoc ::boost::intrusive::avltree::rbegin()
+   reverse_iterator rbegin() BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::avltree::begin()const
-   const_reverse_iterator avlegin() const;
+   //! @copydoc ::boost::intrusive::avltree::rbegin()const
+   const_reverse_iterator rbegin() const BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::avltree::crbegin()const
    const_reverse_iterator crbegin() const BOOST_NOEXCEPT;

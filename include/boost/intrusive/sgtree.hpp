@@ -878,9 +878,6 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
    //! @copydoc ::boost::intrusive::bstree::replace_node
    void replace_node(iterator replace_this, reference with_this) BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::bstree::remove_node
-   void remove_node(reference value) BOOST_NOEXCEPT;
-
    //! @copydoc ::boost::intrusive::bstree::rebalance
    void rebalance() BOOST_NOEXCEPT;
 

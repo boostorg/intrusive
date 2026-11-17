@@ -439,9 +439,6 @@ class sg_set_impl
    //! @copydoc ::boost::intrusive::sgtree::replace_node
    void replace_node(iterator replace_this, reference with_this) BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::sgtree::remove_node
-   void remove_node(reference value) BOOST_NOEXCEPT;
-
    //! @copydoc ::boost::intrusive::sgtree::rebalance
    void rebalance() BOOST_NOEXCEPT;
 
@@ -982,9 +979,6 @@ class sg_multiset_impl
 
    //! @copydoc ::boost::intrusive::sgtree::replace_node
    void replace_node(iterator replace_this, reference with_this) BOOST_NOEXCEPT;
-
-   //! @copydoc ::boost::intrusive::sgtree::remove_node
-   void remove_node(reference value) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::sgtree::rebalance
    void rebalance() BOOST_NOEXCEPT;
