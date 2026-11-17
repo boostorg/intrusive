@@ -23,6 +23,7 @@
 
 #include <boost/intrusive/detail/workaround.hpp>
 #include <boost/move/utility_core.hpp>
+#include <boost/move/detail/type_traits.hpp>
 
 namespace boost {
 namespace intrusive {
@@ -34,11 +35,18 @@ template<class ValueTraits>
 struct value_traits_holder
    : public ValueTraits
 {
+   BOOST_INTRUSIVE_FORCEINLINE value_traits_holder()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<ValueTraits>::value)
+      :  ValueTraits()
+   {}
+
    BOOST_INTRUSIVE_FORCEINLINE explicit value_traits_holder(const ValueTraits &val_traits)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<ValueTraits>::value)
       :  ValueTraits(val_traits)
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE explicit value_traits_holder(BOOST_RV_REF(ValueTraits) val_traits)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<ValueTraits>::value)
       :  ValueTraits(::boost::move(val_traits))
    {}
 };
