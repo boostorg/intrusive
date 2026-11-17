@@ -2542,6 +2542,15 @@ class slist
    typedef typename Base::size_type          size_type;
    typedef typename Base::node_ptr           node_ptr;
 
+   struct incorporate_t{};
+
+   #if defined(BOOST_INTRUSIVE_HAS_INHERITING_CONSTRUCTORS)
+   //The inherited constructors and the defaulted operations get the noexcept of Base
+   using Base::Base;
+   slist() = default;
+   slist(slist &&) = default;
+   slist& operator=(slist &&) = default;
+   #else
    BOOST_INTRUSIVE_FORCEINLINE slist()
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<Base>::value)
       :  Base()
@@ -2551,8 +2560,6 @@ class slist
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value)
       :  Base(v_traits)
    {}
-
-   struct incorporate_t{};
 
    inline slist( node_ptr f, node_ptr before_l
              , size_type n, const value_traits &v_traits = value_traits())
@@ -2574,6 +2581,7 @@ class slist
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
    #endif
    {  return static_cast<slist &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
+   #endif
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(slist &x, slist &y)
