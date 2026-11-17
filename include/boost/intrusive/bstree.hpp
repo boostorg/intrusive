@@ -299,11 +299,18 @@ struct bstbase3
       : public ValueTraits
       , public node_base_t
    {
+      BOOST_INTRUSIVE_FORCEINLINE holder_t()
+         BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<ValueTraits>::value)
+         : ValueTraits(), node_base_t()
+      {}
+
       BOOST_INTRUSIVE_FORCEINLINE explicit holder_t(const ValueTraits &vtraits)
+         BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<ValueTraits>::value)
          : ValueTraits(vtraits), node_base_t()
       {}
 
       BOOST_INTRUSIVE_FORCEINLINE explicit holder_t(BOOST_RV_REF(ValueTraits) vtraits)
+         BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<ValueTraits>::value)
          : ValueTraits(::boost::move(vtraits)), node_base_t()
       {}
    } holder;
@@ -315,11 +322,18 @@ struct bstbase3
       return *get_parent_from_member<bstbase3, holder_t>(h, &bstbase3::holder);
    }
 
+   BOOST_INTRUSIVE_FORCEINLINE bstbase3()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<ValueTraits>::value)
+      : holder()
+   {}
+
    BOOST_INTRUSIVE_FORCEINLINE bstbase3(const ValueTraits &vtraits)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<ValueTraits>::value)
       : holder(vtraits)
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE bstbase3(BOOST_RV_REF(ValueTraits) vtraits)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<ValueTraits>::value)
       : holder(::boost::move(vtraits))
    {}
 
@@ -514,11 +528,21 @@ struct BOOST_INTRUSIVE_EMPTY_BASES bstbase2
    typedef typename treeheader_t::node_ptr                           node_ptr;
    typedef typename treeheader_t::const_node_ptr                     const_node_ptr;
 
+   BOOST_INTRUSIVE_FORCEINLINE bstbase2()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_default_constructible<ValueTraits>::value)
+      : detail::ebo_functor_holder<value_compare>(), treeheader_t()
+   {}
+
    BOOST_INTRUSIVE_FORCEINLINE bstbase2(const key_compare &comp, const ValueTraits &vtraits)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<ValueTraits>::value)
       : detail::ebo_functor_holder<value_compare>(comp), treeheader_t(vtraits)
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE bstbase2(const key_compare &comp, BOOST_RV_REF(ValueTraits) vtraits)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value &&
+                        ::boost::move_detail::is_nothrow_move_constructible<ValueTraits>::value)
       : detail::ebo_functor_holder<value_compare>(comp), treeheader_t(::boost::move(vtraits))
    {}
 
@@ -890,9 +914,10 @@ class bstree_impl
    //!
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks)
-   //!   or the copy constructor of the key_compare object throws. Basic guarantee.
+   //!   or the default constructor of the key_compare object or value_traits throws.
+   //!   Basic guarantee.
    BOOST_INTRUSIVE_FORCEINLINE bstree_impl()
-      :  data_type(key_compare(), value_traits())
+      :  data_type()
    {}
 
    //! <b>Effects</b>: Constructs an empty container with given comparison and traits.

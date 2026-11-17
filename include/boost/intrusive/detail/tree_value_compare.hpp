@@ -69,16 +69,19 @@ struct tree_value_compare
 
    public:
    BOOST_INTRUSIVE_FORCEINLINE tree_value_compare()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<key_compare>::value)
       :  base_t()
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE explicit tree_value_compare(const key_compare &kcomp)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<key_compare>::value)
       :  base_t(kcomp)
    {}
 
    //Implicit copy operations: keeps the comparator trivially copyable (passed in registers)
 
    BOOST_INTRUSIVE_FORCEINLINE tree_value_compare &operator=(const key_compare &x)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<key_compare>::value)
    {  this->base_t::get() = x;   return *this;  }
 
    //Swaps the key comparison objects with their own swap function, if any
@@ -86,7 +89,7 @@ struct tree_value_compare
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_swappable<key_compare>::value)
    {  ::boost::adl_move_swap(a.base_t::get(), b.base_t::get());  }
 
-   BOOST_INTRUSIVE_FORCEINLINE const key_compare &key_comp() const
+   BOOST_INTRUSIVE_FORCEINLINE const key_compare &key_comp() const BOOST_NOEXCEPT
    {  return this->base_t::get();  }
 
    BOOST_INTRUSIVE_FORCEINLINE Ret operator()(const key_type &key) const

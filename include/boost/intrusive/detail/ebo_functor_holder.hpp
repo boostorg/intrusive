@@ -25,6 +25,7 @@
 #include <boost/intrusive/detail/workaround.hpp>
 #include <boost/intrusive/detail/mpl.hpp>   //enable_if_c, is_convertible
 #include <boost/move/utility_core.hpp>
+#include <boost/move/detail/type_traits.hpp>
 
 namespace boost {
 namespace intrusive {
@@ -40,14 +41,17 @@ class ebo_functor_holder
    typedef T functor_type;
 
    BOOST_INTRUSIVE_FORCEINLINE ebo_functor_holder()
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<T>::value)
       : T()
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE explicit ebo_functor_holder(const T &t)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<T>::value)
       : T(t)
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE explicit ebo_functor_holder(BOOST_RV_REF(T) t)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<T>::value)
       : T(::boost::move(t))
    {}
 
@@ -55,11 +59,13 @@ class ebo_functor_holder
    BOOST_INTRUSIVE_FORCEINLINE explicit ebo_functor_holder
       ( BOOST_FWD_REF(Arg) arg
       , typename enable_if_c<!is_convertible<Arg, const T&>::value>::type* = 0)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT_EXPR(T(::boost::move_detail::declval<Arg>())))
       : T(::boost::forward<Arg>(arg))
    {}
 
    template<class Arg1, class Arg2>
    BOOST_INTRUSIVE_FORCEINLINE ebo_functor_holder(BOOST_FWD_REF(Arg1) arg1, BOOST_FWD_REF(Arg2) arg2)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT_EXPR(T(::boost::move_detail::declval<Arg1>(), ::boost::move_detail::declval<Arg2>())))
       : T(::boost::forward<Arg1>(arg1), ::boost::forward<Arg2>(arg2))
    {}
 
@@ -96,12 +102,14 @@ class ebo_functor_holder
    #endif
 
    inline ebo_functor_holder& operator=(const T &t)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_assignable<T>::value)
    {
       static_cast<T&>(*this) = t;
       return *this;
    }
 
    inline ebo_functor_holder& operator=(BOOST_RV_REF(T) t)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<T>::value)
    {
       static_cast<T&>(*this) = ::boost::move(t);
       return *this;
@@ -119,11 +127,11 @@ class ebo_functor_holder<T *, Tag>
    public:
    typedef T* functor_type;
 
-   BOOST_INTRUSIVE_FORCEINLINE ebo_functor_holder()
+   BOOST_INTRUSIVE_FORCEINLINE ebo_functor_holder() BOOST_NOEXCEPT
       : t_()
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE explicit ebo_functor_holder(T * t)
+   BOOST_INTRUSIVE_FORCEINLINE explicit ebo_functor_holder(T * t) BOOST_NOEXCEPT
       : t_(t)
    {}
 
@@ -158,7 +166,7 @@ class ebo_functor_holder<T *, Tag>
    }
    #endif
 
-   inline ebo_functor_holder& operator=(T * t)
+   inline ebo_functor_holder& operator=(T * t) BOOST_NOEXCEPT
    {
       this->t_ = t;
       return *this;
