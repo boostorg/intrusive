@@ -1424,6 +1424,16 @@ void test_unordered<ContainerDefiner>::test_move_constructor_predicates(value_co
    typedef typename ContainerDefiner::template container
       <>::type default_type;
    using boost::move_detail::declval;
+   //The constructor from the bucket traits is noexcept if the copy constructors
+   //of the bucket traits, the hasher, the equality and the value traits are (the
+   //copy of the bucket traits is not noexcept with some test smart pointers)
+   typedef typename default_type::bucket_traits default_bucket_traits;
+   BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(unordered_type(declval<const bucket_traits&>())) ));
+   BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(default_type(declval<const default_bucket_traits&>())) ==
+                                   boost::move_detail::is_nothrow_copy_constructible<default_bucket_traits>::value ));
+   BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(unordered_type( declval<const bucket_traits&>()
+                                                           , declval<const tracking_hash&>()
+                                                           , declval<const tracking_equal&>())) ));
    BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(unordered_type(declval<unordered_type>())) ));
    BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(default_type(declval<default_type>())) ));
    BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(declval<unordered_type&>() = declval<unordered_type>()) ));

@@ -1284,10 +1284,14 @@ struct bucket_plus_vtraits
 
       public:
       BOOST_INTRUSIVE_FORCEINLINE data_type(const ValueTraits& val_traits, const BucketTraits& b_traits)
+         BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<ValueTraits>::value &&
+                           ::boost::move_detail::is_nothrow_copy_constructible<BucketTraits>::value)
          : ValueTraits(val_traits), BucketTraits(b_traits)
       {}
 
       BOOST_INTRUSIVE_FORCEINLINE data_type(BOOST_RV_REF(data_type) other)
+         BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<ValueTraits>::value &&
+                           ::boost::move_detail::is_nothrow_move_constructible<BucketTraits>::value)
          : ValueTraits (BOOST_MOVE_BASE(ValueTraits,  other))
          , BucketTraits(BOOST_MOVE_BASE(BucketTraits, other))
       {}
@@ -1345,10 +1349,14 @@ struct bucket_plus_vtraits
    typedef hashtable_node_ops<node_traits, LinearBuckets> node_ops_t;
 
    BOOST_INTRUSIVE_FORCEINLINE bucket_plus_vtraits(const ValueTraits &val_traits, const bucket_traits &b_traits)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<ValueTraits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<BucketTraits>::value)
       : m_data(val_traits, b_traits)
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE bucket_plus_vtraits(BOOST_RV_REF(bucket_plus_vtraits) other)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<ValueTraits>::value &&
+                        ::boost::move_detail::is_nothrow_move_constructible<BucketTraits>::value)
       : m_data(boost::move(((bucket_plus_vtraits&)other).m_data))
    {}
 
@@ -1626,12 +1634,20 @@ struct BOOST_INTRUSIVE_EMPTY_BASES bucket_hash_equal_t
 
    BOOST_INTRUSIVE_FORCEINLINE bucket_hash_equal_t
       (const ValueTraits &val_traits, const bucket_traits &b_traits, const hasher & h, const key_equal &e)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<ValueTraits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<BucketTraits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<hasher>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<key_equal>::value)
       : hasher_holder_t(h)
       , bucket_plus_vtraits_t(val_traits, b_traits)
       , equal_holder_t(e)
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE bucket_hash_equal_t(BOOST_RV_REF(bucket_hash_equal_t) other)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<ValueTraits>::value &&
+                        ::boost::move_detail::is_nothrow_move_constructible<BucketTraits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<hasher>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<key_equal>::value)
       : hasher_holder_t(static_cast<const hasher_holder_t&>(other))
       , bucket_plus_vtraits_t(BOOST_MOVE_BASE(bucket_plus_vtraits_t, other))
       , equal_holder_t(static_cast<const equal_holder_t&>(other))
@@ -1759,10 +1775,13 @@ struct hashtable_state_wrapper
    template<class Arg0, class Arg1, class Arg2, class Arg3>
    BOOST_INTRUSIVE_FORCEINLINE hashtable_state_wrapper
       ( const Arg0 &arg0, const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT_EXPR(Base( ::boost::move_detail::declval<const Arg0&>(), ::boost::move_detail::declval<const Arg1&>()
+                                         , ::boost::move_detail::declval<const Arg2&>(), ::boost::move_detail::declval<const Arg3&>())))
       :  Base(arg0, arg1, arg2, arg3)
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE hashtable_state_wrapper(BOOST_RV_REF(hashtable_state_wrapper) other)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<Base>::value)
       : Base(BOOST_MOVE_BASE(Base, other))
    {}
 
@@ -1789,10 +1808,13 @@ struct hashtable_state_wrapper<Base, BucketPtr, SizeType, false, false>
    template<class Arg0, class Arg1, class Arg2, class Arg3>
    BOOST_INTRUSIVE_FORCEINLINE hashtable_state_wrapper
       ( const Arg0 &arg0, const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT_EXPR(Base( ::boost::move_detail::declval<const Arg0&>(), ::boost::move_detail::declval<const Arg1&>()
+                                         , ::boost::move_detail::declval<const Arg2&>(), ::boost::move_detail::declval<const Arg3&>())))
       :  Base(arg0, arg1, arg2, arg3)
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE hashtable_state_wrapper(BOOST_RV_REF(hashtable_state_wrapper) other)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<Base>::value)
       : Base(BOOST_MOVE_BASE(Base, other))
    {}
 
@@ -1814,6 +1836,8 @@ struct hashtable_size_wrapper
    template<class Base, class Arg0, class Arg1, class Arg2>
    hashtable_size_wrapper( BOOST_FWD_REF(Base) base, BOOST_FWD_REF(Arg0) arg0
                          , BOOST_FWD_REF(Arg1) arg1, BOOST_FWD_REF(Arg2) arg2)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT_EXPR(DeriveFrom( ::boost::move_detail::declval<Base>(), ::boost::move_detail::declval<Arg0>()
+                                               , ::boost::move_detail::declval<Arg1>(), ::boost::move_detail::declval<Arg2>())))
       :  DeriveFrom( ::boost::forward<Base>(base)
                    , ::boost::forward<Arg0>(arg0)
                    , ::boost::forward<Arg1>(arg1)
@@ -1822,6 +1846,7 @@ struct hashtable_size_wrapper
    typedef detail::size_holder < true, SizeType> size_traits;//size_traits
 
    BOOST_INTRUSIVE_FORCEINLINE hashtable_size_wrapper(BOOST_RV_REF(hashtable_size_wrapper) other)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<DeriveFrom>::value)
       : DeriveFrom(BOOST_MOVE_BASE(DeriveFrom, other))
    {}
 
@@ -1848,6 +1873,8 @@ struct hashtable_size_wrapper<DeriveFrom, SizeType, false>
    template<class Base, class Arg0, class Arg1, class Arg2>
    hashtable_size_wrapper( BOOST_FWD_REF(Base) base, BOOST_FWD_REF(Arg0) arg0
                          , BOOST_FWD_REF(Arg1) arg1, BOOST_FWD_REF(Arg2) arg2)
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT_EXPR(DeriveFrom( ::boost::move_detail::declval<Base>(), ::boost::move_detail::declval<Arg0>()
+                                               , ::boost::move_detail::declval<Arg1>(), ::boost::move_detail::declval<Arg2>())))
       :  DeriveFrom( ::boost::forward<Base>(base)
                    , ::boost::forward<Arg0>(arg0)
                    , ::boost::forward<Arg1>(arg1)
@@ -1855,6 +1882,7 @@ struct hashtable_size_wrapper<DeriveFrom, SizeType, false>
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE hashtable_size_wrapper(BOOST_RV_REF(hashtable_size_wrapper) other)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<DeriveFrom>::value)
       : DeriveFrom(BOOST_MOVE_BASE(DeriveFrom, other))
    {}
 
@@ -1953,10 +1981,15 @@ struct hashdata_internal
 
    BOOST_INTRUSIVE_FORCEINLINE hashdata_internal( const ValueTraits &val_traits, const bucket_traits &b_traits
                     , const hasher & h, const key_equal &e)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<ValueTraits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<bucket_traits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<hasher>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<key_equal>::value)
       : split_bucket_hash_equal_t(val_traits, b_traits, h, e)
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE hashdata_internal(BOOST_RV_REF(hashdata_internal) other)
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_constructible<split_bucket_hash_equal_t>::value)
       : split_bucket_hash_equal_t(BOOST_MOVE_BASE(split_bucket_hash_equal_t, other))
    {}
 
@@ -2552,7 +2585,7 @@ class hashtable_impl
    //!
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks)
-   //!   or the copy constructor or invocation of hash_func or equal_func throws.
+   //!   or the copy constructor of value_traits, bucket_traits, hash_func or equal_func throws.
    //!
    //! <b>Notes</b>: buckets array must be disposed only after
    //!   *this is disposed.
@@ -2560,6 +2593,10 @@ class hashtable_impl
                            , const hasher & hash_func = hasher()
                            , const key_equal &equal_func = key_equal()
                            , const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<bucket_traits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<hasher>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<key_equal>::value)
       :  internal_type(v_traits, b_traits, hash_func, equal_func)
    {  this->default_init_actions(); }
 
@@ -4583,11 +4620,30 @@ class hashtable
    //Assert if passed value traits are compatible with the type
    BOOST_INTRUSIVE_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
 
+   #if defined(BOOST_INTRUSIVE_HAS_INHERITING_CONSTRUCTORS)
+   //The inherited constructors and the defaulted operations get the noexcept of Base
+   using Base::Base;
+   hashtable(hashtable &&) = default;
+   hashtable& operator=(hashtable &&) = default;
+   #else
    inline explicit hashtable ( const bucket_traits &b_traits
              , const hasher & hash_func = hasher()
              , const key_equal &equal_func = key_equal()
              , const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<bucket_traits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<hasher>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<key_equal>::value)
       :  Base(b_traits, hash_func, equal_func, v_traits)
+   {}
+
+   template<class Iterator>
+   inline hashtable( bool unique, Iterator b, Iterator e
+                   , const bucket_traits &b_traits
+                   , const hasher & hash_func = hasher()
+                   , const key_equal &equal_func = key_equal()
+                   , const value_traits &v_traits = value_traits())
+      :  Base(unique, b, e, b_traits, hash_func, equal_func, v_traits)
    {}
 
    BOOST_INTRUSIVE_FORCEINLINE hashtable(BOOST_RV_REF(hashtable) x)
@@ -4600,6 +4656,7 @@ class hashtable
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
    #endif
    {  return static_cast<hashtable&>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
+   #endif
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(hashtable &x, hashtable &y)

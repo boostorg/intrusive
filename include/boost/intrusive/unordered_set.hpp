@@ -127,6 +127,10 @@ class unordered_set_impl
                               , const hasher & hash_func = hasher()
                               , const key_equal &equal_func = key_equal()
                               , const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<bucket_traits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<hasher>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<key_equal>::value)
       :  table_type(b_traits, hash_func, equal_func, v_traits)
    {}
 
@@ -528,11 +532,21 @@ class unordered_set
    typedef typename Base::hasher             hasher;
    typedef typename Base::key_equal          key_equal;
 
+   #if defined(BOOST_INTRUSIVE_HAS_INHERITING_CONSTRUCTORS)
+   //The inherited constructors and the defaulted operations get the noexcept of Base
+   using Base::Base;
+   unordered_set(unordered_set &&) = default;
+   unordered_set& operator=(unordered_set &&) = default;
+   #else
    inline
    explicit unordered_set  ( const bucket_traits &b_traits
                            , const hasher & hash_func = hasher()
                            , const key_equal &equal_func = key_equal()
                            , const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<bucket_traits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<hasher>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<key_equal>::value)
       :  Base(b_traits, hash_func, equal_func, v_traits)
    {}
 
@@ -557,6 +571,7 @@ class unordered_set
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
    #endif
    {  return static_cast<unordered_set&>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
+   #endif
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(unordered_set &x, unordered_set &y)
@@ -666,6 +681,10 @@ class unordered_multiset_impl
                                     , const hasher & hash_func = hasher()
                                     , const key_equal &equal_func = key_equal()
                                     , const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<bucket_traits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<hasher>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<key_equal>::value)
       :  table_type(b_traits, hash_func, equal_func, v_traits)
    {}
 
@@ -1010,11 +1029,21 @@ class unordered_multiset
    typedef typename Base::hasher             hasher;
    typedef typename Base::key_equal          key_equal;
 
+   #if defined(BOOST_INTRUSIVE_HAS_INHERITING_CONSTRUCTORS)
+   //The inherited constructors and the defaulted operations get the noexcept of Base
+   using Base::Base;
+   unordered_multiset(unordered_multiset &&) = default;
+   unordered_multiset& operator=(unordered_multiset &&) = default;
+   #else
    inline
    explicit unordered_multiset( const bucket_traits &b_traits
                               , const hasher & hash_func = hasher()
                               , const key_equal &equal_func = key_equal()
                               , const value_traits &v_traits = value_traits())
+      BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_copy_constructible<value_traits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<bucket_traits>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<hasher>::value &&
+                        ::boost::move_detail::is_nothrow_copy_constructible<key_equal>::value)
       :  Base(b_traits, hash_func, equal_func, v_traits)
    {}
 
@@ -1039,6 +1068,7 @@ class unordered_multiset
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_move_assignable<Base>::value)
    #endif
    {  return static_cast<unordered_multiset&>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
+   #endif
 
    /// @cond
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(unordered_multiset &x, unordered_multiset &y)
