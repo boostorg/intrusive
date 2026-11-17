@@ -47,31 +47,31 @@ struct tree_node_traits
    typedef typename detail::ptr_cparam<node_ptr>::type        node_ptr_cparam;
    typedef typename detail::ptr_cparam<const_node_ptr>::type  const_node_ptr_cparam;
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_parent(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_parent(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->parent_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_parent(BOOST_INTRUSIVE_CPARAM(node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_parent(BOOST_INTRUSIVE_CPARAM(node_ptr) n) BOOST_NOEXCEPT
    {  return n->parent_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_parent(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr p)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_parent(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr p) BOOST_NOEXCEPT
    {  n->parent_ = p;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_left(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_left(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->left_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_left(BOOST_INTRUSIVE_CPARAM(node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_left(BOOST_INTRUSIVE_CPARAM(node_ptr) n) BOOST_NOEXCEPT
    {  return n->left_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_left(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr l)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_left(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr l) BOOST_NOEXCEPT
    {  n->left_ = l;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_right(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_right(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->right_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_right(BOOST_INTRUSIVE_CPARAM(node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_right(BOOST_INTRUSIVE_CPARAM(node_ptr) n) BOOST_NOEXCEPT
    {  return n->right_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_right(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr r)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_right(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr r) BOOST_NOEXCEPT
    {  n->right_ = r;  }
 };
 

@@ -84,15 +84,15 @@ template<class NodePtr, class StoredPointer, bool StatefulValueTraits = true>
 struct iiterator_members
 {
 
-   BOOST_INTRUSIVE_FORCEINLINE iiterator_members()
+   BOOST_INTRUSIVE_FORCEINLINE iiterator_members() BOOST_NOEXCEPT
       : nodeptr_()//Value initialization to achieve "null iterators" (N3644)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE iiterator_members(const NodePtr &n_ptr, const StoredPointer &data)
+   BOOST_INTRUSIVE_FORCEINLINE iiterator_members(const NodePtr &n_ptr, const StoredPointer &data) BOOST_NOEXCEPT
       :  nodeptr_(n_ptr), ptr_(data)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE StoredPointer get_ptr() const
+   BOOST_INTRUSIVE_FORCEINLINE StoredPointer get_ptr() const BOOST_NOEXCEPT
    {  return ptr_;  }
 
    NodePtr nodeptr_;
@@ -102,15 +102,15 @@ struct iiterator_members
 template<class NodePtr, class StoredPointer>
 struct iiterator_members<NodePtr, StoredPointer, false>
 {
-   BOOST_INTRUSIVE_FORCEINLINE iiterator_members()
+   BOOST_INTRUSIVE_FORCEINLINE iiterator_members() BOOST_NOEXCEPT
       : nodeptr_()//Value initialization to achieve "null iterators" (N3644)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE iiterator_members(const NodePtr &n_ptr, const StoredPointer &)
+   BOOST_INTRUSIVE_FORCEINLINE iiterator_members(const NodePtr &n_ptr, const StoredPointer &) BOOST_NOEXCEPT
       : nodeptr_(n_ptr)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE StoredPointer get_ptr() const
+   BOOST_INTRUSIVE_FORCEINLINE StoredPointer get_ptr() const BOOST_NOEXCEPT
    {  return StoredPointer();  }
 
    NodePtr nodeptr_;

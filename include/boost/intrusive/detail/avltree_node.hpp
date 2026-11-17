@@ -71,49 +71,49 @@ struct default_avltree_node_traits_impl
 
    typedef typename node::balance balance;
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_parent(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_parent(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->parent_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_parent(BOOST_INTRUSIVE_CPARAM(node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_parent(BOOST_INTRUSIVE_CPARAM(node_ptr) n) BOOST_NOEXCEPT
    {  return n->parent_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_parent(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr p)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_parent(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr p) BOOST_NOEXCEPT
    {  n->parent_ = p;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_left(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_left(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->left_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_left(BOOST_INTRUSIVE_CPARAM(node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_left(BOOST_INTRUSIVE_CPARAM(node_ptr) n) BOOST_NOEXCEPT
    {  return n->left_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_left(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr l)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_left(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr l) BOOST_NOEXCEPT
    {  n->left_ = l;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_right(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_right(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->right_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_right(BOOST_INTRUSIVE_CPARAM(node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_right(BOOST_INTRUSIVE_CPARAM(node_ptr) n) BOOST_NOEXCEPT
    {  return n->right_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_right(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr r)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_right(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr r) BOOST_NOEXCEPT
    {  n->right_ = r;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static balance get_balance(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static balance get_balance(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->balance_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static balance get_balance(BOOST_INTRUSIVE_CPARAM(node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static balance get_balance(BOOST_INTRUSIVE_CPARAM(node_ptr) n) BOOST_NOEXCEPT
    {  return n->balance_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_balance(BOOST_INTRUSIVE_CPARAM(node_ptr) n, balance b)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_balance(BOOST_INTRUSIVE_CPARAM(node_ptr) n, balance b) BOOST_NOEXCEPT
    {  n->balance_ = b;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static balance negative()
+   BOOST_INTRUSIVE_FORCEINLINE static balance negative() BOOST_NOEXCEPT
    {  return node::negative_t;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static balance zero()
+   BOOST_INTRUSIVE_FORCEINLINE static balance zero() BOOST_NOEXCEPT
    {  return node::zero_t;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static balance positive()
+   BOOST_INTRUSIVE_FORCEINLINE static balance positive() BOOST_NOEXCEPT
    {  return node::positive_t;  }
 };
 
@@ -131,37 +131,37 @@ struct compact_avltree_node_traits_impl
 
    typedef pointer_plus_bits<node_ptr, 2> ptr_bit;
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_parent(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_parent(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return ptr_bit::get_pointer(n->parent_);  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_parent(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr p)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_parent(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr p) BOOST_NOEXCEPT
    {  ptr_bit::set_pointer(n->parent_, p);  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_left(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_left(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->left_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_left(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr l)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_left(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr l) BOOST_NOEXCEPT
    {  n->left_ = l;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_right(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_right(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->right_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_right(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr r)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_right(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr r) BOOST_NOEXCEPT
    {  n->right_ = r;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static balance get_balance(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static balance get_balance(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return (balance)ptr_bit::get_bits(n->parent_);  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_balance(BOOST_INTRUSIVE_CPARAM(node_ptr) n, balance b)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_balance(BOOST_INTRUSIVE_CPARAM(node_ptr) n, balance b) BOOST_NOEXCEPT
    {  ptr_bit::set_bits(n->parent_, (std::size_t)b);  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static balance negative()
+   BOOST_INTRUSIVE_FORCEINLINE static balance negative() BOOST_NOEXCEPT
    {  return node::negative_t;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static balance zero()
+   BOOST_INTRUSIVE_FORCEINLINE static balance zero() BOOST_NOEXCEPT
    {  return node::zero_t;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static balance positive()
+   BOOST_INTRUSIVE_FORCEINLINE static balance positive() BOOST_NOEXCEPT
    {  return node::positive_t;  }
 };
 

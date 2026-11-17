@@ -51,16 +51,16 @@ struct any_list_node_traits
    typedef typename detail::ptr_cparam<node_ptr>::type        node_ptr_cparam;
    typedef typename detail::ptr_cparam<const_node_ptr>::type  const_node_ptr_cparam;
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_next(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_next(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->node_ptr_1;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_next(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr next)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_next(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr next) BOOST_NOEXCEPT
    {  n->node_ptr_1 = next;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_previous(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_previous(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->node_ptr_2;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_previous(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr prev)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_previous(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr prev) BOOST_NOEXCEPT
    {  n->node_ptr_2 = prev;  }
 };
 
@@ -74,10 +74,10 @@ struct any_slist_node_traits
    typedef typename detail::ptr_cparam<node_ptr>::type        node_ptr_cparam;
    typedef typename detail::ptr_cparam<const_node_ptr>::type  const_node_ptr_cparam;
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_next(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_next(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->node_ptr_1;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_next(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr next)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_next(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr next) BOOST_NOEXCEPT
    {  n->node_ptr_1 = next;  }
 };
 
@@ -96,22 +96,22 @@ struct any_unordered_node_traits
    static const bool store_hash        = true;
    static const bool optimize_multikey = true;
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_next(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_next(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->node_ptr_1;   }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_next(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr next)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_next(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr next) BOOST_NOEXCEPT
    {  n->node_ptr_1 = next;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_prev_in_group(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_prev_in_group(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->node_ptr_2;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_prev_in_group(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr prev)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_prev_in_group(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr prev) BOOST_NOEXCEPT
    {  n->node_ptr_2 = prev;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static std::size_t get_hash(const_node_ptr n)
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t get_hash(const_node_ptr n) BOOST_NOEXCEPT
    {  return n->size_t_1;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_hash(BOOST_INTRUSIVE_CPARAM(node_ptr) n, std::size_t h)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_hash(BOOST_INTRUSIVE_CPARAM(node_ptr) n, std::size_t h) BOOST_NOEXCEPT
    {  n->size_t_1 = h;  }
 };
 
@@ -127,34 +127,34 @@ struct any_rbtree_node_traits
 
    typedef std::size_t color;
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_parent(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_parent(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->node_ptr_1;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_parent(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr p)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_parent(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr p) BOOST_NOEXCEPT
    {  n->node_ptr_1 = p;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_left(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_left(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->node_ptr_2;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_left(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr l)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_left(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr l) BOOST_NOEXCEPT
    {  n->node_ptr_2 = l;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_right(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_right(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->node_ptr_3;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_right(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr r)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_right(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr r) BOOST_NOEXCEPT
    {  n->node_ptr_3 = r;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static color get_color(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static color get_color(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->size_t_1;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_color(BOOST_INTRUSIVE_CPARAM(node_ptr) n, color c)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_color(BOOST_INTRUSIVE_CPARAM(node_ptr) n, color c) BOOST_NOEXCEPT
    {  n->size_t_1 = c;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static color black()
+   BOOST_INTRUSIVE_FORCEINLINE static color black() BOOST_NOEXCEPT
    {  return 0u;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static color red()
+   BOOST_INTRUSIVE_FORCEINLINE static color red() BOOST_NOEXCEPT
    {  return 1u;  }
 };
 
@@ -170,37 +170,37 @@ struct any_avltree_node_traits
 
    typedef std::size_t balance;
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_parent(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_parent(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->node_ptr_1;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_parent(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr p)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_parent(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr p) BOOST_NOEXCEPT
    {  n->node_ptr_1 = p;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_left(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_left(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->node_ptr_2;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_left(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr l)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_left(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr l) BOOST_NOEXCEPT
    {  n->node_ptr_2 = l;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_right(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_right(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->node_ptr_3;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_right(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr r)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_right(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr r) BOOST_NOEXCEPT
    {  n->node_ptr_3 = r;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static balance get_balance(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static balance get_balance(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->size_t_1;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_balance(BOOST_INTRUSIVE_CPARAM(node_ptr) n, balance b)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_balance(BOOST_INTRUSIVE_CPARAM(node_ptr) n, balance b) BOOST_NOEXCEPT
    {  n->size_t_1 = b;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static balance negative()
+   BOOST_INTRUSIVE_FORCEINLINE static balance negative() BOOST_NOEXCEPT
    {  return 0u;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static balance zero()
+   BOOST_INTRUSIVE_FORCEINLINE static balance zero() BOOST_NOEXCEPT
    {  return 1u;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static balance positive()
+   BOOST_INTRUSIVE_FORCEINLINE static balance positive() BOOST_NOEXCEPT
    {  return 2u;  }
 };
 
@@ -214,22 +214,22 @@ struct any_tree_node_traits
    typedef typename detail::ptr_cparam<node_ptr>::type        node_ptr_cparam;
    typedef typename detail::ptr_cparam<const_node_ptr>::type  const_node_ptr_cparam;
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_parent(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_parent(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->node_ptr_1;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_parent(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr p)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_parent(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr p) BOOST_NOEXCEPT
    {  n->node_ptr_1 = p;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_left(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_left(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->node_ptr_2;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_left(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr l)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_left(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr l) BOOST_NOEXCEPT
    {  n->node_ptr_2 = l;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_right(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_right(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->node_ptr_3;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_right(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr r)
+   BOOST_INTRUSIVE_FORCEINLINE static void set_right(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr r) BOOST_NOEXCEPT
    {  n->node_ptr_3 = r;  }
 };
 
@@ -274,19 +274,19 @@ class any_algorithms
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   inline static bool inited(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   inline static bool inited(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return !n->node_ptr_1;  };
 
    BOOST_INTRUSIVE_FORCEINLINE static bool unique(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return !n->node_ptr_1; }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void unlink(node_ptr)
+   BOOST_INTRUSIVE_FORCEINLINE static void unlink(node_ptr) BOOST_NOEXCEPT
    {
       //Auto-unlink hooks and unlink() are not available for any hooks
       any_algorithms<VoidPointer>::template function_not_available_for_any_hooks<node_ptr>();
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void swap_nodes(node_ptr, node_ptr)
+   BOOST_INTRUSIVE_FORCEINLINE static void swap_nodes(node_ptr, node_ptr) BOOST_NOEXCEPT
    {
       //Any nodes have no swap_nodes capability because they don't know
       //what algorithm they must use to unlink the node from the container

@@ -52,22 +52,22 @@ struct bucket_impl
    typedef detail::common_slist_algorithms<NodeTraits> algo_t;
 
    public:
-   BOOST_INTRUSIVE_FORCEINLINE bucket_impl()
+   BOOST_INTRUSIVE_FORCEINLINE bucket_impl() BOOST_NOEXCEPT
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE bucket_impl(const bucket_impl &)
+   BOOST_INTRUSIVE_FORCEINLINE bucket_impl(const bucket_impl &) BOOST_NOEXCEPT
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE bucket_impl &operator=(const bucket_impl&)
+   BOOST_INTRUSIVE_FORCEINLINE bucket_impl &operator=(const bucket_impl&) BOOST_NOEXCEPT
    {  return *this;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE node_ptr get_node_ptr()
+   BOOST_INTRUSIVE_FORCEINLINE node_ptr get_node_ptr() BOOST_NOEXCEPT
    {  return pointer_traits<node_ptr>::pointer_to(*this);  }
 
-   BOOST_INTRUSIVE_FORCEINLINE const_node_ptr get_node_ptr() const
+   BOOST_INTRUSIVE_FORCEINLINE const_node_ptr get_node_ptr() const BOOST_NOEXCEPT
    {  return pointer_traits<const_node_ptr>::pointer_to(*this);  }
 
-   BOOST_INTRUSIVE_FORCEINLINE node_ptr begin_ptr()
+   BOOST_INTRUSIVE_FORCEINLINE node_ptr begin_ptr() BOOST_NOEXCEPT
    {  return node_traits::get_next(get_node_ptr());  }
 };
 
@@ -111,7 +111,7 @@ struct hashtable_iterator_ops
 
    //Circular buckets: the last node of a bucket points to the bucket node.
    //"buckets_len" is the number of buckets of the array.
-   static void circular_increment(siterator &slist_it, bucket_type *const buckets, const std::size_t buckets_len)
+   static void circular_increment(siterator &slist_it, bucket_type *const buckets, const std::size_t buckets_len) BOOST_NOEXCEPT
    {
       typedef circular_slist_algorithms<slist_node_traits> slist_node_algorithms;
       ++slist_it;
@@ -146,7 +146,7 @@ struct hashtable_iterator_ops
    //Linear buckets: the last node of a bucket is null and a sentinel bucket ends the array.
    //"bucket" is the bucket of the element and it is updated to the bucket of the next element.
    template<class BucketPtr>
-   static void linear_increment(siterator &slist_it, BucketPtr &bucket)
+   static void linear_increment(siterator &slist_it, BucketPtr &bucket) BOOST_NOEXCEPT
    {
       typedef linear_slist_algorithms<slist_node_traits> slist_node_algorithms;
       ++slist_it;
@@ -197,7 +197,7 @@ class hashtable_iterator
                   , hashtable_iterator<BucketValueTraits, LinearBuckets, false>
                   , nat>::type                                 nonconst_iterator;
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr downcast_bucket(typename bucket_type::node_traits::node_ptr p)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr downcast_bucket(typename bucket_type::node_traits::node_ptr p) BOOST_NOEXCEPT
    {
       return pointer_traits<node_ptr>::
          pointer_to(static_cast<typename node_traits::node&>(*p));
@@ -205,60 +205,60 @@ class hashtable_iterator
 
    public:
 
-   BOOST_INTRUSIVE_FORCEINLINE hashtable_iterator ()
+   BOOST_INTRUSIVE_FORCEINLINE hashtable_iterator () BOOST_NOEXCEPT
       : slist_it_()  //Value initialization to achieve "null iterators" (N3644)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE explicit hashtable_iterator(siterator ptr, const BucketValueTraits *cont)
+   BOOST_INTRUSIVE_FORCEINLINE explicit hashtable_iterator(siterator ptr, const BucketValueTraits *cont) BOOST_NOEXCEPT
       : slist_it_ (ptr)
       , traitsptr_ (cont ? pointer_traits<const_bucketvaltraits_ptr>::pointer_to(*cont) : const_bucketvaltraits_ptr() )
    {}
 
    //Implicit copy operations: keeps the iterator trivially copyable (passed in registers)
-   BOOST_INTRUSIVE_FORCEINLINE hashtable_iterator(const nonconst_iterator &other)
+   BOOST_INTRUSIVE_FORCEINLINE hashtable_iterator(const nonconst_iterator &other) BOOST_NOEXCEPT
       :  slist_it_(other.slist_it()), traitsptr_(other.get_bucket_value_traits())
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE const siterator &slist_it() const
+   BOOST_INTRUSIVE_FORCEINLINE const siterator &slist_it() const BOOST_NOEXCEPT
    { return slist_it_; }
 
-   BOOST_INTRUSIVE_FORCEINLINE hashtable_iterator<BucketValueTraits, LinearBuckets, false> unconst() const
+   BOOST_INTRUSIVE_FORCEINLINE hashtable_iterator<BucketValueTraits, LinearBuckets, false> unconst() const BOOST_NOEXCEPT
    {  return hashtable_iterator<BucketValueTraits, LinearBuckets, false>(this->slist_it(), this->get_bucket_value_traits());   }
 
-   BOOST_INTRUSIVE_FORCEINLINE hashtable_iterator& operator++()
+   BOOST_INTRUSIVE_FORCEINLINE hashtable_iterator& operator++() BOOST_NOEXCEPT
    {  this->increment();   return *this;   }
 
-   inline hashtable_iterator operator++(int)
+   inline hashtable_iterator operator++(int) BOOST_NOEXCEPT
    {
       hashtable_iterator result (*this);
       this->increment();
       return result;
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE friend bool operator== (const hashtable_iterator& i, const hashtable_iterator& i2)
+   BOOST_INTRUSIVE_FORCEINLINE friend bool operator== (const hashtable_iterator& i, const hashtable_iterator& i2) BOOST_NOEXCEPT
    { return i.slist_it_ == i2.slist_it_; }
 
-   BOOST_INTRUSIVE_FORCEINLINE friend bool operator!= (const hashtable_iterator& i, const hashtable_iterator& i2)
+   BOOST_INTRUSIVE_FORCEINLINE friend bool operator!= (const hashtable_iterator& i, const hashtable_iterator& i2) BOOST_NOEXCEPT
    { return !(i == i2); }
 
-   BOOST_INTRUSIVE_FORCEINLINE reference operator*() const
+   BOOST_INTRUSIVE_FORCEINLINE reference operator*() const BOOST_NOEXCEPT
    { return *this->operator ->(); }
 
-   BOOST_INTRUSIVE_FORCEINLINE pointer operator->() const
+   BOOST_INTRUSIVE_FORCEINLINE pointer operator->() const BOOST_NOEXCEPT
    {
       return this->priv_value_traits().to_value_ptr
          (downcast_bucket(slist_it_.pointed_node()));
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE const_bucketvaltraits_ptr get_bucket_value_traits() const
+   BOOST_INTRUSIVE_FORCEINLINE const_bucketvaltraits_ptr get_bucket_value_traits() const BOOST_NOEXCEPT
    {  return traitsptr_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE const value_traits &priv_value_traits() const
+   BOOST_INTRUSIVE_FORCEINLINE const value_traits &priv_value_traits() const BOOST_NOEXCEPT
    {  return traitsptr_->priv_value_traits();  }
 
    private:
 
-   BOOST_INTRUSIVE_FORCEINLINE void increment()
+   BOOST_INTRUSIVE_FORCEINLINE void increment() BOOST_NOEXCEPT
    {
       hashtable_iterator_ops<bucket_type>::circular_increment
          ( slist_it_
@@ -310,7 +310,7 @@ class hashtable_iterator<BucketValueTraits, true, IsConst>
                   , hashtable_iterator<BucketValueTraits, true, false>
                   , nat>::type                                 nonconst_iterator;
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr downcast_bucket(slist_node_ptr p)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr downcast_bucket(slist_node_ptr p) BOOST_NOEXCEPT
    {
       return pointer_traits<node_ptr>::
          pointer_to(static_cast<typename node_traits::node&>(*p));
@@ -318,64 +318,64 @@ class hashtable_iterator<BucketValueTraits, true, IsConst>
 
    public:
 
-   BOOST_INTRUSIVE_FORCEINLINE hashtable_iterator ()
+   BOOST_INTRUSIVE_FORCEINLINE hashtable_iterator () BOOST_NOEXCEPT
       : slist_it_()  //Value initialization to achieve "null iterators" (N3644)
       , members_()
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE explicit hashtable_iterator(siterator ptr, bucket_ptr bp, const_value_traits_ptr traits_ptr)
+   BOOST_INTRUSIVE_FORCEINLINE explicit hashtable_iterator(siterator ptr, bucket_ptr bp, const_value_traits_ptr traits_ptr) BOOST_NOEXCEPT
       : slist_it_ (ptr)
       , members_ (bp, traits_ptr)
    {}
 
    //Implicit copy operations: keeps the iterator trivially copyable (passed in registers)
-   BOOST_INTRUSIVE_FORCEINLINE hashtable_iterator(const nonconst_iterator &other)
+   BOOST_INTRUSIVE_FORCEINLINE hashtable_iterator(const nonconst_iterator &other) BOOST_NOEXCEPT
       :  slist_it_(other.slist_it()), members_(other.get_bucket_ptr(), other.get_value_traits())
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE const siterator &slist_it() const
+   BOOST_INTRUSIVE_FORCEINLINE const siterator &slist_it() const BOOST_NOEXCEPT
    { return slist_it_; }
 
-   BOOST_INTRUSIVE_FORCEINLINE hashtable_iterator<BucketValueTraits, true, false> unconst() const
+   BOOST_INTRUSIVE_FORCEINLINE hashtable_iterator<BucketValueTraits, true, false> unconst() const BOOST_NOEXCEPT
    {  return hashtable_iterator<BucketValueTraits, true, false>(this->slist_it(), members_.nodeptr_, members_.get_ptr());   }
 
-   BOOST_INTRUSIVE_FORCEINLINE hashtable_iterator& operator++()
+   BOOST_INTRUSIVE_FORCEINLINE hashtable_iterator& operator++() BOOST_NOEXCEPT
    {  this->increment();   return *this;   }
 
-   inline hashtable_iterator operator++(int)
+   inline hashtable_iterator operator++(int) BOOST_NOEXCEPT
    {
       hashtable_iterator result (*this);
       this->increment();
       return result;
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE friend bool operator== (const hashtable_iterator& i, const hashtable_iterator& i2)
+   BOOST_INTRUSIVE_FORCEINLINE friend bool operator== (const hashtable_iterator& i, const hashtable_iterator& i2) BOOST_NOEXCEPT
    { return i.slist_it_ == i2.slist_it_; }
 
-   BOOST_INTRUSIVE_FORCEINLINE friend bool operator!= (const hashtable_iterator& i, const hashtable_iterator& i2)
+   BOOST_INTRUSIVE_FORCEINLINE friend bool operator!= (const hashtable_iterator& i, const hashtable_iterator& i2) BOOST_NOEXCEPT
    { return i.slist_it_ != i2.slist_it_; }
 
-   BOOST_INTRUSIVE_FORCEINLINE reference operator*() const
+   BOOST_INTRUSIVE_FORCEINLINE reference operator*() const BOOST_NOEXCEPT
    { return *this->operator ->(); }
 
-   BOOST_INTRUSIVE_FORCEINLINE pointer operator->() const
+   BOOST_INTRUSIVE_FORCEINLINE pointer operator->() const BOOST_NOEXCEPT
    { return this->operator_arrow(detail::bool_<stateful_value_traits>()); }
 
-   BOOST_INTRUSIVE_FORCEINLINE const_value_traits_ptr get_value_traits() const
+   BOOST_INTRUSIVE_FORCEINLINE const_value_traits_ptr get_value_traits() const BOOST_NOEXCEPT
    {  return members_.get_ptr(); }
 
-   BOOST_INTRUSIVE_FORCEINLINE bucket_ptr get_bucket_ptr() const
+   BOOST_INTRUSIVE_FORCEINLINE bucket_ptr get_bucket_ptr() const BOOST_NOEXCEPT
    {  return members_.nodeptr_; }
 
    private:
 
-   BOOST_INTRUSIVE_FORCEINLINE pointer operator_arrow(detail::false_) const
+   BOOST_INTRUSIVE_FORCEINLINE pointer operator_arrow(detail::false_) const BOOST_NOEXCEPT
    { return value_traits::to_value_ptr(downcast_bucket(slist_it_.pointed_node())); }
 
-   BOOST_INTRUSIVE_FORCEINLINE pointer operator_arrow(detail::true_) const
+   BOOST_INTRUSIVE_FORCEINLINE pointer operator_arrow(detail::true_) const BOOST_NOEXCEPT
    { return this->get_value_traits()->to_value_ptr(downcast_bucket(slist_it_.pointed_node())); }
 
-   BOOST_INTRUSIVE_FORCEINLINE void increment()
+   BOOST_INTRUSIVE_FORCEINLINE void increment() BOOST_NOEXCEPT
    {  hashtable_iterator_ops<bucket_type>::linear_increment(slist_it_, members_.nodeptr_);  }
 
    siterator   slist_it_;

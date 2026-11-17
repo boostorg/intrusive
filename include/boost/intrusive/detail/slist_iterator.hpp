@@ -62,69 +62,69 @@ class slist_iterator
    typedef typename types_t::iterator_type::reference          reference;
    typedef typename types_t::iterator_type::iterator_category  iterator_category;
 
-   BOOST_INTRUSIVE_FORCEINLINE slist_iterator()
+   BOOST_INTRUSIVE_FORCEINLINE slist_iterator() BOOST_NOEXCEPT
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE slist_iterator(node_ptr nodeptr, const_value_traits_ptr traits_ptr)
+   BOOST_INTRUSIVE_FORCEINLINE slist_iterator(node_ptr nodeptr, const_value_traits_ptr traits_ptr) BOOST_NOEXCEPT
       : members_(nodeptr, traits_ptr)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE explicit slist_iterator(node_ptr nodeptr)
+   BOOST_INTRUSIVE_FORCEINLINE explicit slist_iterator(node_ptr nodeptr) BOOST_NOEXCEPT
       : members_(nodeptr, const_value_traits_ptr())
    {  BOOST_INTRUSIVE_STATIC_ASSERT((stateful_value_traits == false));  }
 
    //Implicit copy operations: keeps the iterator trivially copyable (passed in registers)
-   BOOST_INTRUSIVE_FORCEINLINE slist_iterator(const nonconst_iterator &other)
+   BOOST_INTRUSIVE_FORCEINLINE slist_iterator(const nonconst_iterator &other) BOOST_NOEXCEPT
       :  members_(other.pointed_node(), other.get_value_traits())
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE node_ptr pointed_node() const
+   BOOST_INTRUSIVE_FORCEINLINE node_ptr pointed_node() const BOOST_NOEXCEPT
    { return members_.nodeptr_; }
 
-   BOOST_INTRUSIVE_FORCEINLINE slist_iterator &operator=(node_ptr n)
+   BOOST_INTRUSIVE_FORCEINLINE slist_iterator &operator=(node_ptr n) BOOST_NOEXCEPT
    {  members_.nodeptr_ = n;  return static_cast<slist_iterator&>(*this);  }
 
-   BOOST_INTRUSIVE_FORCEINLINE const_value_traits_ptr get_value_traits() const
+   BOOST_INTRUSIVE_FORCEINLINE const_value_traits_ptr get_value_traits() const BOOST_NOEXCEPT
    {  return members_.get_ptr(); }
 
-   BOOST_INTRUSIVE_FORCEINLINE bool operator!() const
+   BOOST_INTRUSIVE_FORCEINLINE bool operator!() const BOOST_NOEXCEPT
    {  return !members_.nodeptr_; }
 
    public:
-   inline slist_iterator& operator++()
+   inline slist_iterator& operator++() BOOST_NOEXCEPT
    {
       members_.nodeptr_ = node_traits::get_next(members_.nodeptr_);
       return static_cast<slist_iterator&> (*this);
    }
 
-   inline slist_iterator operator++(int)
+   inline slist_iterator operator++(int) BOOST_NOEXCEPT
    {
       slist_iterator result (*this);
       members_.nodeptr_ = node_traits::get_next(members_.nodeptr_);
       return result;
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE friend bool operator== (const slist_iterator& l, const slist_iterator& r)
+   BOOST_INTRUSIVE_FORCEINLINE friend bool operator== (const slist_iterator& l, const slist_iterator& r) BOOST_NOEXCEPT
    {  return l.pointed_node() == r.pointed_node();   }
 
-   BOOST_INTRUSIVE_FORCEINLINE friend bool operator!= (const slist_iterator& l, const slist_iterator& r)
+   BOOST_INTRUSIVE_FORCEINLINE friend bool operator!= (const slist_iterator& l, const slist_iterator& r) BOOST_NOEXCEPT
    {  return l.pointed_node() != r.pointed_node();   }
 
-   BOOST_INTRUSIVE_FORCEINLINE reference operator*() const
+   BOOST_INTRUSIVE_FORCEINLINE reference operator*() const BOOST_NOEXCEPT
    {  return *operator->();   }
 
-   BOOST_INTRUSIVE_FORCEINLINE pointer operator->() const
+   BOOST_INTRUSIVE_FORCEINLINE pointer operator->() const BOOST_NOEXCEPT
    { return this->operator_arrow(detail::bool_<stateful_value_traits>()); }
 
-   BOOST_INTRUSIVE_FORCEINLINE slist_iterator<ValueTraits, false> unconst() const
+   BOOST_INTRUSIVE_FORCEINLINE slist_iterator<ValueTraits, false> unconst() const BOOST_NOEXCEPT
    {  return slist_iterator<ValueTraits, false>(this->pointed_node(), this->get_value_traits());   }
 
    private:
 
-   BOOST_INTRUSIVE_FORCEINLINE pointer operator_arrow(detail::false_) const
+   BOOST_INTRUSIVE_FORCEINLINE pointer operator_arrow(detail::false_) const BOOST_NOEXCEPT
    { return ValueTraits::to_value_ptr(members_.nodeptr_); }
 
-   BOOST_INTRUSIVE_FORCEINLINE pointer operator_arrow(detail::true_) const
+   BOOST_INTRUSIVE_FORCEINLINE pointer operator_arrow(detail::true_) const BOOST_NOEXCEPT
    { return this->get_value_traits()->to_value_ptr(members_.nodeptr_); }
 
    iiterator_members<node_ptr, const_value_traits_ptr, stateful_value_traits> members_;

@@ -49,13 +49,13 @@ struct slist_node_traits
    typedef typename detail::ptr_cparam<node_ptr>::type        node_ptr_cparam;
    typedef typename detail::ptr_cparam<const_node_ptr>::type  const_node_ptr_cparam;
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_next(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_next(BOOST_INTRUSIVE_CPARAM(const_node_ptr) n) BOOST_NOEXCEPT
    {  return n->next_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_next(BOOST_INTRUSIVE_CPARAM(node_ptr) n)
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_next(BOOST_INTRUSIVE_CPARAM(node_ptr) n) BOOST_NOEXCEPT
    {  return n->next_;  }
 
-   BOOST_INTRUSIVE_NVCOMPILER_WORKAROUND_NOINLINE static void set_next(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr next)
+   BOOST_INTRUSIVE_NVCOMPILER_WORKAROUND_NOINLINE static void set_next(BOOST_INTRUSIVE_CPARAM(node_ptr) n, node_ptr next) BOOST_NOEXCEPT
    {  n->next_ = next;  }
 };
 
