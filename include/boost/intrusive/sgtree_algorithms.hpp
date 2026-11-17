@@ -56,6 +56,14 @@ namespace intrusive {
 //! <tt>static node_ptr get_right(const_node_ptr n);</tt>
 //!
 //! <tt>static void set_right(node_ptr n, node_ptr right);</tt>
+//!
+//! <b>Alpha function objects</b>:
+//!
+//! The insertion functions take an <tt>H_Alpha</tt> function object: <tt>h_alpha(size)</tt>
+//! returns the maximum depth of a balanced tree with <tt>size</tt> nodes. The erasure functions
+//! take an <tt>AlphaByMaxSize</tt> function object: <tt>alpha_by_maxsize(max_tree_size)</tt>
+//! returns the size under which the tree is rebuilt. Their call operators and their copy and
+//! move constructors must not throw: the functions that use them are <tt>noexcept</tt>.
 template<class NodeTraits>
 class sgtree_algorithms
    #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
@@ -136,7 +144,7 @@ class sgtree_algorithms
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::erase(node_ptr,node_ptr)
    template<class AlphaByMaxSize>
-   static node_ptr erase(node_ptr header, node_ptr z, std::size_t tree_size, std::size_t &max_tree_size, AlphaByMaxSize alpha_by_maxsize)
+   static node_ptr erase(node_ptr header, node_ptr z, std::size_t tree_size, std::size_t &max_tree_size, AlphaByMaxSize alpha_by_maxsize) BOOST_NOEXCEPT
    {
       bstree_algo::erase(header, z);
       --tree_size;
@@ -230,7 +238,7 @@ class sgtree_algorithms
    template<class H_Alpha>
    static node_ptr insert_before
       (node_ptr header, node_ptr pos, node_ptr new_node
-      ,std::size_t tree_size, H_Alpha h_alpha, std::size_t &max_tree_size)
+      ,std::size_t tree_size, H_Alpha h_alpha, std::size_t &max_tree_size) BOOST_NOEXCEPT
    {
       std::size_t depth;
       bstree_algo::insert_before(header, pos, new_node, &depth);
@@ -289,7 +297,7 @@ class sgtree_algorithms
    template<class H_Alpha>
    inline static void insert_unique_commit
       (node_ptr header, node_ptr new_value, const insert_commit_data &commit_data
-      ,std::size_t tree_size, H_Alpha h_alpha, std::size_t &max_tree_size)
+      ,std::size_t tree_size, H_Alpha h_alpha, std::size_t &max_tree_size) BOOST_NOEXCEPT
    {  return insert_commit(header, new_value, commit_data, tree_size, h_alpha, max_tree_size);  }
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::transfer_unique
