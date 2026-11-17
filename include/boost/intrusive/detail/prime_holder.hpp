@@ -55,28 +55,28 @@ struct prime_list_holder
 
    //Maximum value of SizeType that std::size_t can represent
    template <class SizeType>
-   BOOST_INTRUSIVE_FORCEINLINE static std::size_t max_size_type_value()
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t max_size_type_value() BOOST_NOEXCEPT
    {  return sizeof(SizeType) < sizeof(std::size_t) ? std::size_t(SizeType(-1)) : std::size_t(-1);  }
 
    //Converts n to std::size_t, saturating values that std::size_t can't represent
    template <class SizeType>
-   BOOST_INTRUSIVE_FORCEINLINE static std::size_t saturate_to_size_t(SizeType n)
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t saturate_to_size_t(SizeType n) BOOST_NOEXCEPT
    {  return saturate_to_size_t(n, detail::bool_<(sizeof(SizeType) > sizeof(std::size_t))>());  }
 
    //SizeType is not wider than std::size_t, no saturation needed
    template <class SizeType>
-   BOOST_INTRUSIVE_FORCEINLINE static std::size_t saturate_to_size_t(SizeType n, detail::false_)
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t saturate_to_size_t(SizeType n, detail::false_) BOOST_NOEXCEPT
    {  return std::size_t(n);  }
 
    template <class SizeType>
-   BOOST_INTRUSIVE_FORCEINLINE static std::size_t saturate_to_size_t(SizeType n, detail::true_)
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t saturate_to_size_t(SizeType n, detail::true_) BOOST_NOEXCEPT
    {  return n > SizeType(std::size_t(-1)) ? std::size_t(-1) : std::size_t(n);  }
 
    static const std::size_t prime_list[];
    static const std::size_t prime_list_size;
 
    //Biggest prime smaller or equal than n or the smallest prime
-   static const std::size_t *suggested_lower_bucket_count_ptr(std::size_t n)
+   static const std::size_t *suggested_lower_bucket_count_ptr(std::size_t n) BOOST_NOEXCEPT
    {
       const std::size_t *primes     = &prime_list[0];
       const std::size_t *primes_end = primes + prime_list_size;
@@ -87,7 +87,7 @@ struct prime_list_holder
    }
 
    //Smallest prime bigger or equal than n and smaller or equal than max_n
-   static const std::size_t *suggested_upper_bucket_count_ptr(std::size_t n, std::size_t max_n)
+   static const std::size_t *suggested_upper_bucket_count_ptr(std::size_t n, std::size_t max_n) BOOST_NOEXCEPT
    {
       const std::size_t *primes     = &prime_list[0];
       const std::size_t *primes_end = primes + prime_list_size;
@@ -102,32 +102,32 @@ struct prime_list_holder
    public:
 
    template <class SizeType>
-   BOOST_INTRUSIVE_FORCEINLINE static SizeType suggested_upper_bucket_count(SizeType n)
+   BOOST_INTRUSIVE_FORCEINLINE static SizeType suggested_upper_bucket_count(SizeType n) BOOST_NOEXCEPT
    {
       return static_cast<SizeType>
          (*suggested_upper_bucket_count_ptr(saturate_to_size_t(n), max_size_type_value<SizeType>()));
    }
 
    template <class SizeType>
-   BOOST_INTRUSIVE_FORCEINLINE static SizeType suggested_lower_bucket_count(SizeType n)
+   BOOST_INTRUSIVE_FORCEINLINE static SizeType suggested_lower_bucket_count(SizeType n) BOOST_NOEXCEPT
    {  return static_cast<SizeType>(*suggested_lower_bucket_count_ptr(saturate_to_size_t(n)));   }
 
    template <class SizeType>
-   BOOST_INTRUSIVE_FORCEINLINE static std::size_t suggested_lower_bucket_count_idx(SizeType n)
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t suggested_lower_bucket_count_idx(SizeType n) BOOST_NOEXCEPT
    {  return static_cast<std::size_t>(suggested_lower_bucket_count_ptr(saturate_to_size_t(n)) - &prime_list[0]); }
 
    template <class SizeType>
-   BOOST_INTRUSIVE_FORCEINLINE static std::size_t suggested_upper_bucket_count_idx(SizeType n)
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t suggested_upper_bucket_count_idx(SizeType n) BOOST_NOEXCEPT
    {
       return static_cast<std::size_t>
          (suggested_upper_bucket_count_ptr(saturate_to_size_t(n), max_size_type_value<SizeType>()) - &prime_list[0]);
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE static std::size_t size_from_index(std::size_t n)
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t size_from_index(std::size_t n) BOOST_NOEXCEPT
    {  return prime_list[std::ptrdiff_t(n)]; }
 
    template<std::size_t SizeIndex>
-   BOOST_INTRUSIVE_FORCEINLINE static std::size_t modfunc(std::size_t hash) { return hash % SizeIndex; }
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t modfunc(std::size_t hash) BOOST_NOEXCEPT { return hash % SizeIndex; }
 
    static std::size_t(*const positions[])(std::size_t);
 
@@ -137,20 +137,20 @@ struct prime_list_holder
    #endif
 
    template <class SizeType>
-   BOOST_INTRUSIVE_FORCEINLINE static std::size_t lower_size_index(SizeType n)
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t lower_size_index(SizeType n) BOOST_NOEXCEPT
    {   return prime_list_holder<>::suggested_lower_bucket_count_idx(n);  }
 
    template <class SizeType>
-   BOOST_INTRUSIVE_FORCEINLINE static std::size_t upper_size_index(SizeType n)
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t upper_size_index(SizeType n) BOOST_NOEXCEPT
    {   return prime_list_holder<>::suggested_upper_bucket_count_idx(n);  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static std::size_t size(std::size_t size_index)
+   BOOST_INTRUSIVE_FORCEINLINE static std::size_t size(std::size_t size_index) BOOST_NOEXCEPT
    {   return prime_list_holder<>::size_from_index(size_index);  }
 
    #if BOOST_INTRUSIVE_64_BIT_SIZE_T
    // https://github.com/lemire/fastmod
 
-   inline static uint64_t mul128_u32(uint64_t lowbits, uint32_t d)
+   inline static uint64_t mul128_u32(uint64_t lowbits, uint32_t d) BOOST_NOEXCEPT
    {
       #if defined(_MSC_VER)
          return __umulh(lowbits, d);
@@ -164,14 +164,14 @@ struct prime_list_holder
       #endif
    }
 
-   inline static uint32_t fastmod_u32(uint32_t a, uint64_t M, uint32_t d)
+   inline static uint32_t fastmod_u32(uint32_t a, uint64_t M, uint32_t d) BOOST_NOEXCEPT
    {
       uint64_t lowbits = M * a;
       return (uint32_t)(mul128_u32(lowbits, d));
    }
    #endif // BOOST_INTRUSIVE_64_BIT_SIZE_T
 
-   inline static std::size_t position(std::size_t hash,std::size_t size_index)
+   inline static std::size_t position(std::size_t hash,std::size_t size_index) BOOST_NOEXCEPT
    {
       #if BOOST_INTRUSIVE_64_BIT_SIZE_T
          BOOST_CONSTEXPR_OR_CONST std::size_t sizes_under_32bit = sizeof(inv_sizes32)/sizeof(inv_sizes32[0]);

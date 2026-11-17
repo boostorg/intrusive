@@ -81,7 +81,7 @@ template<std::size_t Bits> struct hash_mix_impl;
 
 template<> struct hash_mix_impl<64>
 {
-    inline static boost::uint64_t fn( boost::uint64_t x )
+    inline static boost::uint64_t fn( boost::uint64_t x ) BOOST_NOEXCEPT
     {
         boost::uint64_t const m = 0xe9846af9b1a615d;
 
@@ -102,7 +102,7 @@ template<> struct hash_mix_impl<64>
 
 template<> struct hash_mix_impl<32>
 {
-    inline static boost::uint32_t fn( boost::uint32_t x )
+    inline static boost::uint32_t fn( boost::uint32_t x ) BOOST_NOEXCEPT
     {
         boost::uint32_t const m1 = 0x21f0aaad;
         boost::uint32_t const m2 = 0x735a2d97;
@@ -117,7 +117,7 @@ template<> struct hash_mix_impl<32>
     }
 };
 
-inline std::size_t hash_mix( std::size_t v )
+inline std::size_t hash_mix( std::size_t v ) BOOST_NOEXCEPT
 {
     return hash_mix_impl<sizeof(std::size_t) * CHAR_BIT>::fn( v );
 }

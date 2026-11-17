@@ -228,6 +228,45 @@ void test_value_unordered()
 }
 
 
+#ifndef BOOST_NO_CXX11_NOEXCEPT
+
+//The internal hash functor is noexcept for scalars and arrays of scalars
+//and not noexcept for types that use a user hash_value
+namespace hash_noexcept_test {
+
+struct UserHashed {};
+
+std::size_t hash_value(const UserHashed &)
+{  return 0u;  }
+
+enum Enum { enum_value };
+
+typedef boost::intrusive::detail::internal_hash_functor<int>                  int_hash;
+typedef boost::intrusive::detail::internal_hash_functor<long long>            long_long_hash;
+typedef boost::intrusive::detail::internal_hash_functor<double>               double_hash;
+typedef boost::intrusive::detail::internal_hash_functor<long double>          long_double_hash;
+typedef boost::intrusive::detail::internal_hash_functor<int*>                 pointer_hash;
+typedef boost::intrusive::detail::internal_hash_functor<Enum>                 enum_hash;
+typedef boost::intrusive::detail::internal_hash_functor<std::nullptr_t>       nullptr_hash;
+typedef boost::intrusive::detail::internal_hash_functor<int[3]>               int_array_hash;
+typedef boost::intrusive::detail::internal_hash_functor<UserHashed>           user_hash;
+typedef boost::intrusive::detail::internal_hash_functor<UserHashed[2]>        user_array_hash;
+
+static_assert(noexcept(int_hash()(0)), "");
+static_assert(noexcept(long_long_hash()(0LL)), "");
+static_assert(noexcept(double_hash()(0.0)), "");
+static_assert(noexcept(long_double_hash()(0.0L)), "");
+static_assert(noexcept(pointer_hash()(nullptr)), "");
+static_assert(noexcept(enum_hash()(enum_value)), "");
+static_assert(noexcept(nullptr_hash()(nullptr)), "");
+static_assert(noexcept(int_array_hash()(boost::move_detail::declval<const int(&)[3]>())), "");
+static_assert(!noexcept(user_hash()(UserHashed())), "");
+static_assert(!noexcept(user_array_hash()(boost::move_detail::declval<const UserHashed(&)[2]>())), "");
+
+}  //namespace hash_noexcept_test
+
+#endif   //#ifndef BOOST_NO_CXX11_NOEXCEPT
+
 #if (BOOST_CXX_VERSION >= 201103L)
 #include <string>
 #include <list>

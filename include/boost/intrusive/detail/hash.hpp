@@ -79,7 +79,7 @@ inline typename detail::disable_if_c<detail::is_scalar<T>::value, std::size_t>::
 
 template <typename T>
 BOOST_INTRUSIVE_FORCEINLINE typename enable_if_c<is_enum<T>::value, std::size_t>::type
-   hash_value( T v )
+   hash_value( T v ) BOOST_NOEXCEPT
 {
    return static_cast<std::size_t>( v );
 }
@@ -96,7 +96,7 @@ struct hash_float_impl;
 // float
 template<class T> struct hash_float_impl<T, 32>
 {
-   static std::size_t fn( T v )
+   static std::size_t fn( T v ) BOOST_NOEXCEPT
    {
          boost::uint32_t w;
          std::memcpy( &w, &v, sizeof( v ) );
@@ -108,7 +108,7 @@ template<class T> struct hash_float_impl<T, 32>
 // double
 template<class T> struct hash_float_impl<T, 64>
 {
-   static std::size_t fn( T v )
+   static std::size_t fn( T v ) BOOST_NOEXCEPT
    {
          boost::uint64_t w;
          std::memcpy( &w, &v, sizeof( v ) );
@@ -120,7 +120,7 @@ template<class T> struct hash_float_impl<T, 64>
 // 80 bit long double in 12 bytes
 template<class T> struct hash_float_impl<T, 96>
 {
-   static std::size_t fn( T v )
+   static std::size_t fn( T v ) BOOST_NOEXCEPT
    {
          boost::uint64_t w[ 2 ] = {};
          std::memcpy( &w, &v, 80 / CHAR_BIT );
@@ -139,7 +139,7 @@ template<class T> struct hash_float_impl<T, 96>
 // 80 bit long double in 16 bytes
 template<class T> struct hash_float_impl<T, 128>
 {
-   static std::size_t fn( T v )
+   static std::size_t fn( T v ) BOOST_NOEXCEPT
    {
       boost::uint64_t w[ 2 ] = {};
       std::memcpy( &w, &v, 80 / CHAR_BIT );
@@ -157,7 +157,7 @@ template<class T> struct hash_float_impl<T, 128>
 // 128 bit long double
 template<class T> struct hash_float_impl<T, 128>
 {
-   static std::size_t fn( T v )
+   static std::size_t fn( T v ) BOOST_NOEXCEPT
    {
       boost::uint64_t w[ 2 ];
       std::memcpy( &w, &v, sizeof( v ) );
@@ -182,7 +182,7 @@ template<class T> struct hash_float_impl<T, 128>
 
 template <typename T>
 BOOST_INTRUSIVE_FORCEINLINE typename enable_if_c<is_floating_point<T>::value, std::size_t>::type
-   hash_value( T v )
+   hash_value( T v ) BOOST_NOEXCEPT
 {
    return boost::intrusive::detail::hash_float_impl<T>::fn( v + 0 );
 }
@@ -193,7 +193,7 @@ BOOST_INTRUSIVE_FORCEINLINE typename enable_if_c<is_floating_point<T>::value, st
 //
 ////////////////////////////////////////////////////////////
 // `x + (x >> 3)` adjustment by Alberto Barbati and Dave Harris.
-template <class T> std::size_t hash_value( T* const& v )
+template <class T> std::size_t hash_value( T* const& v ) BOOST_NOEXCEPT
 {
    std::size_t x = reinterpret_cast<std::size_t>( v );
    return hash_value( x + (x >> 3) );
@@ -207,7 +207,7 @@ template <class T> std::size_t hash_value( T* const& v )
 #if !defined(BOOST_NO_CXX11_NULLPTR)
 template <typename T>
 BOOST_INTRUSIVE_FORCEINLINE typename enable_if_c<is_same<T, std::nullptr_t>::value, std::size_t>::type
-   hash_value( T const &)
+   hash_value( T const &) BOOST_NOEXCEPT
 {
    return (hash_value)( static_cast<void*>( nullptr ) );
 }
@@ -225,6 +225,7 @@ struct internal_hash_functor;
 
 template<class T, std::size_t N>
 inline std::size_t hash_value_dispatch( T const (&x)[ N ] )
+   BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT_EXPR(internal_hash_functor<T>()(::boost::move_detail::declval<T const&>())))
 {
    std::size_t seed = 0;
    for(std::size_t i = 0; i != N; ++i){
@@ -235,6 +236,7 @@ inline std::size_t hash_value_dispatch( T const (&x)[ N ] )
 
 template<class T, std::size_t N>
 inline std::size_t hash_value_dispatch( T (&x)[ N ] )
+   BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT_EXPR(internal_hash_functor<T>()(::boost::move_detail::declval<T const&>())))
 {
    std::size_t seed = 0;
    for (std::size_t i = 0; i != N; ++i) {
@@ -250,7 +252,7 @@ inline std::size_t hash_value_dispatch( T (&x)[ N ] )
 ////////////////////////////////////////////////////////////
 template <class T>
 inline typename detail::enable_if_c<detail::is_scalar<T>::value, std::size_t>::type
-   hash_value_dispatch(const T &v)
+   hash_value_dispatch(const T &v) BOOST_NOEXCEPT
 {
    return boost::intrusive::detail::hash_value(v);
 }
@@ -262,6 +264,7 @@ template<class T>
 struct internal_hash_functor
 {
    BOOST_INTRUSIVE_FORCEINLINE std::size_t operator()(T const& val) const
+      BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT_EXPR(::boost::intrusive::detail::hash_value_dispatch(::boost::move_detail::declval<T const&>())))
    {
       return ::boost::intrusive::detail::hash_value_dispatch(val);
    }

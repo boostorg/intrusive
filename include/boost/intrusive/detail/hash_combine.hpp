@@ -42,7 +42,7 @@ namespace boost {
 namespace intrusive {
 namespace detail {
 
-inline void hash_combine_size_t(std::size_t& seed, std::size_t value)
+inline void hash_combine_size_t(std::size_t& seed, std::size_t value) BOOST_NOEXCEPT
 {
    seed = boost::intrusive::detail::hash_mix(seed + 0x9e3779b9 + value);
 }

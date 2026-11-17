@@ -38,7 +38,7 @@ struct hash_integral_impl;
 template<class T, bool is_unsigned, std::size_t size_t_bits, std::size_t type_bits>
 struct hash_integral_impl<T, false, is_unsigned, size_t_bits, type_bits>
 {
-    BOOST_INTRUSIVE_FORCEINLINE static std::size_t fn( T v )
+    BOOST_INTRUSIVE_FORCEINLINE static std::size_t fn( T v ) BOOST_NOEXCEPT
     {
         return static_cast<std::size_t>( v );
     }
@@ -47,7 +47,7 @@ struct hash_integral_impl<T, false, is_unsigned, size_t_bits, type_bits>
 template<class T, std::size_t size_t_bits, std::size_t type_bits>
 struct hash_integral_impl<T, true, false, size_t_bits, type_bits>
 {
-    static std::size_t fn( T v )
+    static std::size_t fn( T v ) BOOST_NOEXCEPT
     {
         typedef typename make_unsigned<T>::type U;
 
@@ -65,7 +65,7 @@ struct hash_integral_impl<T, true, false, size_t_bits, type_bits>
 template<class T>
 struct hash_integral_impl<T, true, true, 32, 64>
 {
-    static std::size_t fn( T v )
+    static std::size_t fn( T v ) BOOST_NOEXCEPT
     {
         std::size_t seed = 0;
 
@@ -79,7 +79,7 @@ struct hash_integral_impl<T, true, true, 32, 64>
 template<class T>
 struct hash_integral_impl<T, true, true, 32, 128>
 {
-    static std::size_t fn( T v )
+    static std::size_t fn( T v ) BOOST_NOEXCEPT
     {
         std::size_t seed = 0;
 
@@ -95,7 +95,7 @@ struct hash_integral_impl<T, true, true, 32, 128>
 template<class T>
 struct hash_integral_impl<T, true, true, 64, 128>
 {
-    static std::size_t fn( T v )
+    static std::size_t fn( T v ) BOOST_NOEXCEPT
     {
         std::size_t seed = 0;
 
@@ -108,7 +108,7 @@ struct hash_integral_impl<T, true, true, 64, 128>
 
 template <typename T>
 BOOST_INTRUSIVE_FORCEINLINE typename enable_if_c<is_integral<T>::value, std::size_t>::type
-    hash_value( T v )
+    hash_value( T v ) BOOST_NOEXCEPT
 {
     return hash_integral_impl<T>::fn( v );
 }
