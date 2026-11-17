@@ -92,6 +92,12 @@ template<class NodeTraits>
 class linear_slist_algorithms;
 
 template<class NodeTraits>
+class cached_circular_slist_algorithms;
+
+template<class NodeTraits>
+class cached_linear_slist_algorithms;
+
+template<class NodeTraits>
 class bstree_algorithms;
 
 template<class NodeTraits>

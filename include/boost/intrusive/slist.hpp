@@ -22,6 +22,8 @@
 #include <boost/intrusive/slist_hook.hpp>
 #include <boost/intrusive/circular_slist_algorithms.hpp>
 #include <boost/intrusive/linear_slist_algorithms.hpp>
+#include <boost/intrusive/cached_circular_slist_algorithms.hpp>
+#include <boost/intrusive/cached_linear_slist_algorithms.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/intrusive/detail/get_value_traits.hpp>
@@ -58,6 +60,151 @@ namespace intrusive {
 
 namespace detail {
 
+//Operations on a list, identified by its header node, with the same interface if the
+//last node is cached or not. "plast" points to the cached last node of the list if
+//CacheLast is true, and it is null and ignored if CacheLast is false.
+template<class NodeTraits, bool Linear, bool CacheLast>
+struct slist_last_algorithms;
+
+template<class NodeTraits, bool Linear>
+struct slist_last_algorithms<NodeTraits, Linear, true>
+{
+   typedef typename detail::if_c
+      < Linear
+      , cached_linear_slist_algorithms<NodeTraits>
+      , cached_circular_slist_algorithms<NodeTraits>
+      >::type                                      cached_algorithms;
+   typedef typename detail::if_c
+      < Linear
+      , linear_slist_algorithms<NodeTraits>
+      , circular_slist_algorithms<NodeTraits>
+      >::type                                      node_algorithms;
+   typedef typename NodeTraits::node_ptr           node_ptr;
+   typedef typename node_algorithms::stable_partition_info stable_partition_info;
+
+   BOOST_INTRUSIVE_FORCEINLINE static void init_header(node_ptr header, node_ptr *plast) BOOST_NOEXCEPT
+   {  cached_algorithms::init_header(header, *plast);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE static void link_after(node_ptr prev_n, node_ptr n, node_ptr *plast) BOOST_NOEXCEPT
+   {  cached_algorithms::link_after(prev_n, n, *plast);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE static void unlink_after(node_ptr prev_n, node_ptr *plast) BOOST_NOEXCEPT
+   {  cached_algorithms::unlink_after(prev_n, *plast);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE static void unlink_after(node_ptr prev_n, node_ptr e, node_ptr *plast) BOOST_NOEXCEPT
+   {  cached_algorithms::unlink_after(prev_n, e, *plast);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE static void incorporate_after(node_ptr bp, node_ptr b, node_ptr be, node_ptr *plast) BOOST_NOEXCEPT
+   {  cached_algorithms::incorporate_after(bp, b, be, *plast);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE static void transfer_after
+      (node_ptr p, node_ptr b, node_ptr e, node_ptr *plast, node_ptr *bplast) BOOST_NOEXCEPT
+   {  cached_algorithms::transfer_after(p, b, e, *plast, *bplast);  }
+
+   //Transfers all the nodes of the list x (non-empty) after p, returns the previous last node of x
+   static node_ptr transfer_all_after(node_ptr p, node_ptr x, node_ptr *plast, node_ptr *xplast) BOOST_NOEXCEPT
+   {
+      const node_ptr last_x = *xplast;
+      cached_algorithms::transfer_after(p, x, *plast, *xplast);
+      return last_x;
+   }
+
+   BOOST_INTRUSIVE_FORCEINLINE static void swap_trailing_nodes
+      (node_ptr header, node_ptr xheader, node_ptr *plast, node_ptr *xplast) BOOST_NOEXCEPT
+   {  cached_algorithms::swap_trailing_nodes(header, xheader, *plast, *xplast);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE static void reverse(node_ptr header, node_ptr *plast) BOOST_NOEXCEPT
+   {  cached_algorithms::reverse(header, *plast);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE static void shift_backwards(node_ptr header, std::size_t n, node_ptr *plast) BOOST_NOEXCEPT
+   {  cached_algorithms::shift_backwards(header, n, *plast);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE static void shift_forward(node_ptr header, std::size_t n, node_ptr *plast) BOOST_NOEXCEPT
+   {  cached_algorithms::shift_forward(header, n, *plast);  }
+
+   template<class NodePtrCompare>
+   BOOST_INTRUSIVE_FORCEINLINE static void sort(node_ptr header, NodePtrCompare comp, node_ptr *plast)
+   {  cached_algorithms::sort(header, comp, *plast);  }
+
+   template<class NodePtrCompare>
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr merge(node_ptr p, node_ptr x, NodePtrCompare comp, node_ptr *plast, node_ptr *xplast)
+   {  return cached_algorithms::merge(p, x, comp, *plast, *xplast);  }
+
+   //Moves the nodes for which pred is true before the others, keeping the relative order
+   template<class Pred>
+   static void stable_partition(node_ptr header, Pred pred, stable_partition_info &info, node_ptr *plast)
+   {
+      node_algorithms::stable_partition(header, node_algorithms::end_node(header), pred, info);
+      *plast = info.new_last_node;
+   }
+};
+
+template<class NodeTraits, bool Linear>
+struct slist_last_algorithms<NodeTraits, Linear, false>
+{
+   typedef typename detail::if_c
+      < Linear
+      , linear_slist_algorithms<NodeTraits>
+      , circular_slist_algorithms<NodeTraits>
+      >::type                                      node_algorithms;
+   typedef slist_header_algorithms<node_algorithms, Linear>  header_algorithms;
+   typedef typename NodeTraits::node_ptr           node_ptr;
+   typedef typename node_algorithms::stable_partition_info stable_partition_info;
+
+   BOOST_INTRUSIVE_FORCEINLINE static void init_header(node_ptr header, node_ptr *) BOOST_NOEXCEPT
+   {  node_algorithms::init_header(header);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE static void link_after(node_ptr prev_n, node_ptr n, node_ptr *) BOOST_NOEXCEPT
+   {  node_algorithms::link_after(prev_n, n);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE static void unlink_after(node_ptr prev_n, node_ptr *) BOOST_NOEXCEPT
+   {  node_algorithms::unlink_after(prev_n);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE static void unlink_after(node_ptr prev_n, node_ptr e, node_ptr *) BOOST_NOEXCEPT
+   {  node_algorithms::unlink_after(prev_n, e);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE static void incorporate_after(node_ptr bp, node_ptr b, node_ptr be, node_ptr *) BOOST_NOEXCEPT
+   {  node_algorithms::incorporate_after(bp, b, be);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE static void transfer_after
+      (node_ptr p, node_ptr b, node_ptr e, node_ptr *, node_ptr *) BOOST_NOEXCEPT
+   {  node_algorithms::transfer_after(p, b, e);  }
+
+   //Transfers all the nodes of the list x (non-empty) after p, returns the previous last node of x
+   static node_ptr transfer_all_after(node_ptr p, node_ptr x, node_ptr *, node_ptr *) BOOST_NOEXCEPT
+   {
+      const node_ptr last_x = node_algorithms::get_previous_node(x, node_algorithms::end_node(x));
+      node_algorithms::transfer_after(p, x, last_x);
+      return last_x;
+   }
+
+   BOOST_INTRUSIVE_FORCEINLINE static void swap_trailing_nodes
+      (node_ptr header, node_ptr xheader, node_ptr *, node_ptr *) BOOST_NOEXCEPT
+   {  header_algorithms::swap_trailing_nodes(header, xheader);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE static void reverse(node_ptr header, node_ptr *) BOOST_NOEXCEPT
+   {  header_algorithms::reverse(header);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE static void shift_backwards(node_ptr header, std::size_t n, node_ptr *) BOOST_NOEXCEPT
+   {  (void)header_algorithms::shift_backwards(header, n);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE static void shift_forward(node_ptr header, std::size_t n, node_ptr *) BOOST_NOEXCEPT
+   {  (void)header_algorithms::shift_forward(header, n);  }
+
+   template<class NodePtrCompare>
+   BOOST_INTRUSIVE_FORCEINLINE static void sort(node_ptr header, NodePtrCompare comp, node_ptr *)
+   {  (void)node_algorithms::sort(header, comp);  }
+
+   template<class NodePtrCompare>
+   BOOST_INTRUSIVE_FORCEINLINE static node_ptr merge(node_ptr p, node_ptr x, NodePtrCompare comp, node_ptr *, node_ptr *)
+   {  return node_algorithms::merge(p, x, comp);  }
+
+   //Moves the nodes for which pred is true before the others, keeping the relative order
+   template<class Pred>
+   BOOST_INTRUSIVE_FORCEINLINE static void stable_partition(node_ptr header, Pred pred, stable_partition_info &info, node_ptr *)
+   {  node_algorithms::stable_partition(header, node_algorithms::end_node(header), pred, info);  }
+};
+
 //Operations of slist_impl that only depend on the node type, the size holder,
 //the linear/cache_last options and the link mode
 //"header" is the header node of the list, "plast" points to the cached last node
@@ -65,11 +212,8 @@ namespace detail {
 template<class NodeTraits, class SizeTraits, bool Linear, bool CacheLast, bool SafeModeOrAutoUnlink>
 struct slist_node_ops
 {
-   typedef typename detail::if_c
-      < Linear
-      , linear_slist_algorithms<NodeTraits>
-      , circular_slist_algorithms<NodeTraits>
-      >::type                                      node_algorithms;
+   typedef slist_last_algorithms<NodeTraits, Linear, CacheLast>   last_algorithms;
+   typedef typename last_algorithms::node_algorithms  node_algorithms;
    typedef typename NodeTraits::node_ptr           node_ptr;
    typedef typename NodeTraits::const_node_ptr     const_node_ptr;
    typedef typename SizeTraits::size_type          size_type;
@@ -77,12 +221,8 @@ struct slist_node_ops
 
    static void init(node_ptr header, node_ptr *plast, SizeTraits &sz) BOOST_NOEXCEPT
    {
-      (void)plast;
-      node_algorithms::init_header(header);
+      last_algorithms::init_header(header, plast);
       sz.set_size(size_type(0));
-      BOOST_IF_CONSTEXPR(CacheLast){
-         *plast = header;
-      }
    }
 
    static size_type size(const_node_ptr header, const SizeTraits &sz) BOOST_NOEXCEPT
@@ -105,31 +245,20 @@ struct slist_node_ops
    //Unlinks the node after prev_n and initializes it, if needed
    static void erase_after(node_ptr prev_n, node_ptr *plast, SizeTraits &sz) BOOST_NOEXCEPT
    {
-      (void)plast;
       node_ptr const to_erase(NodeTraits::get_next(prev_n));
       (void)to_erase;
-      node_algorithms::unlink_after(prev_n);
-      BOOST_IF_CONSTEXPR(CacheLast){
-         if(to_erase == *plast){
-            *plast = prev_n;
-         }
-      }
+      last_algorithms::unlink_after(prev_n, plast);
       BOOST_IF_CONSTEXPR(SafeModeOrAutoUnlink)
          node_algorithms::init(to_erase);
       sz.decrement();
    }
 
    //Unlinks (bfp, lp) and initializes the nodes, if needed
-   static void erase_after(node_ptr bfp, node_ptr lp, node_ptr header, node_ptr *plast, SizeTraits &sz) BOOST_NOEXCEPT
+   static void erase_after(node_ptr bfp, node_ptr lp, node_ptr *plast, SizeTraits &sz) BOOST_NOEXCEPT
    {
-      (void)header; (void)plast; (void)sz;
-      BOOST_IF_CONSTEXPR(CacheLast){
-         if(lp == node_algorithms::end_node(header)){
-            *plast = bfp;
-         }
-      }
+      (void)sz;
       node_ptr fp(NodeTraits::get_next(bfp));
-      node_algorithms::unlink_after(bfp, lp);
+      last_algorithms::unlink_after(bfp, lp, plast);
       BOOST_IF_CONSTEXPR(SafeModeOrAutoUnlink || constant_time_size){
          while(fp != lp){
             node_ptr to_erase(fp);
@@ -143,20 +272,15 @@ struct slist_node_ops
    }
 
    //Unlinks (bfp, lp), with n == distance(next(bfp), lp), and initializes the nodes, if needed
-   static void erase_after(node_ptr bfp, node_ptr lp, size_type n, node_ptr header, node_ptr *plast, SizeTraits &sz) BOOST_NOEXCEPT
+   static void erase_after(node_ptr bfp, node_ptr lp, size_type n, node_ptr *plast, SizeTraits &sz) BOOST_NOEXCEPT
    {
-      (void)n; (void)header; (void)plast;
+      (void)n;
       BOOST_INTRUSIVE_INVARIANT_ASSERT(node_algorithms::distance(NodeTraits::get_next(bfp), lp) == n);
       BOOST_IF_CONSTEXPR(SafeModeOrAutoUnlink){
-         slist_node_ops::erase_after(bfp, lp, header, plast, sz);
+         slist_node_ops::erase_after(bfp, lp, plast, sz);
       }
       else{
-         BOOST_IF_CONSTEXPR(CacheLast){
-            if(lp == node_algorithms::end_node(header)){
-               *plast = bfp;
-            }
-         }
-         node_algorithms::unlink_after(bfp, lp);
+         last_algorithms::unlink_after(bfp, lp, plast);
          sz.decrease(n);
       }
    }
@@ -164,84 +288,47 @@ struct slist_node_ops
    //Transfers all the nodes of the list x (non-empty) after prev_n,
    //returns the previous last node of x
    static node_ptr splice_after_all
-      ( node_ptr prev_n, node_ptr header, node_ptr *plast, SizeTraits &sz
+      ( node_ptr prev_n, node_ptr *plast, SizeTraits &sz
       , node_ptr xheader, node_ptr *xplast, SizeTraits &xsz) BOOST_NOEXCEPT
    {
-      (void)header; (void)plast; (void)xplast;
-      node_ptr last_x_n;
-      BOOST_IF_CONSTEXPR(CacheLast){
-         last_x_n = *xplast;
-         *xplast = xheader;
-         if(NodeTraits::get_next(prev_n) == node_algorithms::end_node(header)){
-            *plast = last_x_n;
-         }
-      }
-      else{
-         last_x_n = node_algorithms::get_previous_node(xheader, node_algorithms::end_node(xheader));
-      }
-      node_algorithms::transfer_after(prev_n, xheader, last_x_n);
+      const node_ptr last_x_n = last_algorithms::transfer_all_after(prev_n, xheader, plast, xplast);
       sz.increase(xsz.get_size());
       xsz.set_size(size_type(0));
       return last_x_n;
    }
 
    //Transfers (before_f_n, before_l_n] from x after prev_pos_n
-   static void splice_after
-      ( node_ptr prev_pos_n, node_ptr header, node_ptr *plast
-      , node_ptr before_f_n, node_ptr before_l_n, node_ptr xheader, node_ptr *xplast) BOOST_NOEXCEPT
-   {
-      (void)header; (void)plast; (void)xheader; (void)xplast;
-      node_algorithms::transfer_after(prev_pos_n, before_f_n, before_l_n);
-      BOOST_IF_CONSTEXPR(CacheLast){
-         if(before_f_n != before_l_n){
-            if(NodeTraits::get_next(before_l_n) == node_algorithms::end_node(header)){
-               *plast = before_l_n;
-            }
-            if(NodeTraits::get_next(before_f_n) == node_algorithms::end_node(xheader)){
-               *xplast = before_f_n;
-            }
-         }
-      }
-   }
+   BOOST_INTRUSIVE_FORCEINLINE static void splice_after
+      ( node_ptr prev_pos_n, node_ptr *plast
+      , node_ptr before_f_n, node_ptr before_l_n, node_ptr *xplast) BOOST_NOEXCEPT
+   {  last_algorithms::transfer_after(prev_pos_n, before_f_n, before_l_n, plast, xplast);  }
 
    //Transfers (before_f_n, before_l_n] from x after prev_pos_n, n == distance(before_f_n, before_l_n)
    static void splice_after
-      ( node_ptr prev_pos_n, node_ptr header, node_ptr *plast, SizeTraits &sz
+      ( node_ptr prev_pos_n, node_ptr *plast, SizeTraits &sz
       , node_ptr before_f_n, node_ptr before_l_n, size_type n
-      , node_ptr xheader, node_ptr *xplast, SizeTraits &xsz) BOOST_NOEXCEPT
+      , node_ptr *xplast, SizeTraits &xsz) BOOST_NOEXCEPT
    {
       (void)n;
       BOOST_INTRUSIVE_INVARIANT_ASSERT(node_algorithms::distance(before_f_n, before_l_n) == n);
-      slist_node_ops::splice_after(prev_pos_n, header, plast, before_f_n, before_l_n, xheader, xplast);
+      slist_node_ops::splice_after(prev_pos_n, plast, before_f_n, before_l_n, xplast);
       sz.increase(n);
       xsz.decrease(n);
    }
 
    //Transfers (before_f_n, before_l_n] from x after prev_pos_n
    static void splice_after
-      ( node_ptr prev_pos_n, node_ptr header, node_ptr *plast, SizeTraits &sz
+      ( node_ptr prev_pos_n, node_ptr *plast, SizeTraits &sz
       , node_ptr before_f_n, node_ptr before_l_n
-      , node_ptr xheader, node_ptr *xplast, SizeTraits &xsz) BOOST_NOEXCEPT
+      , node_ptr *xplast, SizeTraits &xsz) BOOST_NOEXCEPT
    {
       (void)sz; (void)xsz;
       BOOST_IF_CONSTEXPR(constant_time_size)
          slist_node_ops::splice_after
-            ( prev_pos_n, header, plast, sz, before_f_n, before_l_n
-            , size_type(node_algorithms::distance(before_f_n, before_l_n)), xheader, xplast, xsz);
+            ( prev_pos_n, plast, sz, before_f_n, before_l_n
+            , size_type(node_algorithms::distance(before_f_n, before_l_n)), xplast, xsz);
       else
-         slist_node_ops::splice_after(prev_pos_n, header, plast, before_f_n, before_l_n, xheader, xplast);
-   }
-
-   //Links [first_n, before_l_n] after prev_pos_n
-   static void incorporate_after(node_ptr prev_pos_n, node_ptr first_n, node_ptr before_l_n, node_ptr *plast) BOOST_NOEXCEPT
-   {
-      (void)plast;
-      BOOST_IF_CONSTEXPR(CacheLast){
-         if(prev_pos_n == *plast){
-            *plast = before_l_n;
-         }
-      }
-      node_algorithms::incorporate_after(prev_pos_n, first_n, before_l_n);
+         slist_node_ops::splice_after(prev_pos_n, plast, before_f_n, before_l_n, xplast);
    }
 
    //Links [first_n, before_l_n] after prev_pos_n, n == distance(first_n, before_l_n) + 1
@@ -249,7 +336,7 @@ struct slist_node_ops
    {
       if(n){
          BOOST_INTRUSIVE_INVARIANT_ASSERT(size_type(node_algorithms::distance(first_n, before_l_n) + 1u) == n);
-         slist_node_ops::incorporate_after(prev_pos_n, first_n, before_l_n, plast);
+         last_algorithms::incorporate_after(prev_pos_n, first_n, before_l_n, plast);
          sz.increase(n);
       }
    }
@@ -262,51 +349,23 @@ struct slist_node_ops
          slist_node_ops::incorporate_after
             (prev_pos_n, first_n, before_l_n, size_type(node_algorithms::distance(first_n, before_l_n) + 1u), plast, sz);
       else
-         slist_node_ops::incorporate_after(prev_pos_n, first_n, before_l_n, plast);
-   }
-
-   static void reverse(node_ptr header, node_ptr *plast) BOOST_NOEXCEPT
-   {
-      (void)plast;
-      BOOST_IF_CONSTEXPR(CacheLast){
-         if(!node_algorithms::is_empty(header)){
-            *plast = NodeTraits::get_next(header);
-         }
-      }
-      slist_node_ops::priv_reverse(header, detail::bool_<Linear>());
-   }
-
-   BOOST_INTRUSIVE_FORCEINLINE static void shift_backwards(node_ptr header, node_ptr *plast, std::size_t n) BOOST_NOEXCEPT
-   {
-      slist_node_ops::priv_shift_backwards(header, plast, n, detail::bool_<Linear>());
-   }
-
-   BOOST_INTRUSIVE_FORCEINLINE static void shift_forward(node_ptr header, node_ptr *plast, std::size_t n) BOOST_NOEXCEPT
-   {
-      slist_node_ops::priv_shift_forward(header, plast, n, detail::bool_<Linear>());
+         last_algorithms::incorporate_after(prev_pos_n, first_n, before_l_n, plast);
    }
 
    //Swaps the nodes of both lists
-   static void swap(node_ptr header, node_ptr *plast, node_ptr xheader, node_ptr *xplast) BOOST_NOEXCEPT
-   {
-      (void)plast; (void)xplast;
-      BOOST_IF_CONSTEXPR(CacheLast){
-         slist_node_ops::priv_swap_cache_last(header, plast, xheader, xplast);
-      }
-      else{
-         slist_node_ops::priv_swap_lists(header, xheader, detail::bool_<Linear>());
-      }
-   }
+   BOOST_INTRUSIVE_FORCEINLINE static void swap(node_ptr header, node_ptr *plast, node_ptr xheader, node_ptr *xplast) BOOST_NOEXCEPT
+   {  last_algorithms::swap_trailing_nodes(header, xheader, plast, xplast);  }
 
-   //Updates sizes and the cached last node of x after transferring all its nodes
-   static void transfer_all(SizeTraits &sz, node_ptr xheader, node_ptr *xplast, SizeTraits &xsz) BOOST_NOEXCEPT
+   //Merges the nodes of x in the list. All the nodes of x are transferred, also if "comp" throws.
+   //Returns the last node transferred from x, or null if x is empty
+   template<class NodePtrCompare>
+   static node_ptr merge
+      ( node_ptr header, node_ptr *plast, SizeTraits &sz
+      , node_ptr xheader, node_ptr *xplast, SizeTraits &xsz, NodePtrCompare comp)
    {
-      (void)xheader; (void)xplast;
       sz.increase(xsz.get_size());
       xsz.set_size(size_type(0));
-      BOOST_IF_CONSTEXPR(CacheLast){
-         *xplast = xheader;
-      }
+      return last_algorithms::merge(header, xheader, comp, plast, xplast);
    }
 
    //Transfers all the nodes of the list x to the empty list and leaves x empty.
@@ -325,19 +384,9 @@ struct slist_node_ops
             xsz.set_size(size_type(0));
          }
          else{
-            slist_node_ops::splice_after_all(header, header, plast, sz, xheader, xplast, xsz);
+            slist_node_ops::splice_after_all(header, plast, sz, xheader, xplast, xsz);
          }
       }
-   }
-
-   static void update_last_node(node_ptr header, node_ptr *plast) BOOST_NOEXCEPT
-   {
-      const node_ptr end_node = node_algorithms::end_node(header);
-      node_ptr l = header;
-      for(node_ptr n = NodeTraits::get_next(l); n != end_node; n = NodeTraits::get_next(n)){
-         l = n;
-      }
-      *plast = l;
    }
 
    static void check(const_node_ptr header_ptr, const_node_ptr last, const SizeTraits &sz)
@@ -373,110 +422,6 @@ struct slist_node_ops
       }
       BOOST_INTRUSIVE_INVARIANT_ASSERT(!constant_time_size || sz.get_size() == node_count);
    }
-
-   private:
-   BOOST_INTRUSIVE_FORCEINLINE static void priv_reverse(node_ptr header, detail::bool_<false>) BOOST_NOEXCEPT
-   {  node_algorithms::reverse(header);   }
-
-   static void priv_reverse(node_ptr header, detail::bool_<true>) BOOST_NOEXCEPT
-   {
-      node_ptr new_first = node_algorithms::reverse(NodeTraits::get_next(header));
-      NodeTraits::set_next(header, new_first);
-   }
-
-   static void priv_shift_backwards(node_ptr header, node_ptr *plast, std::size_t n, detail::bool_<false>) BOOST_NOEXCEPT
-   {
-      (void)plast;
-      node_ptr l = node_algorithms::move_forward(header, n);
-      (void)l;
-      BOOST_IF_CONSTEXPR(CacheLast){
-         if(l){
-            *plast = l;
-         }
-      }
-   }
-
-   static void priv_shift_backwards(node_ptr header, node_ptr *plast, std::size_t n, detail::bool_<true>) BOOST_NOEXCEPT
-   {
-      (void)plast;
-      typename node_algorithms::node_pair ret(
-         node_algorithms::move_first_n_forward(NodeTraits::get_next(header), n));
-      if(ret.first){
-         NodeTraits::set_next(header, ret.first);
-         BOOST_IF_CONSTEXPR(CacheLast){
-            *plast = ret.second;
-         }
-      }
-   }
-
-   static void priv_shift_forward(node_ptr header, node_ptr *plast, std::size_t n, detail::bool_<false>) BOOST_NOEXCEPT
-   {
-      (void)plast;
-      node_ptr l = node_algorithms::move_backwards(header, n);
-      (void)l;
-      BOOST_IF_CONSTEXPR(CacheLast){
-         if(l){
-            *plast = l;
-         }
-      }
-   }
-
-   static void priv_shift_forward(node_ptr header, node_ptr *plast, std::size_t n, detail::bool_<true>) BOOST_NOEXCEPT
-   {
-      (void)plast;
-      typename node_algorithms::node_pair ret(
-         node_algorithms::move_first_n_backwards(NodeTraits::get_next(header), n));
-      if(ret.first){
-         NodeTraits::set_next(header, ret.first);
-         BOOST_IF_CONSTEXPR(CacheLast){
-            *plast = ret.second;
-         }
-      }
-   }
-
-   static void priv_swap_cache_last(node_ptr this_bfirst, node_ptr *this_plast, node_ptr other_bfirst, node_ptr *other_plast) BOOST_NOEXCEPT
-   {
-      bool other_was_empty = false;
-      if(node_algorithms::is_empty(this_bfirst)){
-         //Check if both are empty or
-         if(node_algorithms::is_empty(other_bfirst))
-            return;
-         //If this is empty swap pointers
-         node_ptr tmp_bfirst = this_bfirst;
-         node_ptr *tmp_plast = this_plast;
-         this_bfirst = other_bfirst;
-         this_plast  = other_plast;
-         other_bfirst = tmp_bfirst;
-         other_plast  = tmp_plast;
-         other_was_empty = true;
-      }
-      else{
-         other_was_empty = node_algorithms::is_empty(other_bfirst);
-      }
-
-      //Precondition: this is not empty
-      node_ptr other_old_last(*other_plast);
-      node_ptr this_old_last(*this_plast);
-
-      //Move all nodes from this to other's beginning
-      node_algorithms::transfer_after(other_bfirst, this_bfirst, this_old_last);
-      *other_plast = this_old_last;
-
-      if(other_was_empty){
-         *this_plast = this_bfirst;
-      }
-      else{
-         //Move trailing nodes from other to this
-         node_algorithms::transfer_after(this_bfirst, this_old_last, other_old_last);
-         *this_plast = other_old_last;
-      }
-   }
-
-   BOOST_INTRUSIVE_FORCEINLINE static void priv_swap_lists(node_ptr this_node, node_ptr other_node, detail::bool_<false>) BOOST_NOEXCEPT
-   {  node_algorithms::swap_nodes(this_node, other_node); }
-
-   BOOST_INTRUSIVE_FORCEINLINE static void priv_swap_lists(node_ptr this_node, node_ptr other_node, detail::bool_<true>) BOOST_NOEXCEPT
-   {  node_algorithms::swap_trailing_nodes(this_node, other_node); }
 };
 
 template<class HeaderHolder, class NodePtr, bool>
@@ -508,6 +453,7 @@ class slist_node_base
    typedef slist_node_ops
       <NodeTraits, size_traits, Linear, CacheLast, SafeModeOrAutoUnlink>   node_ops;
    typedef typename node_ops::node_algorithms                  node_algorithms;
+   typedef typename node_ops::last_algorithms                  last_algorithms;
    typedef typename NodeTraits::node_ptr                       node_ptr;
    typedef typename NodeTraits::const_node_ptr                 const_node_ptr;
    typedef HeaderHolder                                        header_holder_type;
@@ -565,9 +511,6 @@ class slist_node_base
    BOOST_INTRUSIVE_FORCEINLINE const_node_ptr get_last_node() const BOOST_NOEXCEPT
    {  return this->get_last_node(detail::bool_<CacheLast>());  }
 
-   BOOST_INTRUSIVE_FORCEINLINE void set_last_node(node_ptr n) BOOST_NOEXCEPT
-   {  return this->set_last_node(n, detail::bool_<CacheLast>());  }
-
    //Pointer to the cached last node, null if CacheLast is false
    BOOST_INTRUSIVE_FORCEINLINE node_ptr *priv_last_ptr() BOOST_NOEXCEPT
    {  return this->priv_last_ptr(detail::bool_<CacheLast>());  }
@@ -600,20 +543,11 @@ class slist_node_base
       return node_ptr();
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_last_node(node_ptr , detail::bool_<false>) BOOST_NOEXCEPT
-   {
-      //This function shall not be used if cache_last is not true
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(CacheLast);
-   }
-
    BOOST_INTRUSIVE_FORCEINLINE node_ptr get_last_node(detail::bool_<true>) BOOST_NOEXCEPT
    {  return node_ptr(root_plus_size_.last_);  }
 
    BOOST_INTRUSIVE_FORCEINLINE const_node_ptr get_last_node(detail::bool_<true>) const BOOST_NOEXCEPT
    {  return const_node_ptr(root_plus_size_.last_);  }
-
-   BOOST_INTRUSIVE_FORCEINLINE void set_last_node(node_ptr n, detail::bool_<true>) BOOST_NOEXCEPT
-   {  root_plus_size_.last_ = n;  }
 
    public:
    BOOST_INTRUSIVE_FORCEINLINE size_type size() const BOOST_NOEXCEPT
@@ -626,13 +560,13 @@ class slist_node_base
    {  node_ops::clear(this->get_root_node(), this->priv_last_ptr(), this->priv_size_traits());  }
 
    BOOST_INTRUSIVE_FORCEINLINE void shift_backwards(size_type n = 1) BOOST_NOEXCEPT
-   {  node_ops::shift_backwards(this->get_root_node(), this->priv_last_ptr(), std::size_t(n));  }
+   {  last_algorithms::shift_backwards(this->get_root_node(), std::size_t(n), this->priv_last_ptr());  }
 
    BOOST_INTRUSIVE_FORCEINLINE void shift_forward(size_type n = 1) BOOST_NOEXCEPT
-   {  node_ops::shift_forward(this->get_root_node(), this->priv_last_ptr(), std::size_t(n));  }
+   {  last_algorithms::shift_forward(this->get_root_node(), std::size_t(n), this->priv_last_ptr());  }
 
    BOOST_INTRUSIVE_FORCEINLINE void reverse() BOOST_NOEXCEPT
-   {  node_ops::reverse(this->get_root_node(), this->priv_last_ptr());  }
+   {  last_algorithms::reverse(this->get_root_node(), this->priv_last_ptr());  }
 
    BOOST_INTRUSIVE_FORCEINLINE void check() const
    {  node_ops::check(this->get_root_node(), CacheLast ? this->get_last_node() : const_node_ptr(), this->priv_size_traits());  }
@@ -754,6 +688,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    static const bool safemode_or_autounlink = is_safe_autounlink<value_traits::link_mode>::value;
 
    typedef detail::slist_node_ops<node_traits, size_traits, linear, cache_last, safemode_or_autounlink> node_ops;
+   typedef typename node_ops::last_algorithms                     last_algorithms;
 
    //Constant-time size is incompatible with auto-unlink hooks!
    BOOST_INTRUSIVE_STATIC_ASSERT(!(constant_time_size && ((int)value_traits::link_mode == (int)auto_unlink)));
@@ -799,17 +734,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
              , size_type n, const value_traits &v_traits = value_traits())
       :  vtraits_holder_t(v_traits), base_t()
    {
-      if(n){
-         this->priv_size_traits().set_size(n);
-         BOOST_IF_CONSTEXPR(cache_last){
-            this->set_last_node(before_l);
-         }
-         node_traits::set_next(this->get_root_node(), f);
-         node_traits::set_next(before_l, this->get_end_node());
-      }
-      else{
-         this->set_default_constructed_state();
-      }
+      node_ops::incorporate_after(this->get_root_node(), f, before_l, n, this->priv_last_ptr(), this->priv_size_traits());
    }
 
    ///@endcond
@@ -980,12 +905,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    {
       node_ptr to_insert = priv_value_traits().to_node_ptr(value);
       BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::inited(to_insert));
-      BOOST_IF_CONSTEXPR(cache_last){
-         if(this->empty()){
-            this->set_last_node(to_insert);
-         }
-      }
-      node_algorithms::link_after(this->get_root_node(), to_insert);
+      last_algorithms::link_after(this->get_root_node(), to_insert, this->priv_last_ptr());
       this->priv_size_traits().increment();
    }
 
@@ -1005,10 +925,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
       BOOST_INTRUSIVE_STATIC_ASSERT((cache_last));
       node_ptr n = priv_value_traits().to_node_ptr(value);
       BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::inited(n));
-      node_algorithms::link_after(this->get_last_node(), n);
-      BOOST_IF_CONSTEXPR(cache_last){
-         this->set_last_node(n);
-      }
+      last_algorithms::link_after(this->get_last_node(), n, this->priv_last_ptr());
       this->priv_size_traits().increment();
    }
 
@@ -1038,16 +955,11 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    void pop_front_and_dispose(Disposer disposer) BOOST_NOEXCEPT
    {
       node_ptr to_erase = node_traits::get_next(this->get_root_node());
-      node_algorithms::unlink_after(this->get_root_node());
+      last_algorithms::unlink_after(this->get_root_node(), this->priv_last_ptr());
       this->priv_size_traits().decrement();
       BOOST_IF_CONSTEXPR(safemode_or_autounlink)
          node_algorithms::init(to_erase);
       disposer(priv_value_traits().to_value_ptr(to_erase));
-      BOOST_IF_CONSTEXPR(cache_last){
-         if(this->empty()){
-            this->set_last_node(this->get_root_node());
-         }
-      }
    }
 
    //! <b>Effects</b>: Returns a reference to the first element of the list.
@@ -1387,13 +1299,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    {
       node_ptr n = priv_value_traits().to_node_ptr(value);
       BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::inited(n));
-      node_ptr prev_n(prev_p.pointed_node());
-      node_algorithms::link_after(prev_n, n);
-
-      BOOST_IF_CONSTEXPR(cache_last)
-      if(this->get_last_node() == prev_n){
-         this->set_last_node(n);
-      }
+      last_algorithms::link_after(prev_p.pointed_node(), n, this->priv_last_ptr());
       this->priv_size_traits().increment();
       return iterator (n, this->priv_value_traits_ptr());
    }
@@ -1415,16 +1321,21 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    void insert_after(const_iterator prev_p, Iterator f, Iterator l)
       BOOST_NOEXCEPT_IF((detail::is_nothrow_range_iterator<Iterator, reference>::value))
    {
-      //Insert first nodes avoiding cache and size checks. The fixer updates
-      //them at the end, also if the iterator throws.
+      //Link the nodes in a chain [first_n, last_n]. The fixer inserts the chain
+      //after prev_p at the end, also if the iterator throws.
       size_type count = 0;
-      node_ptr prev_n(prev_p.pointed_node());
-      const range_insertion_fixer fixer(*this, prev_n, prev_n, count);
+      node_ptr first_n = node_ptr(), last_n = node_ptr();
+      const range_insertion_fixer fixer(*this, prev_p.pointed_node(), first_n, last_n, count);
       for (; f != l; ++f){
          const node_ptr n = priv_value_traits().to_node_ptr(*f);
          BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::inited(n));
-         node_algorithms::link_after(prev_n, n);
-         prev_n = n;
+         if(count){
+            node_traits::set_next(last_n, n);
+         }
+         else{
+            first_n = n;
+         }
+         last_n = n;
          ++count;
       }
    }
@@ -1500,7 +1411,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //!   erased element.
    iterator erase_after(const_iterator before_f, const_iterator l) BOOST_NOEXCEPT
    {
-      node_ops::erase_after(before_f.pointed_node(), l.pointed_node(), this->get_root_node(), this->priv_last_ptr(), this->priv_size_traits());
+      node_ops::erase_after(before_f.pointed_node(), l.pointed_node(), this->priv_last_ptr(), this->priv_size_traits());
       return l.unconst();
    }
 
@@ -1520,7 +1431,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //!   erased element.
    iterator erase_after(const_iterator before_f, const_iterator l, size_type n) BOOST_NOEXCEPT
    {
-      node_ops::erase_after(before_f.pointed_node(), l.pointed_node(), n, this->get_root_node(), this->priv_last_ptr(), this->priv_size_traits());
+      node_ops::erase_after(before_f.pointed_node(), l.pointed_node(), n, this->priv_last_ptr(), this->priv_size_traits());
       return l.unconst();
    }
 
@@ -1595,13 +1506,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
       ++it;
       node_ptr to_erase(it.pointed_node());
       ++it;
-      node_ptr prev_n(prev.pointed_node());
-      node_algorithms::unlink_after(prev_n);
-
-      BOOST_IF_CONSTEXPR(cache_last)
-      if(to_erase == this->get_last_node()){
-         this->set_last_node(prev_n);
-      }
+      last_algorithms::unlink_after(prev.pointed_node(), this->priv_last_ptr());
       BOOST_IF_CONSTEXPR(safemode_or_autounlink)
          node_algorithms::init(to_erase);
       disposer(priv_value_traits().to_value_ptr(to_erase));
@@ -1678,7 +1583,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    {
       node_ptr bfp(before_f.pointed_node()), lp(l.pointed_node());
       node_ptr fp(node_traits::get_next(bfp));
-      node_algorithms::unlink_after(bfp, lp);
+      last_algorithms::unlink_after(bfp, lp, this->priv_last_ptr());
       while(fp != lp){
          node_ptr to_erase(fp);
          fp = node_traits::get_next(fp);
@@ -1686,11 +1591,6 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
             node_algorithms::init(to_erase);
          disposer(priv_value_traits().to_value_ptr(to_erase));
          this->priv_size_traits().decrement();
-      }
-
-      BOOST_IF_CONSTEXPR(cache_last)
-      if(node_traits::get_next(bfp) == this->get_end_node()){
-         this->set_last_node(bfp);
       }
       return l.unconst();
    }
@@ -1825,7 +1725,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
       else{
          BOOST_INTRUSIVE_INVARIANT_ASSERT(&x != this);
          node_ptr const last_x_n = node_ops::splice_after_all
-            ( prev.pointed_node(), this->get_root_node(), this->priv_last_ptr(), this->priv_size_traits()
+            ( prev.pointed_node(), this->priv_last_ptr(), this->priv_size_traits()
             , x.get_root_node(), x.priv_last_ptr(), x.priv_size_traits());
          if(l) *l = const_iterator(last_x_n, this->priv_value_traits_ptr());
       }
@@ -1868,8 +1768,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    BOOST_INTRUSIVE_FORCEINLINE void splice_after(const_iterator prev_pos, slist_impl &x, const_iterator before_f, const_iterator before_l) BOOST_NOEXCEPT
    {
       node_ops::splice_after
-         ( prev_pos.pointed_node(), this->get_root_node(), this->priv_last_ptr(), this->priv_size_traits(), before_f.pointed_node(), before_l.pointed_node()
-         , x.get_root_node(), x.priv_last_ptr(), x.priv_size_traits());
+         ( prev_pos.pointed_node(), this->priv_last_ptr(), this->priv_size_traits(), before_f.pointed_node(), before_l.pointed_node()
+         , x.priv_last_ptr(), x.priv_size_traits());
    }
 
    //! <b>Requires</b>: prev_pos must be a dereferenceable iterator in *this or be
@@ -1889,8 +1789,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    BOOST_INTRUSIVE_FORCEINLINE void splice_after(const_iterator prev_pos, slist_impl &x, const_iterator before_f, const_iterator before_l, size_type n) BOOST_NOEXCEPT
    {
       node_ops::splice_after
-         ( prev_pos.pointed_node(), this->get_root_node(), this->priv_last_ptr(), this->priv_size_traits(), before_f.pointed_node(), before_l.pointed_node(), n
-         , x.get_root_node(), x.priv_last_ptr(), x.priv_size_traits());
+         ( prev_pos.pointed_node(), this->priv_last_ptr(), this->priv_size_traits(), before_f.pointed_node(), before_l.pointed_node(), n
+         , x.priv_last_ptr(), x.priv_size_traits());
    }
 
    //! <b>Requires</b>: it is an iterator to an element in *this. &x != this.
@@ -1988,20 +1888,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    void sort(Predicate p)
    {
       detail::key_nodeptr_comp<Predicate, value_traits> comp(p, &this->priv_value_traits());
-      BOOST_IF_CONSTEXPR(cache_last){
-         BOOST_INTRUSIVE_TRY{
-            this->set_last_node(node_algorithms::sort(this->get_root_node(), comp));
-         }
-         BOOST_INTRUSIVE_CATCH(...){
-            //Nodes remain linked in unspecified order, so recalculate the new last node
-            node_ops::update_last_node(this->get_root_node(), this->priv_last_ptr());
-            BOOST_INTRUSIVE_RETHROW;
-         }
-         BOOST_INTRUSIVE_CATCH_END
-      }
-      else{
-         node_algorithms::sort(this->get_root_node(), comp);
-      }
+      last_algorithms::sort(this->get_root_node(), comp, this->priv_last_ptr());
    }
 
    //! <b>Requires</b>: p must be a comparison function that induces a strict weak
@@ -2052,28 +1939,16 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
       detail::key_nodeptr_comp<Predicate, value_traits> comp(p, &this->priv_value_traits());
       node_ptr last_x = node_ptr();
       BOOST_INTRUSIVE_TRY{
-         //With a cached last node, merge does not need to traverse the lists to find it
-         last_x = node_algorithms::merge
-            ( this->get_root_node(), x.get_root_node(), comp
-            , cache_last ? this->get_last_node() : node_ptr()
-            , cache_last ? x.get_last_node() : node_ptr());
+         //All nodes of x are moved to *this even if the predicate throws
+         last_x = node_ops::merge
+            ( this->get_root_node(), this->priv_last_ptr(), this->priv_size_traits()
+            , x.get_root_node(), x.priv_last_ptr(), x.priv_size_traits(), comp);
       }
       BOOST_INTRUSIVE_CATCH(...){
-         //All nodes of x have been moved to *this even if the predicate throws
-         node_ops::transfer_all(this->priv_size_traits(), x.get_root_node(), x.priv_last_ptr(), x.priv_size_traits());
-         BOOST_IF_CONSTEXPR(cache_last){
-            node_ops::update_last_node(this->get_root_node(), this->priv_last_ptr());
-         }
          if(l) *l = this->cend().unconst();
          BOOST_INTRUSIVE_RETHROW;
       }
       BOOST_INTRUSIVE_CATCH_END
-      node_ops::transfer_all(this->priv_size_traits(), x.get_root_node(), x.priv_last_ptr(), x.priv_size_traits());
-      BOOST_IF_CONSTEXPR(cache_last){
-         if(last_x != node_ptr() && node_traits::get_next(last_x) == this->get_end_node()){
-            this->set_last_node(last_x);
-         }
-      }
       if(l) *l = last_x != node_ptr() ? const_iterator(last_x, this->priv_value_traits_ptr()) : this->cend();
    }
 
@@ -2147,15 +2022,12 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    size_type remove_if(Pred pred)
    {
       const node_ptr bbeg = this->get_root_node();
-      typename node_algorithms::stable_partition_info info;
-      node_algorithms::stable_partition
-         (bbeg, this->get_end_node(), detail::key_nodeptr_comp<Pred, value_traits>(pred, &this->priv_value_traits()), info);
-      //After cache last is set, slist invariants are preserved...
-      BOOST_IF_CONSTEXPR(cache_last){
-         this->set_last_node(info.new_last_node);
-      }
-      //...so erase can be safely called
-      node_ops::erase_after(bbeg, info.beg_2st_partition, info.num_1st_partition, bbeg, this->priv_last_ptr(), this->priv_size_traits());
+      typename last_algorithms::stable_partition_info info;
+      //The cached last node is updated, so slist invariants are preserved...
+      last_algorithms::stable_partition
+         (bbeg, detail::key_nodeptr_comp<Pred, value_traits>(pred, &this->priv_value_traits()), info, this->priv_last_ptr());
+      //...and erase can be safely called
+      node_ops::erase_after(bbeg, info.beg_2st_partition, info.num_1st_partition, this->priv_last_ptr(), this->priv_size_traits());
       return info.num_1st_partition;
    }
 
@@ -2176,14 +2048,11 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    size_type remove_and_dispose_if(Pred pred, Disposer disposer)
    {
       const node_ptr bbeg = this->get_root_node();
-      typename node_algorithms::stable_partition_info info;
-      node_algorithms::stable_partition
-         (bbeg, this->get_end_node(), detail::key_nodeptr_comp<Pred, value_traits>(pred, &this->priv_value_traits()), info);
-      //After cache last is set, slist invariants are preserved...
-      BOOST_IF_CONSTEXPR(cache_last){
-         this->set_last_node(info.new_last_node);
-      }
-      //...so erase can be safely called
+      typename last_algorithms::stable_partition_info info;
+      //The cached last node is updated, so slist invariants are preserved...
+      last_algorithms::stable_partition
+         (bbeg, detail::key_nodeptr_comp<Pred, value_traits>(pred, &this->priv_value_traits()), info, this->priv_last_ptr());
+      //...and erase can be safely called
       this->erase_after_and_dispose( const_iterator(bbeg, this->priv_value_traits_ptr())
                                    , const_iterator(info.beg_2st_partition, this->priv_value_traits_ptr())
                                    , disposer);
@@ -2271,9 +2140,6 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
                bcur = cur;
                ++cur;
             }
-         }
-         BOOST_IF_CONSTEXPR(cache_last){
-            this->set_last_node(bcur.pointed_node());
          }
       }
       return n;
@@ -2496,24 +2362,21 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    {
       public:
       range_insertion_fixer
-         (slist_impl &c, node_ptr prev_n, const node_ptr &last_n, const size_type &count) BOOST_NOEXCEPT
-         : c_(c), prev_n_(prev_n), last_n_(last_n), count_(count)
+         ( slist_impl &c, node_ptr prev_n, const node_ptr &first_n
+         , const node_ptr &last_n, const size_type &count) BOOST_NOEXCEPT
+         : c_(c), prev_n_(prev_n), first_n_(first_n), last_n_(last_n), count_(count)
       {}
 
       ~range_insertion_fixer()
       {
-         BOOST_IF_CONSTEXPR(cache_last)
-         if(c_.get_last_node() == prev_n_){
-            c_.set_last_node(last_n_);
-         }
-         BOOST_IF_CONSTEXPR(constant_time_size){
-            c_.priv_size_traits().increase(count_);
-         }
+         node_ops::incorporate_after
+            (prev_n_, first_n_, last_n_, count_, c_.priv_last_ptr(), c_.priv_size_traits());
       }
 
       private:
       slist_impl &c_;
       const node_ptr prev_n_;
+      const node_ptr &first_n_;
       const node_ptr &last_n_;
       const size_type &count_;
    };

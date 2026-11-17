@@ -36,14 +36,8 @@ struct node_chain_sort
 {
    typedef typename NodeTraits::node_ptr node_ptr;
 
-   //Linking policies: "link(a, b)" makes b the node that follows a
-   struct next_linker
-   {
-      BOOST_INTRUSIVE_FORCEINLINE static void link(node_ptr a, node_ptr b)
-      {  NodeTraits::set_next(a, b);  }
-   };
-
-   //Same as next_linker, but also updates the "previous" pointer of b
+   //Linking policies for merge_nodes: "link(a, b)" makes b the node that follows a.
+   //This one also updates the "previous" pointer of b
    struct next_prev_linker
    {
       static void link(node_ptr a, node_ptr b)
@@ -51,6 +45,14 @@ struct node_chain_sort
          NodeTraits::set_next(a, b);
          NodeTraits::set_previous(b, a);
       }
+   };
+
+   private:
+   //Same as next_prev_linker, but only updates the "next" pointer of a
+   struct next_linker
+   {
+      BOOST_INTRUSIVE_FORCEINLINE static void link(node_ptr a, node_ptr b)
+      {  NodeTraits::set_next(a, b);  }
    };
 
    //A null-terminated sub-chain of nodes, from "head" to "tail". Empty if head is null.
@@ -97,6 +99,28 @@ struct node_chain_sort
       return first;
    }
 
+   //Merges "a" (elements that go first on ties) and "b" into "res".
+   //Elements of both chains are always in "res", even if "comp" throws.
+   //"res" can be the same object as "a" or "b".
+   template<class NodePtrCompare>
+   static void merge(chain &res, const chain a, const chain b, NodePtrCompare comp)
+   {
+      node_ptr head = node_ptr(), tail = node_ptr(), last_b = node_ptr();
+      BOOST_INTRUSIVE_TRY{
+         merge_nodes<next_linker>
+            (a.head, b.head, a.tail, b.tail, node_ptr(), node_ptr(), comp, head, tail, last_b);
+      }
+      BOOST_INTRUSIVE_CATCH(...){
+         res.head = head;
+         res.tail = tail;
+         BOOST_INTRUSIVE_RETHROW;
+      }
+      BOOST_INTRUSIVE_CATCH_END
+      res.head = head;
+      res.tail = tail;
+   }
+
+   public:
    //Merges two sorted non-empty chains: "a" is [pa, ea) and "b" is [pb, eb). The end
    //markers are not part of the chains, and can be null. Nodes of "a" go first on ties.
    //"a_tail" and "b_tail" are the last nodes of the chains, if known (otherwise, null pointers).
@@ -184,27 +208,6 @@ struct node_chain_sort
       }
    }
 
-   //Merges "a" (elements that go first on ties) and "b" into "res".
-   //Elements of both chains are always in "res", even if "comp" throws.
-   //"res" can be the same object as "a" or "b".
-   template<class NodePtrCompare>
-   static void merge(chain &res, const chain a, const chain b, NodePtrCompare comp)
-   {
-      node_ptr head = node_ptr(), tail = node_ptr(), last_b = node_ptr();
-      BOOST_INTRUSIVE_TRY{
-         merge_nodes<next_linker>
-            (a.head, b.head, a.tail, b.tail, node_ptr(), node_ptr(), comp, head, tail, last_b);
-      }
-      BOOST_INTRUSIVE_CATCH(...){
-         res.head = head;
-         res.tail = tail;
-         BOOST_INTRUSIVE_RETHROW;
-      }
-      BOOST_INTRUSIVE_CATCH_END
-      res.head = head;
-      res.tail = tail;
-   }
-
    //Stable sort of the nodes first, next(first), ... until "end" is reached (not included).
    //
    //Output: a null-terminated chain [out_head, out_tail] that contains all input nodes.
@@ -289,6 +292,93 @@ struct node_chain_sort
       BOOST_INTRUSIVE_CATCH_END
       out_head = carry.head;
       out_tail = carry.tail;
+   }
+
+   //Stable sort of the nodes of a singly linked list that follow "p", until "end" is reached
+   //(not included). "p" keeps its position.
+   //
+   //Output: "last" is the last node of the list (p if the list has no other nodes).
+   //It is also assigned if "comp" throws: all nodes remain in the list in unspecified order.
+   template<class NodePtrCompare>
+   static void sort_after(node_ptr p, const node_ptr end, NodePtrCompare comp, node_ptr &last)
+   {
+      const node_ptr first = NodeTraits::get_next(p);
+      //Lists with less than two nodes are already sorted
+      if(first == end){
+         last = p;
+         return;
+      }
+      if(NodeTraits::get_next(first) == end){
+         last = first;
+         return;
+      }
+      node_ptr head = node_ptr(), tail = node_ptr();
+      BOOST_INTRUSIVE_TRY{
+         sort(first, end, comp, head, tail);
+      }
+      BOOST_INTRUSIVE_CATCH(...){
+         //All nodes are in the chain [head, tail] in unspecified order
+         NodeTraits::set_next(p, head);
+         NodeTraits::set_next(tail, end);
+         last = tail;
+         BOOST_INTRUSIVE_RETHROW;
+      }
+      BOOST_INTRUSIVE_CATCH_END
+      NodeTraits::set_next(p, head);
+      NodeTraits::set_next(tail, end);
+      last = tail;
+   }
+
+   //Merges the nodes of a singly linked list that follow "x" (until "x_end") into the
+   //nodes of a different singly linked list that follow "p" (until "p_end"). Nodes of
+   //p's list go first on ties. x's list is left empty.
+   //"p_last" and "x_last" are the last nodes of the lists, if known (otherwise, null pointers).
+   //
+   //Returns the last node that was transferred from x's list, or a null pointer if x's list
+   //had no other nodes.
+   //
+   //Output: "new_p_last" is the new last node of p's list, or a null pointer if it is unknown
+   //(only possible if "p_last" is null). If "comp" throws, all the nodes of x's list are moved
+   //to p's list in unspecified order, and "new_p_last" is the last node of p's list.
+   //"new_p_last" can be the same object as "p_last" or "x_last".
+   template<class NodePtrCompare>
+   static node_ptr merge_after
+      ( node_ptr p, const node_ptr p_end, const node_ptr p_last
+      , node_ptr x, const node_ptr x_end, const node_ptr x_last
+      , NodePtrCompare comp, node_ptr &new_p_last)
+   {
+      const node_ptr first_p = NodeTraits::get_next(p);
+      const node_ptr first_x = NodeTraits::get_next(x);
+      if(first_x == x_end){
+         new_p_last = p_last;
+         return node_ptr();
+      }
+      node_ptr head = node_ptr(), tail = node_ptr(), last_x = node_ptr();
+      if(first_p == p_end){
+         //p's list is empty: just take x's nodes
+         head   = first_x;
+         last_x = find_last(first_x, x_end, x_last);
+         tail   = last_x;
+         if(p_end != x_end)
+            NodeTraits::set_next(last_x, p_end);
+      }
+      else{
+         BOOST_INTRUSIVE_TRY{
+            merge_nodes<next_linker>
+               (first_p, first_x, p_last, x_last, p_end, x_end, comp, head, tail, last_x);
+         }
+         BOOST_INTRUSIVE_CATCH(...){
+            NodeTraits::set_next(p, head);
+            NodeTraits::set_next(x, x_end);
+            new_p_last = tail;
+            BOOST_INTRUSIVE_RETHROW;
+         }
+         BOOST_INTRUSIVE_CATCH_END
+      }
+      NodeTraits::set_next(p, head);
+      NodeTraits::set_next(x, x_end);
+      new_p_last = tail;
+      return last_x;
    }
 };
 

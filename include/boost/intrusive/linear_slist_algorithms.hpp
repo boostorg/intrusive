@@ -143,9 +143,21 @@ class linear_slist_algorithms
    //! <b>Throws</b>: Nothing.
    static void transfer_after(node_ptr p, node_ptr b, node_ptr e) BOOST_NOEXCEPT;
 
+   //! <b>Requires</b>: this_node and prev_init_node must be in the same linear list.
+   //!
+   //! <b>Effects</b>: Returns the previous node of this_node in the linear list starting.
+   //!   the search from prev_init_node. The first node checked for equality
+   //!   is NodeTraits::get_next(prev_init_node).
+   //!
+   //! <b>Complexity</b>: Linear to the number of elements between prev_init_node and this_node.
+   //!
+   //! <b>Throws</b>: Nothing.
+   static node_ptr get_previous_node(node_ptr prev_init_node, node_ptr this_node) BOOST_NOEXCEPT;
+
    #else
 
    using base_t::transfer_after;
+   using base_t::get_previous_node;
 
    #endif   //#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
@@ -194,18 +206,6 @@ class linear_slist_algorithms
    BOOST_INTRUSIVE_FORCEINLINE static void set_sentinel(node_ptr this_node) BOOST_NOEXCEPT
    {  NodeTraits::set_next(this_node, this_node);   }
 
-   //! <b>Requires</b>: this_node and prev_init_node must be in the same linear list.
-   //!
-   //! <b>Effects</b>: Returns the previous node of this_node in the linear list starting.
-   //!   the search from prev_init_node. The first node checked for equality
-   //!   is NodeTraits::get_next(prev_init_node).
-   //!
-   //! <b>Complexity</b>: Linear to the number of elements between prev_init_node and this_node.
-   //!
-   //! <b>Throws</b>: Nothing.
-   inline static node_ptr
-      get_previous_node(node_ptr prev_init_node, BOOST_INTRUSIVE_CPARAM(node_ptr) this_node) BOOST_NOEXCEPT
-   {  return base_t::get_previous_node(prev_init_node, this_node);   }
 
    //! <b>Requires</b>: this_node must be in a linear list or be an empty linear list.
    //!
@@ -282,26 +282,9 @@ class linear_slist_algorithms
    template<class NodePtrCompare>
    static node_ptr sort(node_ptr p, NodePtrCompare comp)
    {
-      const node_ptr first = NodeTraits::get_next(p);
-      //Lists with less than two nodes are already sorted
-      if(first == node_ptr())
-         return p;
-      if(NodeTraits::get_next(first) == node_ptr())
-         return first;
-      node_ptr head = node_ptr(), tail = node_ptr();
-      BOOST_INTRUSIVE_TRY{
-         detail::node_chain_sort<NodeTraits>::sort(first, node_ptr(), comp, head, tail);
-      }
-      BOOST_INTRUSIVE_CATCH(...){
-         //All nodes are in the chain [head, tail] in unspecified order
-         NodeTraits::set_next(p, head);
-         NodeTraits::set_next(tail, node_ptr());
-         BOOST_INTRUSIVE_RETHROW;
-      }
-      BOOST_INTRUSIVE_CATCH_END
-      NodeTraits::set_next(p, head);
-      NodeTraits::set_next(tail, node_ptr());
-      return tail;
+      node_ptr last = node_ptr();
+      detail::node_chain_sort<NodeTraits>::sort_after(p, node_ptr(), comp, last);
+      return last;
    }
 
    //! <b>Requires</b>: p and x must be nodes of two different linear lists (typically the nodes
@@ -313,9 +296,6 @@ class linear_slist_algorithms
    //!   The merge is stable: if a node of p's list is equivalent to a node of x's list,
    //!   the node of p's list goes first.
    //!
-   //!   "p_last" and "x_last" are optional: the last nodes of both lists, if they are known, which
-   //!   avoids traversing the lists to find them (otherwise null pointers can be passed).
-   //!
    //! <b>Returns</b>: The last node that was transferred from x's list, or a null pointer
    //!   if x's list had no other nodes.
    //!
@@ -326,35 +306,11 @@ class linear_slist_algorithms
    //! <b>Throws</b>: If "comp" throws. Basic guarantee: all the nodes of x's list
    //!   are moved to p's list in unspecified order.
    template<class NodePtrCompare>
-   static node_ptr merge(node_ptr p, node_ptr x, NodePtrCompare comp, node_ptr p_last = node_ptr(), node_ptr x_last = node_ptr())
+   static node_ptr merge(node_ptr p, node_ptr x, NodePtrCompare comp)
    {
-      const node_ptr first_p = NodeTraits::get_next(p);
-      const node_ptr first_x = NodeTraits::get_next(x);
-      if(first_x == node_ptr()){
-         return node_ptr();
-      }
-      typedef detail::node_chain_sort<NodeTraits> chain_sort;
-      node_ptr head = node_ptr(), tail = node_ptr(), last_x = node_ptr();
-      if(first_p == node_ptr()){
-         //p's list is empty: just take x's nodes
-         head   = first_x;
-         last_x = chain_sort::find_last(first_x, node_ptr(), x_last);
-      }
-      else{
-         BOOST_INTRUSIVE_TRY{
-            chain_sort::template merge_nodes<typename chain_sort::next_linker>
-               (first_p, first_x, p_last, x_last, node_ptr(), node_ptr(), comp, head, tail, last_x);
-         }
-         BOOST_INTRUSIVE_CATCH(...){
-            NodeTraits::set_next(p, head);
-            NodeTraits::set_next(x, node_ptr());
-            BOOST_INTRUSIVE_RETHROW;
-         }
-         BOOST_INTRUSIVE_CATCH_END
-      }
-      NodeTraits::set_next(p, head);
-      NodeTraits::set_next(x, node_ptr());
-      return last_x;
+      node_ptr p_last = node_ptr();
+      return detail::node_chain_sort<NodeTraits>::merge_after
+         (p, node_ptr(), node_ptr(), x, node_ptr(), node_ptr(), comp, p_last);
    }
 
    //! <b>Effects</b>: Moves the first n nodes starting at p to the end of the list.
