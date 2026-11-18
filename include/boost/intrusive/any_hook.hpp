@@ -28,7 +28,7 @@
 namespace boost {
 namespace intrusive {
 
-//! Helper metafunction to define a \c \c any_base_hook that yields to the same
+//! Helper metafunction to define a \c any_base_hook that yields to the same
 //! type when the same options (either explicitly or implicitly) are used.
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) || defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template<class ...Options>
@@ -89,13 +89,13 @@ class any_base_hook
 {
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
    public:
-   //! <b>Effects</b>: If link_mode is or \c safe_link
+   //! <b>Effects</b>: If link_mode is \c safe_link
    //!   initializes the node to an unlinked state.
    //!
    //! <b>Throws</b>: Nothing.
    any_base_hook() noexcept;
 
-   //! <b>Effects</b>: If link_mode is or \c safe_link
+   //! <b>Effects</b>: If link_mode is \c safe_link
    //!   initializes the node to an unlinked state. The argument is ignored.
    //!
    //! <b>Throws</b>: Nothing.
@@ -134,7 +134,7 @@ class any_base_hook
    #endif
 };
 
-//! Helper metafunction to define a \c \c any_member_hook that yields to the same
+//! Helper metafunction to define a \c any_member_hook that yields to the same
 //! type when the same options (either explicitly or implicitly) are used.
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) || defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template<class ...Options>
@@ -190,13 +190,13 @@ class any_member_hook
 {
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
    public:
-   //! <b>Effects</b>: If link_mode is or \c safe_link
+   //! <b>Effects</b>: If link_mode is \c safe_link
    //!   initializes the node to an unlinked state.
    //!
    //! <b>Throws</b>: Nothing.
    any_member_hook() BOOST_NOEXCEPT;
 
-   //! <b>Effects</b>: If link_mode is or \c safe_link
+   //! <b>Effects</b>: If link_mode is \c safe_link
    //!   initializes the node to an unlinked state. The argument is ignored.
    //!
    //! <b>Throws</b>: Nothing.

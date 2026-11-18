@@ -71,7 +71,7 @@ struct treap_tag;
 /// @endcond
 
 //! The class template treap is an intrusive treap container that
-//! is used to construct intrusive set and multiset containers. The no-throw
+//! is used to construct intrusive treap_set and treap_multiset containers. The no-throw
 //! guarantee holds only, if the key_compare object and priority_compare object
 //! don't throw.
 //!
@@ -187,7 +187,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //!
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks)
-   //!   or the copy constructor of the value_compare/priority_compare objects throw. Basic guarantee.
+   //!   or the default constructor of the key_compare/priority_compare objects throw. Basic guarantee.
    BOOST_INTRUSIVE_FORCEINLINE treap_impl()
       BOOST_NOEXCEPT_IF(::boost::move_detail::is_nothrow_default_constructible<key_compare>::value &&
                         ::boost::move_detail::is_nothrow_default_constructible<value_traits>::value &&
@@ -201,7 +201,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //!
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks)
-   //!   or the copy constructor of the value_compare/priority_compare objects throw. Basic guarantee.
+   //!   or the copy constructor of the key_compare/priority_compare objects throw. Basic guarantee.
    explicit treap_impl( const key_compare &cmp
                       , const priority_compare &pcmp = priority_compare()
                       , const value_traits &v_traits = value_traits())
@@ -366,7 +366,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    BOOST_INTRUSIVE_FORCEINLINE reverse_iterator rtop() BOOST_NOEXCEPT
    {  return reverse_iterator(this->top());  }
 
-   //! <b>Effects</b>: Returns a const_reverse_iterator pointing to the highest priority objec
+   //! <b>Effects</b>: Returns a const_reverse_iterator pointing to the highest priority object
    //!    of the reversed treap.
    //!
    //! <b>Complexity</b>: Constant.
@@ -816,7 +816,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //!   No objects should have been inserted or erased from the container between
    //!   the "insert_check" that filled "commit_data" and the call to "insert_commit".
    //!
-   //! <b>Effects</b>: Inserts the value in the avl_set using the information obtained
+   //! <b>Effects</b>: Inserts the value in the container using the information obtained
    //!   from the "commit_data" that a previous "insert_check" filled.
    //!
    //! <b>Returns</b>: An iterator to the newly inserted object.
@@ -961,7 +961,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //!
    //! <b>Complexity</b>: O(log(size() + N).
    //!
-   //! <b>Throws</b>: if the internal priority_compare function throws. Strong guarantee.
+   //! <b>Throws</b>: if the internal key_compare or priority_compare functions throw.
+   //!   Strong guarantee.
    //!
    //! <b>Note</b>: Invalidates the iterators (but not the references)
    //!    to the erased elements. No destructors are called.
@@ -1100,8 +1101,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
 
    //! <b>Effects</b>: Erases all of the elements calling disposer(p) for
    //!   each node to be erased.
-   //! <b>Complexity</b>: Average complexity for is at most O(log(size() + N)),
-   //!   where N is the number of elements in the container.
+   //! <b>Complexity</b>: Linear to the number of elements in the container.
    //!
    //! <b>Throws</b>: Nothing.
    //!

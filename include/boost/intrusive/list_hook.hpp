@@ -30,7 +30,7 @@
 namespace boost {
 namespace intrusive {
 
-//! Helper metafunction to define a \c \c list_base_hook that yields to the same
+//! Helper metafunction to define a \c list_base_hook that yields to the same
 //! type when the same options (either explicitly or implicitly) are used.
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) || defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template<class ...Options>
@@ -61,7 +61,7 @@ struct make_list_base_hook
 };
 
 //! Derive a class from this hook in order to store objects of that class
-//! in an list.
+//! in a list.
 //!
 //! The hook admits the following options: \c tag<>, \c void_pointer<> and
 //! \c link_mode<>.
@@ -121,7 +121,7 @@ class list_base_hook
 
    //! <b>Effects</b>: If link_mode is \c normal_link, the destructor does
    //!   nothing (ie. no code is generated). If link_mode is \c safe_link and the
-   //!   object is stored in an list an assertion is raised. If link_mode is
+   //!   object is stored in a list an assertion is raised. If link_mode is
    //!   \c auto_unlink and \c is_linked() is true, the node is unlinked.
    //!
    //! <b>Throws</b>: Nothing.
@@ -129,7 +129,7 @@ class list_base_hook
 
    //! <b>Effects</b>: Swapping two nodes swaps the position of the elements
    //!   related to those nodes in one or two containers. That is, if the node
-   //!   this is part of the element e1, the node x is part of the element e2
+   //!   this is part of the element e1, the node other is part of the element e2
    //!   and both elements are included in the containers s1 and s2, then after
    //!   the swap-operation e1 is in s2 at the position of e2 and e2 is in s1
    //!   at the position of e1. If one element is not in a container, then
@@ -158,7 +158,7 @@ class list_base_hook
    #endif
 };
 
-//! Helper metafunction to define a \c \c list_member_hook that yields to the same
+//! Helper metafunction to define a \c list_member_hook that yields to the same
 //! type when the same options (either explicitly or implicitly) are used.
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) || defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template<class ...Options>
@@ -189,7 +189,7 @@ struct make_list_member_hook
 };
 
 //! Store this hook in a class to be inserted
-//! in an list.
+//! in a list.
 //!
 //! The hook admits the following options: \c void_pointer<> and
 //! \c link_mode<>.
@@ -244,7 +244,7 @@ class list_member_hook
 
    //! <b>Effects</b>: If link_mode is \c normal_link, the destructor does
    //!   nothing (ie. no code is generated). If link_mode is \c safe_link and the
-   //!   object is stored in an list an assertion is raised. If link_mode is
+   //!   object is stored in a list an assertion is raised. If link_mode is
    //!   \c auto_unlink and \c is_linked() is true, the node is unlinked.
    //!
    //! <b>Throws</b>: Nothing.
@@ -252,7 +252,7 @@ class list_member_hook
 
    //! <b>Effects</b>: Swapping two nodes swaps the position of the elements
    //!   related to those nodes in one or two containers. That is, if the node
-   //!   this is part of the element e1, the node x is part of the element e2
+   //!   this is part of the element e1, the node other is part of the element e2
    //!   and both elements are included in the containers s1 and s2, then after
    //!   the swap-operation e1 is in s2 at the position of e2 and e2 is in s1
    //!   at the position of e1. If one element is not in a container, then

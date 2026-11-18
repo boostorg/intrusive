@@ -166,7 +166,7 @@ class circular_slist_algorithms
    BOOST_INTRUSIVE_FORCEINLINE static void init_header(node_ptr this_node) BOOST_NOEXCEPT
    {  NodeTraits::set_next(this_node, this_node);  }
 
-   //! <b>Requires</b>: 'p' is the first node of a list.
+   //! <b>Requires</b>: 'p' is the header node of a list.
    //!
    //! <b>Effects</b>: Returns a pointer to a node that represents the "end" (one past end) node
    //!
@@ -224,8 +224,8 @@ class circular_slist_algorithms
    //! <b>Requires</b>: this_node and p must be in the same circular list.
    //!
    //! <b>Effects</b>: Returns the previous node of the previous node of this_node in the
-   //!   circular list starting. the search from p. The first node checked
-   //!   for equality is NodeTraits::get_next((NodeTraits::get_next(p)).
+   //!   circular list starting the search from p. The first node checked
+   //!   for equality is NodeTraits::get_next(NodeTraits::get_next(p)).
    //!
    //! <b>Complexity</b>: Linear to the number of elements in the circular list.
    //!

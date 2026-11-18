@@ -578,7 +578,7 @@ class splaytree_impl
    void replace_node(iterator replace_this, reference with_this) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree::remove_node
-   void remove_node(reference value) BOOST_NOEXCEPT;
+   static void remove_node(reference value) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree::merge_unique
    //!
@@ -610,7 +610,7 @@ class splaytree_impl
    {  return node_algorithms::splay_up(i.pointed_node(), tree_type::header_ptr());   }
 
    //! <b>Effects</b>: Rearranges the container so that if *this stores an element
-   //!   with a key equivalent to value the element is placed as the root of the
+   //!   with a key equivalent to key the element is placed as the root of the
    //!   tree. If the element is not present returns the last node compared with the key.
    //!   If the tree is empty, end() is returned.
    //!
@@ -629,7 +629,7 @@ class splaytree_impl
    }
 
    //! <b>Effects</b>: Rearranges the container so that if *this stores an element
-   //!   with a key equivalent to value the element is placed as the root of the
+   //!   with a key equivalent to key the element is placed as the root of the
    //!   tree.
    //!
    //! <b>Complexity</b>: Amortized logarithmic.

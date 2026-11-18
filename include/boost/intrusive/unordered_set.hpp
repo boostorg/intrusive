@@ -164,7 +164,7 @@ class unordered_set_impl
    #endif
    {  return static_cast<unordered_set_impl&>(table_type::operator=(BOOST_MOVE_BASE(table_type, x))); }
 
-   //! @copydoc ::boost::intrusive::hashtable::swap
+   //! @copydoc ::boost::intrusive::hashtable::swap(hashtable&)
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(unordered_set_impl &x, unordered_set_impl &y)
       BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
@@ -203,7 +203,7 @@ class unordered_set_impl
    //! @copydoc ::boost::intrusive::hashtable::size()const
    size_type size() const BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::hashtable::swap
+   //! @copydoc ::boost::intrusive::hashtable::swap(hashtable&)
    void swap(unordered_set_impl& other);
 
    //! @copydoc ::boost::intrusive::hashtable::clone_from(const hashtable&,Cloner,Disposer)
@@ -346,7 +346,7 @@ class unordered_set_impl
    //! @copydoc ::boost::intrusive::hashtable::local_iterator_to(reference)
    local_iterator local_iterator_to(reference value) BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::hashtable::local_iterator_to(const_reference)
+   //! @copydoc ::boost::intrusive::hashtable::local_iterator_to(const_reference)const
    const_local_iterator local_iterator_to(const_reference value) const BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::hashtable::bucket_count
@@ -718,7 +718,7 @@ class unordered_multiset_impl
    #endif
    {  return static_cast<unordered_multiset_impl&>(table_type::operator=(BOOST_MOVE_BASE(table_type, x)));  }
 
-   //! @copydoc ::boost::intrusive::hashtable::swap
+   //! @copydoc ::boost::intrusive::hashtable::swap(hashtable&)
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(unordered_multiset_impl &x, unordered_multiset_impl &y)
       BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
@@ -758,7 +758,7 @@ class unordered_multiset_impl
    //! @copydoc ::boost::intrusive::hashtable::size()const
    size_type size() const BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::hashtable::swap
+   //! @copydoc ::boost::intrusive::hashtable::swap(hashtable&)
    void swap(unordered_multiset_impl& other);
 
    //! @copydoc ::boost::intrusive::hashtable::clone_from(const hashtable&,Cloner,Disposer)
@@ -877,7 +877,7 @@ class unordered_multiset_impl
    //! @copydoc ::boost::intrusive::hashtable::local_iterator_to(reference)
    local_iterator local_iterator_to(reference value) BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::hashtable::local_iterator_to(const_reference)
+   //! @copydoc ::boost::intrusive::hashtable::local_iterator_to(const_reference)const
    const_local_iterator local_iterator_to(const_reference value) const BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::hashtable::bucket_count

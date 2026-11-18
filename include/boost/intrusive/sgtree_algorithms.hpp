@@ -118,7 +118,7 @@ class sgtree_algorithms
    static void replace_node(node_ptr node_to_be_replaced, node_ptr header, node_ptr new_node) BOOST_NOEXCEPT;
 
    //Unlink is not possible since tree metadata is needed to update the tree
-   //!static void unlink(node_ptr n) BOOST_NOEXCEPT;
+   //static void unlink(node_ptr n) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::unlink_leftmost_without_rebalance
    static node_ptr unlink_leftmost_without_rebalance(node_ptr header) BOOST_NOEXCEPT;
@@ -333,11 +333,11 @@ class sgtree_algorithms
    //! @copydoc ::boost::intrusive::bstree_algorithms::is_header
    static bool is_header(const_node_ptr p) BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::bstree_algorithms::is_header
+   //! @copydoc ::boost::intrusive::bstree_algorithms::rebalance
    static void rebalance(node_ptr header) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::rebalance_subtree
-   static node_ptr rebalance_subtree(node_ptr old_root) BOOST_NOEXCEPT
+   static node_ptr rebalance_subtree(node_ptr old_root) BOOST_NOEXCEPT;
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    /// @cond

@@ -458,7 +458,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
       ::boost::adl_move_swap(this->get_alpha_traits(), other.get_alpha_traits());
    }
 
-   //! @copydoc ::boost::intrusive::sgtree::swap
+   //! @copydoc ::boost::intrusive::bstree::swap
    BOOST_INTRUSIVE_FORCEINLINE friend void swap(sgtree_impl &x, sgtree_impl &y)
       BOOST_NOEXCEPT_IF(BOOST_NOEXCEPT(x.swap(y)))
    {  x.swap(y);  }
@@ -578,6 +578,9 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
    {  return this->insert_unique_check(hint, key, this->key_comp(), commit_data);   }
 
    //! @copydoc ::boost::intrusive::bstree::insert_unique_commit
+   //!
+   //! <b>Additional notes</b>: In sgtree a subtree can be rebuilt, so the complexity
+   //!   is amortized logarithmic.
    iterator insert_unique_commit(reference value, const insert_commit_data &commit_data) BOOST_NOEXCEPT
    {
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
@@ -607,6 +610,9 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
    }
 
    //! @copydoc ::boost::intrusive::bstree::insert_before
+   //!
+   //! <b>Additional notes</b>: In sgtree a subtree can be rebuilt, so the complexity
+   //!   is amortized logarithmic.
    iterator insert_before(const_iterator pos, reference value) BOOST_NOEXCEPT
    {
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
@@ -621,6 +627,9 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
    }
 
    //! @copydoc ::boost::intrusive::bstree::push_back
+   //!
+   //! <b>Additional notes</b>: In sgtree a subtree can be rebuilt, so the complexity
+   //!   is amortized logarithmic.
    void push_back(reference value) BOOST_NOEXCEPT
    {
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
@@ -634,6 +643,9 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
    }
 
    //! @copydoc ::boost::intrusive::bstree::push_front
+   //!
+   //! <b>Additional notes</b>: In sgtree a subtree can be rebuilt, so the complexity
+   //!   is amortized logarithmic.
    void push_front(reference value) BOOST_NOEXCEPT
    {
       node_ptr to_insert(this->get_value_traits().to_node_ptr(value));
@@ -907,14 +919,15 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
    BOOST_INTRUSIVE_FORCEINLINE float balance_factor() const BOOST_NOEXCEPT
    {  return this->get_alpha_traits().get_alpha(); }
 
-   //! <b>Requires</b>: new_alpha must be a value between 0.5 and 1.0
+   //! <b>Requires</b>: new_alpha must be greater than 0.5 and less than 1.0.
    //!
    //! <b>Effects</b>: Establishes a new balance factor (alpha) and rebalances
    //!   the tree if the new balance factor is stricter (less) than the old factor.
    //!
    //! <b>Throws</b>: Nothing.
    //!
-   //! <b>Complexity</b>: Linear to the elements in the subtree.
+   //! <b>Complexity</b>: Linear to the elements in the tree if the tree is rebalanced.
+   //!   Constant otherwise.
    //!
    //! <b>Note</b>: Does not affect the validity of iterators and references.
    void balance_factor(float new_alpha) BOOST_NOEXCEPT

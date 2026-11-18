@@ -144,8 +144,8 @@ struct pointer_traits
 
    //! <b>Remark</b>: Non-standard extension.
    //!
-   //! <b>Returns</b>: A dereferenceable pointer to r obtained by calling the static template function
-   //!   Ptr::static_cast_from(UPpr/const UPpr &).
+   //! <b>Returns</b>: A dereferenceable pointer to *uptr obtained by calling the static template function
+   //!   Ptr::static_cast_from(UPtr/const UPtr &).
    //!   If such function does not exist, returns pointer_to(static_cast<element_type&>(*uptr))
    //!
    //! <b>Note</b>: For non-conforming compilers only the existence of a member function called
@@ -165,8 +165,8 @@ struct pointer_traits
 
    //! <b>Remark</b>: Non-standard extension.
    //!
-   //! <b>Returns</b>: A dereferenceable pointer to r obtained by calling the static template function
-   //!   Ptr::const_cast_from<UPtr>(UPpr/const UPpr &).
+   //! <b>Returns</b>: A dereferenceable pointer to *uptr obtained by calling the static template function
+   //!   Ptr::const_cast_from<UPtr>(UPtr/const UPtr &).
    //!   If such function does not exist, returns pointer_to(const_cast<element_type&>(*uptr))
    //!
    //! <b>Note</b>: For non-conforming compilers only the existence of a member function called
@@ -186,8 +186,8 @@ struct pointer_traits
 
    //! <b>Remark</b>: Non-standard extension.
    //!
-   //! <b>Returns</b>: A dereferenceable pointer to r obtained by calling the static template function
-   //!   Ptr::dynamic_cast_from<UPtr>(UPpr/const UPpr &).
+   //! <b>Returns</b>: A dereferenceable pointer to *uptr obtained by calling the static template function
+   //!   Ptr::dynamic_cast_from<UPtr>(UPtr/const UPtr &).
    //!   If such function does not exist, returns pointer_to(*dynamic_cast<element_type*>(&*uptr))
    //!
    //! <b>Note</b>: For non-conforming compilers only the existence of a member function called

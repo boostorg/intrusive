@@ -245,10 +245,11 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       return p ? p : detail::uncast(header);
    }
 
-   //! <b>Requires</b>: 'n' is a node of the tree or a node initialized
-   //!   by init(...) or init_node.
+   //! <b>Requires</b>: 'n' is a node of the tree, a header node or a node initialized
+   //!   by init(...).
    //!
-   //! <b>Effects</b>: Returns true if the node is initialized by init() or init_node().
+   //! <b>Effects</b>: Returns true if 'n' is not linked in a tree (for example, after init(n))
+   //!   or if 'n' is the header of an empty tree.
    //!
    //! <b>Complexity</b>: Constant time.
    //!
@@ -544,7 +545,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
 
    //! <b>Requires</b>: 'n' is a node of a tree but not the header.
    //!
-   //! <b>Effects</b>: Returns the minimum node of the subtree starting at p.
+   //! <b>Effects</b>: Returns the minimum node of the subtree starting at n.
    //!
    //! <b>Complexity</b>: Logarithmic to the size of the subtree.
    //!
@@ -553,7 +554,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
 
    //! <b>Requires</b>: 'n' is a node of a tree but not the header.
    //!
-   //! <b>Effects</b>: Returns the maximum node of the subtree starting at p.
+   //! <b>Effects</b>: Returns the maximum node of the subtree starting at n.
    //!
    //! <b>Complexity</b>: Logarithmic to the size of the subtree.
    //!
@@ -563,13 +564,13 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
 
    //! <b>Requires</b>: 'n' must not be part of any tree.
    //!
-   //! <b>Effects</b>: After the function unique(node) == true.
+   //! <b>Effects</b>: After the function unique(n) == true.
    //!
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
    //!
-   //! <b>Nodes</b>: If node is inserted in a tree, this function corrupts the tree.
+   //! <b>Notes</b>: If n is inserted in a tree, this function corrupts the tree.
    static void init(node_ptr n) BOOST_NOEXCEPT
    {
       NodeTraits::set_parent(n, node_ptr());
@@ -577,7 +578,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       NodeTraits::set_right(n, node_ptr());
    }
 
-   //! <b>Effects</b>: Returns true if node is in the same state as if called init(node)
+   //! <b>Effects</b>: Returns true if n is in the same state as after a call to init(n).
    //!
    //! <b>Complexity</b>: Constant.
    //!
@@ -598,7 +599,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!
    //! <b>Throws</b>: Nothing.
    //!
-   //! <b>Nodes</b>: If header is inserted in a tree, this function corrupts the tree.
+   //! <b>Notes</b>: If header is inserted in a tree, this function corrupts the tree.
    static void init_header(node_ptr header) BOOST_NOEXCEPT
    {
       NodeTraits::set_parent(header, node_ptr());
@@ -614,8 +615,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!   <tt>void disposer::operator()(node_ptr)</tt> for every node of the tree
    //!    except the header.
    //!
-   //! <b>Complexity</b>: Linear to the number of element of the source tree plus the.
-   //!   number of elements of tree target tree when calling this function.
+   //! <b>Complexity</b>: Linear to the number of elements of the tree.
    //!
    //! <b>Throws</b>: Nothing.
    template<class Disposer>
@@ -1019,11 +1019,11 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!   "commit_data" must have been obtained from a previous call to
    //!   "insert_unique_check". No objects should have been inserted or erased
    //!   from the set between the "insert_unique_check" that filled "commit_data"
-   //!   and the call to "insert_commit".
+   //!   and the call to "insert_unique_commit".
    //!
    //!
-   //! <b>Effects</b>: Inserts new_node in the set using the information obtained
-   //!   from the "commit_data" that a previous "insert_check" filled.
+   //! <b>Effects</b>: Inserts new_value in the set using the information obtained
+   //!   from the "commit_data" that a previous "insert_unique_check" filled.
    //!
    //! <b>Complexity</b>: Constant time.
    //!
@@ -1031,7 +1031,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!
    //! <b>Notes</b>: This function has only sense if a "insert_unique_check" has been
    //!   previously executed to fill "commit_data". No value should be inserted or
-   //!   erased between the "insert_check" and "insert_commit" calls.
+   //!   erased between the "insert_unique_check" and "insert_unique_commit" calls.
    inline static void insert_unique_commit
       (node_ptr header, node_ptr new_value, const insert_commit_data &commit_data) BOOST_NOEXCEPT
    {  return insert_commit(header, new_value, commit_data); }
@@ -1039,7 +1039,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Requires</b>: "header" must be the header node of a tree.
    //!   KeyNodePtrCompare is a function object that induces a strict weak
    //!   ordering compatible with the strict weak ordering used to create the
-   //!   the tree. NodePtrCompare compares KeyType with a node_ptr.
+   //!   the tree. KeyNodePtrCompare compares KeyType with a node_ptr.
    //!
    //! <b>Effects</b>: Checks if there is an equivalent node to "key" in the
    //!   tree according to "comp" and obtains the needed information to realize
@@ -1049,7 +1049,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!   returns a pair containing a node_ptr to the already present node
    //!   and false. If there is not equivalent key can be inserted returns true
    //!   in the returned pair's boolean and fills "commit_data" that is meant to
-   //!   be used with the "insert_commit" function to achieve a constant-time
+   //!   be used with the "insert_unique_commit" function to achieve a constant-time
    //!   insertion function.
    //!
    //! <b>Complexity</b>: Average complexity is at most logarithmic.
@@ -1065,7 +1065,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!   to check if the insertion will be successful.
    //!
    //!   If the check is successful, the user can construct the node and use
-   //!   "insert_commit" to insert the node in constant-time. This gives a total
+   //!   "insert_unique_commit" to insert the node in constant-time. This gives a total
    //!   logarithmic complexity to the insertion: check(O(log(N)) + commit(O(1)).
    //!
    //!   "commit_data" remains valid for a subsequent "insert_unique_commit" only
@@ -1112,7 +1112,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //! <b>Requires</b>: "header" must be the header node of a tree.
    //!   KeyNodePtrCompare is a function object that induces a strict weak
    //!   ordering compatible with the strict weak ordering used to create the
-   //!   the tree. NodePtrCompare compares KeyType with a node_ptr.
+   //!   the tree. KeyNodePtrCompare compares KeyType with a node_ptr.
    //!   "hint" is node from the "header"'s tree.
    //!
    //! <b>Effects</b>: Checks if there is an equivalent node to "key" in the
@@ -1126,7 +1126,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!   returns a pair containing a node_ptr to the already present node
    //!   and false. If there is not equivalent key can be inserted returns true
    //!   in the returned pair's boolean and fills "commit_data" that is meant to
-   //!   be used with the "insert_commit" function to achieve a constant-time
+   //!   be used with the "insert_unique_commit" function to achieve a constant-time
    //!   insertion function.
    //!
    //! <b>Complexity</b>: Average complexity is at most logarithmic, but it is
@@ -1143,7 +1143,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!   to check if the insertion will be successful.
    //!
    //!   If the check is successful, the user can construct the node and use
-   //!   "insert_commit" to insert the node in constant-time. This gives a total
+   //!   "insert_unique_commit" to insert the node in constant-time. This gives a total
    //!   logarithmic complexity to the insertion: check(O(log(N)) + commit(O(1)).
    //!
    //!   "commit_data" remains valid for a subsequent "insert_unique_commit" only
@@ -1175,11 +1175,11 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
       return insert_unique_check(header, key, comp, commit_data, pdepth);
    }
 
-   //! <b>Requires</b>: "header" must be the header node of a tree.
+   //! <b>Requires</b>: "h" must be the header node of a tree.
    //!   NodePtrCompare is a function object that induces a strict weak
    //!   ordering compatible with the strict weak ordering used to create the
    //!   the tree. NodePtrCompare compares two node_ptrs. "hint" is node from
-   //!   the "header"'s tree.
+   //!   the "h"'s tree.
    //!
    //! <b>Effects</b>: Inserts new_node into the tree, using "hint" as a hint to
    //!   where it will be inserted. If "hint" is the upper_bound
@@ -1286,7 +1286,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!   "new_node" must be, according to the used ordering no less than the
    //!   greatest inserted key.
    //!
-   //! <b>Effects</b>: Inserts new_node into the tree before "pos".
+   //! <b>Effects</b>: Inserts new_node into the tree in the last position.
    //!
    //! <b>Complexity</b>: Constant-time.
    //!
@@ -1311,7 +1311,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!   "new_node" must be, according to the used ordering, no greater than the
    //!   lowest inserted key.
    //!
-   //! <b>Effects</b>: Inserts new_node into the tree before "pos".
+   //! <b>Effects</b>: Inserts new_node into the tree in the first position.
    //!
    //! <b>Complexity</b>: Constant-time.
    //!
@@ -1403,13 +1403,13 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    }
 
    //! <b>Requires</b>: header1 and header2 must be the headers of trees tree1 and tree2
-   //!   respectively, z a non-header node of tree1. NodePtrCompare is the comparison
-   //!   function of tree1..
+   //!   respectively, z a non-header node of tree2. NodePtrCompare is the comparison
+   //!   function of tree1.
    //!
-   //! <b>Effects</b>: Transfers node "z" from tree1 to tree2 if tree1 does not contain
+   //! <b>Effects</b>: Transfers node "z" from tree2 to tree1 if tree1 does not contain
    //!   a node that is equivalent to z.
    //!
-   //! <b>Returns</b>: True if the node was trasferred, false otherwise.
+   //! <b>Returns</b>: True if the node was transferred, false otherwise.
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
@@ -1423,10 +1423,10 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    }
 
    //! <b>Requires</b>: header1 and header2 must be the headers of trees tree1 and tree2
-   //!   respectively, z a non-header node of tree1. NodePtrCompare is the comparison
-   //!   function of tree1..
+   //!   respectively, z a non-header node of tree2. NodePtrCompare is the comparison
+   //!   function of tree1.
    //!
-   //! <b>Effects</b>: Transfers node "z" from tree1 to tree2.
+   //! <b>Effects</b>: Transfers node "z" from tree2 to tree1.
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
@@ -1443,7 +1443,7 @@ class bstree_algorithms : public bstree_algorithms_base<NodeTraits>
    //!
    //! <b>Effects</b>: Unlinks the node and rebalances the tree.
    //!
-   //! <b>Complexity</b>: Average complexity is constant time.
+   //! <b>Complexity</b>: Logarithmic (the function must find the header).
    //!
    //! <b>Throws</b>: Nothing.
    static void unlink(node_ptr n) BOOST_NOEXCEPT

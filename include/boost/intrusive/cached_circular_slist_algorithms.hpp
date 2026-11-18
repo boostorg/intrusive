@@ -85,7 +85,7 @@ class cached_circular_slist_algorithms
    //!
    //! <b>Effects</b>: Returns the previous node of the previous node of this_node in the
    //!   circular list starting the search from p. The first node checked
-   //!   for equality is NodeTraits::get_next((NodeTraits::get_next(p)).
+   //!   for equality is NodeTraits::get_next(NodeTraits::get_next(p)).
    //!
    //! <b>Complexity</b>: Linear to the number of elements in the circular list.
    //!

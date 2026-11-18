@@ -31,7 +31,7 @@ class sg_multiset_impl;
 #endif
 
 //! The class template sg_set is an intrusive container, that mimics most of
-//! the interface of std::sg_set as described in the C++ standard.
+//! the interface of std::set as described in the C++ standard.
 //!
 //! The template parameter \c T is the type to be managed by the container.
 //! The user can specify additional options and if no options are provided
@@ -630,7 +630,7 @@ class sg_set
 #endif
 
 //! The class template sg_multiset is an intrusive container, that mimics most of
-//! the interface of std::sg_multiset as described in the C++ standard.
+//! the interface of std::multiset as described in the C++ standard.
 //!
 //! The template parameter \c T is the type to be managed by the container.
 //! The user can specify additional options and if no options are provided

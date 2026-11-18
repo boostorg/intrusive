@@ -350,7 +350,7 @@ class treap_algorithms
    //!   ordering compatible with the one used to create the
    //!   the tree. NodePtrPriorityCompare compares two node_ptrs.
    //!
-   //! <b>Effects</b>: Inserts new_node into the tree before the upper bound
+   //! <b>Effects</b>: Inserts new_node into the tree before the lower bound
    //!   according to "comp" and rotates the tree according to "pcomp".
    //!
    //! <b>Complexity</b>: Average complexity for insert element is at
@@ -367,11 +367,11 @@ class treap_algorithms
       return new_node;
    }
 
-   //! <b>Requires</b>: "header" must be the header node of a tree.
+   //! <b>Requires</b>: "h" must be the header node of a tree.
    //!   NodePtrCompare is a function object that induces a strict weak
    //!   ordering compatible with the strict weak ordering used to create the
    //!   the tree. NodePtrCompare compares two node_ptrs. "hint" is node from
-   //!   the "header"'s tree.
+   //!   the "h"'s tree.
    //!   NodePtrPriorityCompare is a priority function object that induces a strict weak
    //!   ordering compatible with the one used to create the
    //!   the tree. NodePtrPriorityCompare compares two node_ptrs.
@@ -430,7 +430,7 @@ class treap_algorithms
    //!   ordering compatible with the one used to create the
    //!   the tree. NodePtrPriorityCompare compares two node_ptrs.
    //!
-   //! <b>Effects</b>: Inserts x into the tree in the last position
+   //! <b>Effects</b>: Inserts new_node into the tree in the last position
    //!   and rotates the tree according to "pcomp".
    //!
    //! <b>Complexity</b>: Constant-time.
@@ -455,7 +455,7 @@ class treap_algorithms
    //!   ordering compatible with the one used to create the
    //!   the tree. NodePtrPriorityCompare compares two node_ptrs.
    //!
-   //! <b>Effects</b>: Inserts x into the tree in the first position
+   //! <b>Effects</b>: Inserts new_node into the tree in the first position
    //!   and rotates the tree according to "pcomp".
    //!
    //! <b>Complexity</b>: Constant-time.
@@ -476,7 +476,10 @@ class treap_algorithms
    //! <b>Requires</b>: "header" must be the header node of a tree.
    //!   KeyNodePtrCompare is a function object that induces a strict weak
    //!   ordering compatible with the strict weak ordering used to create the
-   //!   the tree. NodePtrCompare compares KeyType with a node_ptr.
+   //!   the tree. KeyNodePtrCompare compares KeyType with a node_ptr.
+   //!   PrioNodePtrPrioCompare is a priority function object that induces a strict weak
+   //!   ordering compatible with the one used to create the tree.
+   //!   PrioNodePtrPrioCompare compares PrioType ("prio") with a node_ptr.
    //!
    //! <b>Effects</b>: Checks if there is an equivalent node to "key" in the
    //!   tree according to "comp" and obtains the needed information to realize
@@ -486,7 +489,7 @@ class treap_algorithms
    //!   returns a pair containing a node_ptr to the already present node
    //!   and false. If there is not equivalent key can be inserted returns true
    //!   in the returned pair's boolean and fills "commit_data" that is meant to
-   //!   be used with the "insert_commit" function to achieve a constant-time
+   //!   be used with the "insert_unique_commit" function to achieve a constant-time
    //!   insertion function.
    //!
    //! <b>Complexity</b>: Average complexity is at most logarithmic.
@@ -502,7 +505,7 @@ class treap_algorithms
    //!   to check if the insertion will be successful.
    //!
    //!   If the check is successful, the user can construct the node and use
-   //!   "insert_commit" to insert the node in constant-time. This gives a total
+   //!   "insert_unique_commit" to insert the node in constant-time. This gives a total
    //!   logarithmic complexity to the insertion: check(O(log(N)) + commit(O(1)).
    //!
    //!   "commit_data" remains valid for a subsequent "insert_unique_commit" only
@@ -524,7 +527,10 @@ class treap_algorithms
    //! <b>Requires</b>: "header" must be the header node of a tree.
    //!   KeyNodePtrCompare is a function object that induces a strict weak
    //!   ordering compatible with the strict weak ordering used to create the
-   //!   the tree. NodePtrCompare compares KeyType with a node_ptr.
+   //!   the tree. KeyNodePtrCompare compares KeyType with a node_ptr.
+   //!   PrioNodePtrPrioCompare is a priority function object that induces a strict weak
+   //!   ordering compatible with the one used to create the tree.
+   //!   PrioNodePtrPrioCompare compares PrioType ("prio") with a node_ptr.
    //!   "hint" is node from the "header"'s tree.
    //!
    //! <b>Effects</b>: Checks if there is an equivalent node to "key" in the
@@ -538,7 +544,7 @@ class treap_algorithms
    //!   returns a pair containing a node_ptr to the already present node
    //!   and false. If there is not equivalent key can be inserted returns true
    //!   in the returned pair's boolean and fills "commit_data" that is meant to
-   //!   be used with the "insert_commit" function to achieve a constant-time
+   //!   be used with the "insert_unique_commit" function to achieve a constant-time
    //!   insertion function.
    //!
    //! <b>Complexity</b>: Average complexity is at most logarithmic, but it is
@@ -555,7 +561,7 @@ class treap_algorithms
    //!   to check if the insertion will be successful.
    //!
    //!   If the check is successful, the user can construct the node and use
-   //!   "insert_commit" to insert the node in constant-time. This gives a total
+   //!   "insert_unique_commit" to insert the node in constant-time. This gives a total
    //!   logarithmic complexity to the insertion: check(O(log(N)) + commit(O(1)).
    //!
    //!   "commit_data" remains valid for a subsequent "insert_unique_commit" only
@@ -578,11 +584,11 @@ class treap_algorithms
    //!   "commit_data" must have been obtained from a previous call to
    //!   "insert_unique_check". No objects should have been inserted or erased
    //!   from the set between the "insert_unique_check" that filled "commit_data"
-   //!   and the call to "insert_commit".
+   //!   and the call to "insert_unique_commit".
    //!
    //!
    //! <b>Effects</b>: Inserts new_node in the set using the information obtained
-   //!   from the "commit_data" that a previous "insert_check" filled.
+   //!   from the "commit_data" that a previous "insert_unique_check" filled.
    //!
    //! <b>Complexity</b>: Constant time.
    //!
@@ -590,7 +596,7 @@ class treap_algorithms
    //!
    //! <b>Notes</b>: This function has only sense if a "insert_unique_check" has been
    //!   previously executed to fill "commit_data". No value should be inserted or
-   //!   erased between the "insert_check" and "insert_commit" calls.
+   //!   erased between the "insert_unique_check" and "insert_unique_commit" calls.
    static void insert_unique_commit
       (node_ptr header, node_ptr new_node, const insert_commit_data &commit_data) BOOST_NOEXCEPT
    {
@@ -605,7 +611,7 @@ class treap_algorithms
    //! <b>Effects</b>: Transfers node "z" from tree2 to tree1 if tree1 does not contain
    //!   a node that is equivalent to z. Rotates both trees according to "pcomp".
    //!
-   //! <b>Returns</b>: True if the node was trasferred, false otherwise.
+   //! <b>Returns</b>: True if the node was transferred, false otherwise.
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!

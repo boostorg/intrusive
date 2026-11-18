@@ -4205,14 +4205,19 @@ to be inserted in intrusive containers are allocated using `std::vector` or `std
 
 [section:release_notes Release Notes]
 
-[section:release_notes_boost_1_93_00 Boost 1.93 Release]
+[section:release_notes_boost_1_94_00 Boost 1.94 Release]
 
-* Added [classref boost::intrusive::unordered_bucket_manager unordered_bucket_manager] utility.
 * Added [classref boost::intrusive::cached_linear_slist_algorithms cached_linear_slist_algorithms] and
   [classref boost::intrusive::cached_circular_slist_algorithms cached_circular_slist_algorithms]: singly linked
   list algorithms that update a cached pointer to the last node of the list, stored outside the nodes.
-  `slist` with the `cache_last<true>` option uses them, so the code that updates the last node is shared by all
-  `slist` instances with the same node type.
+  It was an implementation detail of `slist` with the `cache_last<true>` option, now it's refactored
+  into a separate algorithms classso that users can utilize it for their data structures.
+
+[endsect]
+
+[section:release_notes_boost_1_93_00 Boost 1.93 Release]
+
+* Added [classref boost::intrusive::unordered_bucket_manager unordered_bucket_manager] utility.
 * [funcref boost::intrusive::get_parent_from_member get_parent_from_member] and member hooks now support
   parents with virtual bases (as long as the member is not located in a virtual base) and the
   `/vmg` (full generality pointer to member representation) compiler option in MSVC ABI compatible compilers.

@@ -678,12 +678,12 @@ class unordered_bucket_manager
       return true;
    }
 
-   //! <b>Effects</b>: Shrinks the bucket array to the smallest suggested
-   //!   count that respects the maximum load factor for the current size,
-   //!   which allocates that smaller array and <b>rehashes \c c into
-   //!   it</b>. Erasures never do this implicitly (see the class
-   //!   documentation), so this is the operation to call when releasing
-   //!   buckets is desired.
+   //! <b>Effects</b>: Calculates the smallest suggested bucket count that
+   //!   respects the maximum load factor for the current size. If this count
+   //!   is different from the current bucket count, allocates an array of that
+   //!   size and <b>rehashes \c c into it</b>. Otherwise, does nothing.
+   //!   Erasures never shrink the bucket array implicitly (see the class
+   //!   documentation): call this function to release buckets.
    //!
    //! <b>Returns</b>: true if a rehash took place (all iterators into \c c
    //!   are invalidated; pointers and references remain valid).

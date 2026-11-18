@@ -64,7 +64,7 @@ struct max_pointer_plus_bits<void*, Alignment>
 //!because operations to embed the bits change with every pointer type.
 //!
 //!An implementation that detects that a pointer type whose
-//!has_pointer_plus_bits<>::value is non-zero can make use of these
+//!max_pointer_plus_bits<>::value is non-zero can make use of these
 //!operations to embed the bits in the pointer.
 template<class Pointer, std::size_t NumBits>
 struct pointer_plus_bits

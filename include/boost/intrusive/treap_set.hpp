@@ -651,7 +651,7 @@ class treap_set
 #endif
 
 //! The class template treap_multiset is an intrusive container, that mimics most of
-//! the interface of std::treap_multiset as described in the C++ standard.
+//! the interface of std::multiset as described in the C++ standard.
 //!
 //! The template parameter \c T is the type to be managed by the container.
 //! The user can specify additional options and if no options are provided

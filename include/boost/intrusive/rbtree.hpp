@@ -316,7 +316,7 @@ class rbtree_impl
    //! @copydoc ::boost::intrusive::bstree::erase(const_iterator,const_iterator)
    iterator erase(const_iterator b, const_iterator e) BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::bstree::erase(const key_type &key)
+   //! @copydoc ::boost::intrusive::bstree::erase(const key_type &)
    size_type erase(const key_type &key);
 
    //! @copydoc ::boost::intrusive::bstree::erase(const KeyType&,KeyTypeKeyCompare)
@@ -451,7 +451,7 @@ class rbtree_impl
    void replace_node(iterator replace_this, reference with_this) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree::remove_node
-   void remove_node(reference value) BOOST_NOEXCEPT;
+   static void remove_node(reference value) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree::merge_unique
    template<class T, class ...Options2>

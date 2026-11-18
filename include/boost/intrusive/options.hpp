@@ -79,16 +79,17 @@ BOOST_INTRUSIVE_OPTION_TYPE(key_of_value, KeyOfValue, KeyOfValue, key_of_value)
 BOOST_INTRUSIVE_OPTION_TYPE(priority_of_value, PrioOfValue, PrioOfValue, priority_of_value)
 
 //!This option setter for scapegoat containers specifies if
-//!the intrusive scapegoat container should use a non-variable
-//!alpha value that does not need floating-point operations.
+//!the intrusive scapegoat container uses floating-point operations
+//!to support a variable alpha value.
 //!
-//!If activated, the fixed alpha value is 1/sqrt(2). This
-//!option also saves some space in the container since
-//!the alpha value and some additional data does not need
-//!to be stored in the container.
+//!If deactivated (\c floating_point<false>), the container uses a fixed
+//!alpha value of 1/sqrt(2) and does not need floating-point operations.
+//!This also saves some space in the container since
+//!the alpha value and some additional data are not
+//!stored in the container.
 //!
-//!If the user only needs an alpha value near 1/sqrt(2), this
-//!option also improves performance since avoids logarithm
+//!If the user only needs an alpha value near 1/sqrt(2), deactivating this
+//!option also improves performance since it avoids logarithm
 //!and division operations when rebalancing the tree.
 BOOST_INTRUSIVE_OPTION_CONSTANT(floating_point, bool, Enabled, floating_point)
 
@@ -131,7 +132,7 @@ template< typename Parent
         , MemberHook Parent::* PtrToMember>
 struct member_hook
 {
-// @cond
+/// @cond
 //   typedef typename MemberHook::hooktags::node_traits node_traits;
 //   typedef typename node_traits::node node_type;
 //   typedef node_type Parent::* Ptr2MemNode;

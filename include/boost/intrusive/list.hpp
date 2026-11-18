@@ -432,7 +432,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
 
    //! <b>Requires</b>: Dereferencing iterator must yield an lvalue of type value_type.
    //!
-   //! <b>Effects</b>: Constructs a list equal to the range [first,last).
+   //! <b>Effects</b>: Constructs a list equal to the range [b, e).
    //!
    //! <b>Complexity</b>: Linear in distance(b, e). No copy constructors are called.
    //!
@@ -762,7 +762,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    //! <b>Precondition</b>: end_iterator must be a valid end iterator
    //!   of list.
    //!
-   //! <b>Effects</b>: Returns a const reference to the list associated to the end iterator
+   //! <b>Effects</b>: Returns a reference to the list associated to the end iterator
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -1155,9 +1155,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
 
    //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
    //!   constructors of Disposer shouldn't throw.
-   //!
-   //! <b>Requires</b>: Dereferencing iterator must yield
-   //!   an lvalue of type value_type.
+   //!   Dereferencing iterator must yield an lvalue of type value_type.
    //!
    //! <b>Effects</b>: Clears the list and inserts the range pointed by b and e.
    //!   No destructors or copy constructors are called.
@@ -1403,7 +1401,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    //!
    //! <b>Throws</b>: If pred throws. Basic guarantee.
    //!
-   //! <b>Complexity</b>: Linear time. It performs exactly size() comparisons for equality.
+   //! <b>Complexity</b>: Linear time. It performs exactly size() calls to the predicate.
    //!
    //! <b>Note</b>: The relative order of elements that are not removed is unchanged,
    //!   and iterators to elements that are not removed remain valid.
@@ -1429,7 +1427,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    //!
    //! <b>Throws</b>: If the comparison operator throws. Basic guarantee.
    //!
-   //! <b>Complexity</b>: Linear time (size()-1 comparisons calls to pred()).
+   //! <b>Complexity</b>: Linear time (size()-1 equality comparisons).
    //!
    //! <b>Note</b>: The relative order of elements that are not removed is unchanged,
    //!   and iterators to elements that are not removed remain valid.
@@ -1512,7 +1510,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
 
    //! <b>Requires</b>: `value` must be a reference to a value inserted in an instance of this container type.
    //!
-   //! <b>Effects</b>: This function returns a const_iterator pointing to the element
+   //! <b>Effects</b>: This function returns an iterator pointing to the element.
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -1530,7 +1528,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
 
    //! <b>Requires</b>: value must be a const reference to a value inserted in a list.
    //!
-   //! <b>Effects</b>: This function returns an iterator pointing to the element.
+   //! <b>Effects</b>: This function returns a const_iterator pointing to the element.
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -1549,7 +1547,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
 
    //! <b>Requires</b>: `value` must be a reference to a value inserted in an instance of this container type.
    //!
-   //! <b>Effects</b>: This function returns a const_iterator pointing to the element
+   //! <b>Effects</b>: This function returns an iterator pointing to the element.
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -1564,7 +1562,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
 
    //! <b>Requires</b>: value must be a const reference to a value inserted in a list.
    //!
-   //! <b>Effects</b>: This function returns an iterator pointing to the element.
+   //! <b>Effects</b>: This function returns a const_iterator pointing to the element.
    //!
    //! <b>Throws</b>: Nothing.
    //!

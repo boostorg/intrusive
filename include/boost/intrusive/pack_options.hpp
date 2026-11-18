@@ -224,7 +224,7 @@ struct pack_options
 //!
 //! ...that after being combined with
 //! <code>boost::intrusive::pack_options</code>,
-//! will typedef TYPE as a typedef of name TYPEDEF_NAME. Example:
+//! will typedef TYPEDEF_EXPR as a typedef of name TYPEDEF_NAME. Example:
 //!
 //! \code
 //!   //[includes and namespaces omitted for brevity]
@@ -237,7 +237,7 @@ struct pack_options
 //!
 //!   struct empty_default{};
 //!
-//!   typedef pack_options< empty_default, typename my_pointer<void*> >::type::my_pointer_type type;
+//!   typedef pack_options< empty_default, my_pointer<void*> >::type::my_pointer_type type;
 //!
 //!   BOOST_INTRUSIVE_STATIC_ASSERT(( boost::is_same<type, void>::value ));
 //!

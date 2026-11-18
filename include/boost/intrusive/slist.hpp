@@ -843,8 +843,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
       return *this;
    }
 
-   //! <b>Effects</b>: If it's a safe-mode
-   //!   or auto-unlink value, the destructor does nothing
+   //! <b>Effects</b>: If it's not a safe-mode
+   //!   or an auto-unlink value, the destructor does nothing
    //!   (ie. no code is generated). Otherwise it detaches all elements from this.
    //!   In this case the objects in the list are not deleted (i.e. no destructors
    //!   are called), but the hooks according to the value_traits template parameter
@@ -1055,7 +1055,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    { return this->end(); }
 
    //! <b>Effects</b>: Returns an iterator that points to a position
-   //!   before the first element. Equivalent to "end()"
+   //!   before the first element. Equivalent to "end()" if linear<> is false.
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -1063,8 +1063,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    BOOST_INTRUSIVE_FORCEINLINE iterator before_begin() BOOST_NOEXCEPT
    { return iterator(this->get_root_node(), this->priv_value_traits_ptr()); }
 
-   //! <b>Effects</b>: Returns an iterator that points to a position
-   //!   before the first element. Equivalent to "end()"
+   //! <b>Effects</b>: Returns a const_iterator that points to a position
+   //!   before the first element. Equivalent to "end()" if linear<> is false.
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -1072,8 +1072,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    BOOST_INTRUSIVE_FORCEINLINE const_iterator before_begin() const BOOST_NOEXCEPT
    { return const_iterator(detail::uncast(this->get_root_node()), this->priv_value_traits_ptr()); }
 
-   //! <b>Effects</b>: Returns an iterator that points to a position
-   //!   before the first element. Equivalent to "end()"
+   //! <b>Effects</b>: Returns a const_iterator that points to a position
+   //!   before the first element. Equivalent to "end()" if linear<> is false.
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -1087,7 +1087,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //!
    //! <b>Complexity</b>: Constant.
    //!
-   //! <b>Note</b>: This function is present only if cached_last<> option is true.
+   //! <b>Note</b>: This function is present only if cache_last<> option is true.
    inline iterator last() BOOST_NOEXCEPT
    {
       //This function shall not be used if cache_last is not true
@@ -1101,7 +1101,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //!
    //! <b>Complexity</b>: Constant.
    //!
-   //! <b>Note</b>: This function is present only if cached_last<> option is true.
+   //! <b>Note</b>: This function is present only if cache_last<> option is true.
    inline const_iterator last() const BOOST_NOEXCEPT
    {
       //This function shall not be used if cache_last is not true
@@ -1115,14 +1115,14 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //!
    //! <b>Complexity</b>: Constant.
    //!
-   //! <b>Note</b>: This function is present only if cached_last<> option is true.
+   //! <b>Note</b>: This function is present only if cache_last<> option is true.
    BOOST_INTRUSIVE_FORCEINLINE const_iterator clast() const BOOST_NOEXCEPT
    {  return this->last();  }
 
    //! <b>Precondition</b>: end_iterator must be a valid end iterator
    //!   of slist.
    //!
-   //! <b>Effects</b>: Returns a const reference to the slist associated to the end iterator
+   //! <b>Effects</b>: Returns a reference to the slist associated to the end iterator
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -1194,7 +1194,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //!
    //! <b>Complexity</b>: Linear to the number of elements plus the number shifts.
    //!
-   //! <b>Note</b>: Iterators Does not affect the validity of iterators and references.
+   //! <b>Note</b>: Does not affect the validity of iterators and references.
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
    void shift_backwards(size_type n = 1) BOOST_NOEXCEPT;
    #else
@@ -1366,7 +1366,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //!   inserted before the exception stay in the list.
    //!
    //! <b>Complexity</b>: Linear to the number of elements inserted plus linear
-   //!   to the elements before b.
+   //!   to the elements before p.
    //!   Linear to the number of elements to insert if cache_last<> option is true and p == end().
    //!
    //! <b>Note</b>: Does not affect the validity of iterators and references.
@@ -1452,7 +1452,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
 
    //! <b>Requires</b>: f and l must be valid iterator to elements in *this.
    //!
-   //! <b>Effects</b>: Erases the range pointed by b and e.
+   //! <b>Effects</b>: Erases the range [f, l).
    //!   No destructors are called.
    //!
    //! <b>Returns</b>: the first element remaining beyond the removed elements,
@@ -1575,7 +1575,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //!
    //! <b>Throws</b>: Nothing.
    //!
-   //! <b>Complexity</b>: Linear to the elements (l - before_f + 1).
+   //! <b>Complexity</b>: Linear to the number of erased elements.
    //!
    //! <b>Note</b>: Invalidates the iterators to the erased element.
    template<class Disposer>
@@ -1625,7 +1625,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //!                  Disposer::operator()(pointer) and the copy and move
    //!   constructors of Disposer shouldn't throw.
    //!
-   //! <b>Effects</b>: Erases the range pointed by b and e.
+   //! <b>Effects</b>: Erases the range [f, l).
    //!   No destructors are called.
    //!   Disposer::operator()(pointer) is called for the removed elements.
    //!
@@ -1669,15 +1669,13 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
 
    //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
    //!   constructors of Disposer shouldn't throw.
-   //!
-   //! <b>Requires</b>: Dereferencing iterator must yield
-   //!   an lvalue of type value_type.
+   //!   Dereferencing iterator must yield an lvalue of type value_type.
    //!
    //! <b>Effects</b>: Clears the list and inserts the range pointed by b and e.
    //!   No destructors or copy constructors are called.
    //!   Disposer::operator()(pointer) is called for the removed elements.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If the operations of Iterator throw. Basic guarantee.
    //!
    //! <b>Complexity</b>: Linear to the number of elements inserted plus
    //!   linear to the elements contained in the list.
@@ -1731,12 +1729,12 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
       }
    }
 
-   //! <b>Requires</b>: prev must point to an element contained by this list or
+   //! <b>Requires</b>: prev_pos must point to an element contained by this list or
    //!   to the before_begin() element. prev_ele must point to an element contained in list
    //!   x or must be x.before_begin().
    //!
    //! <b>Effects</b>: Transfers the element after prev_ele, from list x to this list,
-   //!   after the element pointed by prev. No destructors or copy constructors are called.
+   //!   after the element pointed by prev_pos. No destructors or copy constructors are called.
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -1778,7 +1776,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //!   n == distance(before_f, before_l).
    //!
    //! <b>Effects</b>: Transfers the range (before_f, before_l] from list x to this
-   //!   list, after the element pointed by p. No destructors or copy constructors are called.
+   //!   list, after the element pointed by prev_pos. No destructors or copy constructors are called.
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -1811,13 +1809,13 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //! list. Iterators of this list and all the references are not invalidated.
    //!
    //! <b>Additional note</b>: If the optional parameter "l" is provided, it will be
-   //!   assigned to the last spliced element or prev if x is empty.
+   //!   assigned to the last spliced element or to previous(it) if x is empty.
    //!   This iterator can be used as new "prev" iterator for a new splice_after call.
    //!   that will splice new values after the previously spliced values.
    BOOST_INTRUSIVE_FORCEINLINE void splice(const_iterator it, slist_impl &x, const_iterator *l = 0) BOOST_NOEXCEPT
    {  this->splice_after(this->previous(it), x, l);   }
 
-   //! <b>Requires</b>: it p must be a valid iterator of *this.
+   //! <b>Requires</b>: pos must be a valid iterator of *this.
    //!   elem must point to an element contained in list
    //!   x.
    //!
@@ -1835,7 +1833,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    {  return this->splice_after(this->previous(pos), x, x.previous(elem));  }
 
    //! <b>Requires</b>: pos must be a dereferenceable iterator in *this
-   //!   and f and f belong to x and f and f a valid range on x.
+   //!   and f and l belong to x and [f, l) is a valid range on x.
    //!
    //! <b>Effects</b>: Transfers the range [f, l) from list x to this
    //!   list, before the element pointed by pos.
@@ -1855,7 +1853,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    {  return this->splice_after(this->previous(pos), x, x.previous(f), x.previous(l));  }
 
    //! <b>Requires</b>: pos must be a dereferenceable iterator in *this
-   //!   and f and l belong to x and f and l a valid range on x.
+   //!   and f and l belong to x and [f, l) is a valid range on x.
    //!   n == distance(f, l).
    //!
    //! <b>Effects</b>: Transfers the range [f, l) from list x to this
@@ -1873,7 +1871,9 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    BOOST_INTRUSIVE_FORCEINLINE void splice(const_iterator pos, slist_impl &x, const_iterator f, const_iterator l, size_type n) BOOST_NOEXCEPT
    {  return this->splice_after(this->previous(pos), x, x.previous(f), x.previous(l), n);  }
 
-   //! <b>Effects</b>: This function sorts the list *this according to operator<.
+   //! <b>Requires</b>: p must be a comparison function that induces a strict weak ordering.
+   //!
+   //! <b>Effects</b>: This function sorts the list *this according to p.
    //!   The sort is stable, that is, the relative order of equivalent elements is preserved.
    //!
    //! <b>Throws</b>: If value_traits::node_traits::node
@@ -1891,20 +1891,15 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
       last_algorithms::sort(this->get_root_node(), comp, this->priv_last_ptr());
    }
 
-   //! <b>Requires</b>: p must be a comparison function that induces a strict weak
-   //!   ordering and both *this and x must be sorted according to that ordering
-   //!   The lists x and *this must be distinct.
-   //!
-   //! <b>Effects</b>: This function removes all of x's elements and inserts them
-   //!   in order into *this. The merge is stable; that is, if an element from *this is
-   //!   equivalent to one from x, then the element from *this will precede the one from x.
+   //! <b>Effects</b>: This function sorts the list *this according to operator<.
+   //!   The sort is stable, that is, the relative order of equivalent elements is preserved.
    //!
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks)
    //!   or operator< throws. Basic guarantee.
    //!
-   //! <b>Complexity</b>: This function is linear time: it performs at most
-   //!   size() + x.size() - 1 comparisons.
+   //! <b>Complexity</b>: The number of comparisons is approximately N log N, where N
+   //!   is the list's size.
    //!
    //! <b>Note</b>: Iterators and references are not invalidated.
    BOOST_INTRUSIVE_FORCEINLINE void sort()
@@ -1928,7 +1923,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //! <b>Note</b>: Iterators and references are not invalidated.
    //!
    //! <b>Additional note</b>: If optional "l" argument is passed, it is assigned
-   //! to an iterator to the last transferred value or end() is x is empty or &x == this.
+   //! to an iterator to the last transferred value or end() if x is empty or &x == this.
    template<class Predicate>
    void merge(slist_impl& x, Predicate p, const_iterator *l = 0)
    {
@@ -2040,7 +2035,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //!
    //! <b>Throws</b>: If pred throws. Basic guarantee.
    //!
-   //! <b>Complexity</b>: Linear time. It performs exactly size() comparisons for equality.
+   //! <b>Complexity</b>: Linear time. It performs exactly size() calls to the predicate.
    //!
    //! <b>Note</b>: The relative order of elements that are not removed is unchanged,
    //!   and iterators to elements that are not removed remain valid.
@@ -2066,7 +2061,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    //!
    //! <b>Throws</b>: If operator== throws. Basic guarantee.
    //!
-   //! <b>Complexity</b>: Linear time (size()-1) comparisons calls to pred()).
+   //! <b>Complexity</b>: Linear time (size()-1 equality comparisons).
    //!
    //! <b>Note</b>: The relative order of elements that are not removed is unchanged,
    //!   and iterators to elements that are not removed remain valid.
@@ -2147,7 +2142,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
 
    //! <b>Requires</b>: `value` must be a reference to a value inserted in an instance of this container type.
    //!
-   //! <b>Effects</b>: This function returns a const_iterator pointing to the element
+   //! <b>Effects</b>: This function returns an iterator pointing to the element.
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -2164,7 +2159,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
 
    //! <b>Requires</b>: value must be a const reference to a value inserted in a list.
    //!
-   //! <b>Effects</b>: This function returns an iterator pointing to the element.
+   //! <b>Effects</b>: This function returns a const_iterator pointing to the element.
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -2182,7 +2177,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
 
    //! <b>Requires</b>: `value` must be a reference to a value inserted in an instance of this container type.
    //!
-   //! <b>Effects</b>: This function returns a const_iterator pointing to the element
+   //! <b>Effects</b>: This function returns an iterator pointing to the element.
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -2197,7 +2192,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
 
    //! <b>Requires</b>: value must be a const reference to a value inserted in a list.
    //!
-   //! <b>Effects</b>: This function returns an iterator pointing to the element.
+   //! <b>Effects</b>: This function returns a const_iterator pointing to the element.
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -2212,7 +2207,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    }
 
    //! <b>Returns</b>: The iterator to the element before i in the list.
-   //!   Returns the end-iterator, if either i is the begin-iterator or the
+   //!   Returns before_begin(), if either i is the begin-iterator or the
    //!   list is empty.
    //!
    //! <b>Throws</b>: Nothing.
@@ -2223,7 +2218,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
    {  return this->previous(this->cbefore_begin(), i); }
 
    //! <b>Returns</b>: The const_iterator to the element before i in the list.
-   //!   Returns the end-const_iterator, if either i is the begin-const_iterator or
+   //!   Returns before_begin(), if either i is the begin-const_iterator or
    //!   the list is empty.
    //!
    //! <b>Throws</b>: Nothing.
@@ -2235,7 +2230,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
 
    //! <b>Returns</b>: The iterator to the element before i in the list,
    //!   starting the search on element after prev_from.
-   //!   Returns the end-iterator, if either i is the begin-iterator or the
+   //!   Returns before_begin(), if either i is the begin-iterator or the
    //!   list is empty.
    //!
    //! <b>Throws</b>: Nothing.
@@ -2247,7 +2242,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES slist_impl
 
    //! <b>Returns</b>: The const_iterator to the element before i in the list,
    //!   starting the search on element after prev_from.
-   //!   Returns the end-const_iterator, if either i is the begin-const_iterator or
+   //!   Returns before_begin(), if either i is the begin-const_iterator or
    //!   the list is empty.
    //!
    //! <b>Throws</b>: Nothing.

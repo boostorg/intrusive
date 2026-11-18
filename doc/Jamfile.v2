@@ -41,6 +41,7 @@ doxygen autodoc
                   \"BOOST_NOEXCEPT_IF(T)=noexcept(T)\" \\
                   \"BOOST_NOEXCEPT=noexcept\" \\
                   \"BOOST_INTRUSIVE_FORCEINLINE=inline\" \\
+                  \"BOOST_INTRUSIVE_STATIC_ASSERT(C)=\" \\
                   \"list_impl=list\" \\
                   \"slist_impl=slist\" \\
                   \"bstree_impl=bstree\" \\

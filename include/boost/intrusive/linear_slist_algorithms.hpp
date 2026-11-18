@@ -85,10 +85,10 @@ class linear_slist_algorithms
    //! <b>Throws</b>: Nothing.
    static void init(node_ptr this_node) BOOST_NOEXCEPT;
 
-   //! <b>Requires</b>: this_node must be in a circular list or be an empty circular list.
+   //! <b>Requires</b>: this_node must be in a linear list or be an empty linear list.
    //!
-   //! <b>Effects</b>: Returns true is "this_node" is the only node of a circular list:
-   //!  or it's a not inserted node:
+   //! <b>Effects</b>: Returns true if the next pointer of "this_node" is null
+   //!  or points to "this_node":
    //!  <tt>return node_ptr() == NodeTraits::get_next(this_node) || NodeTraits::get_next(this_node) == this_node</tt>
    //!
    //! <b>Complexity</b>: Constant
@@ -104,17 +104,17 @@ class linear_slist_algorithms
    //! <b>Throws</b>: Nothing.
    static bool inited(const_node_ptr this_node) BOOST_NOEXCEPT;
 
-   //! <b>Requires</b>: prev_node must be in a circular list or be an empty circular list.
+   //! <b>Requires</b>: prev_node must be in a linear list or be an empty linear list.
    //!
-   //! <b>Effects</b>: Unlinks the next node of prev_node from the circular list.
+   //! <b>Effects</b>: Unlinks the next node of prev_node from the linear list.
    //!
    //! <b>Complexity</b>: Constant
    //!
    //! <b>Throws</b>: Nothing.
    static void unlink_after(node_ptr prev_node) BOOST_NOEXCEPT;
 
-   //! <b>Requires</b>: prev_node and last_node must be in a circular list
-   //!  or be an empty circular list.
+   //! <b>Requires</b>: prev_node and last_node must be in a linear list
+   //!  or be an empty linear list.
    //!
    //! <b>Effects</b>: Unlinks the range (prev_node, last_node) from the linear list.
    //!
@@ -145,7 +145,7 @@ class linear_slist_algorithms
 
    //! <b>Requires</b>: this_node and prev_init_node must be in the same linear list.
    //!
-   //! <b>Effects</b>: Returns the previous node of this_node in the linear list starting.
+   //! <b>Effects</b>: Returns the previous node of this_node in the linear list starting
    //!   the search from prev_init_node. The first node checked for equality
    //!   is NodeTraits::get_next(prev_init_node).
    //!
@@ -161,9 +161,8 @@ class linear_slist_algorithms
 
    #endif   //#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
-   //! <b>Effects</b>: Constructs an empty list, making this_node the only
-   //!   node of the circular list:
-   //!  <tt>NodeTraits::get_next(this_node) == this_node</tt>.
+   //! <b>Effects</b>: Constructs an empty linear list with this_node as the header:
+   //!  <tt>NodeTraits::get_next(this_node) == node_ptr()</tt>.
    //!
    //! <b>Complexity</b>: Constant
    //!
@@ -171,7 +170,7 @@ class linear_slist_algorithms
    BOOST_INTRUSIVE_FORCEINLINE static void init_header(node_ptr this_node) BOOST_NOEXCEPT
    {  NodeTraits::set_next(this_node, node_ptr());  }
 
-   //! <b>Requires</b>: 'p' is the first node of a list.
+   //! <b>Requires</b>: 'p' is the header node of a list.
    //!
    //! <b>Effects</b>: Returns a pointer to a node that represents the "end" (one past end) node
    //!
@@ -315,8 +314,8 @@ class linear_slist_algorithms
 
    //! <b>Effects</b>: Moves the first n nodes starting at p to the end of the list.
    //!
-   //! <b>Returns</b>: A pair containing the new first and last node of the list or
-   //!   if there has been any movement, a null pair if n leads to no movement.
+   //! <b>Returns</b>: If there has been any movement, a pair containing the new first
+   //!   and last node of the list. A null pair if n leads to no movement.
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -368,10 +367,10 @@ class linear_slist_algorithms
       return ret;
    }
 
-   //! <b>Effects</b>: Moves the first n nodes starting at p to the beginning of the list.
+   //! <b>Effects</b>: Moves the last n nodes of the list that starts at p to the beginning of the list.
    //!
-   //! <b>Returns</b>: A pair containing the new first and last node of the list or
-   //!   if there has been any movement, a null pair if n leads to no movement.
+   //! <b>Returns</b>: If there has been any movement, a pair containing the new first
+   //!   and last node of the list. A null pair if n leads to no movement.
    //!
    //! <b>Throws</b>: Nothing.
    //!

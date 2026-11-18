@@ -115,8 +115,9 @@ class circular_list_algorithms
 
    //! <b>Requires</b>: this_node must be in a circular list or be an empty circular list.
    //!
-   //! <b>Effects</b>: Returns true is "this_node" is the only node of a circular list:
-   //!  <tt>return NodeTraits::get_next(this_node) == this_node</tt>
+   //! <b>Effects</b>: Returns true if "this_node" is the only node of a circular list
+   //!  or if it is a node that is not inserted (its next pointer is null):
+   //!  <tt>return !NodeTraits::get_next(this_node) || NodeTraits::get_next(this_node) == this_node</tt>
    //!
    //! <b>Complexity</b>: Constant
    //!
@@ -149,6 +150,8 @@ class circular_list_algorithms
    //! <b>Requires</b>: this_node must be in a circular list or be an empty circular list.
    //!
    //! <b>Effects</b>: Unlinks the node from the circular list.
+   //!
+   //! <b>Returns</b>: The node that was after this_node.
    //!
    //! <b>Complexity</b>: Constant
    //!
@@ -259,7 +262,7 @@ class circular_list_algorithms
 
    //! <b>Requires</b>: b and e must be nodes of the same circular list or an empty range.
    //!   and p must be a node of a different circular list or may not be an iterator in
-   //    [b, e).
+   //!   [b, e).
    //!
    //! <b>Effects</b>: Removes the nodes from [b, e) range from their circular list and inserts
    //!   them before p in p's circular list.

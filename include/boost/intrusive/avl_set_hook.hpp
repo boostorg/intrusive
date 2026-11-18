@@ -57,7 +57,7 @@ struct make_avl_set_base_hook
    typedef implementation_defined type;
 };
 
-//! Derive a class from avl_set_base_hook in order to store objects in
+//! Derive a class from avl_set_base_hook in order to store objects
 //! in an avl_set/avl_multiset. avl_set_base_hook holds the data necessary to maintain
 //! the avl_set/avl_multiset and provides an appropriate value_traits class for avl_set/avl_multiset.
 //!
@@ -66,7 +66,7 @@ struct make_avl_set_base_hook
 //!
 //! \c tag<> defines a tag to identify the node.
 //! The same tag value can be used in different classes, but if a class is
-//! derived from more than one \c list_base_hook, then each \c list_base_hook needs its
+//! derived from more than one \c avl_set_base_hook, then each \c avl_set_base_hook needs its
 //! unique tag.
 //!
 //! \c void_pointer<> is the pointer type that will be used internally in the hook
@@ -130,14 +130,14 @@ class avl_set_base_hook
 
    //! <b>Effects</b>: Swapping two nodes swaps the position of the elements
    //!   related to those nodes in one or two containers. That is, if the node
-   //!   this is part of the element e1, the node x is part of the element e2
+   //!   this is part of the element e1, the node other is part of the element e2
    //!   and both elements are included in the containers s1 and s2, then after
    //!   the swap-operation e1 is in s2 at the position of e2 and e2 is in s1
    //!   at the position of e1. If one element is not in a container, then
    //!   after the swap-operation the other element is not in a container.
    //!   Iterators to e1 and e2 related to those nodes are invalidated.
    //!
-   //! <b>Complexity</b>: Constant
+   //! <b>Complexity</b>: Logarithmic
    //!
    //! <b>Throws</b>: Nothing.
    void swap_nodes(avl_set_base_hook &other) noexcept;
@@ -256,14 +256,14 @@ class avl_set_member_hook
 
    //! <b>Effects</b>: Swapping two nodes swaps the position of the elements
    //!   related to those nodes in one or two containers. That is, if the node
-   //!   this is part of the element e1, the node x is part of the element e2
+   //!   this is part of the element e1, the node other is part of the element e2
    //!   and both elements are included in the containers s1 and s2, then after
    //!   the swap-operation e1 is in s2 at the position of e2 and e2 is in s1
    //!   at the position of e1. If one element is not in a container, then
    //!   after the swap-operation the other element is not in a container.
    //!   Iterators to e1 and e2 related to those nodes are invalidated.
    //!
-   //! <b>Complexity</b>: Constant
+   //! <b>Complexity</b>: Logarithmic
    //!
    //! <b>Throws</b>: Nothing.
    void swap_nodes(avl_set_member_hook &other) noexcept;

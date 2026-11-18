@@ -510,7 +510,7 @@ class splay_set_impl
    void replace_node(iterator replace_this, reference with_this) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::splaytree::remove_node
-   void remove_node(reference value) BOOST_NOEXCEPT;
+   static void remove_node(reference value) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::splaytree::splay_up(iterator)
    void splay_up(iterator i) BOOST_NOEXCEPT;
@@ -519,7 +519,7 @@ class splay_set_impl
    template<class KeyType, class KeyTypeKeyCompare>
    iterator splay_down(const KeyType &key, KeyTypeKeyCompare comp);
 
-   //! @copydoc ::boost::intrusive::splaytree::splay_down(const key_type &key)
+   //! @copydoc ::boost::intrusive::splaytree::splay_down(const key_type &)
    iterator splay_down(const key_type &key);
 
    //! @copydoc ::boost::intrusive::splaytree::rebalance
@@ -1021,7 +1021,7 @@ class splay_multiset_impl
 
    //! @copydoc ::boost::intrusive::splaytree::bounded_range(const key_type&, const key_type&,bool,bool)
    std::pair<iterator,iterator> bounded_range
-      (const_reference lower_value, const_reference upper_value, bool left_closed, bool right_closed);
+      (const key_type &lower_key, const key_type &upper_key, bool left_closed, bool right_closed);
 
    //! @copydoc ::boost::intrusive::splaytree::bounded_range(const KeyType&,const KeyType&,KeyTypeKeyCompare,bool,bool)
    template<class KeyType, class KeyTypeKeyCompare>
@@ -1030,7 +1030,7 @@ class splay_multiset_impl
 
    //! @copydoc ::boost::intrusive::splaytree::bounded_range(const key_type&, const key_type&,bool,bool)const
    std::pair<const_iterator, const_iterator> bounded_range
-      (const_reference lower_value, const_reference upper_value, bool left_closed, bool right_closed) const;
+      (const key_type &lower_key, const key_type &upper_key, bool left_closed, bool right_closed) const;
 
    //! @copydoc ::boost::intrusive::splaytree::bounded_range(const KeyType&,const KeyType&,KeyTypeKeyCompare,bool,bool)const
    template<class KeyType, class KeyTypeKeyCompare>
@@ -1059,7 +1059,7 @@ class splay_multiset_impl
    void replace_node(iterator replace_this, reference with_this) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::splaytree::remove_node
-   void remove_node(reference value) BOOST_NOEXCEPT;
+   static void remove_node(reference value) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::splaytree::splay_up(iterator)
    void splay_up(iterator i) BOOST_NOEXCEPT;
@@ -1068,7 +1068,7 @@ class splay_multiset_impl
    template<class KeyType, class KeyTypeKeyCompare>
    iterator splay_down(const KeyType &key, KeyTypeKeyCompare comp);
 
-   //! @copydoc ::boost::intrusive::splaytree::splay_down(const key_type &key)
+   //! @copydoc ::boost::intrusive::splaytree::splay_down(const key_type &)
    iterator splay_down(const key_type &key);
 
    //! @copydoc ::boost::intrusive::splaytree::rebalance

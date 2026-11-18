@@ -346,7 +346,7 @@ class avltree_impl
    template<class Disposer>
    void clear_and_dispose(Disposer disposer) BOOST_NOEXCEPT;
 
-   //! @copydoc ::boost::intrusive::bstree::count(const key_type &ke)const
+   //! @copydoc ::boost::intrusive::bstree::count(const key_type &)const
    size_type count(const key_type &key) const;
 
    //! @copydoc ::boost::intrusive::bstree::count(const KeyType&,KeyTypeKeyCompare)const
@@ -367,7 +367,7 @@ class avltree_impl
    template<class KeyType, class KeyTypeKeyCompare>
    const_iterator lower_bound(const KeyType& key, KeyTypeKeyCompare comp) const;
 
-   //! @copydoc ::boost::intrusive::bstree::upper_bound(const key_type &key)
+   //! @copydoc ::boost::intrusive::bstree::upper_bound(const key_type &)
    iterator upper_bound(const key_type &key);
 
    //! @copydoc ::boost::intrusive::bstree::upper_bound(const KeyType&,KeyTypeKeyCompare)
@@ -451,7 +451,7 @@ class avltree_impl
    void replace_node(iterator replace_this, reference with_this) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree::remove_node
-   void remove_node(reference value) BOOST_NOEXCEPT;
+   static void remove_node(reference value) BOOST_NOEXCEPT;
 
    //! @copydoc ::boost::intrusive::bstree::merge_unique
    template<class T, class ...Options2>

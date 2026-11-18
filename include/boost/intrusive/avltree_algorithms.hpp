@@ -260,7 +260,7 @@ class avltree_algorithms
    //!
    //! <b>Throws</b>: Nothing.
    //!
-   //! <b>Nodes</b>: If header is inserted in a tree, this function corrupts the tree.
+   //! <b>Notes</b>: If header is inserted in a tree, this function corrupts the tree.
    static void init_header(node_ptr header) BOOST_NOEXCEPT
    {
       bstree_algo::init_header(header);

@@ -942,7 +942,7 @@ class bstree_impl
    //!   [b, e).
    //!
    //! <b>Complexity</b>: Linear in N if [b, e) is already sorted using
-   //!   comp and otherwise N * log N, where N is the distance between first and last.
+   //!   cmp and otherwise N * log N, where N is the distance between b and e.
    //!
    //! <b>Throws</b>: If value_traits::node_traits::node
    //!   constructor throws (this does not happen with predefined Boost.Intrusive hooks)
@@ -1162,7 +1162,8 @@ class bstree_impl
    //! <b>Precondition</b>: end_iterator must be a valid end iterator
    //!   of the container.
    //!
-   //! <b>Effects</b>: Returns a const reference to the container associated to the end iterator
+   //! <b>Effects</b>: Returns a reference to the container associated to the end iterator.
+   //!   If end_iterator is a const_iterator, the reference is const.
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -1174,10 +1175,11 @@ class bstree_impl
                (data_type::get_tree_base_from_end_iterator(end_iterator));
    }
 
-   //! <b>Precondition</b>: end_iterator must be a valid end const_iterator
+   //! <b>Precondition</b>: end_iterator must be a valid end iterator
    //!   of the container.
    //!
-   //! <b>Effects</b>: Returns a const reference to the container associated to the iterator
+   //! <b>Effects</b>: Returns a reference to the container associated to the end iterator.
+   //!   If end_iterator is a const_iterator, the reference is const.
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -1192,7 +1194,8 @@ class bstree_impl
    //! <b>Precondition</b>: it must be a valid iterator
    //!   of the container.
    //!
-   //! <b>Effects</b>: Returns a const reference to the container associated to the iterator
+   //! <b>Effects</b>: Returns a reference to the container associated to the iterator.
+   //!   If it is a const_iterator, the reference is const.
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -1201,10 +1204,11 @@ class bstree_impl
    BOOST_INTRUSIVE_FORCEINLINE static bstree_impl & container_from_iterator(iterator it) BOOST_NOEXCEPT
    {  return container_from_end_iterator(it.end_iterator_from_it());   }
 
-   //! <b>Precondition</b>: it must be a valid end const_iterator
-   //!   of container.
+   //! <b>Precondition</b>: it must be a valid iterator
+   //!   of the container.
    //!
-   //! <b>Effects</b>: Returns a const reference to the container associated to the end iterator
+   //! <b>Effects</b>: Returns a reference to the container associated to the iterator.
+   //!   If it is a const_iterator, the reference is const.
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -1380,12 +1384,12 @@ class bstree_impl
    //! <b>Requires</b>: value must be an lvalue, and "hint" must be
    //!   a valid iterator.
    //!
-   //! <b>Effects</b>: Inserts x into the container, using "hint" as a hint to
+   //! <b>Effects</b>: Inserts value into the container, using "hint" as a hint to
    //!   where it will be inserted. If "hint" is the upper_bound
    //!   the insertion takes constant time (two comparisons in the worst case)
    //!
    //! <b>Complexity</b>: Logarithmic in general, but it is amortized
-   //!   constant time if t is inserted immediately before hint.
+   //!   constant time if value is inserted immediately before hint.
    //!
    //! <b>Throws</b>: If the internal key_compare ordering function throws. Strong guarantee.
    //!
@@ -1450,12 +1454,12 @@ class bstree_impl
    //! <b>Requires</b>: value must be an lvalue, and "hint" must be
    //!   a valid iterator
    //!
-   //! <b>Effects</b>: Tries to insert x into the container, using "hint" as a hint
+   //! <b>Effects</b>: Tries to insert value into the container, using "hint" as a hint
    //!   to where it will be inserted.
    //!
    //! <b>Complexity</b>: Logarithmic in general, but it is amortized
    //!   constant time (two comparisons in the worst case)
-   //!   if t is inserted immediately before hint.
+   //!   if value is inserted immediately before hint.
    //!
    //! <b>Throws</b>: If the comparison functor call throws.
    //!
@@ -1507,11 +1511,11 @@ class bstree_impl
    //!   returns a pair containing an iterator to the already present value
    //!   and false. If the value can be inserted returns true in the returned
    //!   pair boolean and fills "commit_data" that is meant to be used with
-   //!   the "insert_commit" function.
+   //!   the matching commit function.
    //!
    //! <b>Complexity</b>: Average complexity is at most logarithmic.
    //!
-   //! <b>Throws</b>: If the comp ordering function throws. Strong guarantee.
+   //! <b>Throws</b>: If the internal key_compare throws. Strong guarantee.
    std::pair<iterator, bool> insert_unique_check(const key_type &key, insert_commit_data &commit_data);
 
    //! <b>Effects</b>: Checks if a value can be inserted in the container, using
@@ -1522,12 +1526,12 @@ class bstree_impl
    //!   returns a pair containing an iterator to the already present value
    //!   and false. If the value can be inserted returns true in the returned
    //!   pair boolean and fills "commit_data" that is meant to be used with
-   //!   the "insert_commit" function.
+   //!   the matching commit function.
    //!
    //! <b>Complexity</b>: Logarithmic in general, but it's amortized
-   //!   constant time if t is inserted immediately before hint.
+   //!   constant time if key is inserted immediately before hint.
    //!
-   //! <b>Throws</b>: If the comp ordering function throws. Strong guarantee.
+   //! <b>Throws</b>: If the internal key_compare throws. Strong guarantee.
    std::pair<iterator, bool> insert_unique_check(const_iterator hint, const key_type &key, insert_commit_data &commit_data);
 
    //! <b>Requires</b>: comp must be a comparison function that induces
@@ -1541,7 +1545,7 @@ class bstree_impl
    //!   returns a pair containing an iterator to the already present value
    //!   and false. If the value can be inserted returns true in the returned
    //!   pair boolean and fills "commit_data" that is meant to be used with
-   //!   the "insert_commit" function.
+   //!   the matching commit function.
    //!
    //! <b>Complexity</b>: Average complexity is at most logarithmic.
    //!
@@ -1555,10 +1559,10 @@ class bstree_impl
    //!   part to check if the insertion will be successful.
    //!
    //!   If the check is successful, the user can construct the value_type and use
-   //!   "insert_commit" to insert the object in constant-time. This gives a total
+   //!   the matching commit function to insert the object in constant-time. This gives a total
    //!   logarithmic complexity to the insertion: check(O(log(N)) + commit(O(1)).
    //!
-   //!   "commit_data" remains valid for a subsequent "insert_commit" only if no more
+   //!   "commit_data" remains valid for a subsequent commit only if no more
    //!   objects are inserted or erased from the container.
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<iterator, bool> insert_unique_check
@@ -1576,25 +1580,25 @@ class bstree_impl
    //!   returns a pair containing an iterator to the already present value
    //!   and false. If the value can be inserted returns true in the returned
    //!   pair boolean and fills "commit_data" that is meant to be used with
-   //!   the "insert_commit" function.
+   //!   the matching commit function.
    //!
    //! <b>Complexity</b>: Logarithmic in general, but it's amortized
-   //!   constant time if t is inserted immediately before hint.
+   //!   constant time if key is inserted immediately before hint.
    //!
    //! <b>Throws</b>: If the comp ordering function throws. Strong guarantee.
    //!
    //! <b>Notes</b>: This function is used to improve performance when constructing
    //!   a value_type is expensive: if there is an equivalent value
    //!   the constructed object must be discarded. Many times, the part of the
-   //!   constructing that is used to impose the order is much cheaper to construct
+   //!   value_type that is used to impose the order is much cheaper to construct
    //!   than the value_type and this function offers the possibility to use that key
    //!   to check if the insertion will be successful.
    //!
    //!   If the check is successful, the user can construct the value_type and use
-   //!   "insert_commit" to insert the object in constant-time. This can give a total
+   //!   the matching commit function to insert the object in constant-time. This can give a total
    //!   constant-time complexity to the insertion: check(O(1)) + commit(O(1)).
    //!
-   //!   "commit_data" remains valid for a subsequent "insert_commit" only if no more
+   //!   "commit_data" remains valid for a subsequent commit only if no more
    //!   objects are inserted or erased from the container.
    template<class KeyType, class KeyTypeKeyCompare>
    std::pair<iterator, bool> insert_unique_check
@@ -1604,12 +1608,12 @@ class bstree_impl
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! <b>Requires</b>: value must be an lvalue of type value_type. commit_data
-   //!   must have been obtained from a previous call to "insert_check".
+   //!   must have been obtained from a previous call to the matching check function.
    //!   No objects should have been inserted or erased from the container between
-   //!   the "insert_check" that filled "commit_data" and the call to "insert_commit".
+   //!   the check that filled "commit_data" and the call to this function.
    //!
    //! <b>Effects</b>: Inserts the value in the container using the information obtained
-   //!   from the "commit_data" that a previous "insert_check" filled.
+   //!   from the "commit_data" that a previous check filled.
    //!
    //! <b>Returns</b>: An iterator to the newly inserted object.
    //!
@@ -1617,9 +1621,9 @@ class bstree_impl
    //!
    //! <b>Throws</b>: Nothing.
    //!
-   //! <b>Notes</b>: This function has only sense if a "insert_check" has been
+   //! <b>Notes</b>: This function has only sense if a check function has been
    //!   previously executed to fill "commit_data". No value should be inserted or
-   //!   erased between the "insert_check" and "insert_commit" calls.
+   //!   erased between the check and commit calls.
    //!
    //!   Does not affect the validity of iterators and references.
    iterator insert_unique_commit(reference value, const insert_commit_data &commit_data) BOOST_NOEXCEPT
@@ -1650,10 +1654,10 @@ class bstree_impl
    }
 
    //! <b>Requires</b>: value must be an lvalue, "pos" must be
-   //!   a valid iterator (or end) and must be the succesor of value
+   //!   a valid iterator (or end) and must be the successor of value
    //!   once inserted according to the predicate
    //!
-   //! <b>Effects</b>: Inserts x into the container before "pos".
+   //! <b>Effects</b>: Inserts value into the container before "pos".
    //!
    //! <b>Complexity</b>: Constant time.
    //!
@@ -1677,7 +1681,7 @@ class bstree_impl
    //! <b>Requires</b>: value must be an lvalue, and it must be no less
    //!   than the greatest inserted key
    //!
-   //! <b>Effects</b>: Inserts x into the container in the last position.
+   //! <b>Effects</b>: Inserts value into the container in the last position.
    //!
    //! <b>Complexity</b>: Constant time.
    //!
@@ -1701,7 +1705,7 @@ class bstree_impl
    //! <b>Requires</b>: value must be an lvalue, and it must be no greater
    //!   than the minimum inserted key
    //!
-   //! <b>Effects</b>: Inserts x into the container in the first position.
+   //! <b>Effects</b>: Inserts value into the container in the first position.
    //!
    //! <b>Complexity</b>: Constant time.
    //!
@@ -1738,7 +1742,7 @@ class bstree_impl
       return ret.unconst();
    }
 
-   //! <b>Effects</b>: Erases the range pointed to by b end e.
+   //! <b>Effects</b>: Erases the range pointed to by b and e.
    //!
    //! <b>Complexity</b>: Average complexity for erase range is at most
    //!   O(log(size() + N)), where N is the number of elements in the range.
@@ -1772,14 +1776,14 @@ class bstree_impl
    //!   comp(nk, key) and !comp(key, nk), with comp(nk, key) implying !comp(key, nk),
    //!   with nk the key_type of a value_type inserted into `*this`.
    //!
-   //! <b>Effects</b>: Erases all the elements with the given key.
+   //! <b>Effects</b>: Erases all the elements with the given key
    //!   according to the comparison functor "comp".
    //!
    //! <b>Returns</b>: The number of erased elements.
    //!
    //! <b>Complexity</b>: O(log(size() + N).
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If `comp` throws. Strong guarantee.
    //!
    //! <b>Note</b>: Invalidates the iterators (but not the references)
    //!    to the erased elements. No destructors are called.
@@ -1825,10 +1829,10 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: O(log(size() + N).
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If the internal key_compare throws. Strong guarantee.
    //!
-   //! <b>Note</b>: Invalidates the iterators (but not the references)
-   //!    to the erased elements. No destructors are called.
+   //! <b>Note</b>: Invalidates the iterators
+   //!    to the erased elements.
    template<class Disposer>
    size_type erase_and_dispose(const key_type &key, Disposer disposer)
    {
@@ -1841,7 +1845,7 @@ class bstree_impl
    //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
    //!   constructors of Disposer shouldn't throw.
    //!
-   //! <b>Effects</b>: Erases the range pointed to by b end e.
+   //! <b>Effects</b>: Erases the range pointed to by b and e.
    //!   Disposer::operator()(pointer) is called for the removed elements.
    //!
    //! <b>Complexity</b>: Average complexity for erase range is at most
@@ -1858,11 +1862,10 @@ class bstree_impl
    //! <b>Requires</b>: key is a value such that `*this` is partitioned with respect to
    //!   comp(nk, key) and !comp(key, nk), with comp(nk, key) implying !comp(key, nk)
    //!   and nk the key_type of a value_type inserted into `*this`.
-   //!
-   //! <b>Requires</b>: Disposer::operator()(pointer) and the copy and move
+   //!   Disposer::operator()(pointer) and the copy and move
    //!   constructors of Disposer shouldn't throw.
    //!
-   //! <b>Effects</b>: Erases all the elements with the given key.
+   //! <b>Effects</b>: Erases all the elements with the given key
    //!   according to the comparison functor "comp".
    //!   Disposer::operator()(pointer) is called for the removed elements.
    //!
@@ -1870,7 +1873,7 @@ class bstree_impl
    //!
    //! <b>Complexity</b>: O(log(size() + N).
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If `comp` throws. Strong guarantee.
    //!
    //! <b>Note</b>: Invalidates the iterators
    //!    to the erased elements.
@@ -1902,8 +1905,7 @@ class bstree_impl
 
    //! <b>Effects</b>: Erases all of the elements calling disposer(p) for
    //!   each node to be erased.
-   //! <b>Complexity</b>: Average complexity for is at most O(log(size() + N)),
-   //!   where N is the number of elements in the container.
+   //! <b>Complexity</b>: Linear to the number of elements in the container.
    //!
    //! <b>Throws</b>: Nothing.
    //!
@@ -1955,7 +1957,7 @@ class bstree_impl
    #else //defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
    //! <b>Effects</b>: Returns an iterator to the first element whose
-   //!   key is not less than k or end() if that element does not exist.
+   //!   key is not less than key or end() if that element does not exist.
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
@@ -1963,14 +1965,23 @@ class bstree_impl
    iterator lower_bound(const key_type &key);
 
    //! <b>Effects</b>: Returns an iterator to the first element whose
-   //!   key is not less than k or end() if that element does not exist.
+   //!   key is not less than key or end() if that element does not exist.
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
    //! <b>Throws</b>: If `key_compare` throws.
    const_iterator lower_bound(const key_type &key) const;
 
-   //! @copydoc ::boost::intrusive::bstree::lower_bound(const key_type &)
+   //! <b>Requires</b>: key is a value such that `*this` is partitioned with respect to
+   //!   comp(nk, key), with nk the key_type of a value_type inserted into `*this`.
+   //!
+   //! <b>Effects</b>: Returns an iterator to the first element whose
+   //!   key is not less than key according to comp or end() if that element
+   //!   does not exist.
+   //!
+   //! <b>Complexity</b>: Logarithmic.
+   //!
+   //! <b>Throws</b>: If `comp` throws.
    template<class KeyType, class KeyTypeKeyCompare>
    iterator lower_bound(const KeyType &key, KeyTypeKeyCompare comp);
 
@@ -1979,7 +1990,7 @@ class bstree_impl
    const_iterator lower_bound(const KeyType &key, KeyTypeKeyCompare comp) const;
 
    //! <b>Effects</b>: Returns an iterator to the first element whose
-   //!   key is greater than k or end() if that element does not exist.
+   //!   key is greater than key or end() if that element does not exist.
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
@@ -1990,7 +2001,7 @@ class bstree_impl
    //!   !comp(key, nk), with nk the key_type of a value_type inserted into `*this`.
    //!
    //! <b>Effects</b>: Returns an iterator to the first element whose
-   //!   key is greater than k according to comp or end() if that element
+   //!   key is greater than key according to comp or end() if that element
    //!   does not exist.
    //!
    //! <b>Complexity</b>: Logarithmic.
@@ -2007,7 +2018,7 @@ class bstree_impl
    const_iterator upper_bound(const KeyType &key, KeyTypeKeyCompare comp) const;
 
    //! <b>Effects</b>: Finds an iterator to the first element whose key is
-   //!   k or end() if that element does not exist.
+   //!   key or end() if that element does not exist.
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
@@ -2019,7 +2030,7 @@ class bstree_impl
    //!   and nk the key_type of a value_type inserted into `*this`.
    //!
    //! <b>Effects</b>: Finds an iterator to the first element whose key is
-   //!   k or end() if that element does not exist.
+   //!   key or end() if that element does not exist.
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
@@ -2034,9 +2045,9 @@ class bstree_impl
    template<class KeyType, class KeyTypeKeyCompare>
    const_iterator find(const KeyType &key, KeyTypeKeyCompare comp) const;
 
-   //! <b>Effects</b>: Finds a range containing all elements whose key is k or
+   //! <b>Effects</b>: Finds a range containing all elements whose key is key or
    //!   an empty range that indicates the position where those elements would be
-   //!   if they there is no elements with key k.
+   //!   if there are no elements with that key.
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
@@ -2047,9 +2058,9 @@ class bstree_impl
    //!   comp(nk, key) and !comp(key, nk), with comp(nk, key) implying !comp(key, nk),
    //!   with nk the key_type of a value_type inserted into `*this`.
    //!
-   //! <b>Effects</b>: Finds a range containing all elements whose key is k or
+   //! <b>Effects</b>: Finds a range containing all elements whose key is key or
    //!   an empty range that indicates the position where those elements would be
-   //!   if they there is no elements with key k.
+   //!   if there are no elements with that key.
    //!
    //! <b>Complexity</b>: Logarithmic.
    //!
@@ -2073,7 +2084,7 @@ class bstree_impl
    //!   [!key_comp()(upper_key, lower_key) && !key_comp()(lower_key, upper_key)] then
    //!   ('left_closed' || 'right_closed') must be true.
    //!
-   //! <b>Effects</b>: Returns an a pair with the following criteria:
+   //! <b>Effects</b>: Returns a pair with the following criteria:
    //!
    //!   first = lower_bound(lower_key) if left_closed, upper_bound(lower_key) otherwise
    //!
@@ -2084,11 +2095,11 @@ class bstree_impl
    //! <b>Throws</b>: If `key_compare` throws.
    //!
    //! <b>Note</b>: This function can be more efficient than calling upper_bound
-   //!   and lower_bound for lower_value and upper_value.
+   //!   and lower_bound for lower_key and upper_key.
    //!
    //! <b>Note</b>: Experimental function, the interface might change in future releases.
    std::pair<iterator,iterator> bounded_range
-      (const key_type &lower_key, const key_type &upper_value, bool left_closed, bool right_closed);
+      (const key_type &lower_key, const key_type &upper_key, bool left_closed, bool right_closed);
 
    //! <b>Requires</b>:
    //!   `lower_key` is a value such that `*this` is partitioned with respect to
@@ -2104,7 +2115,7 @@ class bstree_impl
    //!   [!comp(upper_key, lower_key) && !comp(lower_key, upper_key)] then
    //!   ('left_closed' || 'right_closed') must be true.
    //!
-   //! <b>Effects</b>: Returns an a pair with the following criteria:
+   //! <b>Effects</b>: Returns a pair with the following criteria:
    //!
    //!   first = lower_bound(lower_key, comp) if left_closed, upper_bound(lower_key, comp) otherwise
    //!
@@ -2135,7 +2146,7 @@ class bstree_impl
    //!   appropriate type. Otherwise the behavior is undefined.
    //!
    //! <b>Effects</b>: Returns: a valid iterator i belonging to the set
-   //!   that points to the value
+   //!   that points to the value. If value is a const_reference, i is a const_iterator.
    //!
    //! <b>Complexity</b>: Constant.
    //!
@@ -2148,8 +2159,8 @@ class bstree_impl
    //! <b>Requires</b>: value must be an lvalue and shall be in a set of
    //!   appropriate type. Otherwise the behavior is undefined.
    //!
-   //! <b>Effects</b>: Returns: a valid const_iterator i belonging to the
-   //!   set that points to the value
+   //! <b>Effects</b>: Returns: a valid iterator i belonging to the set
+   //!   that points to the value. If value is a const_reference, i is a const_iterator.
    //!
    //! <b>Complexity</b>: Constant.
    //!
@@ -2251,9 +2262,9 @@ class bstree_impl
    //! <b>Note</b>: Does not affect the validity of iterators and references.
    void rebalance() BOOST_NOEXCEPT;
 
-   //! <b>Requires</b>: old_root is a node of a tree.
+   //! <b>Requires</b>: r is an iterator to a node of the tree.
    //!
-   //! <b>Effects</b>: Rebalances the subtree rooted at old_root.
+   //! <b>Effects</b>: Rebalances the subtree rooted at r.
    //!
    //! <b>Returns</b>: The new root of the subtree.
    //!
@@ -2273,11 +2284,11 @@ class bstree_impl
    //! <b>Complexity</b>: Logarithmic time.
    //!
    //! <b>Note</b>: This static function is only usable with non-constant
-   //! time size containers that have stateless comparison functors.
+   //! time size containers that have stateless value traits.
    //!
    //! If the user calls
-   //! this function with a constant time size container or stateful comparison
-   //! functor a compilation error will be issued.
+   //! this function with a constant time size container or stateful value
+   //! traits a compilation error will be issued.
    //!
    //! Invalidates the iterators (but not the references) to the removed element.
    static void remove_node(reference value) BOOST_NOEXCEPT
