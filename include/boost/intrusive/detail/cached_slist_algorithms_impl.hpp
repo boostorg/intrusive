@@ -23,6 +23,7 @@
 
 #include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/detail/workaround.hpp>
+#include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/node_chain_sort.hpp>
 #include <cstddef>
 
@@ -192,19 +193,9 @@ class cached_slist_algorithms_impl
       }
    }
 
-   static void swap_trailing_nodes
+   BOOST_INTRUSIVE_FORCEINLINE static void swap_trailing_nodes
       (node_ptr this_node, node_ptr other_node, node_ptr &this_last, node_ptr &other_last) BOOST_NOEXCEPT
-   {
-      if(base_t::is_empty(this_node)){
-         if(!base_t::is_empty(other_node)){
-            cached_slist_algorithms_impl::priv_swap_non_empty(other_node, other_last, this_node, this_last, true);
-         }
-      }
-      else{
-         cached_slist_algorithms_impl::priv_swap_non_empty
-            (this_node, this_last, other_node, other_last, base_t::is_empty(other_node));
-      }
-   }
+   {  cached_slist_algorithms_impl::priv_swap_trailing_nodes(this_node, other_node, this_last, other_last, bool_<Linear>());  }
 
    static void reverse(node_ptr header, node_ptr &last) BOOST_NOEXCEPT
    {
@@ -252,24 +243,45 @@ class cached_slist_algorithms_impl
    }
 
    private:
-   //Precondition: this_node's list is not empty
-   static void priv_swap_non_empty
-      (node_ptr this_node, node_ptr &this_last, node_ptr other_node, node_ptr &other_last, bool other_was_empty) BOOST_NOEXCEPT
+   //Linear lists: no node points to its header, so only the headers
+   //and the cached last nodes change
+   static void priv_swap_trailing_nodes
+      (node_ptr this_node, node_ptr other_node, node_ptr &this_last, node_ptr &other_last, bool_<true>) BOOST_NOEXCEPT
    {
-      const node_ptr other_old_last(other_last);
-      const node_ptr this_old_last(this_last);
+      base_t::swap_trailing_nodes(this_node, other_node);
+      //The cached last node of an empty list is its header
+      const node_ptr old_this_last = this_last;
+      this_last  = other_last == other_node ? this_node : other_last;
+      other_last = old_this_last == this_node ? other_node : old_this_last;
+   }
 
-      //Move all nodes from this to other's beginning
-      base_t::transfer_after(other_node, this_node, this_old_last);
-      other_last = this_old_last;
-
-      if(other_was_empty){
+   //Circular lists: the last node of a non-empty list points to its header,
+   //and the header of an empty list points to itself. circular_slist_algorithms::swap_nodes
+   //is not used, as it traverses the lists to find the nodes that point to the headers,
+   //that are the cached last nodes.
+   static void priv_swap_trailing_nodes
+      (node_ptr this_node, node_ptr other_node, node_ptr &this_last, node_ptr &other_last, bool_<false>) BOOST_NOEXCEPT
+   {
+      const node_ptr this_first  = node_traits::get_next(this_node);
+      const node_ptr other_first = node_traits::get_next(other_node);
+      const node_ptr old_this_last = this_last;
+      if(other_first == other_node){
+         node_traits::set_next(this_node, this_node);
          this_last = this_node;
       }
       else{
-         //Move trailing nodes from other to this
-         base_t::transfer_after(this_node, this_old_last, other_old_last);
-         this_last = other_old_last;
+         node_traits::set_next(this_node, other_first);
+         node_traits::set_next(other_last, this_node);
+         this_last = other_last;
+      }
+      if(this_first == this_node){
+         node_traits::set_next(other_node, other_node);
+         other_last = other_node;
+      }
+      else{
+         node_traits::set_next(other_node, this_first);
+         node_traits::set_next(old_this_last, other_node);
+         other_last = old_this_last;
       }
    }
 };
