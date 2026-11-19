@@ -46,6 +46,26 @@ struct test_treap
       for (std::size_t i = 0; i < 6u; ++i)
          (&values[i])->value_ = (int)i + 1;
       test_move_constructor_predicates(values);
+      test_rtop(values);
+   }
+
+   //rtop() dereferences to the same element as top()
+   static void test_rtop(value_cont_type &values)
+   {
+      typedef typename ContainerDefiner::template container
+         <>::type treap_type;
+      treap_type t;
+      const treap_type &ct = t;
+      BOOST_TEST(t.rtop() == t.rend());
+      BOOST_TEST(ct.rtop() == ct.rend());
+      BOOST_TEST(t.crtop() == t.crend());
+      t.insert(values.begin(), values.end());
+      BOOST_TEST(&*t.rtop() == &*t.top());
+      BOOST_TEST(&*ct.rtop() == &*ct.top());
+      BOOST_TEST(&*t.crtop() == &*t.ctop());
+      typename treap_type::iterator it(t.top());
+      BOOST_TEST(t.rtop().base() == ++it);
+      t.clear();
    }
 
    //The move constructor also copies the priority comparison

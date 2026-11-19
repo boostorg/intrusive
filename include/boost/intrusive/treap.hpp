@@ -363,8 +363,13 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE reverse_iterator rtop() BOOST_NOEXCEPT
-   {  return reverse_iterator(this->top());  }
+   reverse_iterator rtop() BOOST_NOEXCEPT
+   {
+      //The reverse_iterator dereferences the previous position of its base,
+      //so the base must be the position after top()
+      iterator t(this->top());
+      return t == this->end() ? this->rend() : reverse_iterator(++t);
+   }
 
    //! <b>Effects</b>: Returns a const_reverse_iterator pointing to the highest priority object
    //!    of the reversed treap.
@@ -373,7 +378,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //!
    //! <b>Throws</b>: Nothing.
    BOOST_INTRUSIVE_FORCEINLINE const_reverse_iterator rtop() const BOOST_NOEXCEPT
-   {  return const_reverse_iterator(this->top());  }
+   {  return this->crtop();  }
 
    //! <b>Effects</b>: Returns a const_reverse_iterator pointing to the highest priority object
    //!    of the reversed treap.
@@ -381,8 +386,13 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
    //! <b>Complexity</b>: Constant.
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE const_reverse_iterator crtop() const BOOST_NOEXCEPT
-   {  return const_reverse_iterator(this->top());  }
+   const_reverse_iterator crtop() const BOOST_NOEXCEPT
+   {
+      //The reverse_iterator dereferences the previous position of its base,
+      //so the base must be the position after top()
+      const_iterator t(this->ctop());
+      return t == this->cend() ? this->crend() : const_reverse_iterator(++t);
+   }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::bstree::container_from_end_iterator(iterator)
