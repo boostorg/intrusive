@@ -1161,7 +1161,7 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    //!   No destructors or copy constructors are called.
    //!   Disposer::operator()(pointer) is called for the removed elements.
    //!
-   //! <b>Throws</b>: Nothing.
+   //! <b>Throws</b>: If the operations of Iterator throw. Basic guarantee.
    //!
    //! <b>Complexity</b>: Linear to the number of elements inserted plus
    //!   linear to the elements contained in the list.
@@ -1169,7 +1169,8 @@ class BOOST_INTRUSIVE_EMPTY_BASES list_impl
    //! <b>Note</b>: Invalidates the iterators (but not the references)
    //!   to the erased elements.
    template<class Iterator, class Disposer>
-   void dispose_and_assign(Disposer disposer, Iterator b, Iterator e) BOOST_NOEXCEPT
+   void dispose_and_assign(Disposer disposer, Iterator b, Iterator e)
+      BOOST_NOEXCEPT_IF((detail::is_nothrow_range_iterator<Iterator, reference>::value))
    {
       this->clear_and_dispose(disposer);
       this->insert(this->cend(), b, e);

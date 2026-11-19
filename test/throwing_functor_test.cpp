@@ -894,6 +894,9 @@ void test_sequence_range_noexcept_op()
    BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(declval<Cont&>().insert(declval<const_iterator>(), declval<const it_t&>(), declval<const it_t&>())) == nothrow ));
    BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(declval<Cont&>().assign(declval<const it_t&>(), declval<const it_t&>())) == nothrow ));
    BOOST_INTRUSIVE_STATIC_ASSERT(( noexcept(Cont(declval<const it_t&>(), declval<const it_t&>())) == nothrow ));
+   //dispose_and_assign must not be noexcept if an operation of the iterator can throw
+   BOOST_INTRUSIVE_STATIC_ASSERT(( nothrow || !noexcept(declval<Cont&>().dispose_and_assign
+                                      (null_disposer(), declval<const it_t&>(), declval<const it_t&>())) ));
 }
 
 #endif   //#if !defined(BOOST_NO_CXX11_NOEXCEPT)
@@ -955,6 +958,23 @@ void test_sequence_range_throw(value (&values)[N], value (&values2)[N2])
       bool thrown = false;
       try{
          c.assign(b, e);
+      }
+      catch(test_exception &){
+         thrown = true;
+      }
+      BOOST_TEST(thrown);
+      BOOST_TEST(c.size() == linked);
+      BOOST_TEST(iterated_size(c) == linked);
+      BOOST_TEST(contains(c, values2[0]));
+      BOOST_TEST(contains(c, values2[1]) == (linked == 2u));
+      c.check();
+      c.clear();
+   }
+   {
+      Cont c(&values[0], &values[0] + N);
+      bool thrown = false;
+      try{
+         c.dispose_and_assign(null_disposer(), b, e);
       }
       catch(test_exception &){
          thrown = true;
