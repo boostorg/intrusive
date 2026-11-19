@@ -139,16 +139,10 @@ template<unsigned> struct static_assert_test {};
 #endif
 
 //NVIDIA HPC compilers (nvc++) miscompile the singly linked list code at -O2
-//and -fast when the node pointer is a class type (a "fancy pointer"): after
-//the node traits accessors are inlined, type based alias analysis reorders
-//the accesses to the pointer wrappers of the different element types and links
-//are lost (slist_test crashes or produces wrong lists). The code is not
-//undefined behaviour: g++ and clang++ pass at -O3 and clang's TypeSanitizer,
-//MemorySanitizer, AddressSanitizer and UBSan report nothing. Keeping one node
-//traits accessor out of line stops the faulty transformation, so this macro is
-//used instead of BOOST_INTRUSIVE_FORCEINLINE on that accessor. -Mnoautoinline
-//or -alias=traditional also avoid the problem at the command line.
-#if defined(__NVCOMPILER)
+//and -fast when the node pointer is a class type (a "fancy pointer"): 
+// see https://forums.developer.nvidia.com/t/nvc-26-5-miscompilation-when-using-a-class-type-pointer-wrapper-at-o2-type-based-alias-analysis/382737
+#if defined(__NVCOMPILER) && \
+    ((__NVCOMPILER_MAJOR__ < 26) || (__NVCOMPILER_MAJOR__ == 26 && __NVCOMPILER_MINOR__ < 11))
 #  define BOOST_INTRUSIVE_NVCOMPILER_WORKAROUND_NOINLINE __attribute__((noinline))
 #else
 #  define BOOST_INTRUSIVE_NVCOMPILER_WORKAROUND_NOINLINE BOOST_INTRUSIVE_FORCEINLINE
