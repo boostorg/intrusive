@@ -354,6 +354,18 @@ class BOOST_INTRUSIVE_EMPTY_BASES sgtree_impl
    }
    /// @endcond
 
+   //! @copydoc ::boost::intrusive::bstree::transfer_from(bstree&)
+   //!
+   //! Additional notes: the alpha factor and the maximum tree size of x are also
+   //! transferred, because they are part of the balance invariants of the
+   //! transferred nodes. x gets the maximum tree size of an empty tree.
+   BOOST_INTRUSIVE_FORCEINLINE void transfer_from(sgtree_impl &x) BOOST_NOEXCEPT
+   {
+      this->get_alpha_traits() = x.get_alpha_traits();
+      tree_type::transfer_from(x);
+      x.max_tree_size_ = 0;
+   }
+
    /// @cond
    private:
 
@@ -1090,6 +1102,9 @@ class sgtree
    template <class Cloner, class Disposer>
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(sgtree) src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE void transfer_from(sgtree &x) BOOST_NOEXCEPT
+   {  Base::transfer_from(x);  }
 
    BOOST_INTRUSIVE_NO_DANGLING
    BOOST_INTRUSIVE_FORCEINLINE static sgtree &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT

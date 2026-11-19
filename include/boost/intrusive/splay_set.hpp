@@ -218,6 +218,10 @@ class splay_set_impl
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(splay_set_impl) src, Cloner cloner, Disposer disposer)
    {  tree_type::clone_from(BOOST_MOVE_BASE(tree_type, src), cloner, disposer);  }
 
+   //! @copydoc ::boost::intrusive::splaytree::transfer_from(splaytree&)
+   BOOST_INTRUSIVE_FORCEINLINE void transfer_from(splay_set_impl &x) BOOST_NOEXCEPT
+   {  tree_type::transfer_from(x);  }
+
    //! @copydoc ::boost::intrusive::splaytree::insert_unique(reference)
    BOOST_INTRUSIVE_FORCEINLINE std::pair<iterator, bool> insert(reference value)
    {  return tree_type::insert_unique(value);  }
@@ -688,6 +692,9 @@ class splay_set
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(splay_set) src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
 
+   BOOST_INTRUSIVE_FORCEINLINE void transfer_from(splay_set &x) BOOST_NOEXCEPT
+   {  Base::transfer_from(x);  }
+
    BOOST_INTRUSIVE_NO_DANGLING
    BOOST_INTRUSIVE_FORCEINLINE static splay_set &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT
    {  return static_cast<splay_set &>(Base::container_from_end_iterator(end_iterator));   }
@@ -894,6 +901,10 @@ class splay_multiset_impl
    template <class Cloner, class Disposer>
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(splay_multiset_impl) src, Cloner cloner, Disposer disposer)
    {  tree_type::clone_from(BOOST_MOVE_BASE(tree_type, src), cloner, disposer);  }
+
+   //! @copydoc ::boost::intrusive::splaytree::transfer_from(splaytree&)
+   BOOST_INTRUSIVE_FORCEINLINE void transfer_from(splay_multiset_impl &x) BOOST_NOEXCEPT
+   {  tree_type::transfer_from(x);  }
 
    //! @copydoc ::boost::intrusive::splaytree::insert_equal(reference)
    BOOST_INTRUSIVE_FORCEINLINE iterator insert(reference value)
@@ -1236,6 +1247,9 @@ class splay_multiset
    template <class Cloner, class Disposer>
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(splay_multiset) src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE void transfer_from(splay_multiset &x) BOOST_NOEXCEPT
+   {  Base::transfer_from(x);  }
 
    BOOST_INTRUSIVE_NO_DANGLING
    BOOST_INTRUSIVE_FORCEINLINE static splay_multiset &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT

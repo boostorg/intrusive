@@ -63,6 +63,7 @@ struct test_generic_assoc
    static void test_move_constructor_predicates(value_cont_type&);
    static void test_insert_erase_burst();
    static void test_swap_nodes();
+   static void test_transfer_from(value_cont_type&);
    template <class Assoc>
       static void test_perfect_binary_tree_of_height_2(value_cont_type &values, Assoc &assoc);
    static void test_container_from_end(value_cont_type&, detail::true_type);
@@ -383,6 +384,7 @@ void test_generic_assoc<ContainerDefiner>::test_all(value_cont_type& values)
    test_root(values);
    test_clone(values);
    test_moved_from(values);
+   test_transfer_from(values);
    test_move_constructor_predicates(values);
    test_container_from_end(values, detail::bool_< assoc_type::has_container_from_iterator >());
    test_splay_up(values, detail::bool_< has_splay_up< assoc_type >::value >());
@@ -392,6 +394,33 @@ void test_generic_assoc<ContainerDefiner>::test_all(value_cont_type& values)
    test_insert_erase_burst();
    test_swap_nodes();
    test_container_from_iterator(values, detail::bool_< assoc_type::has_container_from_iterator >());
+}
+
+//transfer_from takes the nodes of the source: the elements keep their addresses,
+//the source is left empty and both containers stay usable
+template<class ContainerDefiner>
+void test_generic_assoc<ContainerDefiner>::test_transfer_from(value_cont_type& values)
+{
+   typedef typename ContainerDefiner::template container
+      <>::type assoc_type;
+   assoc_type src(values.begin(), values.end());
+   const std::size_t n = src.size();
+   typename assoc_type::iterator const first = src.begin();
+   assoc_type dst;
+   dst.transfer_from(src);
+   BOOST_TEST(src.empty());
+   BOOST_TEST(dst.size() == n);
+   BOOST_TEST(dst.begin() == first);
+   //An empty source
+   assoc_type empty;
+   empty.transfer_from(src);
+   BOOST_TEST(empty.empty() && src.empty());
+   //Both containers stay usable
+   dst.erase(dst.begin());
+   BOOST_TEST(dst.size() == n - 1u);
+   src.transfer_from(dst);
+   BOOST_TEST(dst.empty() && src.size() == n - 1u);
+   src.clear();
 }
 
 template<class ContainerDefiner>

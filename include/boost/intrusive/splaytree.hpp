@@ -247,6 +247,10 @@ class splaytree_impl
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(splaytree_impl) src, Cloner cloner, Disposer disposer)
    {  tree_type::clone_from(BOOST_MOVE_BASE(tree_type, src), cloner, disposer);  }
 
+   //! @copydoc ::boost::intrusive::bstree::transfer_from(bstree&)
+   BOOST_INTRUSIVE_FORCEINLINE void transfer_from(splaytree_impl &x) BOOST_NOEXCEPT
+   {  tree_type::transfer_from(x);  }
+
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::bstree::insert_equal(reference)
@@ -789,6 +793,9 @@ class splaytree
    template <class Cloner, class Disposer>
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(splaytree) src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE void transfer_from(splaytree &x) BOOST_NOEXCEPT
+   {  Base::transfer_from(x);  }
 
    BOOST_INTRUSIVE_NO_DANGLING
    BOOST_INTRUSIVE_FORCEINLINE static splaytree &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT

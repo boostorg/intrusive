@@ -232,6 +232,10 @@ class treap_set_impl
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(treap_set_impl) src, Cloner cloner, Disposer disposer)
    {  tree_type::clone_from(BOOST_MOVE_BASE(tree_type, src), cloner, disposer);  }
 
+   //! @copydoc ::boost::intrusive::treap::transfer_from(treap&)
+   BOOST_INTRUSIVE_FORCEINLINE void transfer_from(treap_set_impl &x) BOOST_NOEXCEPT
+   {  tree_type::transfer_from(x);  }
+
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
    //! @copydoc ::boost::intrusive::treap::top()
@@ -631,6 +635,9 @@ class treap_set
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(treap_set) src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
 
+   BOOST_INTRUSIVE_FORCEINLINE void transfer_from(treap_set &x) BOOST_NOEXCEPT
+   {  Base::transfer_from(x);  }
+
    BOOST_INTRUSIVE_NO_DANGLING
    BOOST_INTRUSIVE_FORCEINLINE static treap_set &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT
    {  return static_cast<treap_set &>(Base::container_from_end_iterator(end_iterator));   }
@@ -851,6 +858,10 @@ class treap_multiset_impl
    template <class Cloner, class Disposer>
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(treap_multiset_impl) src, Cloner cloner, Disposer disposer)
    {  tree_type::clone_from(BOOST_MOVE_BASE(tree_type, src), cloner, disposer);  }
+
+   //! @copydoc ::boost::intrusive::treap::transfer_from(treap&)
+   BOOST_INTRUSIVE_FORCEINLINE void transfer_from(treap_multiset_impl &x) BOOST_NOEXCEPT
+   {  tree_type::transfer_from(x);  }
 
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 
@@ -1190,6 +1201,9 @@ class treap_multiset
    template <class Cloner, class Disposer>
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(treap_multiset) src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE void transfer_from(treap_multiset &x) BOOST_NOEXCEPT
+   {  Base::transfer_from(x);  }
 
    BOOST_INTRUSIVE_NO_DANGLING
    BOOST_INTRUSIVE_FORCEINLINE static treap_multiset &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT

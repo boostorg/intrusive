@@ -1035,6 +1035,28 @@ class bstree_impl
    }
    /// @endcond
 
+   //! <b>Requires</b>: *this is empty, &x != this, and the predicates of *this are
+   //!   compatible with the predicates of x: they order the elements of x in the same way.
+   //!
+   //! <b>Effects</b>: Transfers all the elements of x to *this. x is left empty.
+   //!   The predicates and the value traits are not copied or moved.
+   //!
+   //! <b>Complexity</b>: Constant.
+   //!
+   //! <b>Throws</b>: Nothing.
+   //!
+   //! <b>Note</b>: Iterators and references to the elements of x stay valid and
+   //!   now refer to elements of *this. Unlike the move assignment, it does not
+   //!   copy the predicates, so it can be used after constructing *this with
+   //!   copies of the predicates of x.
+   BOOST_INTRUSIVE_FORCEINLINE void transfer_from(bstree_impl &x) BOOST_NOEXCEPT
+   {
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(this->empty());
+      node_algorithms::move_tree(this->header_ptr(), node_ptr(x.header_ptr()));
+      this->sz_traits().set_size(x.sz_traits().get_size());
+      x.sz_traits().set_size(size_type(0));
+   }
+
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! <b>Effects</b>: Detaches all elements from this. The objects in the set
    //!   are not deleted (i.e. no destructors are called), but the nodes according to
@@ -2673,6 +2695,9 @@ class bstree
    template <class Cloner, class Disposer>
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(bstree) src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE void transfer_from(bstree &x) BOOST_NOEXCEPT
+   {  Base::transfer_from(x);  }
 
    BOOST_INTRUSIVE_NO_DANGLING
    BOOST_INTRUSIVE_FORCEINLINE static bstree &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT

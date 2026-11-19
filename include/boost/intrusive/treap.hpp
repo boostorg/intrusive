@@ -502,6 +502,13 @@ class BOOST_INTRUSIVE_EMPTY_BASES treap_impl
       tree_type::clone_from(BOOST_MOVE_BASE(tree_type, src), cloner, disposer);
    }
 
+   //! @copydoc ::boost::intrusive::bstree::transfer_from(bstree&)
+   //!
+   //! Additional notes: the priority comparison of *this must also be compatible with
+   //! the one of x: the transferred nodes are ordered by it.
+   BOOST_INTRUSIVE_FORCEINLINE void transfer_from(treap_impl &x) BOOST_NOEXCEPT
+   {  tree_type::transfer_from(x);  }
+
    //! <b>Requires</b>: value must be an lvalue
    //!
    //! <b>Effects</b>: Inserts value into the container before the upper bound.
@@ -1511,6 +1518,9 @@ class treap
    template <class Cloner, class Disposer>
    BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(treap) src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
+
+   BOOST_INTRUSIVE_FORCEINLINE void transfer_from(treap &x) BOOST_NOEXCEPT
+   {  Base::transfer_from(x);  }
 
    BOOST_INTRUSIVE_NO_DANGLING
    BOOST_INTRUSIVE_FORCEINLINE static treap &container_from_end_iterator(iterator end_iterator) BOOST_NOEXCEPT
