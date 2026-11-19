@@ -1460,10 +1460,14 @@ void test_unordered<ContainerDefiner>::test_move_constructor_predicates(value_co
    using boost::move_detail::is_nothrow_swappable;
    BOOST_INTRUSIVE_STATIC_ASSERT((  noexcept(declval<default_type&>().swap(declval<default_type&>())) ));
    BOOST_INTRUSIVE_STATIC_ASSERT((  is_nothrow_swappable<default_type>::value ));
+   //Without expression SFINAE, is_nothrow_swappable can not find the swaps of the
+   //hasher and the equality (found by argument dependent lookup)
+   #if defined(BOOST_MOVE_TT_CXX11_IS_NOTHROW_SWAPPABLE)
    BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(declval<hash_swap_type&>().swap(declval<hash_swap_type&>())) ));
    BOOST_INTRUSIVE_STATIC_ASSERT(( !is_nothrow_swappable<hash_swap_type>::value ));
    BOOST_INTRUSIVE_STATIC_ASSERT(( !noexcept(declval<equal_swap_type&>().swap(declval<equal_swap_type&>())) ));
    BOOST_INTRUSIVE_STATIC_ASSERT(( !is_nothrow_swappable<equal_swap_type>::value ));
+   #endif
    #endif
 }
 
