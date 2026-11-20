@@ -96,7 +96,9 @@ struct int_holder_key_of_value
 {
    typedef int_holder type;
 
-   type operator()(const ValueType &tv) const
+   //Returns a reference: MSVC 14.0 (release, x86) can omit the store
+   //of a returned int_holder temporary passed by reference to the containers.
+   const type &operator()(const ValueType &tv) const
    {  return tv.get_int_holder();  }
 };
 
