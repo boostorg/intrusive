@@ -113,10 +113,9 @@ class smart_ptr
       :  m_ptr(0)
    {}
 
-   //!Constructor from other smart_ptr
-   smart_ptr(const smart_ptr& ptr)
-      :  m_ptr(ptr.m_ptr)
-   {}
+   //The copy constructor and copy assignment are implicit, so smart_ptr is
+   //trivially copyable. MSVC 14.0 (release) can omit the stores of smart_ptr
+   //temporaries when it is not (they are passed in memory, not in registers).
 
    static smart_ptr pointer_to(reference r)
    {  smart_ptr p; p.m_ptr = &r; return p;  }
@@ -146,10 +145,6 @@ class smart_ptr
    //!Indexing operator. Never throws.
    reference operator[](std::ptrdiff_t idx) const
    {  return m_ptr[idx];  }
-
-   //!Assignment from other smart_ptr. Never throws.
-   smart_ptr& operator= (const smart_ptr & pt)
-   {  m_ptr = pt.m_ptr;  return *this;  }
 
    //!Assignment from related smart_ptr. If pointers of pointee types
    //!   are assignable, offset_ptrs will be assignable. Never throws.
