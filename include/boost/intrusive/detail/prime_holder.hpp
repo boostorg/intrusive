@@ -132,8 +132,11 @@ struct prime_list_holder
    static std::size_t(*const positions[])(std::size_t);
 
    #if BOOST_INTRUSIVE_64_BIT_SIZE_T
-   static const uint64_t inv_sizes32[];
-   static const std::size_t inv_sizes32_size;
+   //One inverse for each prime that fits in 32 bits (indexes 0-31).
+   //The bound is declared in the class: MSVC 14.0 rejects sizeof(inv_sizes32)
+   //in position() as it ignores the bound given by the later definition.
+   static const std::size_t inv_sizes32_size = 32u;
+   static const uint64_t inv_sizes32[inv_sizes32_size];
    #endif
 
    template <class SizeType>
@@ -174,8 +177,7 @@ struct prime_list_holder
    inline static std::size_t position(std::size_t hash,std::size_t size_index) BOOST_NOEXCEPT
    {
       #if BOOST_INTRUSIVE_64_BIT_SIZE_T
-         BOOST_CONSTEXPR_OR_CONST std::size_t sizes_under_32bit = sizeof(inv_sizes32)/sizeof(inv_sizes32[0]);
-         if(BOOST_LIKELY(size_index < sizes_under_32bit)){
+         if(BOOST_LIKELY(size_index < inv_sizes32_size)){
             return fastmod_u32( uint32_t(hash)+uint32_t(hash>>32)
                               , inv_sizes32[size_index]
                               , uint32_t(prime_list[size_index])  );
@@ -282,7 +284,7 @@ const std::size_t prime_list_holder<Dummy>::prime_list_size
 #if BOOST_INTRUSIVE_64_BIT_SIZE_T
 
 template<int Dummy>
-const uint64_t prime_list_holder<Dummy>::inv_sizes32[] = {
+const uint64_t prime_list_holder<Dummy>::inv_sizes32[prime_list_holder<Dummy>::inv_sizes32_size] = {
    BOOST_INTRUSIVE_SIZE_C(6148914691236517206), //3
    BOOST_INTRUSIVE_SIZE_C(2635249153387078803), //7
    BOOST_INTRUSIVE_SIZE_C(1676976733973595602), //11
@@ -318,8 +320,7 @@ const uint64_t prime_list_holder<Dummy>::inv_sizes32[] = {
 };
 
 template<int Dummy>
-const std::size_t prime_list_holder<Dummy>::inv_sizes32_size
-   = sizeof(inv_sizes32) / sizeof(uint64_t);
+const std::size_t prime_list_holder<Dummy>::inv_sizes32_size;
 
 #endif // BOOST_INTRUSIVE_64_BIT_SIZE_T
 
